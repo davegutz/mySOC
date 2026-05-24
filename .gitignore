@@ -1,0 +1,12 @@
+
+*.ld
+*.o
+*.d
+*.no_crc
+*.crc_block
+*.bin
+*.elf
+*.hex
+*.lst
+*.map
+*.pyc
