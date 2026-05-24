@@ -22,7 +22,7 @@ import pyperclip
 plat = sys.platform
 
 if plat == 'linux':
-    default_dr = '/home/daveg/gdrive/GitHubArchive/SOC_Particle/dataReduction'
+    default_dr = '/home/daveg/.local/SOC_Particle/dataReduction'
 elif plat == 'darwin':
     default_dr = '/Users/daveg/Library/CloudStorage/GoogleDrive-davegutz2006@gmail.com/My Drive/GitHubArchive/SOC_Particle/dataReduction'
 else:
@@ -32,14 +32,14 @@ else:
 # Configuration for entire folder selection read with filepaths
 default_dict = {
     'test': {
-        "version": "g2025012a",
-        "unit": "soc3p2",
+        "version": "g20260524",
+        "unit": "soc3p2_hi_lo",
         "battery": "bb",
         'dataReduction_folder': default_dr,
     },
     'ref': {
-        "version": "g2025012a",
-        "unit": "soc3p2",
+        "version": "g20260524",
+        "unit": "soc3p2_hi_lo",
         "battery": "bb",
         'dataReduction_folder': default_dr,
     },
@@ -51,7 +51,7 @@ default_dict = {
         'strict_overplot':True,
         'terse': True,
         'hardcopy': False,
-        'auto_overwrite': False,
+        'auto_overwrite': True,
     },
     }
 
