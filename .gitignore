@@ -11,3 +11,5 @@
 *.map
 *.pyc
 SOC_Particle/pyStateOfCharge/.idea/pyStateOfCharge.iml
+SOC_Particle/nul
+SOC_Particle/src/SOC_Particle.cpp
