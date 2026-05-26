@@ -72,11 +72,11 @@ class SavedData:
                         self.zero_end += 1
                     self.zero_end -= 1  # backup one
                     if self.zero_end == len(self.ib) - 1:
-                        print(Colors.fg.red, f"\n\nLikely ib is zero throughout the data.  Check setup and retry\n\n",
+                        print(Colors.fg.yellow, f"\nWARNING:  Likely ib is zero throughout the data\n",
                               Colors.reset)
                         self.zero_end = 2
                     elif self.zero_end == -1:
-                        print(Colors.fg.red, f"\n\nLikely ib is noisy throughout the data.  Check setup and retry\n\n",
+                        print(Colors.fg.yellow, f"\nWARNING:  Likely ib is noisy throughout the data\n",
                               Colors.reset)
                         self.zero_end = 0
                 except IOError:
@@ -377,10 +377,10 @@ class SavedData:
         """
         Iterates over members of a dataset x, assigns values to numpy.ndarray members
         """
+        exceptions = ['c_time_sel', 'f0']
         for name in list(x.dtype.names):
-            print(f'{name}')
-            if no_clobber and hasattr(self, name):
-                print(Colors.fg.red, end='')
+            if no_clobber and hasattr(self, name) and not exceptions.__contains__(name):
+                print(Colors.fg.yellow, end='')
                 print(f'WARNING:  {name} repeated (clobbering).  Change serial.cpp')
                 print(Colors.reset, end='')
                 continue
@@ -399,7 +399,13 @@ class SavedData:
             if i_end is None:
                 setattr(self, name, np.array(np.atleast_1d(x[name])))
             else:
-                setattr(self, name, np.array(np.atleast_1d(getattr(x, name)[:i_end])))
+                try:
+                    setattr(self, name, np.array(np.atleast_1d(getattr(x, name)[:i_end])))
+                except IndexError:
+                    print(Colors.fg.red, end='')
+                    print(f'\nERROR: EKF data too short.  Rerun longer')
+                    print(Colors.reset, end='')
+                    exit(1)
 
     def truncate(self, i_end=None, key_attr='time'):
         """

@@ -367,10 +367,10 @@ void print_shunt_serial(const bool reset, Sensors *Sen)
 // print_signal_select for data collection
 void print_signal_sel_header(void)
 {
-  Serial.printf("unit_s, c_time_sel, dt_sel, dt_psss, reset, resaf, user_sel, cc_dif, ib_amp_hdwe, ib_noa_hdwe, ib_amp_model, ib_noa_model, ib_model, kfres, vovcm, vovcn, ib_amp_hdwe_kf, ib_noa_hdwe_kf, ib_diff, ib_diff_f, ");
-  Serial.printf("  vc_sum, voc_soc, e_wrap, e_wrap_filt, ib_dyn_m, dv_dyn_m, e_wrap_m, e_wrap_m_reset, e_wrap_m_filt, e_wrap_m_trim, ib_dyn_n, dv_dyn_n, e_wrap_n, e_wrap_n_filt, e_wrap_n_trim, ");
-  Serial.printf("  ib_sel_stat, ib_choice, vc_h,ib_h, ib_s, mib, vb_sel, vb_hdwe, vb_s, mvb,vb,  mtb, ");
-  Serial.printf("  ib_rate, ib_quiet, ib_really_quiet, tb_sel, ccd_thr, ewmhi_thr, ewmlo_thr, ewnhi_thr, ewnlo_thr, ibd_thr, ibq_thr, preserving,ff,y_ekf,y_ekf_f,ib_dec, ");
+  Serial.printf("unit_s, c_time_sel, dt_sel, dt_psss, resaf, user_sel, cc_dif, ib_amp_hdwe, ib_noa_hdwe, ib_amp_model, ib_noa_model, ib_model, kfres, vovcm, vovcn, ib_amp_hdwe_kf, ib_noa_hdwe_kf, ib_diff, ib_diff_f, ");
+  Serial.printf("  vc_sum, e_wrap, e_wrap_filt, ib_dyn_m, dv_dyn_m, e_wrap_m, e_wrap_m_reset, e_wrap_m_filt, e_wrap_m_trim, ib_dyn_n, dv_dyn_n, e_wrap_n, e_wrap_n_filt, e_wrap_n_trim, ");
+  Serial.printf("  ib_sel_stat, ib_choice, vc_h,ib_h, ib_s, mib, vb_sel, vb_hdwe, vb_s, mvb,vb_sen,  mtb, ");
+  Serial.printf("  ib_rate, ib_quiet, ib_really_quiet, tb_sel, ccd_thr, ewmhi_thr, ewmlo_thr, ewnhi_thr, ewnlo_thr, ibd_thr, ibq_thr, preserving,ff,y_ekf_f,ib_dec, ");
   Serial.printf("  ib_dyn_T_m, ib_dyn_tau_m, ib_dyn_rstate_m, ib_dyn_lstate_m, ib_lo_active, ");
   Serial.printf("  ib_dyn_T_n, ib_dyn_tau_n, ib_dyn_rstate_n, ib_dyn_lstate_n, ");
   Serial.printf("  ib_wrp_T_n, ib_wrp_tau_n, ib_wrp_rate_n, ib_wrp_state_n, disable_amp_fault, ");
@@ -394,16 +394,16 @@ void print_signal_sel_serial(const bool reset, Sensors *Sen, BatteryMonitor *Mon
     uint64_t now_psss = Sen->now();
     double dt_psss = double(now_psss - psss_now_past) / 1e3;
     psss_now_past = now_psss;
-    sprintf(pr.buff, "unit_sel,%13.4f, %8.4f, %8.4f, %d, %d, %d, %10.7f, %8.6f,%8.6f,%8.6f,%8.6f,%8.6f,   %d,%8.6f,%8.6f,%8.6f,%8.6f,   %8.6f,%8.6f, ",
-        Sen->cTime(), Sen->T(), dt_psss, reset, Sen->Flt->reset_all_faults_print(), sp.ib_force(),
+    sprintf(pr.buff, "unit_sel,%13.4f, %8.4f, %8.4f, %d, %d, %10.7f, %8.6f,%8.6f,%8.6f,%8.6f,%8.6f,   %d,%8.6f,%8.6f,%8.6f,%8.6f,   %8.6f,%8.6f, ",
+        Sen->cTime(), Sen->T(), dt_psss, Sen->Flt->reset_all_faults_print(), sp.ib_force(),
         Sen->Flt->cc_diff(),
         Sen->ib_amp_hdwe(), Sen->ib_noa_hdwe(), Sen->ib_amp_model(), Sen->ib_noa_model(), Sen->ib_model(),
         cp.kf_reset_print, Sen->ib_amp_vo_vc(), Sen->ib_noa_vo_vc(), Sen->ib_amp_hdwe_kf(), Sen->ib_noa_hdwe_kf(),
         Sen->Flt->ib_diff(), Sen->Flt->ib_diff_f());
     Serial.printf("%s", pr.buff);
 
-    sprintf(pr.buff, "   %8.6f,%7.6f,%8.6f,%8.6f,%8.6f,%8.6f,%8.6f,%2d,%8.6f,%8.6f,%8.6f,%8.6f,%8.6f,%8.6f,%8.6f,",
-        Sen->Vc_hdwe_sum(), Mon->voc_soc(), Sen->Flt->e_wrap(), Sen->Flt->e_wrap_filt(), Sen->Flt->ib_dyn_m(), Sen->Flt->dv_dyn_m(),
+    sprintf(pr.buff, "   %8.6f,%8.6f,%8.6f,%8.6f,%8.6f,%8.6f,%2d,%8.6f,%8.6f,%8.6f,%8.6f,%8.6f,%8.6f,%8.6f,",
+        Sen->Vc_hdwe_sum(), Sen->Flt->e_wrap(), Sen->Flt->e_wrap_filt(), Sen->Flt->ib_dyn_m(), Sen->Flt->dv_dyn_m(),
         Sen->Flt->e_wrap_m(), Sen->Flt->e_wrap_m_r(), Sen->Flt->e_wrap_m_filt(), Sen->Flt->WrapLoopAmp->e_wrap_trim(),
         Sen->Flt->ib_dyn_n(), Sen->Flt->dv_dyn_n(), Sen->Flt->e_wrap_n(), Sen->Flt->e_wrap_n_filt(),
         Sen->Flt->WrapLoopNoa->e_wrap_trim());
@@ -415,11 +415,11 @@ void print_signal_sel_serial(const bool reset, Sensors *Sen, BatteryMonitor *Mon
         sp.mod_tb());
     Serial.printf("%s", pr.buff);
 
-    sprintf(pr.buff, "%10.6f, %10.6f, %d, %d, %9.6f,%10.6f,%10.6f,%10.6f,%10.6f,%10.6f,%10.6f,%d,%d,%8.6f,%8.6f,%d,",
+    sprintf(pr.buff, "%10.6f, %10.6f, %d, %d, %9.6f,%10.6f,%10.6f,%10.6f,%10.6f,%10.6f,%10.6f,%d,%d,%8.6f,%d,",
         Sen->Flt->ib_rate(), Sen->Flt->ib_quiet(), Sen->Flt->ib_really_quiet(), Sen->Flt->tb_sel_status(),
         Sen->Flt->cc_diff_thr(), Sen->Flt->WrapLoopAmp->ewhi_thr(), Sen->Flt->WrapLoopAmp->ewlo_thr(), Sen->Flt->WrapLoopNoa->ewhi_thr(),
         Sen->Flt->WrapLoopNoa->ewlo_thr(), Sen->Flt->ib_diff_thr(), Sen->Flt->ib_quiet_thr(), Sen->Flt->preserving(),
-        ap.fake_faults(), Mon->y_ekf(), Mon->y_ekf_f(), Sen->Flt->ib_decision());
+        ap.fake_faults(), Mon->y_ekf_f(), Sen->Flt->ib_decision());
     Serial.printf("%s", pr.buff);
 
     sprintf(pr.buff, "%9.6f,%9.6f,%9.6f,%9.6f,%d,",
