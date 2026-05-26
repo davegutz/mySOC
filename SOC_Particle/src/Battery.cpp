@@ -337,7 +337,7 @@ float BatteryMonitor::calculate(Sensors *Sen, const bool reset_temp, const bool 
             sendTxBuf(String::format("r tbf ib vb voc_stat:%2d %8.4f%8.4f%8.4f%8.4f  H S K y_ekf:%11.6f%7.4f%7.4f%11.7f,   soc soc_ekf y_ekf_f:%11.8f%11.8f%11.7f, C:%2d,\n",
                 reset_ekf, Tb_f_for_hx_, ib_, vb_, voc_stat_,      H_, S_, K_, y_ekf_,     soc_, soc_ekf_, y_ekf_f_,    converged_ekf()), true, IN_SERVICE);
 
-        if ( sp.debug()==3 || sp.debug()==4 ) EKF_1x1::print_ekf_serial(this);  // print EKF in Read frame
+        if ( sp.debug()==3 || sp.debug()==4 ) EKF_1x1::print_ekf_serial(this, freeze);  // print EKF in Read frame
     }
     eframe_++;
     if ( reset_temp || reset_ekf || cp.soft_reset || eframe_ >= ap.eframe_mult() ) eframe_ = 0;  // '>=' allows changing ap.eframe_mult() on the fly

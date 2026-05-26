@@ -308,9 +308,9 @@ def print_ekf_RunSim(SN, i_temp, i_ekf, t, mon, sim, calc_ekf, calc_temp):
           "{:12.8f}".format(SN.mon_run.soc_ekf[G.i]), "{:10.8f}".format(mon.x),
           "{:13.8f}".format(SN.mon_run.y_ekf[G.i]), "{:12.8f}".format(mon.y_ekf),
           "{:13.8f}".format(SN.mon_run.y_ekf_f[G.i]), "{:12.8f}".format(mon.y_ekf_f),
-          "{:13.8f}".format(SN.mon_run.y_ekf_f_T[G.i]), "{:12.8f}".format(mon.y_ekf_f_T),
-          "{:13.8f}".format(SN.mon_run.y_ekf_f_tau[G.i]), "{:12.8f}".format(mon.y_ekf_f_tau),
-          "{:13.8f}".format(SN.mon_run.y_ekf_f_lstate[G.i]), "{:12.8f}".format(mon.y_ekf_f_state),
+          "{:13.8f}".format(SN.mon_run.y_ekf_f_T[i_ekf]), "{:12.8f}".format(mon.y_ekf_f_T),
+          "{:13.8f}".format(SN.mon_run.y_ekf_f_tau[i_ekf]), "{:12.8f}".format(mon.y_ekf_f_tau),
+          "{:13.8f}".format(SN.mon_run.y_ekf_f_lstate[i_ekf]), "{:12.8f}".format(mon.y_ekf_f_state),
           "{:12.6f}".format(SN.mon_run.z[i_ekf]), "{:13.6f}".format(mon.z),
           "{:14.6f}".format(SN.mon_run.hx[i_ekf]), "{:9.6f}".format(mon.hx),
           "{:11.5f}".format(SN.mon_run.voc_ekf[G.i]), "{:9.5f}".format(mon.voc_ekf),
@@ -614,7 +614,7 @@ def print_temp_RunSim(SN, i_temp, t, mon, sim, calc_temp, i_ekf, calc_ekf):
     print(Colors.reset, end='')
     return hdr
 
-# 5
+#5
 # noinspection PyPep8Naming
 def print_volt_HistSim(SN, i_temp, i_ekf, t, mon, calc_temp, calc_ekf):
     global count_since_last_header
@@ -655,7 +655,7 @@ def print_volt_HistSim(SN, i_temp, i_ekf, t, mon, calc_temp, calc_ekf):
     print(Colors.reset, end='')
     return hdr
 
-#5
+# 5
 # noinspection PyPep8Naming
 def print_volt_RunSim(SN, i_temp, i_ekf, t, mon, sim, calc_temp, calc_ekf):
     global count_since_last_header, vv_warning_printed
@@ -666,7 +666,7 @@ def print_volt_RunSim(SN, i_temp, i_ekf, t, mon, sim, calc_temp, calc_ekf):
             vv_warning_printed = True
             print(Colors.reset, end='')
         return None
-    hdr = "  i   time     r       rt   rk   it   ct      re   ie  ce    reset  reset_temp     reset_all_faults   soft_reset  soft_reset_sim  init_mon     init_sim     sa      dt                vb                          ib_charge                   ib_sel         ib                          ib_amp_hdwe                 ib_amp_model                ib_amp                      ib_noa_hdwe                 ib_noa_model               ib_noa                disable_amp_fault  ib_diff                     ibh                         ib_s                 ib_amp_lo    ib_amp_hi   ib_noa_lo   ib_noa_hi dis_amp_flt    dt                  ib_amp                   ib_dyn_T_m           ib_dyn_rstate_m               ib_dyn_lstate_m                     ib_dyn_m                 vb                    vb_model               vb_hdwe               vb_hdwe_f             dv_dyn_m               e_wrap_m_T           e_wrap_m_tau          e_wrap_m_rate          e_wrap_m_reset         e_wrap_m_state        voc                   voc_soc                e_wrap_m             e_wrap_m_filt   disable_amp_fault ib_amp_lo  ib_noa_lo  e_wrap_m_reset  e_wrap_m_trim         ib_dyn_n                 ib_dyn_T_n        dv_dyn_n               e_wrap_n             e_wrap_n_filt         ib_dyn_n                    ib_dyn                   ib_dyn_T_n           ib_dyn_rstate_n               ib_dyn_lstate_n             dv_dyn_n                e_wrap_n_T             e_wrap_n_tau         e_wrap_n_rate          e_wrap_n_state              e_wrap_n_trim        e_wrap_n_trimmed       e_wrap_n             e_wrap_n_filt         ib                         e_wrap               e_wrap_filt          ib_dyn_r     ib_dyn_in                     ib_dyn_T                     ib_dyn_rstate                 ib_dyn_lstate                 ib_dyn                       dv_dyn                  dv_hys                  soc                     dt                Tb_f                      Tb_f                 voc_soc               voc                   voc_stat              voc_stat_s            voc_stat_f             soc_ekf               y_ekf                 y_ekf_f                fltw falw    soc_min"
+    hdr = "  i   time     r       rt   rk   it   ct      re   ie  ce    reset  reset_temp     reset_all_faults   soft_reset  soft_reset_sim  init_mon     init_sim     sa      dt                vb                          ib_charge                   ib_sel         ib                          ib_amp_hdwe                 ib_amp_model                ib_amp                      ib_noa_hdwe                 ib_noa_model               ib_noa                disable_amp_fault  ib_diff                     ibh                         ib_s                 ib_amp_lo    ib_amp_hi   ib_noa_lo   ib_noa_hi dis_amp_flt    dt                  ib_amp                   ib_dyn_T_m           ib_dyn_rstate_m               ib_dyn_lstate_m                     ib_dyn_m                 vb                    vb_model               vb_hdwe               vb_hdwe_f             dv_dyn_m               e_wrap_m_T           e_wrap_m_tau          e_wrap_m_rate          e_wrap_m_reset         e_wrap_m_state        voc                   voc_soc                e_wrap_m             e_wrap_m_filt   disable_amp_fault ib_amp_lo  ib_noa_lo  e_wrap_m_reset  e_wrap_m_trim         ib_dyn_n                 ib_dyn_T_n        dv_dyn_n               e_wrap_n             e_wrap_n_filt         ib_dyn_n                    ib_dyn                   ib_dyn_T_n           ib_dyn_rstate_n               ib_dyn_lstate_n             dv_dyn_n                e_wrap_n_T             e_wrap_n_tau         e_wrap_n_rate          e_wrap_n_state              e_wrap_n_trim        e_wrap_n_trimmed       e_wrap_n             e_wrap_n_filt         ib                         e_wrap               e_wrap_filt          ib_dyn_r     ib_dyn_in                     ib_dyn_T                     ib_dyn_rstate                 ib_dyn_lstate                 ib_dyn                       dv_dyn                  dv_hys                  soc                     dt                Tb_f                     voc_soc               voc                   voc_stat              voc_stat_s            voc_stat_f             soc_ekf               y_ekf                 y_ekf_f                fltw falw    soc_min"
     if (calc_temp or calc_ekf) and count_since_last_header > HDR_SPREAD:
         print(hdr)
         count_since_last_header = 0
@@ -763,7 +763,6 @@ def print_volt_RunSim(SN, i_temp, i_ekf, t, mon, sim, calc_temp, calc_ekf):
           "{:12.6f}".format(SN.mon_run.dv_hys[G.i]), "{:10.6f}".format(mon.dv_hys),
           "{:13.7f}".format(SN.mon_run.soc[G.i]), "{:10.7f}".format(mon.soc),
           "{:9.4f}".format(SN.mon_run.dt[G.i]), "{:5.4f}".format(mon.dt),
-          "{:14.7f}".format(SN.mon_run.Tb_f[G.i]), "{:10.7f}".format(mon.Tb_f),
           "{:14.7f}".format(SN.mon_run.Tb_f[G.i]), "{:10.7f}".format(mon.Tb_f),
           "{:11.5f}".format(SN.mon_run.voc_soc[G.i]), "{:9.5f}".format(mon.voc_soc),
           "{:11.5f}".format(SN.mon_run.voc[G.i]), "{:9.5f}".format(mon.voc),

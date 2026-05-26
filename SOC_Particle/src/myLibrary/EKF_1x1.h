@@ -35,7 +35,7 @@ public:
   // functions
   void predict_ekf(const double u, const bool freeze);
   virtual void pretty_print(void);
-  void print_ekf_serial(BatteryMonitor *Mon);
+  void print_ekf_serial(BatteryMonitor *Mon, const bool freeze);
   double Tb_f_for_hx() { return ( Tb_f_for_hx_); };
   void update_ekf(const double z, double x_min, double x_max);
   double x() { return ( x_ ); };

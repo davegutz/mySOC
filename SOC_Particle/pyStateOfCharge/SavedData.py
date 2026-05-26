@@ -144,7 +144,7 @@ class SavedData:
             pass
         else:
             # Load
-            self.assign_all_from(sel, i_end)
+            self.assign_all_from(sel, i_end, no_clobber=True)
             # Specials
             falw = np.array(self.falw, dtype=np.uint32)
             fltw = np.array(self.fltw, dtype=np.uint32)
@@ -373,11 +373,17 @@ class SavedData:
                     T_lag = self.cTime[i] - self.cTime[i-1]
                 self.ib_lag[i] = IbLag.calculate_tau(float(self.ib[i]), lag_reset, T_lag, ib_lag)
 
-    def assign_all_from(self, x=None, i_end=None):
+    def assign_all_from(self, x=None, i_end=None, no_clobber=False):
         """
         Iterates over members of a dataset x, assigns values to numpy.ndarray members
         """
         for name in list(x.dtype.names):
+            print(f'{name}')
+            if no_clobber and hasattr(self, name):
+                print(Colors.fg.red, end='')
+                print(f'WARNING:  {name} repeated (clobbering).  Change serial.cpp')
+                print(Colors.reset, end='')
+                continue
             if i_end is None:
                 setattr(self, name, x[name])
             else:

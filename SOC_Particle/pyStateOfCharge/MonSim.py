@@ -342,7 +342,6 @@ def replicate(OPT: UserOptions):
         # Firmware uses monitor's NOMINAL_TB q_capacity for soc_s during Tb_fa; mirror that here so soc_s tracks soc.
         if hasattr(OPT.mon_run, 'Tb_fa') and bool(OPT.mon_run.Tb_fa[G.i]) and mon.q_capacity and mon.q_capacity != 0.:
             sim.soc = (mon.q_capacity + sim.delta_q) / mon.q_capacity
-            print(f'{mon.soc=} {mon.q_capacity=} {mon.delta_q=} {sim.q_capacity=} {sim.delta_q=} {sim.soc=}')
         mon.assign_soc_s(sim.soc)
 
         # Break if data integrity questionable

@@ -50,7 +50,7 @@ void benign_zero(BatteryMonitor *Mon, Sensors *Sen) // BZ
   cp.cmd_summarize(); // Hs
 
   // Model
-  ap.hys_scale(HYS_SCALE);                  // Sh 1
+  // ap.hys_scale(HYS_SCALE);                  // Sh 1
   ap.slr_res(1);                            // Sr 1
   sp.cutback_gain_slr_p->print_adj_print(1); // Sk 1
   ap.hys_state(0);                          // SH 0

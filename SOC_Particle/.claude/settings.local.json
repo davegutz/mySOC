@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-Content \"C:\\\\Users\\\\daveg\\\\.claude\\\\projects\\\\c--Users-daveg-Documents-GitHub-mySOC-SOC-Particle\\\\f43a045f-e6ae-499e-966d-6264c4b93f59.jsonl\")",
+      "Bash(Select-Object -Last 100)",
+      "PowerShell($content = Get-Content \"C:\\\\Users\\\\daveg\\\\.claude\\\\projects\\\\c--Users-daveg-Documents-GitHub-mySOC-SOC-Particle\\\\f43a045f-e6ae-499e-966d-6264c4b93f59.jsonl\" -Tail 20; $content | ForEach-Object { $obj = $_ | ConvertFrom-Json; if \\($obj.type -eq \"assistant\"\\) { Write-Output \"=== ASSISTANT ===\"; $obj.message.content | ForEach-Object { if \\($_.type -eq \"text\"\\) { Write-Output $_.text } } } elseif \\($obj.type -eq \"user\"\\) { Write-Output \"=== USER ===\"; $obj.message.content | ForEach-Object { if \\($_.type -eq \"text\"\\) { Write-Output $_.text } } } })",
+      "PowerShell($lines = Get-Content \"C:\\\\Users\\\\daveg\\\\.claude\\\\projects\\\\c--Users-daveg-Documents-GitHub-mySOC-SOC-Particle\\\\f43a045f-e6ae-499e-966d-6264c4b93f59.jsonl\"; $count = $lines.Count; Write-Output \"Total lines: $count\"; $last30 = $lines[\\($count-30\\)..\\($count-1\\)]; foreach \\($line in $last30\\) { try { $obj = $line | ConvertFrom-Json; if \\($obj.type -eq \"assistant\"\\) { $obj.message.content | ForEach-Object { if \\($_.type -eq \"text\" -and $_.text.Length -gt 0\\) { Write-Output \"=ASST= $\\($_.text.Substring\\(0, [Math]::Min\\(500, $_.text.Length\\)\\)\\)\" } } } elseif \\($obj.type -eq \"user\"\\) { $obj.message.content | ForEach-Object { if \\($_.type -eq \"text\" -and $_.text.Length -gt 0\\) { Write-Output \"=USER= $\\($_.text.Substring\\(0, [Math]::Min\\(500, $_.text.Length\\)\\)\\)\" } } } } catch {} })"
+    ]
+  }
+}

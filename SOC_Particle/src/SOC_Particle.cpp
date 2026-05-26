@@ -3,7 +3,7 @@
 /******************************************************/
 
 #include "Particle.h"
-#line 1 "/home/daveg/Documents/GitHub/mySOC/SOC_Particle/src/SOC_Particle.ino"
+#line 1 "c:/Users/daveg/Documents/GitHub/mySOC/SOC_Particle/src/SOC_Particle.ino"
 /*
  * Project SOC_Photon
 
@@ -70,7 +70,7 @@
 #include "constants.h"
 void setup();
 void loop();
-#line 65 "/home/daveg/Documents/GitHub/mySOC/SOC_Particle/src/SOC_Particle.ino"
+#line 65 "c:/Users/daveg/Documents/GitHub/mySOC/SOC_Particle/src/SOC_Particle.ino"
 #undef ARDUINO
 #if (PLATFORM_ID != PLATFORM_P2)
   #error "copy local_config.xxxx.h to constants.h"

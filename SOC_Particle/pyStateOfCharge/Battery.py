@@ -938,7 +938,6 @@ class BatteryMonitor(Battery, EKF1x1):
         else:
             ewsat_slr = 1.
             ewmin_slr = 1.
-        print(f"{self.voc_soc=} {self.vsat=} {self.voc_stat=} {self.ib / Battery.NOM_UNIT_CAP=} {self.soc=} {ewmin_slr=} {ewsat_slr=}")
 
         # Individual wrap logic
         if ib_noa is not None:
@@ -1464,7 +1463,6 @@ class Looparound:
         # Thresholds. Scalars are calculated by Flt->wrap_scalars()
         self.ewhi_thr_base = self.wrap_hi_volt * Battery.ap_ewhi_slr
         self.ewhi_thr = self.ewhi_thr_base * ewsat_slr * ewmin_slr
-        print(f'{self.wrap_hi_volt=} {Battery.ap_ewhi_slr=} {self.ewhi_thr_base=} {ewsat_slr=} {ewmin_slr=}')
         self.ewlo_thr_base = self.wrap_lo_volt * Battery.ap_ewlo_slr
         self.ewlo_thr = self.ewlo_thr_base * ewsat_slr * ewmin_slr
 
