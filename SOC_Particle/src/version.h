@@ -4,7 +4,7 @@
 #define xstr(s) str(s)
 #define str(s) #s
 
-#define version_str "g20260524"  // deviceOS@6.2.1
+#define version_str "g20260524a"  // deviceOS@6.2.1
 // g20250612a was main alpha development config.  First use of AI to debug.  BLE.
 // g20250612 is catch functional Vb failure (soft) and revert voc(soc) for BB. 'a' is nom vsat sp
 // g20241006 is fix for amp wrap windup limits

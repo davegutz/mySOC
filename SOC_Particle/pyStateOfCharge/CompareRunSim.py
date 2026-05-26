@@ -327,8 +327,8 @@ def main():  # Example usage.  ok on 20260217
         8:  vb_wrap
         9:  dyn_n
     """
-    data_file='G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20260524/offSitBmsNoiseBB_soc3p2_hi_lo_bb.csv'
-    unit_key = 'g20260524_soc3p2_hi_lo_bb'
+    data_file='G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20260524a/offSitBmsNoiseBB_soc3p2_hi_lo_bb.csv'
+    unit_key = 'g20260524a_soc3p2_hi_lo_bb'
     time_end = None
     compare_run_ver = True
     shift_soc_s = True
