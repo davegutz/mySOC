@@ -260,7 +260,7 @@ class SavedData:
         if self.ib_sel is None:
             self.ib_sel = np.copy(self.ib)
         if self.ib_sel_stat is None:
-            self.ib_sel_stat = np.copy(self.ib) * 0
+            self.ib_sel_stat = int(np.copy(self.ib)) * 0
         if self.ib_choice is None:
             self.ib_choice = np.copy(self.ib) * 0
         if self.ib_h is None:

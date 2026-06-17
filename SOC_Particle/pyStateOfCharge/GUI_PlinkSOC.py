@@ -452,8 +452,8 @@ def compare_run(show_killer_=True):
         if not Ref.key_exists_in_file:
             tkinter.messagebox.showwarning(message="Ref Key '" + Ref.key + "' does not exist in " + Ref.file_txt)
             return
-        print('GUI_TestSOC compare_run:  Ref', Ref.file_path, Ref.key)
-        print('GUI_TestSOC compare_run:  Test', Test.file_path, Test.key)
+        print('GUI_PlinkSOC compare_run:  Ref', Ref.file_path, Ref.key)
+        print('GUI_PlinkSOC compare_run:  Test', Test.file_path, Test.key)
         keys = [(Ref.file_txt, Ref.key), (Test.file_txt, Test.key)]
         return compare_run_run(keys=keys, data_file_folder_run=Ref.version_path, data_file_folder_test=Test.version_path,
                                terse=terse.get(), hardcopy=hardcopy.get())
