@@ -84,6 +84,9 @@ public:
         return ( true );
     }
     virtual void set_nominal(){};
+    void set_addr(const uint16_t a) { addr_.a16 = a; }
+    uint16_t addr() const { return addr_.a16; }
+    virtual uint16_t eeram_size() { return 0; }
 
 protected:
     String code_;
@@ -115,6 +118,7 @@ public:
     }
 
     ~BooleanV(){}
+    virtual uint16_t eeram_size() override { return sizeof(uint32_t); }
 
     bool check_set_put(bool val)
     {
@@ -223,6 +227,7 @@ public:
     }
 
     ~DoubleV(){}
+    virtual uint16_t eeram_size() override { return sizeof(double); }
 
     bool check_set_put(double val)
     {
@@ -334,6 +339,7 @@ public:
     }
 
     ~FloatV(){}
+    virtual uint16_t eeram_size() override { return sizeof(float); }
 
     bool check_set_put(float val)
     {
@@ -445,6 +451,7 @@ public:
     }
 
     ~IntV(){}
+    virtual uint16_t eeram_size() override { return sizeof(int); }
 
     bool check_set_put(int val)
     {
@@ -555,6 +562,7 @@ public:
     }
 
     ~Int8tV(){}
+    virtual uint16_t eeram_size() override { return sizeof(int8_t); }
 
     bool check_set_put(int8_t val)
     {
@@ -666,6 +674,7 @@ public:
      }
 
     ~Uint16tV(){}
+    virtual uint16_t eeram_size() override { return sizeof(uint16_t); }
 
     bool check_set_put(uint16_t val)
     {
@@ -776,6 +785,7 @@ public:
     }
 
     ~Uint8tV(){}
+    virtual uint16_t eeram_size() override { return sizeof(uint8_t); }
 
     bool check_set_put(uint8_t val)
     {
@@ -884,6 +894,7 @@ public:
     }
 
     ~ULongV(){}
+    virtual uint16_t eeram_size() override { return sizeof(uint32_t); }
 
     bool check_set_put(uint32_t val)
     {

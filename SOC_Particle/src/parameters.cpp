@@ -239,8 +239,15 @@ SavedPars::SavedPars(SerialRAM *ram): Parameters()
 {
     rP_ = ram;
     next_ = 0x000;
-    nflt_ = uint16_t( NFLT ); 
+    nflt_ = uint16_t( NFLT );
     initialize();
+
+    // Assign sequential EERAM addresses now that all variables are constructed
+    for (int i = 0; i < n_; i++)
+    {
+        V_[i]->set_addr(next_);
+        next_ += V_[i]->eeram_size();
+    }
 
     // Don't nominalize SavedPars on load.  Defeats the whole purpose of EERAM
     // for ( uint8_t i=0; i<n_; i++ ) if ( !V_[i]->is_eeram() ) V_[i]->set_nominal();  no!!
@@ -296,6 +303,10 @@ int SavedPars::num_diffs()
 // Print memory map
 void SavedPars::mem_print()
 {
+    sendTxBuf("EERAM map:\n", true, IN_SERVICE);
+    for (int i = 0; i < n_; i++)
+        sendTxBuf(String::format("  0x%04X +%d  %s\n", V_[i]->addr(), V_[i]->eeram_size(), V_[i]->description()), true, IN_SERVICE);
+    sendTxBuf(String::format("  total 0x%04X (%d) of 0x%04X\n", next_, next_, MAX_EERAM), true, IN_SERVICE);
 }
 
 // Print
