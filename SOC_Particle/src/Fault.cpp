@@ -473,7 +473,6 @@ void Fault::pretty_print(Sensors *Sen, BatteryMonitor *Mon)
   sendTxBuf(txBuf, true, IN_SERVICE);
 
   txBuf = String::format("\nFault:\n") +
-    String::format(" cc_diff%9.6f  thr%9.6f Fc^\n", cc_diff_, cc_diff_thr_) +
     String::format(" ib_lo_limited_hi %d\n", ib_lo_limited_hi_) +
     String::format(" ib_lo_active     %d\n", ib_lo_active_) +
     String::format(" ib_lo_limited_lo %d\n", ib_lo_limited_lo_) +
@@ -525,7 +524,6 @@ txBuf = String::format("") +
     String::format("7 red wv  %d  %d   'Fd, Fi/Fo ^'\n",  red_loss(), wrap_vb_fa()) +
     String::format("6 wl      %d  %d 'Fo ^'\n", wrap_lo_flt(), wrap_lo_fa()) +
     String::format("5 wh      %d  %d 'Fi ^'\n", wrap_hi_flt(), wrap_hi_fa()) +
-    String::format("4 xx | cc_dif x  %d 'x Fc ^'\n", cc_diff_fa()) +
     String::format("3 ib n    %d  %d 'FI 1'\n", ib_noa_flt(), ib_noa_fa()) +
     String::format("2 ib m    %d  %d 'FI 1'\n", ib_amp_flt(), ib_amp_fa()) +
     String::format("1 vb      %d  %d 'Fv 1  SV, *Dc/*Dv'.", vb_flt(), vb_fa_lt()) +
@@ -969,8 +967,6 @@ void Fault::Tb_check(Sensors *Sen, const float _tb_min, const float _tb_max, con
     faultAssign( (Sen->Tb_hdwe()<=_tb_min) || (Sen->Tb_hdwe()>=_tb_max), TB_FLT);
     failAssign( Tb_fa() || TbHardFail->calculate(Tb_flt(), TB_HARD_SET, TB_HARD_RES, Sen->T(), reset_loc), TB_FA);
   }
-  // if ( sp.debug()==18 ) Serial.printf("Tb_check: mod_tb %d disab_tb_fa %d Sen->Tb_model() %7.3f Sen->Tb_model_f() %7.3f Sen->Tb_hdwe() %7.3f Sen->Tb_hdwe_f() %7.3f _tb_min%7.3f _tb_max%7.3f TB_FLT %d TB_FA %d\n",
-  //   sp.mod_tb(), ap.disab_tb_fa(), Sen->Tb_model(), Sen->Tb_model_f(), Sen->Tb_hdwe(), Sen->Tb_hdwe_f(), _tb_min, _tb_max, Tb_flt(), Tb_fa());
 }
 
 // Check analog voltage.  Latches

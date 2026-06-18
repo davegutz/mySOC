@@ -76,8 +76,6 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   sp.ib_bias_all_p->print_help();  //* DI
   sp.ib_bias_amp_p->print_help();  //  Dm
   ap.eframe_mult_p->print_help();  //  ED
-  ap.ib_max_amp_p->print_help();  // Mm
-  ap.ib_min_amp_p->print_help();  // Mn
   ap.Ib_amp_noise_amp_p->print_help();  // DM
   sp.ib_bias_noa_p->print_help();  //  Dn
   ap.ib_max_noa_p->print_help();  // Nm
@@ -107,12 +105,10 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   ap.s_cap_sim_p->print_help();  // Sq
   ap.Vb_scale_p->print_help();  // SV
   ap.s_cap_mon_p->print_help();  // SQ
-  ap.snap_wait_p->print_help();  // SW
   ap.q_std_p->print_help();  // Kq
   ap.r_std_p->print_help();  // Kr
 
   sendTxBuf("\nF<?>   Faults\n", true, IN_SERVICE);
-  ap.cc_diff_slr_p->print_help();  // Fc
   ap.fake_faults_p->print_help();  // Ff
   ap.ewhi_slr_p->print_help();  // Fi
   ap.ewlo_slr_p->print_help();  // Fo
@@ -228,8 +224,6 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   ap.s_t_sat_p->print_help();  // Xs
   ap.tail_inj_p->print_help();  // XT
   ap.wait_inj_p->print_help();  // XW
-  ap.fail_tb_p->print_help();  // Xu
-  ap.tb_stale_time_slr_p->print_help();  // Xv
   sendTxBuf("\nurgency of cmds: -=ASAP,*=SOON, '' or +=QUEUE, <=LAST\n", true, IN_SERVICE);
   #endif
 }

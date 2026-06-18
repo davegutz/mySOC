@@ -62,7 +62,6 @@ public:
     virtual void initialize();
     virtual void pretty_print(const bool all);
 
-    FloatV *cc_diff_slr_p;
     FloatV *cycles_inj_p;
     BooleanV *dc_dc_on_p;
     BooleanV *disab_ib_fa_p;
@@ -73,7 +72,6 @@ public:
     Uint8tV *eframe_mult_p;
     FloatV *ewhi_slr_p;
     FloatV *ewlo_slr_p;
-    BooleanV *fail_tb_p;
     BooleanV *fake_faults_p;
     FloatV *hys_scale_p;
     FloatV *hys_state_p;
@@ -95,14 +93,11 @@ public:
     ULongV *talk_delay_p;
     FloatV *Tb_bias_model_p;
     FloatV *Tb_noise_amp_p;
-    FloatV *tb_stale_time_slr_p;
     ULongV *until_q_p;
     FloatV *vb_add_p;
     FloatV *Vb_noise_amp_p;
     FloatV *vc_add_p;
     ULongV *wait_inj_p;
-    FloatV *ib_max_amp_p;
-    FloatV *ib_min_amp_p;
     FloatV *ib_max_noa_p;
     FloatV *ib_min_noa_p;
     FloatV *voc_stat_filt_p;
@@ -120,7 +115,6 @@ public:
     FloatV *nS_p;
     FloatV *s_cap_mon_p;
     FloatV *s_cap_sim_p;
-    ULongV *snap_wait_p;
     FloatV *Vb_scale_p;
 
     // accessors
@@ -156,8 +150,6 @@ public:
     void ewhi_slr(const float input) { ewhi_slr_ = input; }
     float ewlo_slr() { return ewlo_slr_; }
     void ewlo_slr(const float input) { ewlo_slr_ = input; }
-    bool fail_tb() { return fail_tb_; }
-    void fail_tb(const bool input) { fail_tb_ = input; }
     bool fake_faults() { return fake_faults_; }
     void fake_faults(const bool input) { fake_faults_ = input; }
     float hys_scale() { return hys_scale_; }
@@ -228,8 +220,6 @@ public:
     void Tb_filt(const float input) { Tb_filt_ = input; }
     float Tb_noise_amp() { return Tb_noise_amp_; }
     void Tb_noise_amp(const float input) { Tb_noise_amp_ = input; }
-    float tb_stale_time_slr() { return tb_stale_time_slr_; }
-    void tb_stale_time_slr(const float input) { tb_stale_time_slr_ = input; }
     uint32_t until_q() { return until_q_; }
     void until_q(const uint32_t input) { until_q_ = input; }
     float vb_add() { return vb_add_; }
@@ -272,7 +262,6 @@ protected:
     float ekf_x_;                // ekf temporary set x, soc
     float ewhi_slr_;             // Scale wrap hi detection thresh, scalar
     float ewlo_slr_;             // Scale wrap lo detection thresh, scalar
-    bool fail_tb_;            // Make hardware bus read ignore Tb and fail it
     bool fake_faults_;        // Faults faked (ignored).  Used to evaluate a configuration, deploy it without disrupting use
     float hys_scale_;            // Sim hysteresis scalar
     float hys_state_;            // Sim hysteresis state
@@ -295,27 +284,25 @@ protected:
     uint8_t print_mult_;         // Print multiplier for objects
     float q_std_;                // kf q_std set, v
     float r_std_;                // kf q_std set, v
-    uint32_t read_delay_; // Minor frame, ms
+    uint32_t read_delay_;        // Minor frame, ms
     float s_cap_mon_;            // Scalar cap Mon
     float s_cap_sim_;            // Scalar cap Sim
     float s_t_sat_;              // Scalar on saturation test time set and reset
-    uint32_t samp_points_; // Number of sample readings to take, !=0 initiates sampling
+    uint32_t samp_points_;       // Number of sample readings to take, !=0 initiates sampling
     float slr_res_;              // Scalar Randles R0, slr
-    uint32_t sum_delay_; // Minor frame divisor, div
-    uint32_t snap_wait_; // Wait after snap before print, ms
-    uint32_t tail_inj_; // Tail after end injection, ms
-    uint32_t talk_delay_; // Talk frame, ms
+    uint32_t sum_delay_;         // Minor frame divisor, div
+    uint32_t tail_inj_;          // Tail after end injection, ms
+    uint32_t talk_delay_;        // Talk frame, ms
     float Tb_bias_model_;        // Bias on Tb for model
     float Tb_filt_;              // TbHdweFilt time constant, s
     float Tb_noise_amp_;         // Tb noise amplitude model only, deg C pk-pk
-    float tb_stale_time_slr_;    // Scalar on persistences of Tb hardware stale check
-    uint32_t until_q_;  // Time until set vv0, ms
+    uint32_t until_q_;           // Time until set vv0, ms
     float vb_add_;               // Fault injection bias, V
     float Vb_noise_amp_;         // Vb bank noise amplitude model only, V pk-pk
     float Vb_scale_;             // Scale Vb sensor
     float vc_add_;               // Shunt Vc/Vr Fault injection bias, V
     float voc_stat_filt_;        // VocStatFilt time constant, s
-    uint32_t wait_inj_; // Wait before start injection, ms
+    uint32_t wait_inj_;          // Wait before start injection, ms
 
 };
 

@@ -66,8 +66,6 @@ void benign_zero(BatteryMonitor *Mon, Sensors *Sen) // BZ
   ap.Tb_bias_model(TEMP_BIAS); // D^
   ap.dv_voc_soc(NOM_DY);   // Dy
   ap.vc_add(NOM_VC_ADD);   // D3
-  ap.tb_stale_time_slr(1); // Xv 1
-  ap.fail_tb(false);       // Xu 0
   ap.ib_amp_max( (IB_ABS_MAX_AMP/NP/SIZE_MARG) );   // Mm 0
   ap.ib_amp_min(-(IB_ABS_MAX_AMP/NP/SIZE_MARG) );  // Mn 0
   ap.ib_noa_max( (IB_ABS_MAX_NOA/NP/SIZE_MARG) );   // Nm 0
@@ -83,7 +81,6 @@ void benign_zero(BatteryMonitor *Mon, Sensors *Sen) // BZ
   // ap.eframe_mult() = max(min(EKF_EFRAME_MULT, UINT8_MAX), 0); // ED
  
   // Fault logic
-  ap.cc_diff_slr(1);  // Fc 1
   ap.ib_diff_slr(1);  // Fd 1
   ap.fake_faults(0);  // Ff 0
   sp.put_ib_force(IB_FORCE); // si / Ff IB_FORCE
