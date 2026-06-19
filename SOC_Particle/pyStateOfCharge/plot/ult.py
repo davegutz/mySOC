@@ -71,9 +71,6 @@ def ult_1(S:PlotOptions, fig_files=None, fig_list=None):
     plq(plt, S.mv, 'time', S.mv, 'ewnhi_thr', color='orange', linestyle='-.', warn=not S.ver_is_stdy)
     plq(plt, S.mr, 'time', S.mr, 'ewnlo_thr', color='red', linestyle='--', warn=not S.run_is_stdy)
     plq(plt, S.mv, 'time', S.mv, 'ewnlo_thr', color='orange', linestyle='-.', warn=not S.ver_is_stdy)
-    # if active standby
-    # plq(plt, S.mr, 'time', S.mr, 'ewhi_thr', color='red', linestyle='-.')
-    # plq(plt, S.mr, 'time', S.mr, 'ewlo_thr', color='red', linestyle='-.')
     plt.ylim(-4, 4)
     plt.legend(loc=1)
     plt.subplot(332)

@@ -28,7 +28,6 @@
 #undef HDWE_UNIT
 #undef HDWE_BARE
 #undef SOFT_SBAUD
-#undef HDWE_IB_HI_LO
 #undef HDWE_2WIRE
 #undef HDWE_IB_HI_LO_NOA_LO
 #undef HDWE_IB_HI_LO_AMP_LO
@@ -55,25 +54,21 @@
 #undef VOC_STAT_FILT
 
 // Software configuration
-#undef SOFT_DEPLOY_PHOTON
 #undef SOFT_DEBUG_QUEUE
 #undef IB_FORCE
 // #undef PLATFORM_ID
 
 // Setup
 #include "local_config.h"
-#ifndef IB_FORCE
+#if !defined(IB_FORCE)
     #define IB_FORCE 0
 #endif
-#ifndef DISAB_TB_FA
+#if !defined(DISAB_TB_FA)
     #define DISAB_TB_FA false
 #endif
-#ifndef DISAB_VB_FA_LT
+#if !defined(DISAB_VB_FA_LT)
     #define DISAB_VB_FA_LT false
 #endif
-// #ifndef PLATFORM_ID
-//     #define PLATFORM_ID  32
-// #endif
 
 const char unit[] = version_str "_" HDWE_UNIT;
 
@@ -112,13 +107,9 @@ const char unit[] = version_str "_" HDWE_UNIT;
 #define NSUM 2000  // Number of saved summaries. If NFLT + NHIS + NSUM too large, will get compile error SRAM, or GUI FRAG msg (2845) or SOS 4 Bus Fault (2500)
 
 #define HDB_VB                0.05      // Half deadband to filter Vb, V (0.05)
-#ifndef HDWE_IB_HI_LO
-    #define T_SAT                 22        // Saturation time, sec (>21 for no SAT with Dv0.82)
-#else
-    #define T_SAT                 24        // Saturation time, sec (>21 for no SAT with Dv0.82)
-#endif
+#define T_SAT                 24        // Saturation time, sec (>21 for no SAT with Dv0.82)
 const float T_DESAT =         20;       // De-saturation time, sec
-#ifndef TEMP_INIT_DELAY
+#if !defined(TEMP_INIT_DELAY)
     #define TEMP_INIT_DELAY 700         // Time after power on to start reading temp, ms (700)
 #endif
 #define CC_DIFF_LO_SOC_SLR    4.        // Large to disable cc_diff
@@ -159,11 +150,7 @@ const float WRAP_HI_RES = (WRAP_HI_SET/2.); // Wrap high failure reset time, sec
 #define WRAP_LO_NOAV       -0.8         // Wrap low voltage threshold non-amplified, V (-0.8)
 #define WRAP_HI_SETAT_MARG  0.2         // Wrap voltage margin to saturation, V (0.2)
 #define WRAP_HI_SETAT_SLR   2.0         // Wrap voltage margin scalar when saturated (2.0)
-#ifdef HDWE_IB_HI_LO
-    #define IBATT_DISAGREE_THRESH 3.    // Signal selection threshold for current disagree test, A (3.)
-#else
-    #define IBATT_DISAGREE_THRESH 10.   // Signal selection threshold for current disagree test, A (10.)
-#endif
+#define IBATT_DISAGREE_THRESH 3.        // Signal selection threshold for current disagree test, A (3.)
 const float IBATT_DISAGREE_SET = (WRAP_LO_SET-1.); // Signal selection current disagree fail persistence, s (WRAP_LO_SET-1) // must be quicker than wrap lo
 #define IBATT_INST_DIFF_SET   0.2       // Persistence on instantaneous current difference, s (0.2)
 #define IBATT_INST_DIFF_RES   0.0       // Persistence reset on instantaneous current difference, s (0.0)
@@ -181,7 +168,7 @@ const float QUIET_RES (QUIET_SET/10.);  // Quiet reset persistence, sec ('up 1 d
 #define NOMINAL_TB      15.             // Middle of the road Tb for decent reversionary operation, deg C (15.)
 #define NOMINAL_VB   (13.*NS)           // Middle of the road Vb for decent reversionary operation, V (13.)
 #define IMAX_NUM        100000.         // Simulation limit to prevent NaN, A (1e5)
-#ifndef WRAP_SOC_HI_OFF
+#if !defined(WRAP_SOC_HI_OFF)
     #define WRAP_SOC_HI_OFF     0.97        // Disable e_wrap_hi when saturated (0.97)
 #endif
 #define WRAP_SOC_HI_SLR     1000.       // Huge to disable e_wrap (1000)
@@ -416,17 +403,8 @@ const float QUIET_RES (QUIET_SET/10.);  // Quiet reset persistence, sec ('up 1 d
 #endif
 const float VC_CONV_GAIN = float(PHOTON_ADC_VOLT) / float(PHOTON_ADC_COUNT) * float(VC_S);
 const float VO_CONV_GAIN = float(PHOTON_ADC_VOLT) / float(PHOTON_ADC_COUNT) * float(VO_S);
-#if defined(HDWE_IB_HI_LO) & !defined(HDWE_BARE)
-    const float SHUNT_AMP_GAIN = SHUNT_GAIN * SHUNT_AMP_R1 / SHUNT_AMP_R2;
-    const float SHUNT_NOA_GAIN = SHUNT_GAIN * SHUNT_NOA_R1 / SHUNT_NOA_R2;
-#elif !defined(HDWE_BARE)
-    const float SHUNT_AMP_GAIN = SHUNT_GAIN * SHUNT_AMP_R1 / SHUNT_AMP_R2;
-    const float SHUNT_NOA_GAIN = SHUNT_GAIN;
-#else
-    const float SHUNT_AMP_GAIN = SHUNT_GAIN * 220;
-    const float SHUNT_NOA_GAIN = SHUNT_GAIN * 22;
-#endif
-
+const float SHUNT_AMP_GAIN = SHUNT_GAIN * SHUNT_AMP_R1 / SHUNT_AMP_R2;
+const float SHUNT_NOA_GAIN = SHUNT_GAIN * SHUNT_NOA_R1 / SHUNT_NOA_R2;
 const float VH3V3_CONV_GAIN = float(PHOTON_ADC_VOLT) / float(PHOTON_ADC_COUNT);
 const float VTB_CONV_GAIN = float(PHOTON_ADC_VOLT) / float(PHOTON_ADC_COUNT) * float(VTB_S);
 

@@ -42,7 +42,7 @@ public:
 	template <typename T>
 	T &get(uint16_t idx, T &t)
 	{
-		#ifndef HDWE_BARE
+		#if !defined(HDWE_BARE)
 			uint8_t *ptr = (uint8_t *)&t;
 			read(idx, ptr, sizeof(T)); //Address, data, sizeOfData
 		#else
@@ -54,7 +54,7 @@ public:
 	template <typename T>
 	const T &put(uint16_t idx, const T &t) //Address, data
 	{
-		#ifndef HDWE_BARE
+		#if !defined(HDWE_BARE)
 			const uint8_t *ptr = (const uint8_t *)&t;
 			write(idx, ptr, sizeof(T)); //Address, data, sizeOfData
 		#else

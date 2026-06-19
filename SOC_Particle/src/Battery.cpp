@@ -109,32 +109,32 @@ float_t Battery::calc_vsat(void)
 // Print
 void Battery::pretty_print(void)
 {
-#ifndef SOFT_DEPLOY_PHOTON
-    Serial.printf("Battery:\n");
-    Serial.printf("  bms_charging %d\n", bms_charging_);
-    Serial.printf("  bms_off %d\n", bms_off_);
-    Serial.printf("  c_sd%9.3g, farad\n", chem_.c_sd);
-    Serial.printf("  dt%7.3f, s\n", dt_);
-    Serial.printf("  dv_dyn%7.3f, V\n", dv_dyn_);
-    Serial.printf("  dvoc_dt%10.6f, V/dg C\n", chem_.dvoc_dt);
-    Serial.printf("  ib%7.3f, A\n", ib_);
-    Serial.printf("  r_0%10.6f, ohm\n", chem_.r_0);
-    Serial.printf("  r_ct%10.6f, ohm\n", chem_.r_ct);
-    Serial.printf("  r_sd%10.6f, ohm\n", chem_.r_sd);
-    Serial.printf("  soc%8.4f\n", soc_);
-    Serial.printf("  sr%7.3f, slr\n", ap.slr_res());
-    Serial.printf("  tau_ct%10.6f, s (=1/R/C)\n", chem_.tau_ct);
-    Serial.printf("  tau_sd%9.3g, s\n", chem_.tau_sd);
-    Serial.printf("  Tb_f%9.5g, dg C\n", Tb_f_);
-    Serial.printf("  Tb_f_rate%9.5g, s\n", Tb_f_rate_);
-    Serial.printf("  vb%7.3f, V\n", vb_);
-    Serial.printf("  voc%7.3f, V\n", voc_);
-    Serial.printf("  voc_stat%7.3f, V\n", voc_stat_);
-    Serial.printf("  voltage_low %d, BMS will turn off\n", voltage_low_);
-    Serial.printf("  vsat%7.3f, V\n", vsat_);
-#else
-     Serial.printf("Battery: silent DEPLOY\n");
-#endif
+    #if !IN_SERVICE
+        Serial.printf("Battery:\n");
+        Serial.printf("  bms_charging %d\n", bms_charging_);
+        Serial.printf("  bms_off %d\n", bms_off_);
+        Serial.printf("  c_sd%9.3g, farad\n", chem_.c_sd);
+        Serial.printf("  dt%7.3f, s\n", dt_);
+        Serial.printf("  dv_dyn%7.3f, V\n", dv_dyn_);
+        Serial.printf("  dvoc_dt%10.6f, V/dg C\n", chem_.dvoc_dt);
+        Serial.printf("  ib%7.3f, A\n", ib_);
+        Serial.printf("  r_0%10.6f, ohm\n", chem_.r_0);
+        Serial.printf("  r_ct%10.6f, ohm\n", chem_.r_ct);
+        Serial.printf("  r_sd%10.6f, ohm\n", chem_.r_sd);
+        Serial.printf("  soc%8.4f\n", soc_);
+        Serial.printf("  sr%7.3f, slr\n", ap.slr_res());
+        Serial.printf("  tau_ct%10.6f, s (=1/R/C)\n", chem_.tau_ct);
+        Serial.printf("  tau_sd%9.3g, s\n", chem_.tau_sd);
+        Serial.printf("  Tb_f%9.5g, dg C\n", Tb_f_);
+        Serial.printf("  Tb_f_rate%9.5g, s\n", Tb_f_rate_);
+        Serial.printf("  vb%7.3f, V\n", vb_);
+        Serial.printf("  voc%7.3f, V\n", voc_);
+        Serial.printf("  voc_stat%7.3f, V\n", voc_stat_);
+        Serial.printf("  voltage_low %d, BMS will turn off\n", voltage_low_);
+        Serial.printf("  vsat%7.3f, V\n", vsat_);
+    #else
+        Serial.printf("Battery: silent DEPLOY\n");
+    #endif
 }
 
 // EKF model for update
@@ -495,30 +495,30 @@ bool BatteryMonitor::is_sat(const bool reset)
 // Print
 void BatteryMonitor::pretty_print(Sensors *Sen)
 {
-#ifndef SOFT_DEPLOY_PHOTON
-    Serial.printf("BM::");
-    this->Battery::pretty_print();
-    Serial.printf(" BM::BM:\n");
-    Serial.printf("  ah_ekf%7.3f A-h\n", amp_hrs_remaining_ekf_);
-    Serial.printf("  ah_soc%7.3f A-h\n", amp_hrs_remaining_soc_);
-    Serial.printf("  EKF_conv %d\n", converged_ekf());
-    Serial.printf("  e_wrap%7.3f V\n", Sen->Flt->e_wrap());
-    Serial.printf("  e_wrap_filt%7.3f V\n", Sen->Flt->e_wrap_filt());
-    Serial.printf("  q_ekf%10.1f C\n", q_ekf_);
-    Serial.printf("  soc_ekf%8.4f frac\n", soc_ekf_);
-    Serial.printf("  tc%5.1f hr\n", tcharge_);
-    Serial.printf("  tc_ekf%5.1f hr\n", tcharge_ekf_);
-    Serial.printf("  voc_dead%7.3f V\n", voc_dead_);
-    Serial.printf("  voc_soc%7.3f V\n", voc_soc_);
-    Serial.printf("  voc_stat%7.3f V\n", voc_stat_);
-    Serial.printf("  voc_stat_f%7.3f V\n", voc_stat_f_);
-    Serial.printf("  y_ekf_f%7.3f Res EKF, V\n", y_ekf_f_);
-    Serial.printf(" *ap_s_cap_mon%7.3f Slr\n", ap.s_cap_mon());
-    Serial.printf("  vb_model_rev%7.3f V\n", vb_model_rev_);
-    this->Battery::Coulombs::pretty_print();
-#else
-     Serial.printf("BatteryMonitor: silent DEPLOY\n");
-#endif
+    #if !IN_SERVICE
+        Serial.printf("BM::");
+        this->Battery::pretty_print();
+        Serial.printf(" BM::BM:\n");
+        Serial.printf("  ah_ekf%7.3f A-h\n", amp_hrs_remaining_ekf_);
+        Serial.printf("  ah_soc%7.3f A-h\n", amp_hrs_remaining_soc_);
+        Serial.printf("  EKF_conv %d\n", converged_ekf());
+        Serial.printf("  e_wrap%7.3f V\n", Sen->Flt->e_wrap());
+        Serial.printf("  e_wrap_filt%7.3f V\n", Sen->Flt->e_wrap_filt());
+        Serial.printf("  q_ekf%10.1f C\n", q_ekf_);
+        Serial.printf("  soc_ekf%8.4f frac\n", soc_ekf_);
+        Serial.printf("  tc%5.1f hr\n", tcharge_);
+        Serial.printf("  tc_ekf%5.1f hr\n", tcharge_ekf_);
+        Serial.printf("  voc_dead%7.3f V\n", voc_dead_);
+        Serial.printf("  voc_soc%7.3f V\n", voc_soc_);
+        Serial.printf("  voc_stat%7.3f V\n", voc_stat_);
+        Serial.printf("  voc_stat_f%7.3f V\n", voc_stat_f_);
+        Serial.printf("  y_ekf_f%7.3f Res EKF, V\n", y_ekf_f_);
+        Serial.printf(" *ap_s_cap_mon%7.3f Slr\n", ap.s_cap_mon());
+        Serial.printf("  vb_model_rev%7.3f V\n", vb_model_rev_);
+        this->Battery::Coulombs::pretty_print();
+    #else
+        Serial.printf("BatteryMonitor: silent DEPLOY\n");
+    #endif
 }
 
 // Reset Coulomb Counter state to EKF under restricted conditions especially new boot no history of saturation
@@ -922,25 +922,25 @@ void BatterySim::init_battery_sim(const bool reset, Sensors *Sen)
 // Print
 void BatterySim::pretty_print(void)
 {
-#ifndef SOFT_DEPLOY_PHOTON
-    Serial.printf("BS::");
-    this->Battery::pretty_print();
-    Serial.printf(" BS::BS:\n");
-    Serial.printf("  dv_hys%7.3f, V\n", hys_->dv_hys());
-    Serial.printf("  hys_scale%7.3f,\n", ap.hys_scale());
-    Serial.printf("  ib%7.3f, A\n", ib_);
-    Serial.printf("  ib_fut%7.3f, A\n", ib_fut_);
-    Serial.printf("  ib_in%7.3f, A\n", ib_in_);
-    Serial.printf("  ib_sat%7.3f\n", ib_sat_);
-    Serial.printf("  mod_cb %d\n", model_cutback_);
-    Serial.printf("  mod_sat %d\n", model_saturated_);
-    Serial.printf("  sat_cb_gn%7.1f\n", sat_cutback_gain_);
-    Serial.printf("  sat_ib_max%7.3f, A\n", sat_ib_max_);
-    Serial.printf("  sat_ib_null%7.3f, A\n", sat_ib_null_);
-    Serial.printf(" *ap_s_cap_sim%7.3f Slr\n", ap.s_cap_sim());
-    hys_->pretty_print(0., 0., 0.);
-    this->Battery::Coulombs::pretty_print();
-#else
-     Serial.printf("BatterySim: silent DEPLOY\n");
-#endif
+    #if !IN_SERVICE
+        Serial.printf("BS::");
+        this->Battery::pretty_print();
+        Serial.printf(" BS::BS:\n");
+        Serial.printf("  dv_hys%7.3f, V\n", hys_->dv_hys());
+        Serial.printf("  hys_scale%7.3f,\n", ap.hys_scale());
+        Serial.printf("  ib%7.3f, A\n", ib_);
+        Serial.printf("  ib_fut%7.3f, A\n", ib_fut_);
+        Serial.printf("  ib_in%7.3f, A\n", ib_in_);
+        Serial.printf("  ib_sat%7.3f\n", ib_sat_);
+        Serial.printf("  mod_cb %d\n", model_cutback_);
+        Serial.printf("  mod_sat %d\n", model_saturated_);
+        Serial.printf("  sat_cb_gn%7.1f\n", sat_cutback_gain_);
+        Serial.printf("  sat_ib_max%7.3f, A\n", sat_ib_max_);
+        Serial.printf("  sat_ib_null%7.3f, A\n", sat_ib_null_);
+        Serial.printf(" *ap_s_cap_sim%7.3f Slr\n", ap.s_cap_sim());
+        hys_->pretty_print(0., 0., 0.);
+        this->Battery::Coulombs::pretty_print();
+    #else
+        Serial.printf("BatterySim: silent DEPLOY\n");
+    #endif
 }

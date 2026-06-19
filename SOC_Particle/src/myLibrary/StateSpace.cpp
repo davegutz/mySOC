@@ -124,25 +124,24 @@ void StateSpace::pretty_print_vec(const String name, const uint8_t n, double *x)
 // Pretty Print
 void StateSpace::pretty_print(void)
 {
-#ifndef SOFT_DEPLOY_PHOTON
-  Serial.printf("StateSpace:\n");
-  Serial.printf("  dt %9.6f\n", dt_);
-  pretty_print_mat("A ", n_, n_, A_);
-  pretty_print_vec("x ", n_, x_);
-  pretty_print_mat("B ", n_, p_, B_);
-  pretty_print_vec("u ", p_, u_);
-  pretty_print_mat("C ", q_, n_, C_);
-  pretty_print_mat("D ", q_, p_, D_);
-  pretty_print_vec("x_dot ", n_, x_dot_);
-  pretty_print_vec("y ", q_, y_);
-  if ( n_==2 && p_==2)
-  {
-    pretty_print_mat("AinvB", n_, n_, AinvB_);
-  }
-#else
-     Serial.printf("StateSpace: silent DEPLOY\n");
-#endif
-
+  #if !IN_SERVICE
+    Serial.printf("StateSpace:\n");
+    Serial.printf("  dt %9.6f\n", dt_);
+    pretty_print_mat("A ", n_, n_, A_);
+    pretty_print_vec("x ", n_, x_);
+    pretty_print_mat("B ", n_, p_, B_);
+    pretty_print_vec("u ", p_, u_);
+    pretty_print_mat("C ", q_, n_, C_);
+    pretty_print_mat("D ", q_, p_, D_);
+    pretty_print_vec("x_dot ", n_, x_dot_);
+    pretty_print_vec("y ", q_, y_);
+    if ( n_==2 && p_==2)
+    {
+      pretty_print_mat("AinvB", n_, n_, AinvB_);
+    }
+  #else
+      Serial.printf("StateSpace: silent DEPLOY\n");
+  #endif
 }
 
 // Scale elements as requested

@@ -72,7 +72,7 @@ sel_list1 = [
     'flatSit', 'offSitBmsNoiseBB', 'offSitBmsNoiseCHG', 'ampHiFailSlow',
     'noaHiFailSlow', 'noaHiFailSlower', 'noaHiFailSlowest', 'vHiFail', 'vHiFailNoise', 'vHiFailFf',
     'pulseHard', 'tLoFailModel', 'tHiFailModel', 'tLoFailHdwe', 'tHiFailHdwe', 'faultParade', 'stepDown', 'stepUp',
-    'ibDualMid', 'ibDualFlat', 'vcFlat',
+    'ibDualMid', 'ibDualFlat', 'vcFlat', 'nvm',
     ]
 
 # Default content for auto_plink.csv (analogous to default_dict for the .ini file)
@@ -92,7 +92,7 @@ macro_sel_list = [
     'slowTwitchDef', 'fastTwitchDef', 'c06', 'd06', 'c08', 'd05', 'd08', 'c10', 'd10', 'c18', 'd18', 'c50', 'cm50',
     'cmn50', 'dmn50', 'cmn100', 'dmn100',
     'c00', 'dv0', 'twitch', 'time_stamp', 's00', 'sd50', 'sc50', 'zeroPrepHdweNoVb', 'zero_set_hdwe_no_Vb',
-    'noaHiFail', 'noaHiFailNoise',
+    'noaHiFail', 'noaHiFailNoise', 'nvm',
     ]
 
 # Macro
@@ -150,6 +150,7 @@ dv0 = 'Pf;W2;Dv;Rf;W50;'
 s00 = 'Pf;W2;DI;Rf;W100;'
 twitch = time_stamp + 'XR;'
 vm12 = 'Dv-12;'
+off_r = 'Xa-0.1;Bb;Sk-0.1;vv68;qs300000;qm300000;Dw-0.1;Xf-0.1;DI-0.1;DA-0.1;DB-0.1;SD-0.1;si2;if22;ih23;Xb-0.1;is24,Xm5;X?6;Dt-0.1;UT2222222222222;Xt7;Dc-0.1;DS-0.1;'
 
 # Note:  Photon 2 is throughput limited on the Serial buses.  The *tweak* transients are sensitive to differences
 # caused by over-runs and slip and set Dr400 before Xp* then resets to Dr100 (nominal).
@@ -193,7 +194,6 @@ lookup = {
         'flatSit': (690, 'Xm247;Ca0.9;Rb;Rf;Xts;Xa-81;Xf0.004;XW10000;XT10;XC2;W1;' + tranPrep + 'XR;XQ580000;Xa0;Xb0;' + quiet + cleanup + '<XD;', ("Operate around 0.9.  For CHINS, will check EKF with flat voc(soc).   Takes about 10 minutes.", "Make sure EKF soc (soc_ekf) tracks actual soc without wandering.")),
         'offSitBmsNoiseBB': (670, modEmptInitBB + slowTwitchDef + 'Xa-162;' + noisePackage + tranPrep + 'XR;XQ568000;' + 'Xa0;' + silentPackage + quiet + cleanup + 'Sh1;<XD;', ("Stress test with 2x normal Vb noise DV0.10.  Takes about 10 minutes.", "operate around saturation, starting above, go below, come back up. Tune Ca to start just above vsat. Go low enough to exercise hys reset ", "Make sure comes back on.", "It will show one shutoff only since becomes biased with pure sine input with half of down current ignored on first cycle during the shutoff.")),
         'offSitBmsNoiseCHG': (670, modEmptInitCHG + slowTwitchDef + 'Xa-324;' + noisePackage + tranPrep + 'XR;XQ568000;' + 'Xa0;' + silentPackage + quiet + cleanup + 'Sh1;<XD;', ("Stress test with 2x normal Vb noise DV0.10.  Takes about 10 minutes.", "operate around saturation, starting above, go below, come back up. Tune Ca to start just above vsat. Go low enough to exercise hys reset ", "Make sure comes back on.", "It will show one shutoff only since becomes biased with pure sine input with half of down current ignored on first cycle during the shutoff.")),
-        # TODO for all volatile and saved parameters in Battery.csv:  'tranPrep' no 'vv' statment.  'stream' starts data incl 'vv'.  All adjusts before 'stream'
         'ampHiFailSlow': (535, modHalfInit + 'Fc0.0006;Fd0.5;' + tranPrep + c10 + 'XQ400000;' + c00 + quiet + cleanup + '<XD;', ("10A bias on amp, disable wrap, noa in range at 0A and reflects battery state. Artificially tight cc_diff threshold.  Will detect diff but no wrap. Will be slow (~6 min) cc_diff detection as it waits for the EKF to wind up to produce a cc_diff fault and complete isolation and switch to noa.", "EKF should tend to follow voltage while soc wanders away.", "Run for 6  minutes to see that cc_diff_fa does set")),
         'noaHiFailSlow': (525, modHalfInit+ 'Fc0.0006;' + tranPrep + d20 + 'XQ400000;' + c00 + quiet + cleanup + '<XD;', ("20A bias on noa, amp in range at 0A and reflects battery state. Artificially tight cc_diff threshold. Will detect and switch noa current failure due to wrap+diff. Once wrap trips diff won't be displayed. Cannnot ever produce a cc_diff fault because amp still used.", "Will display “diff” due to 20A difference.", "EKF won't move because fed by amp.", "Run for 6  minutes to verify not cc_diff_fa")),
         'noaHiFailSlower': (525, modHalfInit+ 'Fc0.0006;' + tranPrep + d08 + 'XQ400000;' + c00 + quiet + cleanup + '<XD;', ("8A bias on noa, amp in range at 0A and reflects battery state.  Artificially tight cc_diff threshold. Will detect and switch noa current failure due to wrap+diff. Once wrap trips diff won't be displayed. Cannnot ever produce a cc_diff fault.", "Will display “diff” due to 6 A difference..", "EKF won't move because fed by amp.", "Run for 6  minutes to see potential cc_diff_fa")),
@@ -211,6 +211,7 @@ lookup = {
         'ibDualMid': (130, modHalfInit + tranPrep + cmn100 + 'XQ25000;' + c00 + quiet + cleanup + '<XD;', ("Inject 100A into amp and noa simultaneously.  Should detect and switch dual amp current failure set Ib=0", "'*fail' will be displayed. After a bit more, current display will change to 0.", "To evaluate plots, start looking at 'Ult 1'. Fault record (frozen).")),
         'ibDualFlat': (130, modFlatInit + tranPrep + cmn100 + 'XQ25000;' + c00 + quiet + cleanup + '<XD;', ("Inject 100A into amp and noa simultaneously.  Should detect and switch dual amp current failure set Ib=0", "'*fail' will be displayed. After a bit more, current display will change to 0.", "To evaluate plots, start looking at 'Ult 1'. Fault record (frozen).")),
         'vcFlat': (130, modFlatInitHi + tranPrep + 'D30.6;' + 'XQ25000;' + 'Pf;W2;D3;Rf;W50;' + quiet + cleanup + '<XD;', ("Inject 0.6V into sensed Vc (normally 1.65).  Should fail both currents.", "To evaluate plots, start looking at 'Ult 1'. Fault record (frozen).")),
+        'nvm': (10, off_r, ("Adjst all and cycle power", "To evaluate type PR")),
         }
 
 # Lookup keys for which compare_run_sim should be called with shift_soc_s=False

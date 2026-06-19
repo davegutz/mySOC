@@ -119,11 +119,6 @@ def vb_from_raw_or_selected(use_raw, mr):
 #  been converted to the single battery unit 12v form, S1P1, lower-case nomenclature.
 # noinspection PyPep8Naming
 def replicate(OPT: UserOptions):
-    """TODO:
-    7. Fig. 9 EKF 2a: hx(soc) negative slope?  This needs to be run just below saturation
-    9. Run CompareHistSim etc.
-    19. Fig 15 sim_s 2a:  vb?   Keep looking for this when run at other op conditions.  Shutdown problem.
-    """
     # Options
     if OPT.run_type == 'RunSim':
         print(OPT)
@@ -231,7 +226,7 @@ def replicate(OPT: UserOptions):
             # Must call Battery logic at least twice with reset=True to initialized seeded transfer functions correctly
             reset = bool(G.i < 3 or (t[G.i] <= OPT.init_time) or (t[G.i] < 0. and t[0] > OPT.init_time))
             if OPT.mon_run.reset is not None:
-                reset = reset or bool(OPT.mon_run.reset[G.i] > 0.) or bool(OPT.mon_run.reset_all_faults[G.i] > 0.)  # TODO:  reset_all_faults needed here?  Resets Sim while app does not
+                reset = reset or bool(OPT.mon_run.reset[G.i] > 0.) or bool(OPT.mon_run.reset_all_faults[G.i] > 0.)
         elif OPT.run_type == 'HistSim':
             reset = True
         prn_soc_debug(OPT, time=now, leader="before sim init:         ", i_temp=i_temp, mon=mon, sim=sim)

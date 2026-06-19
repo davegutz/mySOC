@@ -36,7 +36,7 @@ String chat_cmd_from(String *source)
   String out_str = "";
 
   #ifdef SOFT_DEBUG_QUEUE
-    // debug_queue("chat_cmd_from enter");
+    debug_queue("chat_cmd_from enter");
   #endif
 
   while ( source->length() )
@@ -52,7 +52,7 @@ String chat_cmd_from(String *source)
   }
 
   #ifdef SOFT_DEBUG_QUEUE
-    // debug_queue("chat_cmd_from exit");
+    debug_queue("chat_cmd_from exit");
   #endif
 
   return out_str;
@@ -139,11 +139,7 @@ void print_battery_header()
 
 void print_battery_serial()
 {
-  #ifdef HDWE_IB_HI_LO
-    bool hdwe_ib_hi_lo = true;
-  #else
-    bool hdwe_ib_hi_lo = false;
-  #endif
+  bool hdwe_ib_hi_lo = true;
   sprintf(pr.buff, "Battery_val,%d,%10.7f,%10.7f,%d,%d,%d,%d,%10.7f,%10.7f,",
     hdwe_ib_hi_lo, AMP_WRAP_TRIM_GAIN, ap.cc_diff_slr(), ap.dc_dc_on(), ap.disab_ib_fa(), ap.disab_tb_fa(), ap.disab_vb_fa_lt(),
     ap.ds_voc_soc(), ap.dv_voc_soc());

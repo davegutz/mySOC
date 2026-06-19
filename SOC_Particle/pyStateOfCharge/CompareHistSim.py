@@ -123,7 +123,7 @@ def bandaid(h):
     res = np.zeros(len(h.time_ux))
     res[0:1] = 1
     time_t = h['time'].copy()
-    ib_sel = h['ib_f'].copy()  # TODO: fix selection logic
+    ib_sel = h['ib_f'].copy()
     ib_in_s = h['ib_f'].copy()
     vb_sel = h['vb_f'].copy()
     tb_sel = h['Tb_f'].copy()

@@ -454,7 +454,6 @@ class Sensors:
             self.kf_v_n = float(self.kf_v_n)
             self.iscn = float((self.VoVcn * Battery.SHUNT_NOA_GAIN) / Battery.NP)
             self.iscn_f = float((self.VoVcn_f * Battery.SHUNT_NOA_GAIN) / Battery.NP)
-            # TODO:  implement iscn filter and scale with sp_ib_disch_slr (= 1. now everywhere so no worries at present)
 
 
     def update_tb(self):

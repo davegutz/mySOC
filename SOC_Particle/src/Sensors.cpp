@@ -62,41 +62,41 @@ Shunt::~Shunt() {}
 
 void Shunt::pretty_print()
 {
-#ifndef SOFT_DEPLOY_PHOTON
-  Serial.printf(" reset %d;\n", reset_);
-  Serial.printf(" *sp_Ib_bias%7.3f; A\n", *sp_ib_bias_);
-  Serial.printf(" *sp_ib_scale%7.3f; A\n", *sp_ib_scale_);
-  Serial.printf(" bare_shunt %d dscn_cmd %d\n", bare_shunt_, dscn_cmd_);
-  Serial.printf(" Ishunt_cal%7.3f; A\n", Ishunt_cal_);
-  Serial.printf(" Ishunt_cal_kf%7.3f; A\n", Ishunt_cal_kf_);
-  Serial.printf(" port 0x%X;\n", port_);
-  Serial.printf(" using_kf%d;", using_kf_);
-  Serial.printf(" v2a_s%7.2f; A/V\n", v2a_s_);
-  Serial.printf(" Vc%10.6f; V\n", Vc_);
-  Serial.printf(" Vc_raw %d;\n", Vc_raw_);
-  Serial.printf(" Vo%10.6f; V\n", Vo_);
-  Serial.printf(" Vo-Vc%10.6f; V\n", Vo_Vc());
-  Serial.printf(" Vo-Vc_kf%10.6f; V\n", Vo_Vc_kf());
-  Serial.printf(" Vo_raw %d;\n", Vo_raw_);
-  Serial.printf(" vshunt_int %d; count\n", vshunt_int_);
-  Serial.printf("Shunt(%s)::\n", name_.c_str());
-  if ( using_kf_ )
-  {
-    Serial.printf(" KF\n");
-    KF_->pretty_print();
-  }
-  else
-    Serial.printf(" not using KF\n");
-#else
-     Serial.printf("Shunt: silent DEPLOY\n");
-#endif
+  #if !IN_SERVICE
+    Serial.printf(" reset %d;\n", reset_);
+    Serial.printf(" *sp_Ib_bias%7.3f; A\n", *sp_ib_bias_);
+    Serial.printf(" *sp_ib_scale%7.3f; A\n", *sp_ib_scale_);
+    Serial.printf(" bare_shunt %d dscn_cmd %d\n", bare_shunt_, dscn_cmd_);
+    Serial.printf(" Ishunt_cal%7.3f; A\n", Ishunt_cal_);
+    Serial.printf(" Ishunt_cal_kf%7.3f; A\n", Ishunt_cal_kf_);
+    Serial.printf(" port 0x%X;\n", port_);
+    Serial.printf(" using_kf%d;", using_kf_);
+    Serial.printf(" v2a_s%7.2f; A/V\n", v2a_s_);
+    Serial.printf(" Vc%10.6f; V\n", Vc_);
+    Serial.printf(" Vc_raw %d;\n", Vc_raw_);
+    Serial.printf(" Vo%10.6f; V\n", Vo_);
+    Serial.printf(" Vo-Vc%10.6f; V\n", Vo_Vc());
+    Serial.printf(" Vo-Vc_kf%10.6f; V\n", Vo_Vc_kf());
+    Serial.printf(" Vo_raw %d;\n", Vo_raw_);
+    Serial.printf(" vshunt_int %d; count\n", vshunt_int_);
+    Serial.printf("Shunt(%s)::\n", name_.c_str());
+    if ( using_kf_ )
+    {
+      Serial.printf(" KF\n");
+      KF_->pretty_print();
+    }
+    else
+      Serial.printf(" not using KF\n");
+  #else
+      Serial.printf("Shunt: silent DEPLOY\n");
+  #endif
 }
 
 // Convert sampled shunt data to Ib engineering units
 void Shunt::convert(const bool disconnect, const bool reset, Sensors *Sen)
 {
   reset_ = reset;
-  #ifndef HDWE_BARE
+  #if !defined(HDWE_BARE)
     bare_shunt_ = Bare_delay_->calculate(Vc_read_->dead(), RAW_BARE_SET, RAW_BARE_RES, Sen->T(),reset_);
   #else
     bare_shunt_ = false;
@@ -197,12 +197,12 @@ Sensors::Sensors(double T, double T_temp, Pins *pins, Sync *ReadSensors, Sync *R
   T_ = T;
   T_filt_ = T;
   T_temp_ = T_temp;
-  #if defined(HDWE_IB_HI_LO) || defined(HDWE_BARE)
-    this->ShuntAmp = new Shunt("Amp", 0x49, ap.ib_scale_amp_ptr(), sp.ib_bias_amp_ptr(), SHUNT_AMP_GAIN, pins->Vcm_pin, pins->Vom_pin, pins->Vh3v3_pin, true, KF_USE_AMP);
-    this->ShuntNoAmp = new Shunt("No Amp", 0x48, ap.ib_scale_noa_ptr(), sp.ib_bias_noa_ptr(), SHUNT_NOA_GAIN, pins->Vcn_pin, pins->Von_pin, pins->Vh3v3_pin, true, KF_USE_NOA);
-  #else
+  #if !defined(HDWE_BARE)
     this->ShuntAmp = new Shunt("Amp", 0x49, ap.ib_scale_amp_ptr(), sp.ib_bias_amp_ptr(), SHUNT_AMP_GAIN, pins->Vcm_pin, pins->Vom_pin, pins->Vh3v3_pin, false, KF_USE_AMP);
     this->ShuntNoAmp = new Shunt("No Amp", 0x48, ap.ib_scale_noa_ptr(), sp.ib_bias_noa_ptr(), SHUNT_NOA_GAIN, pins->Vcn_pin, pins->Von_pin, pins->Vh3v3_pin, false, KF_USE_NOA);
+  #else
+    this->ShuntAmp = new Shunt("Amp", 0x49, ap.ib_scale_amp_ptr(), sp.ib_bias_amp_ptr(), SHUNT_AMP_GAIN, pins->Vcm_pin, pins->Vom_pin, pins->Vh3v3_pin, true, KF_USE_AMP);
+    this->ShuntNoAmp = new Shunt("No Amp", 0x48, ap.ib_scale_noa_ptr(), sp.ib_bias_noa_ptr(), SHUNT_NOA_GAIN, pins->Vcn_pin, pins->Von_pin, pins->Vh3v3_pin, true, KF_USE_NOA);
   #endif
   this->Sim = new BatterySim(ap.ds_voc_soc(), 0., 0.);
   elapsed_inj_ = 0ULL;
@@ -233,11 +233,7 @@ Sensors::Sensors(double T, double T_temp, Pins *pins, Sync *ReadSensors, Sync *R
   IbNoaRMS = new RecursiveRMSMonitorFP();
   VbRMS = new RecursiveRMSMonitorFP();
   VcRMS = new RecursiveRMSMonitorFP();
-  #ifdef HDWE_IB_HI_LO
-    sel_brk_hdwe = new ScaleBrk(HDWE_IB_HI_LO_NOA_LO, HDWE_IB_HI_LO_AMP_LO, HDWE_IB_HI_LO_AMP_HI, HDWE_IB_HI_LO_NOA_HI);
-  #else
-    sel_brk_hdwe = new ScaleBrk(0., 0., 0., 0.);
-  #endif
+  sel_brk_hdwe = new ScaleBrk(HDWE_IB_HI_LO_NOA_LO, HDWE_IB_HI_LO_AMP_LO, HDWE_IB_HI_LO_AMP_HI, HDWE_IB_HI_LO_NOA_HI);
 }
 
 // Deliberate choice based on results and inputs
@@ -349,17 +345,10 @@ void Sensors::pretty_print()
 void Sensors::select_volt_and_current_and_temp(BatteryMonitor *Mon)
 {
 
-  #ifdef HDWE_IB_HI_LO
-    // Reselect ib since may be changed
-    // Inputs:  ib_choice_, Ib_amp_hdwe_, Ib_noa_hdwe_, Ib_amp_model_(past), Ib_noa_model_(past)
-    // Outputs:  Ib_hdwe_model_, Ib_hdwe_
-    ib_choose_hi_lo();
-  #else
-    // Reselect ib since may be changed
-    // Inputs:  ib_sel_stat_, Ib_amp_hdwe_, Ib_noa_hdwe_, Ib_amp_model_(past), Ib_noa_model_(past)
-    // Outputs:  Ib_hdwe_model_, Ib_hdwe_
-    ib_choose_active_standby();
-  #endif
+  // Reselect ib since may be changed
+  // Inputs:  ib_choice_, Ib_amp_hdwe_, Ib_noa_hdwe_, Ib_amp_model_(past), Ib_noa_model_(past)
+  // Outputs:  Ib_hdwe_model_, Ib_hdwe_
+  ib_choose_hi_lo();
 
   // Final assignments
   // Tb
@@ -483,11 +472,7 @@ void Sensors::select_volt_and_current_and_temp(BatteryMonitor *Mon)
     Serial.printf("ib_ %7.3f                     vb_hdwe %7.3f                      Tb_hdwe %7.3f\n", ib_hdwe(), vb_hdwe(), Tb_hdwe_);
     Serial.printf("ib limits amp%7.3f noa %7.3f  diff %7.3f\n", ap.ib_amp_max(), ap.ib_noa_max(), Flt->ib_diff_thr());
     Serial.printf("ib_hdwe_?: %7.3f %7.3f ib_model_?: %7.3f %7.3f", ib_amp_hdwe(), ib_noa_hdwe(), ib_amp_model(), ib_noa_model());
-    #ifdef HDWE_IB_HI_LO
-      Serial.printf(" ib_choice_ %d ibmfa %d ibnfa %d ibdfa %d\n", Flt->ib_choice(), Flt->ib_amp_fa(), Flt->ib_noa_fa(), Flt->ib_diff_fa());
-    #else
-      Serial.printf(" ib_sel_stat_ %d ibmfa %d ibnfa %d ibdfa %d\n", Flt->ib_sel_stat(), Flt->ib_amp_fa(), Flt->ib_noa_fa(), Flt->ib_diff_fa());
-    #endif
+    Serial.printf(" ib_choice_ %d ibmfa %d ibnfa %d ibdfa %d\n", Flt->ib_choice(), Flt->ib_amp_fa(), Flt->ib_noa_fa(), Flt->ib_diff_fa());
     Serial.printf("ib_hdwe:     %7.3f     ib_hdwe_model: %7.3f  modeling=%d\n", ib_hdwe(), ib_hdwe_model(), sp.mod_ib());
     Serial.printf("               ib:  %7.3f\n", ib());
     Serial.printf("     ");
@@ -594,11 +579,7 @@ void Sensors::shunt_select_initial(const bool reset)
     // Initial choice
     // Inputs:  ib_choice/ib_sel_stat_, Ib_amp_hdwe_, Ib_noa_hdwe_, Ib_amp_model_(past), Ib_noa_model_(past)
     // Outputs:  Ib_hdwe_model_, Ib_hdwe_
-    #ifdef HDWE_IB_HI_LO
-      ib_choose_hi_lo();
-    #else
-      ib_choose_active_standby();
-    #endif
+    ib_choose_hi_lo();
 
     // When running normally the model tracks hdwe to synthesize reference information
     if ( !sp.mod_ib() )

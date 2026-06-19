@@ -134,7 +134,7 @@ public:
 
   void pretty_print(void)
   {
-    #ifndef SOFT_DEPLOY_PHOTON
+    #if !IN_SERVICE
 
       //   text    data     bss     dec     hex filename
       // 290338  119852   13698  423888   677d0 c:/Users/daveg/Documents/GitHub/mySolarStateOfCharge/SOC_Particle/target/6.

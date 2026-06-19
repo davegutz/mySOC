@@ -248,10 +248,10 @@ protected:
 
     float cc_diff_slr_;          // Scale cc_diff detection thresh, scalar
     float cycles_inj_;           // Number of injection cycles
-    bool dc_dc_on_;           // DC-DC charger is on
-    bool dis_vb_fa_lt_;        // Disable hard fault range failures for vb
-    bool disab_ib_fa_;        // Disable hard fault range failures for ib
-    bool disab_tb_fa_;        // Disable hard fault range failures for tb
+    bool dc_dc_on_;              // DC-DC charger is on
+    bool dis_vb_fa_lt_;          // Disable hard fault range failures for vb
+    bool disab_ib_fa_;           // Disable hard fault range failures for ib
+    bool disab_tb_fa_;           // Disable hard fault range failures for tb
     float ds_voc_soc_;           // VOC(SOC) delta soc on input, frac
     float dv_voc_soc_;           // VOC(SOC) del v, V
     uint8_t eframe_mult_;        // Frame multiplier for EKF execution.  Number of READ executes for each EKF execution
@@ -262,7 +262,7 @@ protected:
     float ekf_x_;                // ekf temporary set x, soc
     float ewhi_slr_;             // Scale wrap hi detection thresh, scalar
     float ewlo_slr_;             // Scale wrap lo detection thresh, scalar
-    bool fake_faults_;        // Faults faked (ignored).  Used to evaluate a configuration, deploy it without disrupting use
+    bool fake_faults_;           // Faults faked (ignored).  Used to evaluate a configuration, deploy it without disrupting use
     float hys_scale_;            // Sim hysteresis scalar
     float hys_state_;            // Sim hysteresis state
     float ib_amp_add_;           // Fault injection bias on amp, A
@@ -379,7 +379,7 @@ public:
     float ib_hist_n_slr() { if ( abs(amp_) > SCL_40 ) return SCL_30000/abs(amp_); else return SCL_60; }
     float vb_hist_slr() { if ( abs(amp_) > SCL_40 ) return SCL_1500/abs(amp_); else return SCL_1200; }
     bool mod_all_dscn() { return ( 111<modeling() ); }                // Bare all
-    bool mod_any() { return ( mod_ib() || mod_tb() || mod_vb() ); }  // Modeling any
+    bool mod_any() { return ( mod_ib() || mod_tb() || mod_vb() ); }   // Modeling any
     bool mod_none_dscn() { return ( 16>modeling() ); }                // Bare nothing
     bool mod_any_dscn() { return ( 15<modeling() ); }                 // Bare any
     bool mod_ib_all_dscn() { return ( 191<modeling() ); }             // Nothing connected to ib sensors in I2C on SDA/SCL

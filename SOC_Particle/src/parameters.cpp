@@ -173,7 +173,7 @@ void  VolatilePars::initialize()
 
 void VolatilePars::pretty_print(const bool all)
 {
-    #ifndef SOFT_DEPLOY_PHOTON
+    #if !IN_SERVICE
         if ( all )
         {
             sendTxBuf("volatile all:\n", true, IN_SERVICE);
@@ -265,12 +265,8 @@ void SavedPars::initialize()
     V_[n_++] =(ib_bias_all_p    = new FloatV("* ", "DI", rP_, "Del all",                "A",    -1e5, 1e5,  &ib_bias_all_,    CURR_BIAS_ALL)); // DI
     V_[n_++] =(ib_bias_amp_p    = new FloatV("* ", "DA", rP_, "Add amp",                "A",    -1e5, 1e5,  &ib_bias_amp_,    CURR_BIAS_AMP)); // DA
     V_[n_++] =(ib_bias_noa_p    = new FloatV("* ", "DB", rP_, "Add noa",                "A",    -1e5, 1e5,  &ib_bias_noa_,    CURR_BIAS_NOA)); // DB
-    V_[n_++] =(ib_disch_slr_p   = new FloatV("* ", "SD", rP_, "Slr disch",           "slr",    -1e5, 1e5,  &ib_disch_slr_, CURR_SCALE_DISCH)); // SD
-    #ifdef HDWE_IB_HI_LO
-        V_[n_++] =(ib_force_p      = new Int8tV("* ", "si", rP_, "curr sel mode", "(-1, 0, 1)", -1, 1,  &ib_force_,      int8_t(IB_FORCE)));   // si
-    #else
-        V_[n_++] =(ib_force_p      = new Int8tV("* ", "si", rP_, "curr sel mode", "(-1, 0, 1)", -1, 1,  &ib_force_,      int8_t(FAKE_FAULTS)));// si
-    #endif
+    V_[n_++] =(ib_disch_slr_p   = new FloatV("* ", "SD", rP_, "Slr disch",           "slr",   -1e5,   1e5, &ib_disch_slr_, CURR_SCALE_DISCH)); // SD
+    V_[n_++] =(ib_force_p       = new Int8tV("* ", "si", rP_, "curr sel mode", "(-1, 0, 1)",    -1,     1,  &ib_force_,  int8_t(IB_FORCE)));   // si
     V_[n_++] =(iflt_p         = new Uint16tV("* ", "if", rP_, "Fault buffer indx",    "uint",    0,nflt_+1, &iflt_,            nflt_, false)); // if
     V_[n_++] =(ihis_p         = new Uint16tV("* ", "ih", rP_, "Hist buffer indx",     "uint",    0,nhis_+1, &ihis_,            nhis_, false)); // ih
     V_[n_++] =(inj_bias_p       = new FloatV("* ", "Xb", rP_, "Injection bias",          "A",   -1e5, 1e5,  &inj_bias_,        0.));           // Xb
@@ -313,7 +309,7 @@ void SavedPars::pretty_print(const bool all)
         {
             V_[i]->print();
         }
-        #ifndef SOFT_DEPLOY_PHOTON
+        #if !IN_SERVICE
             sendTxBuf("Xm:\n", true, IN_SERVICE);
             pretty_print_modeling();
         #endif

@@ -40,24 +40,24 @@ class Sensors;
 #define TCHARGE_DISPLAY_DEADBAND  0.1 // Inside this +/- deadband, charge time is displayed '---', A
 #define T_RLIM         0.00085    // Temperature sensor rate limit to minimize jumps in Coulomb counting, deg C/s (0.00085 allows 0.05 deg for 1 minute)
 const float VB_DC_DC = 13.5;      // DC-DC charger estimated voltage, V (13.5 < v_sat = 13.85)
-#ifndef EKF_CONV  // allow override in config file
-  #define EKF_CONV        1.5e-3    // EKF tracking error indicating convergence, V (1.5e-3)
+#if !defined(EKF_CONV)            // allow override in config file
+  #define EKF_CONV        1.5e-3  // EKF tracking error indicating convergence, V (1.5e-3)
 #endif
 #define EKF_T_CONV      30.       // EKF set convergence test time, sec (30.)
 const float EKF_T_RES = (EKF_T_CONV/2.); // EKF reset retest time, sec ('up 1, down 2')
-#ifndef VOC_STAT_FILT  // allow override in config file
-  #define VOC_STAT_FILT 120.  // voc_stat_f_ filtering for EKF (120) VF
+#if !defined(VOC_STAT_FILT)       // allow override in config file
+  #define VOC_STAT_FILT 120.      // voc_stat_f_ filtering for EKF (120) VF
 #endif
-#ifndef EKF_Q_SD_NORM  // allow override in config file
-  #define EKF_Q_SD_NORM   0.0015    // Standard deviation of normal EKF process uncertainty, V (0.0015)
+#if !defined(EKF_Q_SD_NORM)       // allow override in config file
+  #define EKF_Q_SD_NORM   0.0015  // Standard deviation of normal EKF process uncertainty, V (0.0015)
 #endif
-#ifndef EKF_R_SD_NORM  // allow override in config file
-  #define EKF_R_SD_NORM   0.5       // Standard deviation of normal EKF state uncertainty, fraction (0-1) (0.5)
+#if !defined(EKF_R_SD_NORM)       // allow override in config file
+  #define EKF_R_SD_NORM   0.5     // Standard deviation of normal EKF state uncertainty, fraction (0-1) (0.5)
 #endif
 #define NOM_DT          0.1       // Nominal update time, s (initialization; actual value varies)
 #define EKF_NOM_DT      0.1       // EKF nominal update time, s (initialization; actual value varies)
-#ifndef EKF_EFRAME_MULT  // allow override in config file
-  #define EKF_EFRAME_MULT 20        // Multiframe rate consistent with READ_DELAY (20 for READ_DELAY=100) ED
+#if !defined(EKF_EFRAME_MULT)     // allow override in config file
+  #define EKF_EFRAME_MULT 20      // Multiframe rate consistent with READ_DELAY (20 for READ_DELAY=100) ED
 #endif
 #define DF2             1.2       // Threshold to resest Coulomb Counter if different from ekf, fraction (0.20)
 #define TAU_Y_FILT      5.        // EKF y-filter time constant, sec (5.)
@@ -77,13 +77,13 @@ const float MXEPS = 1.05;         // Level of soc that indicates mathematically 
 
 #define HYS_SOC_MIN_MARG 0.15     // Add to soc_min to set thr for detecting low endpoint condition for reset of hysteresis (0.15)
 #define HYS_IB_THR      1.0       // Ignore reset if opposite situation exists, A (1.0)
-#ifndef VM
+#if !defined(VM)
   #define VM 0.0
 #endif
-#ifndef VS
+#if !defined(VS)
   #define VS 0.0
 #endif
-#ifndef VTAB_BIAS
+#if !defined(TAB_BIAS)
   #define VTAB_BIAS 0.0
 #endif
 

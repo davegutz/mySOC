@@ -370,7 +370,7 @@ String chit_nibble_inp()
   int semi_loc = cp.inp_str.indexOf(';');
  
   String nibble = cp.inp_str.substring(0, semi_loc+1);  // 2nd index is exclusive
-  nibble.replace(" ", "");  // Strip blanks again, TODO:  why didn't replace in finish_all() do the job?
+  nibble.replace(" ", "");  // Strip blanks
 
   // Serial.printf("inp_str=%s|semi_loc=%d|nibble=%s|", cp.inp_str.c_str(), semi_loc, nibble.c_str());
 

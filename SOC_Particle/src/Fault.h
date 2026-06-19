@@ -35,16 +35,16 @@
 // #include "myLibrary/KF_1x1.h"
 
 // Bit manipulation macros (if not provided by Particle/Arduino)
-#ifndef bitSet
+#if !defined(bitSet)
   #define bitSet(value, bit) ((value) |= (1UL << (bit)))
 #endif
-#ifndef bitClear
+#if !defined(bitClear)
   #define bitClear(value, bit) ((value) &= ~(1UL << (bit)))
 #endif
-#ifndef bitRead
+#if !defined(bitRead)
   #define bitRead(value, bit) (((value) >> (bit)) & 1)
 #endif
-#ifndef bitWrite
+#if !defined(bitWrite)
   #define bitWrite(value, bit, bitvalue) (bitvalue ? bitSet(value, bit) : bitClear(value, bit))
 #endif
 
@@ -54,15 +54,9 @@
 extern SavedPars sp;    // Various parameters to be static at system level and saved through power cycle
 extern VolatilePars ap; // Various adjustment parameters shared at system level
 
-#ifdef HDWE_IB_HI_LO
-  #define IB_SEL_STAT_DEF 0
-  #define TB_SEL_STAT_DEF 1
-  #define VB_SEL_STAT_DEF 1
-#else
-  #define IB_SEL_STAT_DEF 1
-  #define TB_SEL_STAT_DEF 1
-  #define VB_SEL_STAT_DEF 1
-#endif
+#define IB_SEL_STAT_DEF 0
+#define TB_SEL_STAT_DEF 1
+#define VB_SEL_STAT_DEF 1
 
 enum ibSel {UsingNoa=-1, KeepTrying=0, UsingAmp=1, UsingNone=2};
 enum dispw {conn=0, diff_ib=1, red_loss=2, fail_ib=3, fail_ibm=4, fail_vb=5, flt_tb=6, flt_ekf=7, SAT=8, off=9, accy=10, time_long=11, Count};

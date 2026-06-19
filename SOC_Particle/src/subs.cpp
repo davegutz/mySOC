@@ -462,81 +462,44 @@ void serial_display(Sensors *Sen, BatteryMonitor *Mon)
   // Ib
   sprintf(pr.buff, "%6.1f", pp.pubList.Ib);
   disp_2 = pr.buff;  // Default
-  #ifdef HDWE_IB_HI_LO
-    if ( blink==2 )
+  if ( blink==2 )
+  {
+    if ( Sen->Flt->ib_amp_fa() && Sen->Flt->ib_noa_fa() )
     {
-      if ( Sen->Flt->ib_amp_fa() && Sen->Flt->ib_noa_fa() )
-      {
-        disp_2 = "*fail";
-        dispAssign(true, fail_ib);
-      }
-      else if ( Sen->Flt->ib_choice()==1 )
-      {
-        disp_2 = "*fail";
-        dispAssign(true, fail_ib);
-      }
-      else if ( Sen->Flt->ib_choice()==-1 )
-      {
-        disp_2 = "*amp";
-        dispAssign(true, fail_ibm);
-      }
-      // auto section
-      else if ( Sen->Flt->ib_diff_fa() )
-      {
-        disp_2 = " diff ";
-        dispAssign(true, diff_ib);
-      }
-      // another default
-      else if ( Sen->Flt->ib_choice()!=0 )
-      {
-        disp_2 = " redl ";
-        dispAssign(true, red_loss);
-      }
+      disp_2 = "*fail";
+      dispAssign(true, fail_ib);
     }
-    else if ( blink==3 )
+    else if ( Sen->Flt->ib_choice()==1 )
     {
-      if ( Sen->Flt->dscn_fa() && !sp.mod_ib() )
-      {
-        disp_2 = " conn ";
-        dispAssign(true, conn);
-      }
+      disp_2 = "*fail";
+      dispAssign(true, fail_ib);
     }
-  #else
-    if ( blink==2 )
+    else if ( Sen->Flt->ib_choice()==-1 )
     {
-      if ( Sen->Flt->ib_amp_fa() && Sen->Flt->ib_noa_fa() && !sp.mod_ib() )
-      {
-        disp_2 = "*fail";
-        dispAssign(true, fail_vb);
-      }
-      else if ( Sen->Flt->dscn_fa() && !sp.mod_ib() )
-      {
-        disp_2 = " conn ";
-        dispAssign(true, conn);
-      }
-      else if ( Sen->Flt->ib_diff_fa() )
-      {
-        disp_2 = " diff ";
-        dispAssign(true, diff_ib);
-      }
-      else if ( Sen->Flt->red_loss() )
-      {
-        disp_2 = " redl ";
-        dispAssign(true, red_loss);
-      }
+      disp_2 = "*amp";
+      dispAssign(true, fail_ibm);
     }
-    else if ( blink==3 )
+    // auto section
+    else if ( Sen->Flt->ib_diff_fa() )
     {
-      if ( Sen->Flt->ib_amp_fa() && Sen->Flt->ib_noa_fa() && !sp.mod_ib() )
-      {
-        disp_2 = "*fail";
-        dispAssign(true, fail_vb);
-      }
-      else if ( Sen->Flt->dscn_fa() && !sp.mod_ib() )
-      {
-        disp_2 = " conn ";
-        dispAssign(true, conn);}
-  #endif
+      disp_2 = " diff ";
+      dispAssign(true, diff_ib);
+    }
+    // another default
+    else if ( Sen->Flt->ib_choice()!=0 )
+    {
+      disp_2 = " redl ";
+      dispAssign(true, red_loss);
+    }
+  }
+  else if ( blink==3 )
+  {
+    if ( Sen->Flt->dscn_fa() && !sp.mod_ib() )
+    {
+      disp_2 = " conn ";
+      dispAssign(true, conn);
+    }
+  }
   String disp_Tbop = disp_0.substring(0, 4) + " " + disp_1.substring(0, 6) + " " + disp_2.substring(0, 7);
 
   // --------------------- Bottom line of Display ------------------------------
@@ -544,23 +507,14 @@ void serial_display(Sensors *Sen, BatteryMonitor *Mon)
   sprintf(pr.buff, "%3.0f", pp.pubList.Amp_hrs_remaining_ekf);
   disp_0 = pr.buff;  // Default
 
-  #ifdef HDWE_IB_HI_LO
-    if ( blink==0 || blink==1 || blink==2 )
+  if ( blink==0 || blink==1 || blink==2 )
+  {
+    if ( Sen->Flt->cc_diff_fa() && !Sen->Flt->ib_diff_fa() )
     {
-      if ( Sen->Flt->cc_diff_fa() && !Sen->Flt->ib_diff_fa() )
-      {
-        disp_0 = "---";
-        dispAssign(true, flt_ekf);
-      }
+      disp_0 = "---";
+      dispAssign(true, flt_ekf);
     }
-  #else
-    if ( blink==0 || blink==1 || blink==2 )
-    {
-      if ( Sen->Flt->cc_diff_fa() )
-        disp_0 = "---";
-        dispAssign(true, flt_ekf);
-    }
-  #endif
+  }
 
   // t charge
   if ( abs(pp.pubList.tcharge) < 24. )
@@ -575,63 +529,33 @@ void serial_display(Sensors *Sen, BatteryMonitor *Mon)
   disp_1 = pr.buff;
 
   // A-Hrs Coulomb counter remaining
-  #ifdef HDWE_IB_HI_LO
-    sprintf(pr.buff, "%3.0f", pp.pubList.Amp_hrs_remaining_soc);
-    if ( Sen->saturated() && blink==0 )
+  sprintf(pr.buff, "%3.0f", pp.pubList.Amp_hrs_remaining_soc);
+  if ( Sen->saturated() && blink==0 )
+  {
+    disp_2 = "SAT";
+    dispAssign(true, SAT);
+  }
+  else if ( blink==2 )
+  {
+    if ( Sen->Flt->ib_amp_fa() && Sen->Flt->ib_noa_fa() )
     {
-      disp_2 = "SAT";
-      dispAssign(true, SAT);
-    }
-    else if ( blink==2 )
+      disp_2 = "fail";
+      dispAssign(true, fail_ib);
+  }
+    else if ( Sen->Flt->ib_choice()!=0 )
     {
-      if ( Sen->Flt->ib_amp_fa() && Sen->Flt->ib_noa_fa() )
-      {
-        disp_2 = "fail";
-        dispAssign(true, fail_ib);
-    }
-      else if ( Sen->Flt->ib_choice()!=0 )
-      {
-        disp_2 = "accy";
-        dispAssign(true, accy);
-      }
-      else
-      {
-        disp_2 = pr.buff;
-      }
+      disp_2 = "accy";
+      dispAssign(true, accy);
     }
     else
     {
       disp_2 = pr.buff;
     }
-  #else
-    sprintf(pr.buff, "%3.0f", min(pp.pubList.Amp_hrs_remaining_soc, 999.));
-    if (Sen->saturated() && blink==0)
-    {
-      disp_2 = "SAT";
-      dispAssign(true, SAT);
-    }
-    else if ( blink==2 )
-    {
-      if ( Sen->Flt->ib_amp_fa() && Sen->Flt->ib_noa_fa() && !sp.mod_ib() )
-      {
-        disp_2 = "fail";
-        dispAssign(true, fail_ib);
-      }
-      else if ( ( Sen->Flt->ib_amp_fa() || Sen->Flt->ib_noa_fa() ) && !sp.mod_ib() )
-      {
-        disp_2 = "accy";
-        dispAssign(true, accy);
-      }
-      else
-      {
-        disp_2 = pr.buff;
-      }
-    }
-    else
-    {
-      disp_2 = pr.buff;
-    }
-  #endif
+  }
+  else
+  {
+    disp_2 = pr.buff;
+  }
   String dispBot = disp_0 + disp_1 + " " + disp_2;
 
   // Text basic Bluetooth (use serial bluetooth app)
@@ -658,17 +582,10 @@ void serial_display(Sensors *Sen, BatteryMonitor *Mon)
   #ifdef DEBUG_INIT
     if ( sp.debug()==63 )
     {
-      #ifdef HDWE_IB_HI_LO
-        Serial.printf("\nmodib %d ibchc %d vbsst %d tbfa %d ibmfa %d ibnafa %d ibdiffa %d dscnfa %d redloss %d\n",
-            sp.mod_ib(), Sen->Flt->ib_choice(), Sen->Flt->vb_sel_stat(), Sen->Flt->Tb_fa(), Sen->Flt->ib_amp_fa(), Sen->Flt->ib_noa_fa(),  Sen->Flt->ib_diff_fa(), Sen->Flt->dscn_fa(), Sen->Flt->red_loss());
-        Serial.printf("%s   Tb,C  VOC,V  Ib,A \n%s   EKF,Ah  chg,hrs  CC, Ah\nPf; for fails.  prints=%ld\n\n",
-            disp_Tbop.c_str(), dispBot.c_str(), cp.num_v_print);
-      #else
-        Serial.printf("\nmodib %d ibsst %d vbsst %d tbfa %d ibmfa %d ibnafa %d ibdiffa %d dscnfa %d redloss %d\n",
-            sp.mod_ib(), Sen->Flt->ib_sel_stat(), Sen->Flt->vb_sel_stat(), Sen->Flt->Tb_fa(), Sen->Flt->ib_amp_fa(), Sen->Flt->ib_noa_fa(),  Sen->Flt->ib_diff_fa(), Sen->Flt->dscn_fa(), Sen->Flt->red_loss());
-        Serial.printf("%s   Tb,C  VOC,V  Ib,A \n%s   EKF,Ah  chg,hrs  CC, Ah\nPf; for fails.  prints=%ld\n\n",
-            disp_Tbop.c_str(), dispBot.c_str(), cp.num_v_print);
-      #endif
+      Serial.printf("\nmodib %d ibchc %d vbsst %d tbfa %d ibmfa %d ibnafa %d ibdiffa %d dscnfa %d redloss %d\n",
+          sp.mod_ib(), Sen->Flt->ib_choice(), Sen->Flt->vb_sel_stat(), Sen->Flt->Tb_fa(), Sen->Flt->ib_amp_fa(), Sen->Flt->ib_noa_fa(),  Sen->Flt->ib_diff_fa(), Sen->Flt->dscn_fa(), Sen->Flt->red_loss());
+      Serial.printf("%s   Tb,C  VOC,V  Ib,A \n%s   EKF,Ah  chg,hrs  CC, Ah\nPf; for fails.  prints=%ld\n\n",
+          disp_Tbop.c_str(), dispBot.c_str(), cp.num_v_print);
     }
   #endif
 }
@@ -716,10 +633,10 @@ void setup_pins()
   pinMode(myPins->status_led, OUTPUT);
   digitalWrite(myPins->status_led, LOW);
 
-  #if defined(HDWE_BARE)
-    sendTxBuf("Going naked\n", true, IN_SERVICE);
-  #elif defined(HDWE_2WIRE)
+  #if !defined(HDWE_BARE)
     sendTxBuf("Using 2Wire Temperature sensor\n", true, IN_SERVICE);
+  #elif defined(HDWE_2WIRE)
+    sendTxBuf("Going naked\n", true, IN_SERVICE);
   #else
     #error "Temperature sensor undefined"
   #endif

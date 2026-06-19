@@ -311,43 +311,43 @@ double Chemistry::lookup_voc(const double soc, const double tb_f)
 // Pretty print
 void Chemistry::pretty_print()
 {
-#ifndef SOFT_DEPLOY_PHOTON
-    Serial.printf("Chemistry:\n");
-    Serial.printf("  dqdt%7.3f, frac/dg C\n", dqdt);
-    Serial.printf("  dv_min_abs%7.3f, V\n", dv_min_abs);
-    Serial.printf("  dvoc%7.3f, V\n", dvoc);
-    Serial.printf("  dvoc_dt%7.3f, V/dg C\n", dvoc_dt);
-    Serial.printf("  hys_cap%7.0f, F\n", hys_cap);
-    Serial.printf("  low_t%7.3f, V\n", low_t);
-    Serial.printf("  low_voc%7.3f, V\n", low_voc);
-    Serial.printf("  v_sat%7.3f, V\n", v_sat);
-    Serial.printf("  vb_down%7.3f, shutoff, V\n", vb_down);
-    Serial.printf("  vb_down_sim%7.3f, shutoff, V\n", vb_down_sim);
-    Serial.printf("  vb_off%7.3f, shutoff, V (unused)\n", vb_off);
-    Serial.printf("  vb_rising%7.3f, turnon, V\n", vb_rising);
-    Serial.printf("  vb_rising_sim%7.3f, turnon, V\n", vb_rising_sim);
-    Serial.printf("  ChargeTransfer:\n");
-    Serial.printf("  c_sd%9.3g; EKF, farad\n", c_sd);
-    Serial.printf("  r_0%9.6f, ohm\n", r_0);
-    Serial.printf("  r_ct%9.6f, ohm\n", r_ct);
-    Serial.printf("  r_sd%7.0f, EKF, ohm\n", r_sd);
-    Serial.printf("  r_ss%9.6f, SS init, ohm\n", r_ss);
-    Serial.printf("  tau_ct%7.3f, s\n", tau_ct);
-    Serial.printf("  tau_sd%9.3g; EKF, s\n", tau_sd);
-    Serial.printf("  voc(t, soc):\n");
-    voc_T_->pretty_print();
-    Serial.printf("  soc_min(tb_f):\n");
-    soc_min_T_->pretty_print();
-    Serial.printf("  r(soc, dv):\n");
-    hys_T_->pretty_print();
-    Serial.printf("  s(soc, dv):\n");
-    hys_Ts_->pretty_print();
-    Serial.printf("  r_max(soc):\n");
-    hys_Tx_->pretty_print();
-    Serial.printf("  r_min(soc):\n");
-    hys_Tn_->pretty_print();
-#else
-     Serial.printf("Chemistry: silent DEPLOY\n");
-#endif
+    #if !IN_SERVICE
+        Serial.printf("Chemistry:\n");
+        Serial.printf("  dqdt%7.3f, frac/dg C\n", dqdt);
+        Serial.printf("  dv_min_abs%7.3f, V\n", dv_min_abs);
+        Serial.printf("  dvoc%7.3f, V\n", dvoc);
+        Serial.printf("  dvoc_dt%7.3f, V/dg C\n", dvoc_dt);
+        Serial.printf("  hys_cap%7.0f, F\n", hys_cap);
+        Serial.printf("  low_t%7.3f, V\n", low_t);
+        Serial.printf("  low_voc%7.3f, V\n", low_voc);
+        Serial.printf("  v_sat%7.3f, V\n", v_sat);
+        Serial.printf("  vb_down%7.3f, shutoff, V\n", vb_down);
+        Serial.printf("  vb_down_sim%7.3f, shutoff, V\n", vb_down_sim);
+        Serial.printf("  vb_off%7.3f, shutoff, V (unused)\n", vb_off);
+        Serial.printf("  vb_rising%7.3f, turnon, V\n", vb_rising);
+        Serial.printf("  vb_rising_sim%7.3f, turnon, V\n", vb_rising_sim);
+        Serial.printf("  ChargeTransfer:\n");
+        Serial.printf("  c_sd%9.3g; EKF, farad\n", c_sd);
+        Serial.printf("  r_0%9.6f, ohm\n", r_0);
+        Serial.printf("  r_ct%9.6f, ohm\n", r_ct);
+        Serial.printf("  r_sd%7.0f, EKF, ohm\n", r_sd);
+        Serial.printf("  r_ss%9.6f, SS init, ohm\n", r_ss);
+        Serial.printf("  tau_ct%7.3f, s\n", tau_ct);
+        Serial.printf("  tau_sd%9.3g; EKF, s\n", tau_sd);
+        Serial.printf("  voc(t, soc):\n");
+        voc_T_->pretty_print();
+        Serial.printf("  soc_min(tb_f):\n");
+        soc_min_T_->pretty_print();
+        Serial.printf("  r(soc, dv):\n");
+        hys_T_->pretty_print();
+        Serial.printf("  s(soc, dv):\n");
+        hys_Ts_->pretty_print();
+        Serial.printf("  r_max(soc):\n");
+        hys_Tx_->pretty_print();
+        Serial.printf("  r_min(soc):\n");
+        hys_Tn_->pretty_print();
+    #else
+        Serial.printf("Chemistry: silent DEPLOY\n");
+    #endif
 }
 

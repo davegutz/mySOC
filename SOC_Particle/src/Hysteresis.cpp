@@ -91,25 +91,25 @@ float Hysteresis::look_slr(const float dv, const float soc)
 // Print
 void Hysteresis::pretty_print(const float dx, const float dy, const float dz)
 {
-#ifndef SOFT_DEPLOY_PHOTON
-    float res = look_hys(0., 0.8);
-    Serial.printf("Hysteresis:\n");
-    Serial.printf("  cap%10.1f, F\n", chem_->hys_cap);
-    Serial.printf("  disab %d\n", disabled_);
-    Serial.printf("  dv_dot%7.3f, V/s\n", dv_dot_);
-    Serial.printf("  dv_hys%7.3f, V, SH\n", dv_hys_);
-    Serial.printf("  ib%7.3f, A\n", ib_);
-    Serial.printf("  ibs%7.3f, A\n", ibs_);
-    Serial.printf("  ioc%7.3f, A\n", ioc_);
-    Serial.printf("  res%6.4f, null Ohm\n", res_);
-    Serial.printf("  res%7.3f, ohm\n", res_);
-    Serial.printf("  slr%7.3f,\n", slr_);
-    Serial.printf("  soc%8.4f\n", soc_);
-    Serial.printf("  tau%10.1f, null, s\n", res*chem_->hys_cap);
-    chem_->pretty_print();
-#else
-     Serial.printf("Hysteresis: silent DEPLOY\n");
-#endif
+    #if !IN_SERVICE
+        float res = look_hys(0., 0.8);
+        Serial.printf("Hysteresis:\n");
+        Serial.printf("  cap%10.1f, F\n", chem_->hys_cap);
+        Serial.printf("  disab %d\n", disabled_);
+        Serial.printf("  dv_dot%7.3f, V/s\n", dv_dot_);
+        Serial.printf("  dv_hys%7.3f, V, SH\n", dv_hys_);
+        Serial.printf("  ib%7.3f, A\n", ib_);
+        Serial.printf("  ibs%7.3f, A\n", ibs_);
+        Serial.printf("  ioc%7.3f, A\n", ioc_);
+        Serial.printf("  res%6.4f, null Ohm\n", res_);
+        Serial.printf("  res%7.3f, ohm\n", res_);
+        Serial.printf("  slr%7.3f,\n", slr_);
+        Serial.printf("  soc%8.4f\n", soc_);
+        Serial.printf("  tau%10.1f, null, s\n", res*chem_->hys_cap);
+        chem_->pretty_print();
+    #else
+        Serial.printf("Hysteresis: silent DEPLOY\n");
+    #endif
 }
 
 // Dynamic update

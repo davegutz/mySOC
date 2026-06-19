@@ -199,23 +199,23 @@ double TableInterp::interp(void)
 }
 void TableInterp::pretty_print(void)
 {
-#ifndef SOFT_DEPLOY_PHOTON
-  uint16_t i;
-  Serial.printf("    x={");
-  for ( i = 0; i < n1_; i++ )
-  {
-     Serial.printf("%7.3f, ", x_[i]);
-  }
-  Serial.printf("};\n");
-  Serial.printf("    v={");
-  for ( i = 0; i < n1_; i++ )
-  {
-     Serial.printf("%7.3f, ", v_[i]);
-  }
-  Serial.printf("};\n");
-#else
-     Serial.printf("TableInterp: silent DEPLOY\n");
-#endif
+  #if !IN_SERVICE
+    uint16_t i;
+    Serial.printf("    x={");
+    for ( i = 0; i < n1_; i++ )
+    {
+      Serial.printf("%7.3f, ", x_[i]);
+    }
+    Serial.printf("};\n");
+    Serial.printf("    v={");
+    for ( i = 0; i < n1_; i++ )
+    {
+      Serial.printf("%7.3f, ", v_[i]);
+    }
+    Serial.printf("};\n");
+  #else
+      Serial.printf("TableInterp: silent DEPLOY\n");
+  #endif
 }
 
 // 1-D Interpolation Table Lookup
@@ -307,20 +307,20 @@ double TableInterp2D::interp(double x, double y)
 
 void TableInterp2D::pretty_print()
 {
-#ifndef SOFT_DEPLOY_PHOTON
-  uint16_t i, j;
-  Serial.printf("    dx%7.3f dy%7.3f dz%7.3f\n", dx_, dy_, dz_);
-  Serial.printf("    y={"); for ( j=0; j<n2_; j++ ) Serial.printf("%7.3f, ", y_[j] - dy_); Serial.printf("};\n");
-  Serial.printf("    x={"); for ( i=0; i<n1_; i++ ) Serial.printf("%7.3f, ", x_[i] - dx_); Serial.printf("};\n");
-  Serial.printf("    v={\n");
-  for ( j=0; j<n2_; j++ )
-  {
-    Serial.printf("      {");
-    for ( i=0; i<n1_; i++ ) Serial.printf("%7.3f, ", v_[j*n1_+i] + dz_);
-    Serial.printf("},\n");
-  }
-  Serial.printf("      };\n");
-#else
-     Serial.printf("TableInterp2D: silent DEPLOY\n");
-#endif
+  #if !IN_SERVICE
+    uint16_t i, j;
+    Serial.printf("    dx%7.3f dy%7.3f dz%7.3f\n", dx_, dy_, dz_);
+    Serial.printf("    y={"); for ( j=0; j<n2_; j++ ) Serial.printf("%7.3f, ", y_[j] - dy_); Serial.printf("};\n");
+    Serial.printf("    x={"); for ( i=0; i<n1_; i++ ) Serial.printf("%7.3f, ", x_[i] - dx_); Serial.printf("};\n");
+    Serial.printf("    v={\n");
+    for ( j=0; j<n2_; j++ )
+    {
+      Serial.printf("      {");
+      for ( i=0; i<n1_; i++ ) Serial.printf("%7.3f, ", v_[j*n1_+i] + dz_);
+      Serial.printf("},\n");
+    }
+    Serial.printf("      };\n");
+  #else
+      Serial.printf("TableInterp2D: silent DEPLOY\n");
+  #endif
 }
