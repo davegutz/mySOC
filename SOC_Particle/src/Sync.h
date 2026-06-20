@@ -39,11 +39,6 @@ public:
   uint64_t delay() { return(delay_); }
   void delay(uint64_t new_delay) { delay_ = new_delay; updateTimeInput_ = float(delay_)/1000.f; }
   void delay(uint64_t new_delay, uint64_t now) { delay_ = new_delay; updateTimeInput_ = float(delay_)/1000.f; last_ = now; }
-  uint64_t last() { return(last_); }
-  bool stat() { return(stat_); }
-  uint64_t updateDiff() { return(updateDiff_); }
-  double updateTime() { return(updateTime_); }
-  double updateTimeInput() { return(updateTimeInput_); }
   uint64_t now() { return(now_); }
 private:
   uint64_t delay_;

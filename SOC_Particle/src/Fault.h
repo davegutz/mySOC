@@ -113,9 +113,9 @@ struct ScaleBrk
 #define WRAP_LO_M_FLT 15  // Wrap reports Vb hi / Ib amp low fault
 #define WRAP_HI_N_FLT 16  // Wrap reports Vb lo / Ib noa high fault
 #define WRAP_LO_N_FLT 17  // Wrap reports Vb hi / Ib noa low fault
-#define NUM_FLT       20  // Number of these
+#define NUM_FLT       20  // Number of these to reserve space
 
-// Fail word bits.   A couple don't latch because single sensor fail in dual sensor system
+// Fail word bits.   A couple don't latch (and therefore heal) because single sensor fail in dual sensor system
 #define TB_FA         0   // Peristed, latched isolation of Tb failure, heals because soft type, T=failed
 #define VB_FA_LT      1   // Peristed, latched isolation of Vb failure, latches because hard type, T=failed
 #define IB_AMP_FA     2   // Amp sensor selection memory, latches because hard type, T = amp failed
@@ -132,7 +132,7 @@ struct ScaleBrk
 #define WRAP_LO_M_FA  15  // Wrap isolates to Ib amp low fail, heals because dual sensor (no latch)
 #define WRAP_HI_N_FA  16  // Wrap isolates to Ib amp high fail, heals because dual sensor (no latch)
 #define WRAP_LO_N_FA  17  // Wrap isolates to Ib amp low fail, heals because dual sensor (no latch)
-#define NUM_FA        20  // Number of these
+#define NUM_FA        20  // Number of these to reserve space
 
 #define faultRead(bit) ( (fltw_ >> bit) & 1 )
 #define failRead(bit) ( (falw_ >> bit) & 1 )
@@ -166,16 +166,11 @@ public:
   uint8_t hi_fail() { return hi_fail_; };
   uint8_t hi_fault() { return hi_fault_; };
   float ib_dyn() { return ib_dyn_; };
-  float ib_dyn_a() { return ChargeTransfer_->a(); };
-  float ib_dyn_b() { return ChargeTransfer_->b(); };
-  float ib_dyn_c() { return ChargeTransfer_->c(); };
   float ib_dyn_lstate() { return ChargeTransfer_->lstate(); };
   float ib_dyn_r() { return ChargeTransfer_->reset(); };
   float ib_dyn_rstate() { return ChargeTransfer_->rstate(); };
   float ib_dyn_T() { return ChargeTransfer_->T(); };
   float ib_dyn_tau() { return ChargeTransfer_->tau(); };
-  float ib_wrp_a() { return WrapErrFilt_->a(); };
-  float ib_wrp_b() { return WrapErrFilt_->b(); };
   float ib_wrp_rate() { return WrapErrFilt_->rate(); };
   float ib_wrp_state() { return WrapErrFilt_->lstate(); };
   float ib_wrp_T() { return WrapErrFilt_->T(); };
@@ -196,9 +191,9 @@ protected:
   float e_wrap_rate_;       // Wrap error rate, V/s
   float e_wrap_trim_;       // Trimmer, V
   float e_wrap_trimmed_;    // Trimmer applied to e_wrap_, V
-  float ewhi_thr_;   // Threshold e_wrap failed high kicked, V
+  float ewhi_thr_;          // Threshold e_wrap failed high kicked, V
   float ewhi_thr_base_;     // Threshold e_wrap failed high base, V
-  float ewlo_thr_;   // Threshold e_wrap failed low kicked, V
+  float ewlo_thr_;          // Threshold e_wrap failed low kicked, V
   float ewlo_thr_base_;     // Threshold e_wrap failed low base, V
   uint8_t hi_fail_;         // Fail bit
   uint8_t hi_fault_;        // Fault bit
@@ -210,13 +205,13 @@ protected:
   uint8_t lo_fail_;         // Fail bit
   uint8_t lo_fault_;        // Fault bit
   BatteryMonitor *Mon_;     // Monitor ptr
-  bool reset_;           // If resetting or not
+  bool reset_;              // If resetting or not
   Sensors *Sen_;            // Sensors ptr
   TustinIntegrator *Trim_;  // Trim integrator
   float vb_;                // Looparound version of vb, V
   float voc_;               // Looparound version of voc, V 
   float voc_soc_;           // Looparound version of voc_soc, V 
-  LagExp *WrapErrFilt_;  // Noise filter for voltage wrap
+  LagExp *WrapErrFilt_;     // Noise filter for voltage wrap
   TFDelay *WrapHi_;         // Wrap test persistence
   TFDelay *WrapLo_;         // Wrap test persistence
   float wrap_hi_volt_;      // Wrap high voltage (hyst +), V
@@ -259,7 +254,6 @@ public:
   bool ib_amp_fa() { return failRead(IB_AMP_FA); };
   bool ib_amp_flt() { return faultRead(IB_AMP_FLT);  };
   bool ib_amp_hi() { return ib_amp_hi_; };
-  bool ib_amp_invalid() { return ib_amp_invalid_; };
   bool ib_amp_lo() { return ib_amp_lo_; };
   ibSel ib_choice() { return ib_choice_; };
   ibSel ib_choice_past() { return ib_choice_last_; };
@@ -281,14 +275,12 @@ public:
   float ib_dyn_m() { return WrapLoopAmp->ib_dyn(); };
   float ib_dyn_n() { return WrapLoopNoa->ib_dyn(); };
   bool ib_is_functional() { return ib_is_functional_; };
-  bool ib_is_quiet() { return ib_is_quiet_; };
   bool ib_lo_active() { return ib_lo_active_; };
   void ib_logic(const bool reset, Sensors *Sen, BatteryMonitor *Mon);
   bool ib_noa_bare() { return faultRead(IB_NOA_BARE); };
   bool ib_noa_fa() { return failRead(IB_NOA_FA); };
   bool ib_noa_flt() { return faultRead(IB_NOA_FLT); };
   bool ib_noa_hi() { return ib_noa_hi_; };
-  bool ib_noa_invalid() { return ib_noa_invalid_; };
   bool ib_noa_lo() { return ib_noa_lo_; };
   void ib_quiet(const bool reset, Sensors *Sen);
   float ib_quiet() { return ib_quiet_; };
@@ -325,10 +317,8 @@ public:
   void Tb_check(Sensors *Sen, const float _tb_min, const float _tb_max, const bool reset);  // Range check Tb
   bool Tb_fa() { return failRead(TB_FA); };
   bool Tb_flt() { return faultRead(TB_FLT); };
-  int8_t tb_sel_stat_past() { return tb_sel_stat_last_; };
   int8_t tb_sel_status() { return tb_sel_stat_; };
   void vb_check(Sensors *Sen, BatteryMonitor *Mon, const float _vb_min, const float _vb_max, const bool reset);  // Range check Vb
-  bool vb_clean() { return ( !vb_fail() ); };
   bool vb_fail() { return ( vb_fa_lt() || vb_sel_stat_==0 ); };
   bool vb_fa_lt() { return failRead(VB_FA_LT); };
   bool vb_flt() { return faultRead(VB_FLT); };

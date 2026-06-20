@@ -46,13 +46,10 @@ public:
   void apply_delta_q(const double delta_q);
   void apply_delta_q_t(const bool reset);
   void apply_delta_q_t(const double delta_q, const double tb_f);
-  void apply_resetting(const bool resetting){ resetting_ = resetting; };
   void apply_soc(const double soc, const double tb_f);
-  void assign_all_mod() { chem_.assign_all_chm(); };
   double calculate_capacity(const double tb_f);
   Chemistry *chem() { return &chem_; };
   void chem_pretty_print () { chem_.pretty_print(); };
-  double coul_eff() { return ( coul_eff_ ); };
   void coul_eff(const double coul_eff) { coul_eff_ = coul_eff; };
   virtual double count_coulombs(Sensors *Sen, const bool reset_temp, const float charge_curr, const bool sat,
   const bool saturated);
@@ -68,10 +65,8 @@ public:
   void put_dy_voc(const float inp) { chem_.put_dy_voc(inp); }
   void put_dz_voc(const float inp) { chem_.put_dz_voc(inp); }
   double q(){ return (q_); };
-  double q_cap_rated(){ return (q_cap_rated_); };
   double q_cap_rated_scaled(){ return (q_cap_rated_scaled_); };
   double q_capacity(){ return (q_capacity_); };
-  double q_inf(){ return (q_inf_); };
   bool sat() { return(sat_); };
   bool saturated() { return(saturated_); };
   double soc() { return(soc_); };

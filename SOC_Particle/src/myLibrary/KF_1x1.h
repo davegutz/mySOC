@@ -31,13 +31,10 @@ public:
   KalmanFilter(const double dt, const double init_pos, const double Q_std, const double R_std);
   ~KalmanFilter();
   double calculate(const bool reset, const double dt, const double in);
-  bool get_reset() { return reset_; };
   double **Fx() { return Fx_; };
   double *x() { return x_; };
   void kf_init(const double in);
-  double kf_u() { return u_; };
   double kf_v() { return x_[1]; };
-  double kf_x() { return x_[0]; };
   void predict();
   void pretty_print(void);
   void print_serial_header(const char suffix);

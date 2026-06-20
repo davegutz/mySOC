@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//tmp/**)",
+      "Bash(awk '/double sd_/{found=1} found && /^class /{print; found=0} /^class /{class=$0} /double sd_/{print class; found=1}' myLibrary/myFilters.h)",
+      "Bash(grep -n \"struct PID\\\\|^};\\\\s*$\" myLibrary/myFilters.h)"
+    ]
+  }
+}

@@ -841,7 +841,6 @@ double BatterySim::count_coulombs(Sensors *Sen, const bool reset_temp, BatteryMo
     if ( ib_charge_>0. ) d_delta_q_s_ *= coul_eff_;
 
     // Rate limit temperature.  When modeling, initialize to no change
-    // TODO: cannot figure out why re-entering Tb stuff here.
     Tb_ = Sen->Tb();
     Tb_f_ = Sen->Tb_f();
     Tb_f_rate_ = Sen->Tb_f_rate();

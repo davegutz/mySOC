@@ -99,9 +99,6 @@ public:
   double calc_soc_voc_slope(double soc, double Tb_f);
   float calc_vsat(void);
   virtual float calculate(const double Tb_f, const double soc_frac, float curr_in, const double dt, const bool dc_dc_on);
-  float chargeTransfer_a() { return ChargeTransfer_->a(); };
-  float chargeTransfer_b() { return ChargeTransfer_->b(); };
-  float chargeTransfer_c() { return ChargeTransfer_->c(); };
   float chargeTransfer_lstate() { return ChargeTransfer_->lstate(); };
   float chargeTransfer_rstate() { return ChargeTransfer_->rstate(); };
   float chargeTransfer_T() { return ChargeTransfer_->T(); };
@@ -112,7 +109,6 @@ public:
   String decode(const uint8_t mod);
   float dqdt() { return chem_.dqdt; };
   float dt() { return dt_; };
-  double dv_dsoc() { return dv_dsoc_; };
   float dv_dyn() { return dv_dyn_; };
   float dv_hys() { return dv_hys_; };
   float ib() { return ib_; };
@@ -125,7 +121,6 @@ public:
   float ibs() { return ibs_; };
   float ioc() { return ioc_; };
   virtual void pretty_print();
-  void print_signal(const bool print) { print_now_ = print; };
   double Tb() { return Tb_; };
   double Tb_f() { return Tb_f_; };
   float vb() { return vb_; };
@@ -200,9 +195,6 @@ public:
   float vb_model_rev() { return vb_model_rev_; };
   float voc_dead() { return voc_dead_; };
   float voc_stat_f() { return voc_stat_f_; };
-  float vocStatFilt_a() { return VocStatFilt->a(); };
-  float vocStatFilt_b() { return VocStatFilt->b(); };
-  float vocStatFilt_c() { return VocStatFilt->c(); };
   float vocStatFilt_lstate() { return VocStatFilt->lstate(); };
   float vocStatFilt_rstate() { return VocStatFilt->rstate(); };
   float vocStatFilt_T() { return VocStatFilt->T(); };

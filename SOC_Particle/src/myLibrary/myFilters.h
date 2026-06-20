@@ -204,7 +204,6 @@ public:
   ~LagExp();
   //operators
   //functions
-  void absorb(LagExp *LE) { lstate_ = LE->lstate_; rstate_ = LE->rstate_; };
   virtual double calculate(double in, int RESET);
   virtual double calculate(double in, int RESET, const double T);
   virtual double calculate(double in, int RESET, const double tau, const double T);
@@ -454,80 +453,6 @@ protected:
   double a_;
   double b_;
   TustinIntegrator *Tustin_;
-};
-
-// PID
-struct PID
-{
-  double G;     // Gain, r/s = %/units of err
-  double tau;   // Lead, s
-  double MAX;   // Integrator max limit, %
-  double MIN;   // Integrator min limit, %
-  double LLMAX; // Lead max, %
-  double LLMIN; // Lead min, %
-  double prop;  // Proportional output, %
-  double integ; // Integrator output, %
-  double DB;    // Half deadband width, units of err
-  double err;   // Error, units
-  double err_comp; // Compensated error, units of err
-  double cont;  // Total control output, %
-  double sd_;   // Derivative tlead lookup scalar
-  double sg_;   // Integral lookup scalar
-  double st_;   // Proportional lookup scalar
-  double ad_;   // Derivative tlead adder
-  double ag_;   // Integral lookup adder
-  double at_;   // Proportional lookup adder
-  double kick_th_; // Threshold to kick
-  double kick_; // Kick scalar
-  double Sd(void) { return(sd_);};  // Der Tld scalar
-  double Sg(void) { return(sg_);};  // Gain scalar
-  double St(void) { return(st_);};  // Prop Tld scalar
-  double Ad(void) { return(ad_);}; 
-  double Ag(void) { return(ag_);};
-  double At(void) { return(at_);};
-  void GN(const double g)  { G = g; };
-  void Sd(const double S) { sd_ = S; };
-  void Ad(const double A) { ad_ = A; };
-  void Sg(const double S) { sg_ = S; };
-  void Ag(const double A) { ag_ = A; };
-  void St(const double S) { st_ = S; };
-  void At(const double A) { at_ = A; };
-  PID(double G, double tau, double MIN, double MAX, double LLMIN, double LLMAX, double prop, double integ, double DB,
-    double err, double err_comp, double cont, double kick_th, double kick)
-  {
-    this->G = G;
-    this->tau = tau;
-    this->MAX = MAX;
-    this->MIN = MIN;
-    this->LLMAX = LLMAX;
-    this->LLMIN = LLMIN;
-    this->prop = prop;
-    this->integ = integ;
-    this->DB = DB;
-    this->err = err;
-    this->err_comp = err_comp;
-    this->cont = cont;
-    this->sd_ = 1;
-    this->ad_ = 0;
-    this->sg_ = 1;
-    this->ag_ = 0;
-    this->st_ = 1;
-    this->at_ = 0;
-    this->kick_th_ = kick_th;
-    this->kick_ = kick;
-  }
-  void update(bool reset, double ref, double fb, double updateTime, double init, double dyn_min, double dyn_max, bool kill_db)
-  {
-    err = ref - fb;
-    double DB_loc = DB;
-    if ( kill_db ) DB_loc = 0.;
-    err_comp = DEAD(err, (DB_loc*sd_+ad_)) * (G*sg_+ag_);
-    if ( fabs(err)>kick_th_ ) err_comp *= kick_;
-    prop = max(min(err_comp * (tau*st_+at_), LLMAX), LLMIN);
-    integ = max(min(integ + updateTime*err_comp, dyn_max-prop), dyn_min-prop);
-    if ( reset ) integ = init;
-    cont = max(min(integ + prop, dyn_max), dyn_min);
-  }
 };
 
 

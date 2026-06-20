@@ -111,8 +111,6 @@ public:
 
   void cmd_reset(void) { soft_reset = true; ekf_reset = true; kf_reset = true; }
 
-  void cmd_reset_ekf(void) { ekf_reset = true; }
-
   void cmd_reset_kf(void) { kf_reset = true; }
 
   void cmd_reset_sim(void) { soft_reset_sim = true; }

@@ -111,7 +111,6 @@ public:
   // operators
   // functions
   bool bare_shunt() { return ( bare_shunt_ ); };
-  void dscn_cmd(const bool cmd) { dscn_cmd_ = cmd; };
   uint64_t dt_ms() { return sample_time_ - sample_time_z_; }; // ms
   void convert(const bool disconnect, const bool reset, Sensors *Sen);
   float Ishunt_cal() { return Ishunt_cal_; };
@@ -129,13 +128,9 @@ public:
   void sample_filter_kf(const bool reset_kf);
   void sample_Vc();
   void sample_Vo();
-  float scale() { return ( *sp_ib_scale_ ); };
   uint64_t sample_time(void) { return sample_time_; };
-  float v2a_s() { return v2a_s_ ; };
   float vshunt() { return vshunt_; };
   int16_t vshunt_int() { return vshunt_int_; };
-  int16_t vshunt_int_0() { return vshunt_int_0_; };
-  int16_t vshunt_int_1() { return vshunt_int_1_; };
   float Vc() { return Vc_; };
   float Vo() { return Vo_; };
   float Vo_Vc() { return Vo_Vc_; };
@@ -186,9 +181,6 @@ public:
   // Getters and setters for encapsulated member variables
   void cTime(const double input) { ctime_ = input; }
   double cTime() { return ctime_; }
-  void cTime_temp(const double input) { ctime_temp_ = input; }
-  double cTime_temp() { return ctime_temp_; }
-  void Vb_raw(const int input) { Vb_raw_ = input; }
   int Vb_raw() { return Vb_raw_; }
   void Vb(const float input) { Vb_ = input; }
   float Vb() { return Vb_; }
@@ -200,7 +192,6 @@ public:
   float Vb_hdwe_f() { return Vb_hdwe_f_; }
   void Vb_model(const float input) { Vb_model_ = input; }
   float Vb_model() { return Vb_model_; }
-  void Vb_volt(const float input) { Vb_volt_ = input; }
   float Vb_volt() { return Vb_volt_; }
   void Vc(const float input) { Vc_ = input; }
   float Vc() { return Vc_; }
@@ -242,11 +233,9 @@ public:
   float Ib() { return Ib_; }
   void Ib_f(const float input) { Ib_f_ = input; }
   float Ib_f() { return Ib_f_; }
-  void Ib_amp(const float input) { Ib_amp_ = input; }
   float Ib_amp() { return Ib_amp_; }
   void Ib_amp_hdwe(const float input) { Ib_amp_hdwe_ = input; }
   float Ib_amp_hdwe() { return Ib_amp_hdwe_; }
-  void Ib_amp_hdwe_f(const float input) { Ib_amp_hdwe_f_ = input; }
   float Ib_amp_hdwe_f() { return Ib_amp_hdwe_f_; }
   void Ib_amp_hdwe_kf(const float input) { Ib_amp_hdwe_kf_ = input; }
   float Ib_amp_hdwe_kf() { return Ib_amp_hdwe_kf_; }
@@ -256,11 +245,9 @@ public:
   float Ib_amp_rms() { return Ib_amp_rms_; }
   void Ib_hdwe_f(const float input) { Ib_hdwe_f_ = input; }
   float Ib_hdwe_f() { return Ib_hdwe_f_; }
-  void Ib_hdwe_kf(const float input) { Ib_hdwe_kf_ = input; }
   float Ib_hdwe_kf() { return Ib_hdwe_kf_; }
   void Ib_hdwe_f_cal(const float input) { Ib_hdwe_f_cal_ = input; }
   float Ib_hdwe_f_cal() { return Ib_hdwe_f_cal_; }
-  void Ib_noa(const float input) { Ib_noa_ = input; }
   float Ib_noa() { return Ib_noa_; }
   void Ib_noa_hdwe(const float input) { Ib_noa_hdwe_ = input; }
   float Ib_noa_hdwe() { return Ib_noa_hdwe_; }
@@ -288,15 +275,11 @@ public:
   float Wb() { return Wb_; }
   void now(const uint64_t input) { now_ = input; }
   uint64_t now() { return now_; }
-  void now_temp(const uint64_t input) { now_temp_ = input; }
   uint64_t now_temp() { return now_temp_; }
   void T(const double input) { T_ = input; }
   double T() { return T_; }
   void reset(const bool input) { reset_ = input; }
   bool reset() { return reset_; }
-  void T_filt(const double input) { T_filt_ = input; }
-  double T_filt() { return T_filt_; }
-  void T_temp(const double input) { T_temp_ = input; }
   double T_temp() { return T_temp_; }
   void elapsed_inj(const uint64_t input) { elapsed_inj_ = input; }
   uint64_t elapsed_inj() { return elapsed_inj_; }
@@ -308,7 +291,6 @@ public:
   uint64_t end_inj() { return end_inj_; }
   void control_time(const double input) { control_time_ = input; }
   double control_time() { return control_time_; }
-  void display(const bool input) { display_ = input; }
   bool display() { return display_; }
   void bms_off(const bool input) { bms_off_ = input; }
   bool bms_off() { return bms_off_; }
@@ -323,7 +305,6 @@ public:
   Sync *Summarize;            // Handle to debug read time
   Sync *Talk;                 // Handle to debug talk time
   BatterySim *Sim;            // Used to model Vb and Ib.   Use Talk 'Xp?' to toggle model on/off
-  uint64_t dt_ib(void) { return dt_ib_; }; // ms since last update of selected Ib sample
   void select_volt_and_current_and_temp(BatteryMonitor *Mon);      // Make final signal selection
   float ib() { return Ib_ / ap.nP(); };                            // Battery unit current, A
   float ib_amp() { return Ib_amp_ / ap.nP(); };                    // Battery amp unit current, A
@@ -351,13 +332,9 @@ public:
   float Ib_noa_min();
   float Ib_amp_noise();
   float Ib_noa_noise();
-  uint64_t inst_millis() { return inst_millis_; };
-  uint64_t inst_time() { return inst_time_; };
   void pretty_print();
   void reset_temp(const bool reset) { reset_temp_ = reset; };
   bool reset_temp() { return ( reset_temp_ ); };
-  uint64_t sample_time_ib(void) { return sample_time_ib_; };
-  uint64_t sample_time_vb(void) { return sample_time_vb_; };
   void select_print(Sensors *Sen, BatteryMonitor *Mon);
   void shunt_print();         // Print selection result
   void shunt_select_initial(const bool reset);   // Choose between shunts for model
@@ -366,9 +343,7 @@ public:
   void Tb_print(void);                                             // Print Tb result
   float vb() { return Vb_ / ap.nS(); };                            // Battery select unit voltage, V
   float vb_hdwe() { return Vb_hdwe_ / ap.nS(); };                  // Battery select hardware unit voltage, V
-  float vb_hdwe_f() { return Vb_hdwe_f_ / ap.nS(); };              // Battery select hardware unit voltage filtered, V
   void vb_load(const uint16_t vb_pin, const bool reset);           // Analog read of Vb
-  float vb_model() { return (Vb_model_ / ap.nS()); };              // Battery select model unit voltage, V
   float Vb_add();
   float Vb_noise();
   void vb_print(void);                  // Print Vb result
@@ -460,7 +435,6 @@ protected:
   uint64_t now_;     // Time at sample, ms
   uint64_t now_temp_;// Time at sample, ms
   double ctime_;               // Decimal time, seconds since 1/1/2021
-  double ctime_temp_;          // Decimal time at temp read, seconds since 1/1/2021
   double T_;                   // Update time, s
   bool reset_;                 // Reset flag, T = reset
   double T_filt_;              // Filter update time, s

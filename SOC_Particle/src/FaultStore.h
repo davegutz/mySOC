@@ -72,23 +72,6 @@ public:
   void put(const Flt_st input);
   void put_nominal();
 
-  void put_t_flt(const uint64_t value) { t_flt = value; };
-  void put_Tb_hdwe_filt(const int16_t value)         { Tb_hdwe_filt = value; };
-  void put_vb_hdwe_filt(const int16_t value)         { vb_hdwe_filt = value; };
-  void put_Vc_hdwe_sum(const int16_t value)              { Vc_hdwe_sum = value; };
-  void put_ib_amp_hdwe_filt(const int16_t value)     { ib_amp_hdwe_filt = value; };
-  void put_ib_noa_hdwe_filt(const int16_t value)     { ib_noa_hdwe_filt = value; };
-  void put_Tb_filt(const int16_t value)              { Tb_filt = value; };
-  void put_vb_filt(const int16_t value)              { vb_filt = value; };
-  void put_ib_filt(const int16_t value)              { ib_filt = value; };
-  void put_soc(const int16_t value)             { soc = value; };
-  void put_soc_min(const int16_t value)         { soc_min = value; };
-  void put_soc_ekf(const int16_t value)         { soc_ekf = value; };
-  void put_voc_filt(const int16_t value)             { voc_filt = value; };
-  void put_voc_stat_filt(const int16_t value)        { voc_stat_filt = value; };
-  void put_e_wrap_filt(const int16_t value)     { e_wrap_filt = value; };
-  void put_fltw(const uint32_t value)           { fltw = value; };
-  void put_falw(const uint32_t value)           { falw = value; };
 protected:
   SerialRAM *rP_;
 };

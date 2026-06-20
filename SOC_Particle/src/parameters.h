@@ -238,10 +238,6 @@ public:
     // Put into RAM and check for validity
     void put_ib_scale_amp(const float input) { ib_scale_amp_p->check_set_put(input); }
     void put_ib_scale_noa(const float input) { ib_scale_noa_p->check_set_put(input); }
-    void put_nP(const float input) { nP_p->check_set_put(input); }
-    void put_nS(const float input) { nS_p->check_set_put(input); }
-    void put_s_cap_mon(const float input) { s_cap_mon_p->check_set_put(input); }
-    void put_s_cap_sim(const float input) { s_cap_sim_p->check_set_put(input); }
     void put_Vb_scale(const float input) { Vb_scale_p->check_set_put(input); }
 
 protected:
@@ -378,12 +374,7 @@ public:
     float ib_hist_m_slr() { if ( abs(amp_) > SCL_40 ) return SCL_30000/abs(amp_); else return SCL_600; }
     float ib_hist_n_slr() { if ( abs(amp_) > SCL_40 ) return SCL_30000/abs(amp_); else return SCL_60; }
     float vb_hist_slr() { if ( abs(amp_) > SCL_40 ) return SCL_1500/abs(amp_); else return SCL_1200; }
-    bool mod_all_dscn() { return ( 111<modeling() ); }                // Bare all
-    bool mod_any() { return ( mod_ib() || mod_tb() || mod_vb() ); }   // Modeling any
-    bool mod_none_dscn() { return ( 16>modeling() ); }                // Bare nothing
-    bool mod_any_dscn() { return ( 15<modeling() ); }                 // Bare any
     bool mod_ib_all_dscn() { return ( 191<modeling() ); }             // Nothing connected to ib sensors in I2C on SDA/SCL
-    bool mod_ib_any_dscn() { return ( mod_ib_amp_dscn() || mod_ib_noa_dscn() ); }  // Nothing connected to ib sensors in I2C on SDA/SCL
     bool mod_ib_noa_dscn() { return ( 1<<7 & modeling() ); }          // Nothing connected to noa ib sensors in I2C on SDA/SCL
     bool mod_ib_amp_dscn() { return ( 1<<6 & modeling() ); }          // Nothing connected to amp ib sensors in I2C on SDA/SCL
     bool mod_vb_dscn() { return ( 1<<5 & modeling() ); }              // Nothing connected to vb on A1
@@ -394,34 +385,22 @@ public:
     bool mod_none() { return ( 0==modeling() ); }                     // Using all
 
     // put
-    void put_all_dynamic();
-    void put_amp(const float input) { amp_p->check_set_put(input); }
     void put_booted(const bool input) { booted_p->check_set_put(input); }
     void get_booted() { booted_p->get(); }
-    void put_cutback_gain_slr(const float input) { cutback_gain_slr_p->check_set_put(input); }
-    void put_Debug(const int input) { debug_p->check_set_put(input); }
+    void put_all_dynamic();
     void put_Delta_q(const double input) { delta_q_p->check_set_put(input); }
     void put_delta_q() {}
     void put_delta_q_model(const double input) { delta_q_model_p->check_set_put(input); }
     void put_delta_q_model() {}
-    void put_Dw(const float input) { Dw_p->check_set_put(input); }
-    void put_Freq(const float input) { freq_p->check_set_put(input); }
-    void put_ib_bias_all(const float input) { ib_bias_all_p->check_set_put(input); }
-    void put_ib_bias_amp(const float input) { ib_bias_amp_p->check_set_put(input); }
-    void put_ib_bias_noa(const float input) { ib_bias_noa_p->check_set_put(input); }
-    void put_ib_disch_slr(const float input) { ib_disch_slr_p->check_set_put(input); }
     void put_ib_force(const int8_t input) { ib_force_p->check_set_put(input); }
     void put_Iflt(const int input) { iflt_p->check_set_put(input); }
     void put_Ihis(const int input) { ihis_p->check_set_put(input); }
     void put_Isum(const int input) { isum_p->check_set_put(input); }
     void put_Inj_bias(const float input) { inj_bias_p->check_set_put(input); }
     void put_Preserving(const uint8_t input) { preserving_p->check_set_put(input); }
-    void put_Tb_bias_hdwe(const float input) { Tb_bias_hdwe_p->check_set_put(input); }
     void put_Time_now(const uint32_t input) { Time_now_p->check_set_put(input); }
     void put_Type(const uint8_t input) { Type_p->check_set_put(input); }
-    void put_Vb_bias_hdwe(const float input) { Vb_bias_hdwe_p->check_set_put(input); }
     
-    void put_modeling(const uint8_t input) { modeling_p->check_set_put(input); modeling_ = modeling();}
     void put_fault(const Flt_st input, const uint8_t i) { fault_[i].copy_to_Flt_ram_from(input); }
     //
     Flt_st put_history(const Flt_st input, const uint8_t i);
