@@ -23,7 +23,7 @@
 
 #include "subs.h"
 #include "Cloud.h"
-#include "constants.h"
+// #include "constants.h"
 #include <math.h>
 
 extern CommandPars cp;            // Various parameters to be common at system level (reset on PLC reset)

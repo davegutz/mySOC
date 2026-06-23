@@ -1,0 +1,21 @@
+
+# include Particle.h
+
+CompileFlags:
+  Add:
+    - -DSPARK_PLATFORM
+    - -DPARTICLE
+    - -DPLATFORM_ID=32
+    - -DPLATFORM_GEN=3
+    - -I/home/daveg/.particle/toolchains/deviceOS/6.2.1/user/inc
+    - -I/home/daveg/.particle/toolchains/deviceOS/6.2.1/system/inc
+    - -I/home/daveg/.particle/toolchains/deviceOS/6.2.1/services/inc
+    - -I/home/daveg/.particle/toolchains/deviceOS/6.2.1/communication/inc
+    - -I/home/daveg/.particle/toolchains/deviceOS/6.2.1/crypto/inc
+    - -I/home/daveg/.particle/toolchains/deviceOS/6.2.1/wiring/inc
+    - -I/home/daveg/.particle/toolchains/deviceOS/6.2.1/hal/inc
+    - -I/home/daveg/.particle/toolchains/deviceOS/6.2.1/hal/shared
+    - -I/home/daveg/.particle/toolchains/deviceOS/6.2.1/hal/src/tron
+    - -I/home/daveg/.particle/toolchains/deviceOS/6.2.1/hal/src/rtl872x
+    - -I/home/daveg/.particle/toolchains/deviceOS/6.2.1/dynalib/inc
+    - -I/home/daveg/.particle/toolchains/deviceOS/6.2.1/rt-dynalib/inc

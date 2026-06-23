@@ -139,7 +139,7 @@ void Flt_st::pretty_print(const String code)
     Serial.printf("code %s\n", code.c_str());
     time_long_2_str((time_t)(this->t_flt / 1000ULL), buffer);
     Serial.printf("buffer %s\n", buffer);
-    Serial.printf("t %lld\n", this->t_flt);
+    Serial.printf("t %lu\n", this->t_flt);
     Serial.printf("Tb_hdwe_filt %7.3f\n", float(this->Tb_hdwe_filt)/SCL_600);
     Serial.printf("vb_hdwe_filt %7.3f\n", float(this->vb_hdwe_filt)/sp.vb_hist_slr());
     Serial.printf("Vc_hdwe_sum %7.3f\n", float(this->Vc_hdwe_sum)/SCL_3000);
@@ -157,7 +157,7 @@ void Flt_st::pretty_print(const String code)
     Serial.printf("e_wrap_m_filt %7.3f\n", float(this->e_wrap_m_filt)/sp.vb_hist_slr());
     Serial.printf("e_wrap_m_trim %7.3f\n", float(this->e_wrap_m_trim)/sp.vb_hist_slr());
     Serial.printf("e_wrap_n_filt %7.3f\n", float(this->e_wrap_n_filt)/sp.vb_hist_slr());
-    Serial.printf("fltw %ld falw %ld\n", this->fltw, this->falw);
+    Serial.printf("fltw %u falw %u\n", this->fltw, this->falw);
   }
 }
 

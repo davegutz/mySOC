@@ -464,7 +464,7 @@ void print_signal_sel_serial(const bool reset, Sensors *Sen, BatteryMonitor *Mon
       Sen->Tb_model_f_rstate(), Sen->Tb_model_f_lstate(), Sen->Tb_model_f_dt(), Sen->Tb_model_f_tau());
     Serial.printf("%s", pr.buff);
 
-    sprintf(pr.buff, "%ld, %ld, %ld,", Sen->Flt->fltw(), Sen->Flt->falw(), cp.disp_word);
+    sprintf(pr.buff, "%lu, %lu, %lu,", Sen->Flt->fltw(), Sen->Flt->falw(), cp.disp_word);
     Serial.printf("%s", pr.buff);
 
     Serial.printf("\n");

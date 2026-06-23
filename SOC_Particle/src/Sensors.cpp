@@ -24,10 +24,11 @@
 #include "application.h"
 #include "command.h"
 #include "Sensors.h"
+#include "subs.h"
 #include "constants.h"
 #include <math.h>
-#include "debug.h"
-#include "Summary.h"
+// #include "debug.h"
+// #include "Summary.h"
 
 extern CommandPars cp;  // Various parameters shared at system level
 extern PrinterPars pr;  // Print buffer
@@ -135,7 +136,7 @@ void Shunt::sample(const bool reset_kf)
   sample_Vc();
   sample_combine();
   sample_filter_kf(reset_kf);
-  if  ( sp.debug()==14 )Serial.printf("reset_kf %d ADCref %7.3f samp_t %lld vo_pin_%d V0_raw_%d Vo_%7.3f Vo_Vc_%7.3f vshunt_kf_%7.3f  Vc_%7.3f\n", reset_kf, (float)analogGetReference(), sample_time_, vo_pin_, Vo_raw_, Vo_, Vo_Vc_, vshunt_kf_, Vc_);
+  if  ( sp.debug()==14 )Serial.printf("reset_kf %d ADCref %7.3f samp_t %llu vo_pin_%d V0_raw_%d Vo_%7.3f Vo_Vc_%7.3f vshunt_kf_%7.3f  Vc_%7.3f\n", reset_kf, (float)analogGetReference(), sample_time_, vo_pin_, Vo_raw_, Vo_, Vo_Vc_, vshunt_kf_, Vc_);
 }
 
 // Basic arithmetic

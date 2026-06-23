@@ -1,9 +1,3 @@
-/******************************************************/
-//       THIS IS A GENERATED FILE - DO NOT EDIT       //
-/******************************************************/
-
-#include "Particle.h"
-#line 1 "c:/Users/daveg/Documents/GitHub/mySOC/SOC_Particle/src/SOC_Particle.ino"
 /*
  * Project SOC_Photon
 
@@ -67,10 +61,9 @@
 // See README.md
 */
 
+#include "Particle.h"
+
 #include "constants.h"
-void setup();
-void loop();
-#line 65 "c:/Users/daveg/Documents/GitHub/mySOC/SOC_Particle/src/SOC_Particle.ino"
 #undef ARDUINO
 #if (PLATFORM_ID != PLATFORM_P2)
   #error "copy local_config.xxxx.h to constants.h"
@@ -79,12 +72,12 @@ void loop();
 // Dependent includes.   Easier to sp.debug code if remove unused include files
 #include "Sync.h"
 #include "subs.h"
-#include "Summary.h"
+// #include "Summary.h"
 #include "Cloud.h"
 #include "debug.h"
 #include "parameters.h"
 #include "serial.h"
-#include "ble.h"
+// #include "ble.h"
 
 //#define BOOT_CLEAN      // Use this to clear 'lockup' problems introduced during testing using Talk
 

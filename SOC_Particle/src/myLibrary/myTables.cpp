@@ -1,7 +1,7 @@
 #include <Arduino.h> //needed for Serial.println
 #include "myTables.h"
 #include "math.h"
-#include "../constants.h"
+// #include "../constants.h"
 #include "../parameters.h"
 extern SavedPars sp; // Various parameters to be static at system level and saved through power cycle
 

@@ -259,8 +259,8 @@ bool chitter(const bool chitchat, BatteryMonitor *Mon, Sensors *Sen)
         nibble = chit_nibble_inp();
         request = chit_classify_nibble(&nibble);
 
-        // Deal with each request.  Strip off to use up to ';'.  Leave the rest for next iteration
-        switch (request)
+        // Deal with each int(request).  Strip off to use up to ';'.  Leave the rest for next iteration
+        switch (int(request))
         {
           case (INCOMING):  // 0, really not used until chatter and then as a placeholder
             chit(nibble, INCOMING);
@@ -415,10 +415,10 @@ void clear_queues()
 // Limited echoing of BLE commands available
 void cmd_echo(urgency request)
 {
-  if ( request==0 )
+  if ( int(request)==0 )
     sendTxBuf(String::format("cmd: %s\n", cp.cmd_str.c_str()), true, IN_SERVICE);
   else
-    sendTxBuf(String::format("echo: %s, %d\n", cp.cmd_str.c_str(), request), true, IN_SERVICE);
+    sendTxBuf(String::format("echo: %s, %d\n", cp.cmd_str.c_str(), int(request)), true, IN_SERVICE);
 }
 
 

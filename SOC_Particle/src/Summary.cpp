@@ -22,7 +22,7 @@
 // SOFTWARE.
 
 #include "Summary.h"
-#include "parameters.h"
+// #include "parameters.h"
 
 // print helper
 void print_all_fault_buffer(const String code, struct Flt_st *flt, const uint16_t iflt, const uint16_t nflt)

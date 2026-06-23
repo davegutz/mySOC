@@ -33,7 +33,7 @@ AB2_Integrator::~AB2_Integrator() {}
 Debounce::Debounce()
     : nz_(1), passed_out_(false) {}
 Debounce::  Debounce(const bool icValue, const int updates)
-    : nz_(fmax(updates-1, 1)), passed_out_(icValue)
+    : nz_(max(updates-1, 1)), passed_out_(icValue)
 {
   past_ = new bool[nz_];
   for (int i=0; i<nz_; i++) past_[i] = icValue;
@@ -72,7 +72,7 @@ bool Debounce::calculate(const bool in, const int RESET)
 Delay::Delay()
     : nz_(0) {}
 Delay::Delay(const double in, const int nz)
-    : nz_(fmax(nz, 1))
+    : nz_(max(nz, 1))
 {
   past_ = new double[nz_];
   for ( int i=0; i<nz_; i++ ) past_[i] = in;

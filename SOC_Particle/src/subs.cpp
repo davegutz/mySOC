@@ -26,7 +26,7 @@
 #include "constants.h"
 #include <math.h>
 #include "debug.h"
-#include "Summary.h"
+// #include "Summary.h"
 #include "talk/chitchat.h"
 #include "ble.h"
 #include "Sensors.h"
@@ -88,7 +88,7 @@ void initialize_all(BatteryMonitor *Mon, Sensors *Sen, const float soc_in, const
       Serial.printf("\n\n");
       sp.pretty_print(true);
       cp.pretty_print();
-      Serial.printf("Entering initialize_all: use_soc_in %d soc_in %5.3f, falw %ld Tb_fa %d\n", use_soc_in, soc_in, Sen->Flt->falw(), Sen->Flt->Tb_fa());
+      Serial.printf("Entering initialize_all: use_soc_in %d soc_in %5.3f, falw %lu Tb_fa %d\n", use_soc_in, soc_in, Sen->Flt->falw(), Sen->Flt->Tb_fa());
       debug_m1(Mon, Sen);
     }
   #endif
@@ -118,7 +118,7 @@ void initialize_all(BatteryMonitor *Mon, Sensors *Sen, const float soc_in, const
   #ifdef DEBUG_INIT
     if ( sp.debug()==-1 )
     { 
-      Serial.printf("before harvest_temp, use_soc_in %d falw %ld Tb_fa %d:  ", use_soc_in, Sen->Flt->falw(), Sen->Flt->Tb_fa()); debug_m1(Mon, Sen);
+      Serial.printf("before harvest_temp, use_soc_in %d falw %lu Tb_fa %d:  ", use_soc_in, Sen->Flt->falw(), Sen->Flt->Tb_fa()); debug_m1(Mon, Sen);
     }
   #endif
   if ( !Sen->Flt->Tb_fa() ) harvest_temp_change(Sen->Tb_f(), Mon, Sen->Sim, Sen->Tb_f_rate(), 0.);
@@ -469,12 +469,12 @@ void serial_display(Sensors *Sen, BatteryMonitor *Mon)
       disp_2 = "*fail";
       dispAssign(true, fail_ib);
     }
-    else if ( Sen->Flt->ib_choice()==1 )
+    else if ( int(Sen->Flt->ib_choice())==1 )
     {
       disp_2 = "*fail";
       dispAssign(true, fail_ib);
     }
-    else if ( Sen->Flt->ib_choice()==-1 )
+    else if ( int(Sen->Flt->ib_choice())==-1 )
     {
       disp_2 = "*amp";
       dispAssign(true, fail_ibm);
@@ -486,7 +486,7 @@ void serial_display(Sensors *Sen, BatteryMonitor *Mon)
       dispAssign(true, diff_ib);
     }
     // another default
-    else if ( Sen->Flt->ib_choice()!=0 )
+    else if ( int(Sen->Flt->ib_choice())!=0 )
     {
       disp_2 = " redl ";
       dispAssign(true, red_loss);
@@ -542,7 +542,7 @@ void serial_display(Sensors *Sen, BatteryMonitor *Mon)
       disp_2 = "fail";
       dispAssign(true, fail_ib);
   }
-    else if ( Sen->Flt->ib_choice()!=0 )
+    else if ( int(Sen->Flt->ib_choice())!=0 )
     {
       disp_2 = "accy";
       dispAssign(true, accy);
@@ -584,7 +584,7 @@ void serial_display(Sensors *Sen, BatteryMonitor *Mon)
     {
       Serial.printf("\nmodib %d ibchc %d vbsst %d tbfa %d ibmfa %d ibnafa %d ibdiffa %d dscnfa %d redloss %d\n",
           sp.mod_ib(), Sen->Flt->ib_choice(), Sen->Flt->vb_sel_stat(), Sen->Flt->Tb_fa(), Sen->Flt->ib_amp_fa(), Sen->Flt->ib_noa_fa(),  Sen->Flt->ib_diff_fa(), Sen->Flt->dscn_fa(), Sen->Flt->red_loss());
-      Serial.printf("%s   Tb,C  VOC,V  Ib,A \n%s   EKF,Ah  chg,hrs  CC, Ah\nPf; for fails.  prints=%ld\n\n",
+      Serial.printf("%s   Tb,C  VOC,V  Ib,A \n%s   EKF,Ah  chg,hrs  CC, Ah\nPf; for fails.  prints=%lu\n\n",
           disp_Tbop.c_str(), dispBot.c_str(), cp.num_v_print);
     }
   #endif

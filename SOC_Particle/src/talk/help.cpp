@@ -25,10 +25,10 @@
 #include "../subs.h"
 #include "../command.h"
 #include "../constants.h"
-#include "../Summary.h"
+// #include "../Summary.h"
 #include "../parameters.h"
 #include <math.h>
-#include "../debug.h"
+// #include "../debug.h"
 
 extern SavedPars sp;    // Various parameters to be static at system level and saved through power cycle
 extern VolatilePars ap; // Various adjustment parameters shared at system level
