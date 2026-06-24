@@ -9,8 +9,8 @@
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
 //
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -24,10 +24,11 @@
 
 #pragma once
 
+#include "Particle.h"
+
 // Duct Sim Class
-class Sync
-{
-public:
+class Sync {
+ public:
   // Constructors
   Sync();
   Sync(uint64_t delay);
@@ -36,11 +37,19 @@ public:
   bool update(uint64_t now, bool reset, bool andCheck);
   bool update(uint64_t now, bool reset);
   bool updateN(uint64_t now, bool reset, bool orCheck);
-  uint64_t delay() { return(delay_); }
-  void delay(uint64_t new_delay) { delay_ = new_delay; updateTimeInput_ = float(delay_)/1000.f; }
-  void delay(uint64_t new_delay, uint64_t now) { delay_ = new_delay; updateTimeInput_ = float(delay_)/1000.f; last_ = now; }
-  uint64_t now() { return(now_); }
-private:
+  uint64_t delay() { return (delay_); }
+  void delay(uint64_t new_delay) {
+    delay_ = new_delay;
+    updateTimeInput_ = float(delay_) / 1000.f;
+  }
+  void delay(uint64_t new_delay, uint64_t now) {
+    delay_ = new_delay;
+    updateTimeInput_ = float(delay_) / 1000.f;
+    last_ = now;
+  }
+  uint64_t now() { return (now_); }
+
+ private:
   uint64_t delay_;
   uint64_t last_;
   uint64_t now_;

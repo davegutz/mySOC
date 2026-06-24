@@ -12,12 +12,12 @@
 
 */
 
-#include <stdint.h>
-#include <Wire.h>
 #include "SerialRAM.h"
 
+#include <Wire.h>
+#include <stdint.h>
 
-///<summary>
+///< summary>
 ///	Initialize the RAM chip with the given A0 and A1 values.
 ///	<param name="A0">A0 value (logic 0 or 1) of the RAM chip you want
 ///	to address. Default value 0.</param>
@@ -25,22 +25,21 @@
 ///	to address. Default value 0.</param>
 ///</summary>
 void SerialRAM::begin(const uint8_t a0, const uint8_t a1) {
-  //build mask
+  // build mask
   uint8_t mask = (a0 << 1) | (a1);
   mask <<= 1;
 
-  //save registers addresses
+  // save registers addresses
   this->SRAM_REGISTER = 0x50 | mask;
   this->CONTROL_REGISTER = 0x18 | mask;
 
-  //Arduino I2C lib
-  #if !defined(HDWE_BARE)
-    Wire.begin();
-  #endif
+// Arduino I2C lib
+#if !defined(HDWE_BARE)
+  Wire.begin();
+#endif
 }
 
-
-///<summary>
+///< summary>
 ///	Write the given byte "value" at the 16 bit address "address".
 ///		47x16 chips valid addresses range from 0x0000 to 0x07FF
 ///		47x04 chips valid addresses range from 0x0000 to 0x01FF
@@ -54,18 +53,18 @@ void SerialRAM::begin(const uint8_t a0, const uint8_t a1) {
 uint8_t SerialRAM::write(const uint16_t address, const uint8_t value) {
   address16b a;
   a.a16 = address;
-  #if !defined(HDWE_BARE)
-    Wire.beginTransmission(this->SRAM_REGISTER);
-    Wire.write(a.a8[1]);
-    Wire.write(a.a8[0]);
-    Wire.write(value);
-    return Wire.endTransmission();
-  #else
-    return 0;
-  #endif
+#if !defined(HDWE_BARE)
+  Wire.beginTransmission(this->SRAM_REGISTER);
+  Wire.write(a.a8[1]);
+  Wire.write(a.a8[0]);
+  Wire.write(value);
+  return Wire.endTransmission();
+#else
+  return 0;
+#endif
 }
 
-///<summary>
+///< summary>
 ///	Read the byte "value" located at the 16 bit address "address".
 ///		47x16 chips valid addresses range from 0x0000 to 0x07FF
 ///		47x04 chips valid addresses range from 0x0000 to 0x01FF
@@ -77,19 +76,18 @@ uint8_t SerialRAM::read(const uint16_t address) {
   address16b a;
   a.a16 = address;
 
-  
-  #if !defined(HDWE_BARE)
-    Wire.beginTransmission(this->SRAM_REGISTER);
-    Wire.write(a.a8[1]);
-    Wire.write(a.a8[0]);
-    Wire.endTransmission();
+#if !defined(HDWE_BARE)
+  Wire.beginTransmission(this->SRAM_REGISTER);
+  Wire.write(a.a8[1]);
+  Wire.write(a.a8[0]);
+  Wire.endTransmission();
 
-    Wire.requestFrom(this->SRAM_REGISTER, 1);
-    buffer = Wire.read();
-    Wire.endTransmission();
-  #else
-    buffer = 0;
-  #endif
+  Wire.requestFrom(this->SRAM_REGISTER, 1);
+  buffer = Wire.read();
+  Wire.endTransmission();
+#else
+  buffer = 0;
+#endif
 
   return buffer;
 }
@@ -97,50 +95,49 @@ uint8_t SerialRAM::read(const uint16_t address) {
 uint8_t SerialRAM::readControlRegister() {
   uint8_t buffer = 0x80;
 
-  #if !defined(HDWE_BARE)
-    Wire.beginTransmission(this->CONTROL_REGISTER);
-    Wire.write(0x00); //status register
-    Wire.endTransmission();
+#if !defined(HDWE_BARE)
+  Wire.beginTransmission(this->CONTROL_REGISTER);
+  Wire.write(0x00);  // status register
+  Wire.endTransmission();
 
-    Wire.requestFrom(this->CONTROL_REGISTER, 1);
-    buffer = Wire.read();
-    Wire.endTransmission();
-  #else
-    buffer = 0;
-  #endif
+  Wire.requestFrom(this->CONTROL_REGISTER, 1);
+  buffer = Wire.read();
+  Wire.endTransmission();
+#else
+  buffer = 0;
+#endif
 
   return buffer;
 }
 
-///<summary>
+///< summary>
 ///	De/Activate the "AutoStore" to EEPROM functionnality of the RAM
 ///	when power is lost.
-///		<param name="value">Set to true to activate, false otherwise</param>
+///		<param name="value">Set to true to activate, false
+///otherwise</param>
 ///</summary>
-void SerialRAM::setAutoStore(const bool value)
-{
-  #if !defined(HDWE_BARE)
-    uint8_t buffer = this->readControlRegister();
-    buffer = value ? buffer|0x02 : buffer&0xfd;
-    Wire.beginTransmission(this->CONTROL_REGISTER);
-    Wire.write(0x00); //status register
-    Wire.write(buffer);
-    Wire.endTransmission();
-  #endif
+void SerialRAM::setAutoStore(const bool value) {
+#if !defined(HDWE_BARE)
+  uint8_t buffer = this->readControlRegister();
+  buffer = value ? buffer | 0x02 : buffer & 0xfd;
+  Wire.beginTransmission(this->CONTROL_REGISTER);
+  Wire.write(0x00);  // status register
+  Wire.write(buffer);
+  Wire.endTransmission();
+#endif
 }
 
-///<summary>
+///< summary>
 ///	De/Activate the "AutoStore" to EEPROM functionnality of the RAM
 ///	when power is lost.
 ///		<returns>true of auto store is active</return>
 ///</summary>
-bool SerialRAM::getAutoStore()
-{
+bool SerialRAM::getAutoStore() {
   uint8_t buffer = this->readControlRegister();
   return buffer & 0x02;
 }
 
-///<summary>
+///< summary>
 ///	Write the array of bytes "values" at the 16 bit address "address".
 ///		47x16 chips valid addresses range from 0x0000 to 0x07FF
 ///		47x04 chips valid addresses range from 0x0000 to 0x01FF
@@ -152,48 +149,47 @@ bool SerialRAM::getAutoStore()
 ///		</returns>
 ///</summary>
 uint8_t SerialRAM::write(const uint16_t address, const uint8_t* values,
-                         const uint16_t size)
-{
+                         const uint16_t size) {
   address16b a;
   a.a16 = address;
 
-  #if !defined(HDWE_BARE)
-    Wire.beginTransmission(this->SRAM_REGISTER);
-    Wire.write(a.a8[1]);
-    Wire.write(a.a8[0]);
-    Wire.write(values, size);
-    return Wire.endTransmission();
-  #else
-    return 0;
-  #endif
+#if !defined(HDWE_BARE)
+  Wire.beginTransmission(this->SRAM_REGISTER);
+  Wire.write(a.a8[1]);
+  Wire.write(a.a8[0]);
+  Wire.write(values, size);
+  return Wire.endTransmission();
+#else
+  return 0;
+#endif
 }
 
-///<summary>
+///< summary>
 ///	Read "size" number of bytes into "values" array located at the
 ///	16 bit address "address".
 ///		Make sure values is big enough to contain all data or a
 ///		segfault will occur.
-///		<param name="address">16 bit startign address of the data</param>
-///		<param name="values">array to be used to store the data</param>
+///		<param name="address">16 bit starting address of
+///		the data</param>
+///		<param name="values">array to be used to store the
+///		data</param>
 ///		<param name="size">number of bytes to retrieve</param>
 ///</summary>
 void SerialRAM::read(const uint16_t address, uint8_t* values,
-                     const uint16_t size)
-{
+                     const uint16_t size) {
   address16b a;
   a.a16 = address;
 
-  #if !defined(HDWE_BARE)
-    Wire.beginTransmission(this->SRAM_REGISTER);
-    Wire.write(a.a8[1]);
-    Wire.write(a.a8[0]);
-    Wire.endTransmission();
+#if !defined(HDWE_BARE)
+  Wire.beginTransmission(this->SRAM_REGISTER);
+  Wire.write(a.a8[1]);
+  Wire.write(a.a8[0]);
+  Wire.endTransmission();
 
-    Wire.requestFrom(this->SRAM_REGISTER, size);
-    for (uint16_t i = 0; i < size; i++) {
-      values[i] = Wire.read();
-    }
-    Wire.endTransmission();
-  #endif
+  Wire.requestFrom(this->SRAM_REGISTER, size);
+  for (uint16_t i = 0; i < size; i++) {
+    values[i] = Wire.read();
+  }
+  Wire.endTransmission();
+#endif
 }
-

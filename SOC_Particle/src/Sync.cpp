@@ -9,8 +9,8 @@
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
 //
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -22,67 +22,61 @@
 //
 // 17-Feb-2021  Dave Gutz   Create
 
-#include "application.h"
 #include "Sync.h"
+
+#include "application.h"
 #include "parameters.h"
-extern SavedPars sp;  // Various parameters to be static at system level and saved through power cycle
+extern SavedPars sp;  // Various parameters to be static at system level and
+                      // saved through power cycle
 
 // Constructors
 Sync::Sync()
-  : delay_(0), last_(0ULL), now_(0ULL), stat_(false), updateDiff_(0), updateTime_(0), updateTimeInput_(0.)
-{}
+    : delay_(0), last_(0ULL), now_(0ULL), stat_(false), updateDiff_(0),
+      updateTime_(0), updateTimeInput_(0.) {}
 Sync::Sync(uint64_t delay)
-  : delay_(delay), last_(0ULL), now_(0ULL), stat_(false), updateDiff_(0), updateTime_(0)
-{
-  updateTimeInput_ = float(delay_)/1000.f;
+    : delay_(delay), last_(0ULL), now_(0ULL), stat_(false), updateDiff_(0),
+      updateTime_(0) {
+  updateTimeInput_ = float(delay_) / 1000.f;
 }
 
-// Check and count 
-bool Sync::update(bool reset, uint64_t now, bool andCheck)
-{
+// Check and count
+bool Sync::update(bool reset, uint64_t now, bool andCheck) {
   now_ = now;
   updateDiff_ = now_ - last_;
-  stat_ = reset || ((updateDiff_>=delay_) && andCheck);
-  if ( stat_ )
-  {
-  last_ = now_;
-  updateTime_ = double(updateDiff_)/1000.;
+  stat_ = reset || ((updateDiff_ >= delay_) && andCheck);
+  if (stat_) {
+    last_ = now_;
+    updateTime_ = double(updateDiff_) / 1000.;
   }
-  return( stat_ );
+  return (stat_);
 }
-bool Sync::update(uint64_t now, bool reset, bool andCheck)
-{
+bool Sync::update(uint64_t now, bool reset, bool andCheck) {
   now_ = now;
   updateDiff_ = now_ - last_;
-  stat_ = ((updateDiff_>=delay_) || reset) && andCheck;
-  if ( stat_ )
-  {
-  last_ = now_;
-  updateTime_ = double(updateDiff_)/1000.;
+  stat_ = ((updateDiff_ >= delay_) || reset) && andCheck;
+  if (stat_) {
+    last_ = now_;
+    updateTime_ = double(updateDiff_) / 1000.;
   }
-  return( stat_ );
+  return (stat_);
 }
-bool Sync::update(uint64_t now, bool reset)
-{
+bool Sync::update(uint64_t now, bool reset) {
   now_ = now;
   updateDiff_ = now_ - last_;
-  stat_ = (updateDiff_>=delay_) || reset;
-  if ( stat_ )
-  {
-  last_ = now_;
-  updateTime_ = double(updateDiff_)/1000.;
+  stat_ = (updateDiff_ >= delay_) || reset;
+  if (stat_) {
+    last_ = now_;
+    updateTime_ = double(updateDiff_) / 1000.;
   }
-  return( stat_ );
+  return (stat_);
 }
-bool Sync::updateN(uint64_t now, bool reset, bool orCheck)
-{
+bool Sync::updateN(uint64_t now, bool reset, bool orCheck) {
   now_ = now;
   updateDiff_ = now_ - last_;
-  stat_ = reset || ((stat_ && (updateDiff_<delay_)) || orCheck);
-  if ( stat_ )
-  {
-  last_ = now_;
-  updateTime_ = double(updateDiff_)/1000.;
+  stat_ = reset || ((stat_ && (updateDiff_ < delay_)) || orCheck);
+  if (stat_) {
+    last_ = now_;
+    updateTime_ = double(updateDiff_) / 1000.;
   }
-  return( stat_ );
+  return (stat_);
 }

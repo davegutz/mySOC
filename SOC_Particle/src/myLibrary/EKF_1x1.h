@@ -10,8 +10,8 @@
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
 //
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -23,12 +23,13 @@
 
 #pragma once
 
+#include <stdint.h>
+
 class BatteryMonitor;
 
 // Lightweight general purpose state space for embedded application
-class EKF_1x1
-{
-public:
+class EKF_1x1 {
+ public:
   EKF_1x1();
   ~EKF_1x1();
   // operators
@@ -37,31 +38,32 @@ public:
   virtual void pretty_print();
   void print_ekf_serial(BatteryMonitor* Mon, const bool freeze);
   void update_ekf(const double z, double x_min, double x_max);
-  double x() { return ( x_ ); };
-  double y() { return ( y_ ); };
-  double z() { return ( z_ ); };
+  double x() { return (x_); };
+  double y() { return (y_); };
+  double z() { return (z_); };
   void init_ekf(double soc, double Pinit);
-protected:
-  double Fx_; // State transition
-  double Bu_; // Control transition
-  double Q_;  // Process uncertainty
-  double R_;  // State uncertainty
-  double P_;  // Uncertainty covariance
-  double S_;  // System uncertainty
-  double K_;  // Kalman gain
-  double u_;  // Control input
-  double x_;  // Kalman state variable
-  double y_;  // Residual z - hx
-  double z_;  // Observation of state x
-  double x_prior_;  
+
+ protected:
+  double Fx_;  // State transition
+  double Bu_;  // Control transition
+  double Q_;   // Process uncertainty
+  double R_;   // State uncertainty
+  double P_;   // Uncertainty covariance
+  double S_;   // System uncertainty
+  double K_;   // Kalman gain
+  double u_;   // Control input
+  double x_;   // Kalman state variable
+  double y_;   // Residual z - hx
+  double z_;   // Observation of state x
+  double x_prior_;
   double P_prior_;
   double x_post_;
   double P_post_;
-  double hx_; // Output of observation function h(x)
-  double H_;  // Jacobian of h(x)
-  bool freeze_;  // Command to freeze x_ and P_
-  uint64_t now_ekf_;  // Time value extracted from sensors, ms
-  double dt_ekf_;   // Update time for EKF major frame
+  double hx_;           // Output of observation function h(x)
+  double H_;            // Jacobian of h(x)
+  bool freeze_;         // Command to freeze x_ and P_
+  uint64_t now_ekf_;    // Time value extracted from sensors, ms
+  double dt_ekf_;       // Update time for EKF major frame
   double Tb_f_for_hx_;  // Tb_f used for the hx_ calculation, C
   double x_for_hx_;     // soc used for the hx_ calculation, scalar
   /*

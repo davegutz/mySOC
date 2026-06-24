@@ -10,8 +10,8 @@
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
 //
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -23,40 +23,38 @@
 
 #pragma once
 
-#include "constants.h"
 #include "Battery.h"
+#include "Cloud.h"
 #include "FaultStore.h"
 #include "PrinterPars.h"
 #include "Variable.h"
-#include "Cloud.h"
+#include "constants.h"
 
-
-class Parameters
-{
-public:
+class Parameters {
+ public:
   Parameters();
   ~Parameters();
   // Do everything
   bool dirty() { return dirty_; }
   void dirty(const bool d) { dirty_ = d; }
-  bool find_adjust(const String &str);
+  bool find_adjust(const String& str);
   virtual void initialize() {}
   bool is_corrupt();
-  virtual void pretty_print(const bool all){}
+  virtual void pretty_print(const bool all) {}
   void set_nominal();
   String value_str() { return value_str_; }
-protected:
+
+ protected:
   int8_t n_;
   Variable** V_;
   String value_str_;
-  bool dirty_;  // set when a retained param is modified; cleared on backupRamSync (talk 'w')
+  bool dirty_;  // set when a retained param is modified; cleared on
+                // backupRamSync (talk 'w')
 };
 
-
 // Volatile memory
-class VolatilePars : public Parameters
-{
-public:
+class VolatilePars : public Parameters {
+ public:
   VolatilePars();
   ~VolatilePars();
   virtual void initialize();
@@ -109,7 +107,7 @@ public:
   FloatV* ekf_p_p;
   FloatV* q_std_p;
   FloatV* r_std_p;
-  FloatV* ib_scale_amp_p; 
+  FloatV* ib_scale_amp_p;
   FloatV* ib_scale_noa_p;
   FloatV* nP_p;
   FloatV* nS_p;
@@ -236,97 +234,103 @@ public:
   void wait_inj(const uint32_t input) { wait_inj_ = input; }
 
   // Put into RAM and check for validity
-  void put_ib_scale_amp(const float input) { ib_scale_amp_p->check_set_put(input); }
-  void put_ib_scale_noa(const float input) { ib_scale_noa_p->check_set_put(input); }
+  void put_ib_scale_amp(const float input) {
+    ib_scale_amp_p->check_set_put(input);
+  }
+  void put_ib_scale_noa(const float input) {
+    ib_scale_noa_p->check_set_put(input);
+  }
   void put_Vb_scale(const float input) { Vb_scale_p->check_set_put(input); }
 
-protected:
-
-  float cc_diff_slr_;          // Scale cc_diff detection thresh, scalar
-  float cycles_inj_;           // Number of injection cycles
-  bool dc_dc_on_;              // DC-DC charger is on
-  bool dis_vb_fa_lt_;          // Disable hard fault range failures for vb
-  bool disab_ib_fa_;           // Disable hard fault range failures for ib
-  bool disab_tb_fa_;           // Disable hard fault range failures for tb
-  float ds_voc_soc_;           // VOC(SOC) delta soc on input, frac
-  float dv_voc_soc_;           // VOC(SOC) del v, V
-  uint8_t eframe_mult_;        // Frame multiplier for EKF execution.  Number of READ executes for each EKF execution
-  float ekf_conv_;             // ekf abs conv, v
-  float ekf_p_;                // ekf temporary set P, soc
-  float ekf_q_;                // ekf_q scalar, slr
-  float ekf_r_;                // ekf_r scalar, slr
-  float ekf_x_;                // ekf temporary set x, soc
-  float ewhi_slr_;             // Scale wrap hi detection thresh, scalar
-  float ewlo_slr_;             // Scale wrap lo detection thresh, scalar
-  bool fake_faults_;           // Faults faked (ignored).  Used to evaluate a configuration, deploy it without disrupting use
-  float hys_scale_;            // Sim hysteresis scalar
-  float hys_state_;            // Sim hysteresis state
-  float ib_amp_add_;           // Fault injection bias on amp, A
-  float ib_amp_max_;           // ib amp unit hardware model max, A
-  float ib_amp_min_;           // ib amp unit hardware model min, A
-  float Ib_amp_noise_amp_;     // Ib bank noise on amplified sensor, amplitude model only, A pk-pk
-  float ib_diff_slr_;          // Scale ib_diff detection thresh, scalar
-  float ib_noa_add_;           // Fault injection bias on non amp, A
-  float ib_noa_max_;           // ib noa unit hardware model max, A
-  float ib_noa_min_;           // ib noa unit hardware model min, A
-  float Ib_noa_noise_amp_;     // Ib bank noise on non-amplified sensor, amplitude model only, A pk-pk
-  float ib_quiet_slr_;         // Scale ib_quiet detection thresh, scalar
-  float ib_scale_amp_;         // Slr amp
-  float ib_scale_noa_;         // Slr noa
-  float init_all_soc_;         // Reinitialize all models to this soc
-  float init_sim_soc_;         // Reinitialize sim model only to this soc
-  float nP_;                   // number parallel
-  float nS_;                   // number series
-  uint8_t print_mult_;         // Print multiplier for objects
-  float q_std_;                // kf q_std set, v
-  float r_std_;                // kf q_std set, v
-  uint32_t read_delay_;        // Minor frame, ms
-  float s_cap_mon_;            // Scalar cap Mon
-  float s_cap_sim_;            // Scalar cap Sim
-  float s_t_sat_;              // Scalar on saturation test time set and reset
-  uint32_t samp_points_;       // Number of sample readings to take, !=0 initiates sampling
-  float slr_res_;              // Scalar Randles R0, slr
-  uint32_t sum_delay_;         // Minor frame divisor, div
-  uint32_t tail_inj_;          // Tail after end injection, ms
-  uint32_t talk_delay_;        // Talk frame, ms
-  float Tb_bias_model_;        // Bias on Tb for model
-  float Tb_filt_;              // TbHdweFilt time constant, s
-  float Tb_noise_amp_;         // Tb noise amplitude model only, deg C pk-pk
-  uint32_t until_q_;           // Time until set vv0, ms
-  float vb_add_;               // Fault injection bias, V
-  float Vb_noise_amp_;         // Vb bank noise amplitude model only, V pk-pk
-  float Vb_scale_;             // Scale Vb sensor
-  float vc_add_;               // Shunt Vc/Vr Fault injection bias, V
-  float voc_stat_filt_;        // VocStatFilt time constant, s
-  uint32_t wait_inj_;          // Wait before start injection, ms
-
+ protected:
+  float cc_diff_slr_;    // Scale cc_diff detection thresh, scalar
+  float cycles_inj_;     // Number of injection cycles
+  bool dc_dc_on_;        // DC-DC charger is on
+  bool dis_vb_fa_lt_;    // Disable hard fault range failures for vb
+  bool disab_ib_fa_;     // Disable hard fault range failures for ib
+  bool disab_tb_fa_;     // Disable hard fault range failures for tb
+  float ds_voc_soc_;     // VOC(SOC) delta soc on input, frac
+  float dv_voc_soc_;     // VOC(SOC) del v, V
+  uint8_t eframe_mult_;  // Frame multiplier for EKF execution.  Number of READ
+                         // executes for each EKF execution
+  float ekf_conv_;       // ekf abs conv, v
+  float ekf_p_;          // ekf temporary set P, soc
+  float ekf_q_;          // ekf_q scalar, slr
+  float ekf_r_;          // ekf_r scalar, slr
+  float ekf_x_;          // ekf temporary set x, soc
+  float ewhi_slr_;       // Scale wrap hi detection thresh, scalar
+  float ewlo_slr_;       // Scale wrap lo detection thresh, scalar
+  bool fake_faults_;     // Faults faked (ignored).  Used to evaluate a
+                         // configuration, deploy it without disrupting use
+  float hys_scale_;      // Sim hysteresis scalar
+  float hys_state_;      // Sim hysteresis state
+  float ib_amp_add_;     // Fault injection bias on amp, A
+  float ib_amp_max_;     // ib amp unit hardware model max, A
+  float ib_amp_min_;     // ib amp unit hardware model min, A
+  float Ib_amp_noise_amp_;  // Ib bank noise on amplified sensor, amplitude
+                            // model only, A pk-pk
+  float ib_diff_slr_;       // Scale ib_diff detection thresh, scalar
+  float ib_noa_add_;        // Fault injection bias on non amp, A
+  float ib_noa_max_;        // ib noa unit hardware model max, A
+  float ib_noa_min_;        // ib noa unit hardware model min, A
+  float Ib_noa_noise_amp_;  // Ib bank noise on non-amplified sensor, amplitude
+                            // model only, A pk-pk
+  float ib_quiet_slr_;      // Scale ib_quiet detection thresh, scalar
+  float ib_scale_amp_;      // Slr amp
+  float ib_scale_noa_;      // Slr noa
+  float init_all_soc_;      // Reinitialize all models to this soc
+  float init_sim_soc_;      // Reinitialize sim model only to this soc
+  float nP_;                // number parallel
+  float nS_;                // number series
+  uint8_t print_mult_;      // Print multiplier for objects
+  float q_std_;             // kf q_std set, v
+  float r_std_;             // kf q_std set, v
+  uint32_t read_delay_;     // Minor frame, ms
+  float s_cap_mon_;         // Scalar cap Mon
+  float s_cap_sim_;         // Scalar cap Sim
+  float s_t_sat_;           // Scalar on saturation test time set and reset
+  uint32_t samp_points_;    // Number of sample readings to take, !=0 initiates
+                            // sampling
+  float slr_res_;           // Scalar Randles R0, slr
+  uint32_t sum_delay_;      // Minor frame divisor, div
+  uint32_t tail_inj_;       // Tail after end injection, ms
+  uint32_t talk_delay_;     // Talk frame, ms
+  float Tb_bias_model_;     // Bias on Tb for model
+  float Tb_filt_;           // TbHdweFilt time constant, s
+  float Tb_noise_amp_;      // Tb noise amplitude model only, deg C pk-pk
+  uint32_t until_q_;        // Time until set vv0, ms
+  float vb_add_;            // Fault injection bias, V
+  float Vb_noise_amp_;      // Vb bank noise amplitude model only, V pk-pk
+  float Vb_scale_;          // Scale Vb sensor
+  float vc_add_;            // Shunt Vc/Vr Fault injection bias, V
+  float voc_stat_filt_;     // VocStatFilt time constant, s
+  uint32_t wait_inj_;       // Wait before start injection, ms
 };
 
-
-// Definition of structure to be saved, either EERAM or retained backup SRAM.  Many are needed to calibrate.  Others are
-// needed to allow testing with resets.  Others allow application to remember dynamic
-// tweaks.  Default values below are important:  they prevent junk
-// behavior on initial build. Don't put anything in here that you can't live with normal running
-// because could get set by testing and forgotten.
-// SavedPars Class
-class SavedPars : public Parameters
-{
-public:
+// Definition of structure to be saved, either EERAM or retained backup SRAM.
+// Many are needed to calibrate.  Others are needed to allow testing with
+// resets.  Others allow application to remember dynamic tweaks.  Default values
+// below are important:  they prevent junk behavior on initial build. Don't put
+// anything in here that you can't live with normal running because could get
+// set by testing and forgotten. SavedPars Class
+class SavedPars : public Parameters {
+ public:
   SavedPars();
   SavedPars(SerialRAM* ram);
-  SavedPars(Flt_st* hist, const uint16_t nhis, Flt_st* faults, const uint16_t nflt);
+  SavedPars(Flt_st* hist, const uint16_t nhis, Flt_st* faults,
+            const uint16_t nflt);
   ~SavedPars();
- 
+
   // parameter list
   float Amp(const float nP) { return amp_ * nP; }
   bool booted() { return booted_; }
   void booted(const bool input) { booted_ = input; }
   float cutback_gain_slr() { return cutback_gain_slr_; }
-  int debug() { return debug_;}
-  double delta_q() { return delta_q_;}
-  double* delta_q_ptr() { return &delta_q_;}
-  double delta_q_model() { return delta_q_model_;}
-  double* delta_q_model_ptr() { return &delta_q_model_;}
+  int debug() { return debug_; }
+  double delta_q() { return delta_q_; }
+  double* delta_q_ptr() { return &delta_q_; }
+  double delta_q_model() { return delta_q_model_; }
+  double* delta_q_model_ptr() { return &delta_q_model_; }
   float Dw() { return Dw_; }
   float freq() { return freq_; }
   void freq(const float input) { freq_ = input; }
@@ -354,7 +358,11 @@ public:
 
   // functions
   virtual void initialize();
-  void large_reset() { set_nominal(); reset_flt(); reset_his(); }
+  void large_reset() {
+    set_nominal();
+    reset_flt();
+    reset_his();
+  }
   void mem_print();
   uint16_t nflt() { return nflt_; }
   uint16_t nhis() { return nhis_; }
@@ -371,18 +379,49 @@ public:
   void reset_flt();
   void reset_his();
   virtual void set_nominal();
-  float ib_hist_m_slr() { if ( abs(amp_) > SCL_40 ) return SCL_30000/abs(amp_); else return SCL_600; }
-  float ib_hist_n_slr() { if ( abs(amp_) > SCL_40 ) return SCL_30000/abs(amp_); else return SCL_60; }
-  float vb_hist_slr() { if ( abs(amp_) > SCL_40 ) return SCL_1500/abs(amp_); else return SCL_1200; }
-  bool mod_ib_all_dscn() { return ( 191<modeling() ); }             // Nothing connected to ib sensors in I2C on SDA/SCL
-  bool mod_ib_noa_dscn() { return ( 1<<7 & modeling() ); }          // Nothing connected to noa ib sensors in I2C on SDA/SCL
-  bool mod_ib_amp_dscn() { return ( 1<<6 & modeling() ); }          // Nothing connected to amp ib sensors in I2C on SDA/SCL
-  bool mod_vb_dscn() { return ( 1<<5 & modeling() ); }              // Nothing connected to vb on A1
-  bool mod_tb_dscn() { return ( 1<<4 & modeling() ); }              // Nothing connected to one-wire Tb sensor on D6
-  bool mod_ib() { return ( 1<<2 & modeling() || mod_ib_all_dscn() ); }  // Using Sim as source of ib
-  bool mod_vb() { return ( 1<<1 & modeling() || mod_vb_dscn() ); }  // Using Sim as source of vb
-  bool mod_tb() { return ( 1<<0 & modeling() || mod_tb_dscn() ); }  // Using Sim as source of tb
-  bool mod_none() { return ( 0==modeling() ); }                     // Using all
+  float ib_hist_m_slr() {
+    if (abs(amp_) > SCL_40)
+      return SCL_30000 / abs(amp_);
+    else
+      return SCL_600;
+  }
+  float ib_hist_n_slr() {
+    if (abs(amp_) > SCL_40)
+      return SCL_30000 / abs(amp_);
+    else
+      return SCL_60;
+  }
+  float vb_hist_slr() {
+    if (abs(amp_) > SCL_40)
+      return SCL_1500 / abs(amp_);
+    else
+      return SCL_1200;
+  }
+  bool mod_ib_all_dscn() {
+    return (191 < modeling());
+  }  // Nothing connected to ib sensors in I2C on SDA/SCL
+  bool mod_ib_noa_dscn() {
+    return (1 << 7 & modeling());
+  }  // Nothing connected to noa ib sensors in I2C on SDA/SCL
+  bool mod_ib_amp_dscn() {
+    return (1 << 6 & modeling());
+  }  // Nothing connected to amp ib sensors in I2C on SDA/SCL
+  bool mod_vb_dscn() {
+    return (1 << 5 & modeling());
+  }  // Nothing connected to vb on A1
+  bool mod_tb_dscn() {
+    return (1 << 4 & modeling());
+  }  // Nothing connected to one-wire Tb sensor on D6
+  bool mod_ib() {
+    return (1 << 2 & modeling() || mod_ib_all_dscn());
+  }  // Using Sim as source of ib
+  bool mod_vb() {
+    return (1 << 1 & modeling() || mod_vb_dscn());
+  }  // Using Sim as source of vb
+  bool mod_tb() {
+    return (1 << 0 & modeling() || mod_tb_dscn());
+  }                                              // Using Sim as source of tb
+  bool mod_none() { return (0 == modeling()); }  // Using all
 
   // put
   void put_booted(const bool input) { booted_p->check_set_put(input); }
@@ -390,21 +429,29 @@ public:
   void put_all_dynamic();
   void put_Delta_q(const double input) { delta_q_p->check_set_put(input); }
   void put_delta_q() {}
-  void put_delta_q_model(const double input) { delta_q_model_p->check_set_put(input); }
+  void put_delta_q_model(const double input) {
+    delta_q_model_p->check_set_put(input);
+  }
   void put_delta_q_model() {}
   void put_ib_force(const int8_t input) { ib_force_p->check_set_put(input); }
   void put_Iflt(const int input) { iflt_p->check_set_put(input); }
   void put_Ihis(const int input) { ihis_p->check_set_put(input); }
   void put_Isum(const int input) { isum_p->check_set_put(input); }
   void put_Inj_bias(const float input) { inj_bias_p->check_set_put(input); }
-  void put_Preserving(const uint8_t input) { preserving_p->check_set_put(input); }
+  void put_Preserving(const uint8_t input) {
+    preserving_p->check_set_put(input);
+  }
   void put_Time_now(const uint32_t input) { Time_now_p->check_set_put(input); }
   void put_Type(const uint8_t input) { Type_p->check_set_put(input); }
-  
-  void put_fault(const Flt_st input, const uint8_t i) { fault_[i].copy_to_Flt_ram_from(input); }
+
+  void put_fault(const Flt_st input, const uint8_t i) {
+    fault_[i].copy_to_Flt_ram_from(input);
+  }
   //
   Flt_st put_history(const Flt_st input, const uint8_t i);
-  bool tweak_test() { return ( 1<<3 & modeling() ); } // Driving signal injection completely using software inj_bias 
+  bool tweak_test() {
+    return (1 << 3 & modeling());
+  }  // Driving signal injection completely using software inj_bias
   FloatV* amp_p;
   BooleanV* booted_p;
   FloatV* cutback_gain_slr_p;
@@ -430,18 +477,17 @@ public:
   FloatV* Vb_bias_hdwe_p;
   FloatV* vsat_add_p;
 
-protected:
-
+ protected:
   SerialRAM* rP_;
   Flt_st* fault_;
   Flt_st* history_;
   uint16_t next_;
-  uint16_t nflt_;         // Length of Flt_ram array for fault snapshot
-  uint16_t nhis_;         // Length of Flt_ram array for fault history
-  uint16_t nsum_;         // Length of Sum array for history
+  uint16_t nflt_;  // Length of Flt_ram array for fault snapshot
+  uint16_t nhis_;  // Length of Flt_ram array for fault history
+  uint16_t nsum_;  // Length of Sum array for history
 
   float amp_;
-  bool booted_;                // True if device has been bootstrapped (i.e. initialized)
+  bool booted_;  // True if device has been bootstrapped (i.e. initialized)
   float cutback_gain_slr_;
   float Dw_;
   int debug_;
@@ -463,6 +509,5 @@ protected:
   uint32_t Time_now_;
   uint8_t type_;
   float Vb_bias_hdwe_;
-  float vsat_add_;             // Saturation voltage bias, V
-
+  float vsat_add_;  // Saturation voltage bias, V
 };

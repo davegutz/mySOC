@@ -10,8 +10,8 @@
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
 //
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -23,21 +23,22 @@
 
 #pragma once
 
-#include "myLibrary/myFilters.h"
 #include "Battery.h"
-#include "constants.h"
 #include "Cloud.h"
-#include "talk/chitchat.h"
-#include "parameters.h"
-#include "command.h"
 #include "Sync.h"
+#include "command.h"
+#include "constants.h"
+#include "myLibrary/myFilters.h"
+#include "parameters.h"
+#include "talk/chitchat.h"
 
 // Sensors
 #include "Sensors.h"
 
 const size_t UART_TX_BUF_SIZE = 20;
 
-extern SavedPars sp;    // Various parameters to be static at system level and saved through power cycle
+extern SavedPars sp;    // Various parameters to be static at system level and
+                        // saved through power cycle
 extern PublishPars pp;  // For publishing
 extern CommandPars cp;  // Various parameters to be static at system level
 
@@ -49,14 +50,18 @@ bool is_finished(const char in_char);
 void print_battery_header();
 void print_battery_serial();
 void print_all_header(Sensors* Sen);
-void print_rapid_data(const bool reset, Sensors* Sen, BatteryMonitor* Mon, const bool reset_temp);
+void print_rapid_data(const bool reset, Sensors* Sen, BatteryMonitor* Mon,
+                      const bool reset_temp);
 void print_rapid_header();
-void print_rapid_serial(const bool reset, Publish* pubList, Sensors* Sen, BatteryMonitor* Mon);
-void print_sim_serial(const bool initializing_all, const bool reset_temp, Sensors* Sen, BatterySim* Sim);
+void print_rapid_serial(const bool reset, Publish* pubList, Sensors* Sen,
+                        BatteryMonitor* Mon);
+void print_sim_serial(const bool initializing_all, const bool reset_temp,
+                      Sensors* Sen, BatterySim* Sim);
 void print_sim_header();
 void print_shunt_header(Sensors* Sen);
 void print_shunt_serial(const bool reset, Sensors* Sen);
-void print_signal_sel_serial(const bool reset, Sensors* Sen, BatteryMonitor* Mon, BatterySim* Sim);
+void print_signal_sel_serial(const bool reset, Sensors* Sen,
+                             BatteryMonitor* Mon, BatterySim* Sim);
 void print_signal_sel_header();
 void print_ekf_header();
 void sendTxBuf(const String& txBuf, const bool sendSerial, const bool sendBLE);

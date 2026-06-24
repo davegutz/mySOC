@@ -10,7 +10,8 @@
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
 //
-// The above copyright notice and this permission notice shall be included in all
+// The above copyright notice and this permission notice shall be included in
+all
 // copies or substantial portions of the Software.
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
@@ -29,7 +30,7 @@
 void add_verify(String* src, const String addend);
 
 #ifdef DEBUG_INIT
-  void debug_m1(BatteryMonitor* Mon, Sensors* Sen);
+void debug_m1(BatteryMonitor* Mon, Sensors* Sen);
 #endif
 
 void debug_12(BatteryMonitor* Mon, Sensors* Sen);
@@ -44,6 +45,5 @@ void debug_qf(BatteryMonitor* Mon, Sensors* Sen);
 void debug_qs(BatteryMonitor* Mon, Sensors* Sen);
 
 #ifdef SOFT_DEBUG_QUEUE
-  void debug_queue(const String who);
+void debug_queue(const String who);
 #endif
-

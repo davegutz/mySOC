@@ -10,8 +10,8 @@
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
 //
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -21,30 +21,31 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "application.h"
 #include "EKF_1x1.h"
-#include <math.h>
-#include "parameters.h"
-extern SavedPars sp; // Various parameters to be static at system level and saved through power cycle
-extern VolatilePars ap; // Various adjustment parameters shared at system level
-// extern int8_t debug();
 
+#include <math.h>
+
+#include "application.h"
+#include "parameters.h"
+extern SavedPars sp;     // Various parameters to be static at system level and
+                         // saved through power cycle
+extern VolatilePars ap;  // Various adjustment parameters shared at system level
+// extern int8_t debug();
 
 // class EKF_1x1
 // constructors
 EKF_1x1::EKF_1x1()
-  : Fx_(0.), Bu_(0.), Q_(0.), R_(0.), P_(0.), S_(0.), K_(0.), u_(0.), x_(0.), y_(0.), z_(0.),
-    x_prior_(0.), P_prior_(0.), x_post_(0.), P_post_(0.), hx_(0.), H_(0.),
-    freeze_(false), now_ekf_(0ULL), dt_ekf_(0.), Tb_f_for_hx_(0.), x_for_hx_(0.)
-{}
+    : Fx_(0.), Bu_(0.), Q_(0.), R_(0.), P_(0.), S_(0.), K_(0.), u_(0.), x_(0.),
+      y_(0.), z_(0.), x_prior_(0.), P_prior_(0.), x_post_(0.), P_post_(0.),
+      hx_(0.), H_(0.), freeze_(false), now_ekf_(0ULL), dt_ekf_(0.),
+      Tb_f_for_hx_(0.), x_for_hx_(0.) {}
 EKF_1x1::~EKF_1x1() {}
 
 // operators
 
 // functions
-//1x1 Extended Kalman Filter predict
-void EKF_1x1::predict_ekf(double u, const bool freeze)
-{
+// 1x1 Extended Kalman Filter predict
+void EKF_1x1::predict_ekf(double u, const bool freeze) {
   /*
   1x1 Extended Kalman Filter predict
   Inputs:
@@ -59,17 +60,16 @@ void EKF_1x1::predict_ekf(double u, const bool freeze)
   u_ = u;
   freeze_ = freeze;
   this->ekf_predict(&Fx_, &Bu_);
-  if ( !freeze_ ) x_ = Fx_*x_ + Bu_*u_;
-  if ( isnan(P_) ) P_ = 0.;   // reset overflow
-  P_ = Fx_*P_*Fx_ + Q_*ap.ekf_q()*ap.ekf_q();
+  if (!freeze_) x_ = Fx_ * x_ + Bu_ * u_;
+  if (isnan(P_)) P_ = 0.;  // reset overflow
+  P_ = Fx_ * P_ * Fx_ + Q_ * ap.ekf_q() * ap.ekf_q();
   x_prior_ = x_;
   P_prior_ = P_;
 }
 
 // y <- C@x + D@u
 // Backward Euler integration of x
-void EKF_1x1::update_ekf(const double z, double x_min, double x_max)
-{
+void EKF_1x1::update_ekf(const double z, double x_min, double x_max) {
   /*1x1 Extended Kalman Filter update
   Inputs:
   z   1x1 input, =voc, dynamic predicted by other model, V
@@ -87,44 +87,43 @@ void EKF_1x1::update_ekf(const double z, double x_min, double x_max)
   */
   this->ekf_update(&hx_, &H_, &x_for_hx_, &Tb_f_for_hx_);
   z_ = z;
-  double pht = P_*H_;
-  S_ = H_*pht + R_*ap.ekf_r()*ap.ekf_r();
-  if ( abs(S_) > 1e-12) K_ = pht / S_;  // Using last-good-value if S_ = 0
+  double pht = P_ * H_;
+  S_ = H_ * pht + R_ * ap.ekf_r() * ap.ekf_r();
+  if (abs(S_) > 1e-12) K_ = pht / S_;  // Using last-good-value if S_ = 0
   y_ = z_ - hx_;
-  if ( !freeze_ ) x_ = max(min( x_ + K_*y_, x_max), x_min);
-  if ( ap.ekf_x() != 0. )
-  {
-  x_ = ap.ekf_x();
-  ap.ekf_x(0.);
+  if (!freeze_) x_ = max(min(x_ + K_ * y_, x_max), x_min);
+  if (ap.ekf_x() != 0.) {
+    x_ = ap.ekf_x();
+    ap.ekf_x(0.);
   }
-  double i_kh = 1. - K_*H_;
-  if ( freeze_ ) i_kh = 1.;
+  double i_kh = 1. - K_ * H_;
+  if (freeze_) i_kh = 1.;
   P_ *= i_kh;
-  if ( ap.ekf_p() != 0. )
-  {
-  P_ = ap.ekf_p();
-  ap.ekf_p(0.);
+  if (ap.ekf_p() != 0.) {
+    P_ = ap.ekf_p();
+    ap.ekf_p(0.);
   }
   x_post_ = x_;
   P_post_ = P_;
 
-  if ( sp.debug()==35 )
-  sendTxBuf(String::format("tbf u freeze z hx: %8.4f%8.4f%2d%8.4f%8.4f,   xp x P Pp:  %13.10f%13.10f%13.10f%13.10f,  H S K y:  %11.6f%7.4f%7.4f%11.7f,\n",
-    Tb_f_for_hx_, u_, freeze_, z_, hx_,        x_prior_, x_, P_, P_prior_,      H_, S_, K_, y_), true, IN_SERVICE);
-
+  if (sp.debug() == 35)
+    sendTxBuf(String::format("tbf u freeze z hx: %8.4f%8.4f%2d%8.4f%8.4f,   xp "
+                             "x P Pp:  %13.10f%13.10f%13.10f%13.10f,  H S K y: "
+                             " %11.6f%7.4f%7.4f%11.7f,\n",
+                             Tb_f_for_hx_, u_, freeze_, z_, hx_, x_prior_, x_,
+                             P_, P_prior_, H_, S_, K_, y_),
+              true, IN_SERVICE);
 }
 
 // Initialize
-void EKF_1x1::init_ekf(double soc, double Pinit)
-{
+void EKF_1x1::init_ekf(double soc, double Pinit) {
   x_ = soc;
   P_ = Pinit;
 }
 
 // Pretty Print
-void EKF_1x1::pretty_print()
-{
-  #if !IN_SERVICE
+void EKF_1x1::pretty_print() {
+#if !IN_SERVICE
   Serial.printf("EKF_1x1:\n");
   Serial.printf("In:\n");
   Serial.printf("  u  %8.4f, A\n", u_);
@@ -145,7 +144,7 @@ void EKF_1x1::pretty_print()
   Serial.printf("  P%13.10f\n", P_);
   Serial.printf("  K%13.10f\n", K_);
   Serial.printf("  S%13.10f\n", S_);
-  #else
-    Serial.printf("EKF_1x1: silent DEPLOY\n");
-  #endif
+#else
+  Serial.printf("EKF_1x1: silent DEPLOY\n");
+#endif
 }

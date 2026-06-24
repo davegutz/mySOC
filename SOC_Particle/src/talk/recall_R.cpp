@@ -10,8 +10,8 @@
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
 //
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -20,59 +20,60 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-#include "application.h"
 #include "recall_R.h"
-#include "../subs.h"
+
 #include "../command.h"
 #include "../constants.h"
+#include "../subs.h"
+#include "application.h"
 // #include "../Summary.h"
-#include "../parameters.h"
 #include <math.h>
+
+#include "../parameters.h"
 // #include "../debug.h"
 
-extern SavedPars sp;    // Various parameters to be static at system level and saved through power cycle
-extern VolatilePars ap; // Various adjustment parameters shared at system level
-extern CommandPars cp;  // Various parameters shared at system level
+extern SavedPars sp;     // Various parameters to be static at system level and
+                         // saved through power cycle
+extern VolatilePars ap;  // Various adjustment parameters shared at system level
+extern CommandPars cp;   // Various parameters shared at system level
 extern Flt_st mySum[NSUM];  // Summaries for saving charge history
 
-bool recall_R(const char letter_1, BatteryMonitor* Mon, Sensors* Sen)
-{
+bool recall_R(const char letter_1, BatteryMonitor* Mon, Sensors* Sen) {
   bool found = true;
-  switch ( letter_1 )
-  {
-    case ( 'b' ):  // Rb:  Reset battery states (also hys)
+  switch (letter_1) {
+    case ('b'):  // Rb:  Reset battery states (also hys)
       Sen->Sim->init_battery_sim(true, Sen);  // Reset sim battery state
       Mon->init_battery_mon(true, Sen);       // Reset mon battery state
       break;
 
-    case ( 'e' ):  // Re:  Reset EKF
+    case ('e'):  // Re:  Reset EKF
       Serial.printf("Reset Extended Kalman filter\n");
       cp.ekf_reset = true;
       break;
 
-    case ( 'f' ):  // Rf:  Reset fault Rf
+    case ('f'):  // Rf:  Reset fault Rf
       Serial.printf("Reset latches\n");
       Sen->Flt->reset_all_faults(true);
       break;
 
-    case ( 'i' ):  // Ri:  Reset infinite counter
+    case ('i'):  // Ri:  Reset infinite counter
       Serial.printf("Reset infinite counter\n");
       cp.inf_reset = true;
       break;
 
-    case ( 'k' ):  // Rk:  Reset fault Rk
+    case ('k'):  // Rk:  Reset fault Rk
       Serial.printf("Reset kalman filters\n");
       cp.cmd_reset_kf();
       break;
 
-    case ( 'r' ):  // Rr:  small reset counters
+    case ('r'):  // Rr:  small reset counters
       Serial.printf("CC reset\n");
       Sen->Sim->apply_soc(1.0, Sen->Tb_f());
       Mon->apply_soc(1.0, Sen->Tb_f());
       cp.cmd_reset();
       break;
 
-    case ( 'R' ):  // RR:  large reset
+    case ('R'):  // RR:  large reset
       sendTxBuf("RESET\n", true, IN_SERVICE);
       Sen->Sim->apply_soc(1.0, Sen->Tb_f());
       Mon->apply_soc(1.0, Sen->Tb_f());
@@ -93,24 +94,25 @@ bool recall_R(const char letter_1, BatteryMonitor* Mon, Sensors* Sen)
       chit("Pf;", SOON);
       break;
 
-    case ( 's' ):  // Rs:  small reset filters
+    case ('s'):  // Rs:  small reset filters
       Serial.printf("reset\n");
       cp.cmd_reset();
       break;
 
-    case ( 'S' ):  // RS: renominalize saved pars
+    case ('S'):  // RS: renominalize saved pars
       sp.set_nominal();
       sp.pretty_print(true);
       break;
 
-    case ( 'V' ):  // RV: renominalize volatile pars
+    case ('V'):  // RV: renominalize volatile pars
       ap.set_nominal();
       ap.pretty_print(true);
       break;
 
     default:
       found = ap.find_adjust(cp.cmd_str) || sp.find_adjust(cp.cmd_str);
-      if (!found) Serial.printf("%s NOT FOUND\n", cp.cmd_str.substring(0,2).c_str());
+      if (!found)
+        Serial.printf("%s NOT FOUND\n", cp.cmd_str.substring(0, 2).c_str());
   }
   return found;
 }

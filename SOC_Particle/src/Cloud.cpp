@@ -10,8 +10,8 @@
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
 //
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -21,40 +21,44 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "subs.h"
 #include "Cloud.h"
+
+#include "subs.h"
 // #include "constants.h"
 #include <math.h>
 
-extern CommandPars cp;            // Various parameters to be common at system level (reset on PLC reset)
-extern PublishPars pp;            // For publishing
+extern CommandPars
+    cp;  // Various parameters to be common at system level (reset on PLC reset)
+extern PublishPars pp;  // For publishing
 
 // Assignments
-void assign_publist(Publish* pubList, const uint64_t now, const String unit, const String hm_string,
-  Sensors* Sen, const int num_timeouts, BatteryMonitor* Mon)
-{
+void assign_publist(Publish* pubList, const uint64_t now, const String unit,
+                    const String hm_string, Sensors* Sen,
+                    const int num_timeouts, BatteryMonitor* Mon) {
   String batt;
-  if ( CHEM == 0 )
-  batt = "_bb";
-  else if ( CHEM == 1 )
-  batt = "_ch";
-  else if ( CHEM == 2 )
-  batt = "_chg";
+  if (CHEM == 0)
+    batt = "_bb";
+  else if (CHEM == 1)
+    batt = "_ch";
+  else if (CHEM == 2)
+    batt = "_chg";
   else
-  batt = "_un";
+    batt = "_un";
   pubList->now = now;
   pubList->unit = unit + batt.c_str();
-  pubList->hm_string =hm_string;
+  pubList->hm_string = hm_string;
   pubList->Tb = Sen->Tb();
   // Log.info("    assign_publist pubList->Tb=%9.5f", pubList->Tb);
-  if ( sp.ib_force()>-1 )
-  pubList->Ib = Sen->Ib();
+  if (sp.ib_force() > -1)
+    pubList->Ib = Sen->Ib();
   else
-  pubList->Ib = Sen->Ib_hdwe_f();
+    pubList->Ib = Sen->Ib_hdwe_f();
   pubList->tcharge = Mon->tcharge();
-  pubList->Voc = Mon->voc()*ap.nS();
+  pubList->Voc = Mon->voc() * ap.nS();
   pubList->sat = Mon->sat();
   pubList->saturated = Mon->saturated();
-  pubList->Amp_hrs_remaining_ekf = Mon->amp_hrs_remaining_ekf()*ap.nS()*ap.nP();
-  pubList->Amp_hrs_remaining_soc = Mon->amp_hrs_remaining_soc()*ap.nS()*ap.nP();
+  pubList->Amp_hrs_remaining_ekf =
+      Mon->amp_hrs_remaining_ekf() * ap.nS() * ap.nP();
+  pubList->Amp_hrs_remaining_soc =
+      Mon->amp_hrs_remaining_soc() * ap.nS() * ap.nP();
 }

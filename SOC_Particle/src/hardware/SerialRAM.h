@@ -14,57 +14,56 @@
 
 #pragma once
 
+#include <stdint.h>
+
 const uint16_t MAX_EERAM = 0x07FF;
 
 typedef union {
   uint16_t a16;
   uint8_t a8[2];
-}address16b;
+} address16b;
 
 class SerialRAM {
-private:
+ private:
   int8_t SRAM_REGISTER;
   int8_t CONTROL_REGISTER;
   uint8_t readControlRegister();
 
-public:
-  
+ public:
   void begin(const uint8_t a0, const uint8_t a1);
   uint8_t write(const uint16_t address, const uint8_t value);
   uint8_t read(const uint16_t address);
   void setAutoStore(const bool value);
   bool getAutoStore();
-  
+
   uint8_t write(const uint16_t address, const uint8_t* values,
                 const uint16_t size);
   void read(const uint16_t address, uint8_t* values, const uint16_t size);
 
-  //Functionality to 'get' and 'put' objects to and from EERAM
-  // https://github.com/sparkfun/
-  // External_EEPROM_Arduino_Library/blob/master/src/SparkFun_External_EEPROM.h
+  // Functionality to 'get' and 'put' objects to and from EERAM
+  //  https://github.com/sparkfun/
+  //  External_EEPROM_Arduino_Library/blob/master/src/SparkFun_External_EEPROM.h
   template <typename T>
-  T &get(uint16_t idx, T &t)
-  {
-    #if !defined(HDWE_BARE)
-      uint8_t* ptr = (uint8_t*)&t;
-      read(idx, ptr, sizeof(T)); //Address, data, sizeOfData
-    #else
-      t = T (0);
-    #endif
+  T& get(uint16_t idx, T& t) {
+#if !defined(HDWE_BARE)
+    uint8_t* ptr = (uint8_t*)&t;
+    read(idx, ptr, sizeof(T));  // Address, data, sizeOfData
+#else
+    t = T(0);
+#endif
     return t;
   }
 
   template <typename T>
-  const T &put(uint16_t idx, const T &t) //Address, data
+  const T& put(uint16_t idx, const T& t)  // Address, data
   {
-    #if !defined(HDWE_BARE)
-      const uint8_t* ptr = (const uint8_t *)&t;
-      write(idx, ptr, sizeof(T)); //Address, data, sizeOfData
-    #else
-      T x = t;
-      x = x;
-    #endif
+#if !defined(HDWE_BARE)
+    const uint8_t* ptr = (const uint8_t*)&t;
+    write(idx, ptr, sizeof(T));  // Address, data, sizeOfData
+#else
+    T x = t;
+    x = x;
+#endif
     return t;
   }
 };
-

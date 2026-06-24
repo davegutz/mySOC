@@ -10,8 +10,8 @@
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
 //
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -20,62 +20,68 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-#include "application.h"
 #include "recall_H.h"
-#include "../command.h"
+
 #include "../Summary.h"
+#include "../command.h"
 #include "../parameters.h"
+#include "application.h"
 #include "chitchat.h"
 #include "serial.h"
 
-extern SavedPars sp;    // Various parameters to be static at system level and saved through power cycle
-extern VolatilePars ap; // Various adjustment parameters shared at system level
-extern CommandPars cp;  // Various parameters shared at system level
+extern SavedPars sp;     // Various parameters to be static at system level and
+                         // saved through power cycle
+extern VolatilePars ap;  // Various adjustment parameters shared at system level
+extern CommandPars cp;   // Various parameters shared at system level
 extern Flt_st mySum[NSUM];  // Summaries for saving charge history
 
-bool recall_H(const char letter_1, BatteryMonitor* Mon, Sensors* Sen)
-{
+bool recall_H(const char letter_1, BatteryMonitor* Mon, Sensors* Sen) {
   bool found = true;
-  switch ( letter_1 )
-  {
-  case ( 'd' ):  // Hd: History dump
-    Serial.printf("\n");
-    print_all_fault_buffer("unit_u", mySum, sp.isum(), sp.nsum());
-    sp.print_fault_header(&pp.pubList);
-    chit("Pr;Q;", SOON);
-    Serial.printf("\n");
-    print_battery_header();  // When Hd is triggered at end of GUI run, after BZ command, this changes settings for python model
-    print_battery_serial();  // When Hd is triggered at end of GUI run, after BZ command, this changes settings for python model
-    sp.print_history_array();
-    sp.print_fault_header(&pp.pubList);
-    sp.print_fault_array();
-    sp.print_fault_header(&pp.pubList);
-    break;
+  switch (letter_1) {
+    case ('d'):  // Hd: History dump
+      Serial.printf("\n");
+      print_all_fault_buffer("unit_u", mySum, sp.isum(), sp.nsum());
+      sp.print_fault_header(&pp.pubList);
+      chit("Pr;Q;", SOON);
+      Serial.printf("\n");
+      print_battery_header();  // When Hd is triggered at end of GUI run, after
+                               // BZ command, this changes settings for python
+                               // model
+      print_battery_serial();  // When Hd is triggered at end of GUI run, after
+                               // BZ command, this changes settings for python
+                               // model
+      sp.print_history_array();
+      sp.print_fault_header(&pp.pubList);
+      sp.print_fault_array();
+      sp.print_fault_header(&pp.pubList);
+      break;
 
-  case ( 'f' ):  // Hf: History dump faults only
-    print_battery_header();
-    print_battery_serial();
-    Serial.printf("\n");
-    sp.print_fault_array();
-    sp.print_fault_header(&pp.pubList);
-    break;
+    case ('f'):  // Hf: History dump faults only
+      print_battery_header();
+      print_battery_serial();
+      Serial.printf("\n");
+      sp.print_fault_array();
+      sp.print_fault_header(&pp.pubList);
+      break;
 
-  case ( 'R' ):  // HR: History reset
-    Serial.printf("Reset sum, his, flt...");
-    reset_all_fault_buffer("unit_h", mySum, sp.isum(), sp.nsum());
-    sp.reset_his();
-    sp.reset_flt();
-    Serial.printf("Reset infinite counter\n");
-    cp.inf_reset = true;        Serial.printf("done\n");
-    break;
+    case ('R'):  // HR: History reset
+      Serial.printf("Reset sum, his, flt...");
+      reset_all_fault_buffer("unit_h", mySum, sp.isum(), sp.nsum());
+      sp.reset_his();
+      sp.reset_flt();
+      Serial.printf("Reset infinite counter\n");
+      cp.inf_reset = true;
+      Serial.printf("done\n");
+      break;
 
-  case ( 's' ):  // Hs: History snapshot
-    cp.cmd_summarize();
-    break;
+    case ('s'):  // Hs: History snapshot
+      cp.cmd_summarize();
+      break;
 
-  default:
-    found = ap.find_adjust(cp.cmd_str) || sp.find_adjust(cp.cmd_str);
-    if (!found) Serial.printf("%s NOT FOUND\n", cp.cmd_str.substring(0,2).c_str());
+    default:
+      found = ap.find_adjust(cp.cmd_str) || sp.find_adjust(cp.cmd_str);
+      if (!found)
+        Serial.printf("%s NOT FOUND\n", cp.cmd_str.substring(0, 2).c_str());
   }
   return found;
 }
