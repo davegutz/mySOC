@@ -38,19 +38,19 @@ extern PublishPars pp;    // For publishing
 
 // class Coulombs
 Coulombs::Coulombs() {}
-Coulombs::Coulombs(double *sp_delta_q, const double q_cap_rated,
+Coulombs::Coulombs(double* sp_delta_q, const double q_cap_rated,
   const double s_coul_eff, const float dx_voc, const float dy_voc, const float dz_voc)
   : resetting_(false), d_delta_q_(0.), delta_q_abs_(0.), delta_q_inf_(0.), delta_q_neg_(0.), delta_q_pos_(0.), dt_(0.),
-    q_(q_cap_rated), q_capacity_(q_cap_rated), q_cap_rated_(q_cap_rated), q_cap_rated_scaled_(q_cap_rated), q_inf_(0.), q_min_(0.),
-    sat_(true), saturated_(false), soc_(1.), soc_ekf_min_(0.), soc_inf_(0.), soc_min_(0.), sp_delta_q_(sp_delta_q),
-    tb_f_(0.), tb_f_rate_(0.), Tb_f_(0.), Tb_f_rate_(0.), time_neg_(0.), time_pos_(0.), chem_()
-    {
-      coul_eff_ = chem_.coul_eff*s_coul_eff;
-      soc_ekf_min_ = chem_.soc_ekf_min;
-      put_dx_voc(dx_voc);
-      put_dy_voc(dy_voc);
-      put_dz_voc(dz_voc);
-    }
+  q_(q_cap_rated), q_capacity_(q_cap_rated), q_cap_rated_(q_cap_rated), q_cap_rated_scaled_(q_cap_rated), q_inf_(0.), q_min_(0.),
+  sat_(true), saturated_(false), soc_(1.), soc_ekf_min_(0.), soc_inf_(0.), soc_min_(0.), sp_delta_q_(sp_delta_q),
+  tb_f_(0.), tb_f_rate_(0.), Tb_f_(0.), Tb_f_rate_(0.), time_neg_(0.), time_pos_(0.), chem_()
+  {
+    coul_eff_ = chem_.coul_eff*s_coul_eff;
+    soc_ekf_min_ = chem_.soc_ekf_min;
+    put_dx_voc(dx_voc);
+    put_dy_voc(dy_voc);
+    put_dz_voc(dz_voc);
+  }
 Coulombs::~Coulombs() {}
 
 
@@ -59,34 +59,34 @@ Coulombs::~Coulombs() {}
 void Coulombs::pretty_print()
 {
   #if !IN_SERVICE
-    Serial.printf("Coulombs:\n");
-    Serial.printf(" coul_eff%9.5f\n", coul_eff_);
-    Serial.printf(" d_delta_q%9.1f, C\n", d_delta_q_);
-    Serial.printf(" delta_q%9.1f, C\n", *sp_delta_q_);
-    Serial.printf(" delta_q_inf/delta_q_abs%9.1f / %9.1f %8.4f C\n", delta_q_inf_, delta_q_abs(), delta_q_inf_/delta_q_abs());
-    Serial.printf(" delta_q_neg%9.1f C, time_neg%9.1f s\n", delta_q_neg_, time_neg_);
-    Serial.printf(" delta_q_pos%9.1f C, time_pos%9.1f s\n", delta_q_pos_, time_pos_);
-    Serial.printf(" dt%9.6f, s\n", dt_);
-    Serial.printf(" mod_code %d\n", mod_code());
-    Serial.printf(" mod %s\n", chem_.decode(mod_code()).c_str());
-    Serial.printf(" q%9.1f, C\n", q_);
-    Serial.printf(" q_cap%9.1f, C\n", q_capacity_);
-    Serial.printf(" q_cap_rat%9.1f, C\n", q_cap_rated_);
-    Serial.printf(" q_cap_rat_scl%9.1f, C\n", q_cap_rated_scaled_);
-    Serial.printf(" q_min%9.1f, C\n", q_min_);
-    Serial.printf(" resetting %d\n", resetting_);
-    Serial.printf(" sat %d\n", sat_);
-    Serial.printf(" soc%8.4f\n", soc_);
-    Serial.printf(" soc_inf%8.4f\n", soc_inf_);
-    Serial.printf(" soc_min%8.4f\n", soc_min_);
-    Serial.printf(" tb_f_%5.1f dg C\n", tb_f_);
-    Serial.printf(" rated_t%5.1f dg C\n", chem_.rated_temp);
-    Serial.printf(" tb_f_rate%9.5f dg C / s\n", tb_f_rate_);
-    Serial.printf(" tb_f_rate%9.5f dg C / s\n", Tb_f_rate_);
-    Serial.printf("Coulombs (mod_code=%d) ", mod_code());
-    Serial.printf("Coulombs: silent DEPLOY\n");
-    Serial.printf(" Chemistry::\n");
-    chem_pretty_print();
+  Serial.printf("Coulombs:\n");
+  Serial.printf(" coul_eff%9.5f\n", coul_eff_);
+  Serial.printf(" d_delta_q%9.1f, C\n", d_delta_q_);
+  Serial.printf(" delta_q%9.1f, C\n", *sp_delta_q_);
+  Serial.printf(" delta_q_inf/delta_q_abs%9.1f / %9.1f %8.4f C\n", delta_q_inf_, delta_q_abs(), delta_q_inf_/delta_q_abs());
+  Serial.printf(" delta_q_neg%9.1f C, time_neg%9.1f s\n", delta_q_neg_, time_neg_);
+  Serial.printf(" delta_q_pos%9.1f C, time_pos%9.1f s\n", delta_q_pos_, time_pos_);
+  Serial.printf(" dt%9.6f, s\n", dt_);
+  Serial.printf(" mod_code %d\n", mod_code());
+  Serial.printf(" mod %s\n", chem_.decode(mod_code()).c_str());
+  Serial.printf(" q%9.1f, C\n", q_);
+  Serial.printf(" q_cap%9.1f, C\n", q_capacity_);
+  Serial.printf(" q_cap_rat%9.1f, C\n", q_cap_rated_);
+  Serial.printf(" q_cap_rat_scl%9.1f, C\n", q_cap_rated_scaled_);
+  Serial.printf(" q_min%9.1f, C\n", q_min_);
+  Serial.printf(" resetting %d\n", resetting_);
+  Serial.printf(" sat %d\n", sat_);
+  Serial.printf(" soc%8.4f\n", soc_);
+  Serial.printf(" soc_inf%8.4f\n", soc_inf_);
+  Serial.printf(" soc_min%8.4f\n", soc_min_);
+  Serial.printf(" tb_f_%5.1f dg C\n", tb_f_);
+  Serial.printf(" rated_t%5.1f dg C\n", chem_.rated_temp);
+  Serial.printf(" tb_f_rate%9.5f dg C / s\n", tb_f_rate_);
+  Serial.printf(" tb_f_rate%9.5f dg C / s\n", Tb_f_rate_);
+  Serial.printf("Coulombs (mod_code=%d) ", mod_code());
+  Serial.printf("Coulombs: silent DEPLOY\n");
+  Serial.printf(" Chemistry::\n");
+  chem_pretty_print();
   #endif
 }
 
@@ -164,139 +164,139 @@ Outputs:
   soc_min_        Estimated soc where battery BMS will shutoff current, fraction
   q_min_          Estimated charge at low voltage shutdown, C\
 */
-double Coulombs::count_coulombs(Sensors *Sen, const bool reset_temp, const float charge_curr, const bool sat,
+double Coulombs::count_coulombs(Sensors* Sen, const bool reset_temp, const float charge_curr, const bool sat,
   const bool saturated)
 {
-    // Inputs
-    dt_ = Sen->T();
-    tb_f_ = Sen->Tb_f();
-    tb_f_rate_ = Sen->Tb_f_rate();
-    Tb_f_ = Sen->Tb_f();
-    Tb_f_rate_ = Sen->Tb_f_rate();
-    d_delta_q_ = charge_curr * dt_;
+  // Inputs
+  dt_ = Sen->T();
+  tb_f_ = Sen->Tb_f();
+  tb_f_rate_ = Sen->Tb_f_rate();
+  Tb_f_ = Sen->Tb_f();
+  Tb_f_rate_ = Sen->Tb_f_rate();
+  d_delta_q_ = charge_curr * dt_;
 
-    // State change
-    double d_delta_q_inf = d_delta_q_;
-    if ( charge_curr>0. && !sp.tweak_test() ) d_delta_q_ *= coul_eff_;
-    // Capacity changes withi temperature so this effect would be double if used
-    // d_delta_q_ -= chem_.dqdt*q_capacity_*tb_f_rate_*dt_;
-    d_delta_q_inf = d_delta_q_;
-    sat_ = sat;
-    saturated_ = saturated;
+  // State change
+  double d_delta_q_inf = d_delta_q_;
+  if ( charge_curr>0. && !sp.tweak_test() ) d_delta_q_ *= coul_eff_;
+  // Capacity changes withi temperature so this effect would be double if used
+  // d_delta_q_ -= chem_.dqdt*q_capacity_*tb_f_rate_*dt_;
+  d_delta_q_inf = d_delta_q_;
+  sat_ = sat;
+  saturated_ = saturated;
 
-    // Saturation.   Goal is to set q_capacity and hold it so remember last saturation status.
-    if ( saturated_ )
+  // Saturation.   Goal is to set q_capacity and hold it so remember last saturation status.
+  if ( saturated_ )
+  {
+    if ( d_delta_q_ > 0 )
     {
-        if ( d_delta_q_ > 0 )
-        {
-            d_delta_q_ = 0.;
-            if ( !resetting_ )
-            {
-              *sp_delta_q_ = 0.;
-            }
-        }
-        else if ( reset_temp )
-        {
-          *sp_delta_q_ = 0.;
-        }
-    }
-    // else if ( reset_temp && !ap.fake_faults() ) *sp_delta_q_ = delta_q_ekf;  // Solution to booting up unsaturated
-    resetting_ = false;     // one pass flag
-
-    // Integration.   Can go to negative
-    q_capacity_ = calculate_capacity(tb_f_);
-
-    // soc integrator: gated only by reset_temp.  cp.inf_reset (HR) MUST NOT touch *sp_delta_q_,
-    // otherwise HR would slam soc to 1.0 — see commit history.  Per-window pos/neg/time accumulators
-    // are stepped here too; if cp.inf_reset is also asserted this cycle, the inf-counter block
-    // below will zero them right after, so the net effect is correct.
-    if ( !reset_temp )
-    {
-      *sp_delta_q_ = max(min(*sp_delta_q_ + d_delta_q_, 0.0), -q_capacity_*1.5);
-      if ( d_delta_q_ > 0. )
+      d_delta_q_ = 0.;
+      if ( !resetting_ )
       {
-        delta_q_pos_ += d_delta_q_;
-        time_pos_ += dt_;
+        *sp_delta_q_ = 0.;
       }
-      else
-      {
-        delta_q_neg_ += d_delta_q_;
-        time_neg_ += dt_;
-      }
-    }
-
-    // History (inf-counter) family: cp.inf_reset (HR) zeroes them so soc_inf -> 1.0; reset_temp
-    // rebaselines them to current *sp_delta_q_.  Neither path disturbs *sp_delta_q_ itself.
-    if ( cp.inf_reset )
-    {
-      delta_q_inf_ = 0.;
-      delta_q_abs_ = 0.;
-      delta_q_pos_ = 0.;
-      delta_q_neg_ = 0.;
-      time_pos_ = 0.;
-      time_neg_ = 0.;
-      cp.inf_reset = false;
     }
     else if ( reset_temp )
     {
-      delta_q_abs_ = *sp_delta_q_ / 2.;
-      delta_q_inf_ = *sp_delta_q_;
-      delta_q_neg_ = *sp_delta_q_;
-      delta_q_pos_ = 0.;
-      time_pos_ = 0.;
-      time_neg_ = 0.;
+      *sp_delta_q_ = 0.;
+    }
+  }
+  // else if ( reset_temp && !ap.fake_faults() ) *sp_delta_q_ = delta_q_ekf;  // Solution to booting up unsaturated
+  resetting_ = false;     // one pass flag
+
+  // Integration.   Can go to negative
+  q_capacity_ = calculate_capacity(tb_f_);
+
+  // soc integrator: gated only by reset_temp.  cp.inf_reset (HR) MUST NOT touch *sp_delta_q_,
+  // otherwise HR would slam soc to 1.0 — see commit history.  Per-window pos/neg/time accumulators
+  // are stepped here too; if cp.inf_reset is also asserted this cycle, the inf-counter block
+  // below will zero them right after, so the net effect is correct.
+  if ( !reset_temp )
+  {
+    *sp_delta_q_ = max(min(*sp_delta_q_ + d_delta_q_, 0.0), -q_capacity_*1.5);
+    if ( d_delta_q_ > 0. )
+    {
+    delta_q_pos_ += d_delta_q_;
+    time_pos_ += dt_;
     }
     else
     {
-      delta_q_inf_ += d_delta_q_inf;
-      delta_q_abs_ += abs(d_delta_q_inf) / 2.;
+    delta_q_neg_ += d_delta_q_;
+    time_neg_ += dt_;
     }
+  }
 
-    q_ = q_capacity_ + *sp_delta_q_;
-    q_inf_ = q_capacity_ + delta_q_inf_;
+  // History (inf-counter) family: cp.inf_reset (HR) zeroes them so soc_inf -> 1.0; reset_temp
+  // rebaselines them to current *sp_delta_q_.  Neither path disturbs *sp_delta_q_ itself.
+  if ( cp.inf_reset )
+  {
+    delta_q_inf_ = 0.;
+    delta_q_abs_ = 0.;
+    delta_q_pos_ = 0.;
+    delta_q_neg_ = 0.;
+    time_pos_ = 0.;
+    time_neg_ = 0.;
+    cp.inf_reset = false;
+  }
+  else if ( reset_temp )
+  {
+    delta_q_abs_ = *sp_delta_q_ / 2.;
+    delta_q_inf_ = *sp_delta_q_;
+    delta_q_neg_ = *sp_delta_q_;
+    delta_q_pos_ = 0.;
+    time_pos_ = 0.;
+    time_neg_ = 0.;
+  }
+  else
+  {
+    delta_q_inf_ += d_delta_q_inf;
+    delta_q_abs_ += abs(d_delta_q_inf) / 2.;
+  }
 
-    // Normalize
-    soc_ = q_ / q_capacity_;
-    soc_inf_ = q_inf_ / q_capacity_;
-    soc_min_ = chem_.soc_min_T_->interp(tb_f_);
-    q_min_ = soc_min_ * q_capacity_;
+  q_ = q_capacity_ + *sp_delta_q_;
+  q_inf_ = q_capacity_ + delta_q_inf_;
 
-    // Save and return
-    
-    if ( sp.debug()==36 )
-      sendTxBuf(String::format("BM::CC: cc %7.3f dt%9.6f dq_T%9.2f, coul_eff%7.3f d_delta_q%9.2f sp_delta_q_%9.2f q%9.2f\n",
-        charge_curr, dt_, -chem_.dqdt*q_capacity_*Tb_f_rate_*dt_, coul_eff_, d_delta_q_, *sp_delta_q_, q_), true, IN_SERVICE);
+  // Normalize
+  soc_ = q_ / q_capacity_;
+  soc_inf_ = q_inf_ / q_capacity_;
+  soc_min_ = chem_.soc_min_T_->interp(tb_f_);
+  q_min_ = soc_min_ * q_capacity_;
 
-    if ( sp.debug()==-99 )
-      sendTxBuf(String::format("sat, dt_, tb_f_, charge_curr, dq, dqt+, ddq, q, soc_min soc, %d, %7.4f,%7.4f,%7.4f,%7.4f,%7.4f,%7.4f,%12.1f,%10.7f,%10.7f,\n",
-        sat, dt_, tb_f_, charge_curr, charge_curr * dt_, chem_.dqdt*q_capacity_*Tb_f_rate_*dt_, d_delta_q_, q_, soc_min_, soc_),
-        true, IN_SERVICE);
+  // Save and return
+  
+  if ( sp.debug()==36 )
+    sendTxBuf(String::format("BM::CC: cc %7.3f dt%9.6f dq_T%9.2f, coul_eff%7.3f d_delta_q%9.2f sp_delta_q_%9.2f q%9.2f\n",
+    charge_curr, dt_, -chem_.dqdt*q_capacity_*Tb_f_rate_*dt_, coul_eff_, d_delta_q_, *sp_delta_q_, q_), true, IN_SERVICE);
 
-    return ( soc_ );
+  if ( sp.debug()==-99 )
+    sendTxBuf(String::format("sat, dt_, tb_f_, charge_curr, dq, dqt+, ddq, q, soc_min soc, %d, %7.4f,%7.4f,%7.4f,%7.4f,%7.4f,%7.4f,%12.1f,%10.7f,%10.7f,\n",
+    sat, dt_, tb_f_, charge_curr, charge_curr * dt_, chem_.dqdt*q_capacity_*Tb_f_rate_*dt_, d_delta_q_, q_, soc_min_, soc_),
+    true, IN_SERVICE);
+
+  return soc_;
 }
 
 // Prevent overflows
 double nice_zero(const double in, const double thr)
 {
-    double out = thr;
-    if ( abs(in) < thr )
-    {
-      if ( in < 0. ) out = -thr; 
-    }
-    else
-      out = in;
-    return (out);
+  double out = thr;
+  if ( abs(in) < thr )
+  {
+    if ( in < 0. ) out = -thr; 
+  }
+  else
+    out = in;
+  return out;
 }
 
 float nice_zero(const float in, const float thr)
 {
-    float out = thr;
-    if ( abs(in) < thr )
-    {
-      if ( in < 0. ) out = -thr; 
-    }
-    else
-      out = in;
-    return (out);
+  float out = thr;
+  if ( abs(in) < thr )
+  {
+    if ( in < 0. ) out = -thr; 
+  }
+  else
+    out = in;
+  return out;
 }
 

@@ -24,4 +24,4 @@
 #pragma once
 #include "../Battery.h"
 
-bool recall_P(const char letter_1, BatteryMonitor *Mon, Sensors *Sen);
+bool recall_P(const char letter_1, BatteryMonitor* Mon, Sensors* Sen);

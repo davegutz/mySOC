@@ -14,7 +14,7 @@
 // signum/sgn function
 template <typename T> int sgn(T val)
 {
-    return (T(0) < val) - (val < T(0));
+  return (T(0) < val) - (val < T(0));
 }
 
 class Iterator
@@ -34,16 +34,16 @@ public:
   double iterate(const bool verbose, const uint16_t success_count, const bool en_no_soln);
   double x() { return x_; };
 protected:
-    uint16_t count_;    // Iteration counter
-    String desc_;       // Description
-    double de_;          // Error change
-    double des_;         // Scaled error
-    double dx_;          // Input change
-    double e_;           // Error
-    double ep_;          // Past error
-    bool limited_;   // On limits
-    double x_;           // Input
-    double xmax_;        // Maximum input
-    double xmin_;        // Minimum input
-    double xp_;          // Past input
+  uint16_t count_;    // Iteration counter
+  String desc_;       // Description
+  double de_;          // Error change
+  double des_;         // Scaled error
+  double dx_;          // Input change
+  double e_;           // Error
+  double ep_;          // Past error
+  bool limited_;   // On limits
+  double x_;           // Input
+  double xmax_;        // Maximum input
+  double xmin_;        // Minimum input
+  double xp_;          // Past input
 };

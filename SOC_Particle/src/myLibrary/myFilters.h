@@ -30,7 +30,7 @@ public:
 protected:
   int nz_;     // Number of past consequetive states to agree with input to pass debounce
   bool passed_out_; // latched value of output
-  bool *past_; // Array(nz_-1) of past inputs
+  bool* past_; // Array(nz_-1) of past inputs
 };
 
 
@@ -45,7 +45,7 @@ public:
   double calculate(const double in);
   double calculate(const double in, const int RESET);
 protected:
-  double *past_;
+  double* past_;
   int nz_;
 };
 
@@ -181,7 +181,7 @@ public:
   virtual double rateStateCalc(double in, const double min_rate, const double max_rate);
   virtual double rateStateCalc(double in);
   virtual bool reset() { return reset_; };
-  virtual double state(void);
+  virtual double state();
   double T() { return T_; };
   double tau() { return tau_; };
   double rate() { return rate_; };
@@ -243,7 +243,7 @@ public:
   virtual void assignCoeff(double tau);
   virtual void calcState(double in);
   virtual void calcState(double in, const double T);
-  virtual double state(void);
+  virtual double state();
   virtual void state(const double in) { state_ = in; }  // For severity testing - sudden offset
   double a() { return (a_); };
   double b() { return (b_); };
@@ -270,7 +270,7 @@ public:
   virtual void assignCoeff(const double tld, const double tau, const double T);
   virtual double rateStateCalc(const double in);
   virtual double rateStateCalc(const double in, const double T);
-  virtual double state(void);
+  virtual double state();
 protected:
   double a_;
   double b_;
@@ -296,7 +296,7 @@ public:
   virtual void assignCoeff(const double tld, const double tau, const double T);
   virtual double rateStateCalc(const double in);
   virtual double rateStateCalc(const double in, const double T);
-  virtual double state(void);
+  virtual double state();
 protected:
   double a_;
   double b_;
@@ -320,7 +320,7 @@ public:
   virtual void rateState(double in);
   virtual void rateState(double in, const double T);
   virtual void rateState(double in, const double min_rate, const double max_rate);
-  virtual double state(void);
+  virtual double state();
   double a() { return (a_); };
   double b() { return (b_); };
   double c() { return (c_); };
@@ -349,7 +349,7 @@ public:
   virtual void assignCoeff(double tau);
   virtual void rateState(double in);
   virtual void rateState(double in, const double min_rate, const double max_rate);
-  virtual double state(void);
+  virtual double state();
 protected:
   double a_;
   double b_;
@@ -449,10 +449,10 @@ public:
   virtual void rateState(const double in, const int RESET);
   virtual void rateStateCalc(const double in, const double T, const int RESET);
 protected:
-  AB2_Integrator *AB2_;
+  AB2_Integrator* AB2_;
   double a_;
   double b_;
-  TustinIntegrator *Tustin_;
+  TustinIntegrator* Tustin_;
 };
 
 
@@ -464,33 +464,33 @@ public:
   ~RecursiveRMSMonitorFP() {}
   float update(float newValue)
   {
-      // 1. Remove oldest value from sums if buffer is full
-      if (count == WINDOW_SIZE)
-      {
-          float oldestValue = buffer[index];
-          runningSum -= oldestValue;
-          // For true RMS of noise, we need to handle how the mean affects this.
-          // Simplified: track sum and sum of squares for variance.
-      }
+    // 1. Remove oldest value from sums if buffer is full
+    if (count == WINDOW_SIZE)
+    {
+      float oldestValue = buffer[index];
+      runningSum -= oldestValue;
+      // For true RMS of noise, we need to handle how the mean affects this.
+      // Simplified: track sum and sum of squares for variance.
+    }
 
-      // 2. Add new value to circular buffer
-      buffer[index] = newValue;
-      runningSum += newValue;
-      index = (index + 1) % WINDOW_SIZE;
-      if (count < WINDOW_SIZE) count++;
+    // 2. Add new value to circular buffer
+    buffer[index] = newValue;
+    runningSum += newValue;
+    index = (index + 1) % WINDOW_SIZE;
+    if (count < WINDOW_SIZE) count++;
 
-      // 3. Calculate current mean
-      float mean = runningSum / count;
+    // 3. Calculate current mean
+    float mean = runningSum / count;
 
-      // 4. Calculate RMS relative to the mean (Noise = Deviation)
-      // RMS = sqrt( mean( (x - mean)^2 ) )
-      float currentSumSquares = 0.0;
-      for (int i = 0; i < count; ++i)
-      {
-          currentSumSquares += std::pow(buffer[i] - mean, 2);
-      }
+    // 4. Calculate RMS relative to the mean (Noise = Deviation)
+    // RMS = sqrt( mean( (x - mean)^2 ) )
+    float currentSumSquares = 0.0;
+    for (int i = 0; i < count; ++i)
+    {
+      currentSumSquares += std::pow(buffer[i] - mean, 2);
+    }
 
-      return std::sqrt(currentSumSquares / count);
+    return std::sqrt(currentSumSquares / count);
   }
 private:
   static const int WINDOW_SIZE = 20;

@@ -32,9 +32,9 @@
 struct PublishPars
 {
   Publish pubList;          // Publish object
-  PublishPars(void)
+  PublishPars()
   {
-    pubList = Publish();
+  pubList = Publish();
   }
 };
 
@@ -77,79 +77,79 @@ public:
 
   CommandPars()
   {
-    inf_reset = false;
-    model_cutback = false;
-    model_saturated = false;
-    num_v_print = 0UL;
-    publishS = false;
-    soft_reset = false;
-    soft_reset_print = false;
-    soft_reset_sim = false;
-    soft_reset_sim_print = false;
-    soft_sim_hold = false;
-    write_summary = false;
-    ts = 1.;
-    chitchat = false;
-    inp_token = false;
-    freeze = false;
-    ctl_str = "";
-    inp_str = "";
-    cmd_str = "";
-    last_str = "";
-    queue_str = "";
-    soon_str = "";
-    asap_str = "";
-    ekf_reset = false;
-    ekf_reset_print = false;
-    kf_reset = false;
-    kf_reset_print = false;
-    ble_first_char = '\0';
-    disp_word = 0UL;
+  inf_reset = false;
+  model_cutback = false;
+  model_saturated = false;
+  num_v_print = 0UL;
+  publishS = false;
+  soft_reset = false;
+  soft_reset_print = false;
+  soft_reset_sim = false;
+  soft_reset_sim_print = false;
+  soft_sim_hold = false;
+  write_summary = false;
+  ts = 1.;
+  chitchat = false;
+  inp_token = false;
+  freeze = false;
+  ctl_str = "";
+  inp_str = "";
+  cmd_str = "";
+  last_str = "";
+  queue_str = "";
+  soon_str = "";
+  asap_str = "";
+  ekf_reset = false;
+  ekf_reset_print = false;
+  kf_reset = false;
+  kf_reset_print = false;
+  ble_first_char = '\0';
+  disp_word = 0UL;
   }
 
   void clear_disp_word() { disp_word = 0; };
 
-  void cmd_reset(void) { soft_reset = true; ekf_reset = true; kf_reset = true; }
+  void cmd_reset() { soft_reset = true; ekf_reset = true; kf_reset = true; }
 
-  void cmd_reset_kf(void) { kf_reset = true; }
+  void cmd_reset_kf() { kf_reset = true; }
 
-  void cmd_reset_sim(void) { soft_reset_sim = true; }
+  void cmd_reset_sim() { soft_reset_sim = true; }
 
-  void cmd_soft_sim_hold(void) { soft_sim_hold = true; }
+  void cmd_soft_sim_hold() { soft_sim_hold = true; }
 
-  void cmd_summarize(void) { write_summary = true; }
+  void cmd_summarize() { write_summary = true; }
 
-  void large_reset(void)
+  void large_reset()
   {
-    model_cutback = true;
-    model_saturated = true;
-    soft_reset = true;
-    ekf_reset = true;
-    kf_reset = true;
-    num_v_print = 0UL;
-    ts = 1.;
+  model_cutback = true;
+  model_saturated = true;
+  soft_reset = true;
+  ekf_reset = true;
+  kf_reset = true;
+  num_v_print = 0UL;
+  ts = 1.;
   }
 
-  void pretty_print(void)
+  void pretty_print()
   {
-    #if !IN_SERVICE
+  #if !IN_SERVICE
 
-      //   text    data     bss     dec     hex filename
-      // 290338  119852   13698  423888   677d0 c:/Users/daveg/Documents/GitHub/mySolarStateOfCharge/SOC_Particle/target/6.
-      sendTxBuf(String::format("command parameters(cp):\n"), true, IN_SERVICE);
-      sendTxBuf(String::format(" inf_reset %d\n", inf_reset), true, IN_SERVICE);
-      sendTxBuf(String::format(" model_cutback %d\n", model_cutback), true, IN_SERVICE);
-      sendTxBuf(String::format(" model_saturated %d\n", model_saturated), true, IN_SERVICE);
-      sendTxBuf(String::format(" publishS %d\n", publishS), true, IN_SERVICE);
-      sendTxBuf(String::format(" soft_reset %d\n", soft_reset), true, IN_SERVICE);
-      sendTxBuf(String::format(" soft_reset_sim %d\n", soft_reset_sim), true, IN_SERVICE);
-      sendTxBuf(String::format(" ts %7.3f\n", ts), true, IN_SERVICE);
-      sendTxBuf(String::format(" write_summary %d\n", write_summary), true, IN_SERVICE);
-      sendTxBuf(String::format(" kf_reset %d\n", kf_reset), true, IN_SERVICE);
-      sendTxBuf(String::format(" ekf_reset %d\n", ekf_reset), true, IN_SERVICE);
-      sendTxBuf(String::format(" disp_word %d\n\n", disp_word), true, IN_SERVICE);
+    //   text    data     bss     dec     hex filename
+    // 290338  119852   13698  423888   677d0 c:/Users/daveg/Documents/GitHub/mySolarStateOfCharge/SOC_Particle/target/6.
+    sendTxBuf(String::format("command parameters(cp):\n"), true, IN_SERVICE);
+    sendTxBuf(String::format(" inf_reset %d\n", inf_reset), true, IN_SERVICE);
+    sendTxBuf(String::format(" model_cutback %d\n", model_cutback), true, IN_SERVICE);
+    sendTxBuf(String::format(" model_saturated %d\n", model_saturated), true, IN_SERVICE);
+    sendTxBuf(String::format(" publishS %d\n", publishS), true, IN_SERVICE);
+    sendTxBuf(String::format(" soft_reset %d\n", soft_reset), true, IN_SERVICE);
+    sendTxBuf(String::format(" soft_reset_sim %d\n", soft_reset_sim), true, IN_SERVICE);
+    sendTxBuf(String::format(" ts %7.3f\n", ts), true, IN_SERVICE);
+    sendTxBuf(String::format(" write_summary %d\n", write_summary), true, IN_SERVICE);
+    sendTxBuf(String::format(" kf_reset %d\n", kf_reset), true, IN_SERVICE);
+    sendTxBuf(String::format(" ekf_reset %d\n", ekf_reset), true, IN_SERVICE);
+    sendTxBuf(String::format(" disp_word %d\n\n", disp_word), true, IN_SERVICE);
 
-    #endif
+  #endif
   }
 
 };

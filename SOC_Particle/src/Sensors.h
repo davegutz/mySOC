@@ -10,8 +10,8 @@
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
 //
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
+// The above copyright notice and this permission notice shall be included in 
+// all copies or substantial portions of the Software.
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -37,7 +37,8 @@
 // AD
 extern PublishPars pp;  // For publishing
 extern CommandPars cp;  // Various parameters to be static at system level
-extern SavedPars sp;    // Various parameters to be static at system level and saved through power cycle
+extern SavedPars sp;    // Various parameters to be static at system level
+                        //  and saved through power cycle
 extern VolatilePars ap; // Various adjustment parameters shared at system level
 struct Pins;
 
@@ -47,44 +48,54 @@ class AnalogReadP2
 {
 public:
   AnalogReadP2() {};
-  AnalogReadP2(const uint16_t pin): dead_(false), dead_prev_(false), lgv_(0), pin_(pin), 
-    raw_(0), raw_debounced_(0), raw_low_(false), raw_low_prev_(false) {};
+  AnalogReadP2(const uint16_t pin): dead_(false), dead_prev_(false), lgv_(0),
+  pin_(pin), raw_(0), raw_debounced_(0), raw_low_(false),
+  raw_low_prev_(false) {};
   ~AnalogReadP2() {};
 
   // operators
 
   // functions
 
-  // Hold last-good-value on exactly the 2nd consecutive low read (glitch); pass raw_ otherwise.
-  // 1st low: pass raw_  2nd consecutive low: return lgv_  3rd+ (persistent): pass raw_
-  int32_t analogReadDebounced(const int32_t debounce_level, const bool reset, const String name)
+  // Hold last-good-value on exactly the 2nd consecutive low read (glitch);
+  // pass raw_ otherwise. 1st low: pass raw_  2nd consecutive low: return lgv_ 
+  //  3rd+ (persistent): pass raw_
+  int32_t analogReadDebounced(const int32_t debounce_level, const bool reset,
+    const String name)
   {
-    raw_ = analogRead(pin_);
-    raw_low_ = raw_ < debounce_level;
-    if ( reset ) raw_low_prev_ = raw_low_;
-    dead_ = raw_low_ && raw_low_prev_ && !reset;  // two consecutive low readings
-    raw_low_prev_ = raw_low_;
-    if ( !raw_low_ )
-    {
-      lgv_ = raw_;             // update last-good-value on every valid reading
-      raw_debounced_ = raw_;   // pass through
-    }
-    else if ( dead_ && !dead_prev_ && !reset )
-    {
-      raw_debounced_ = lgv_;   // exactly 2nd consecutive low: hold last good value
-      sendTxBuf(String::format("trip %s reset %d raw %d < %d raw_low %d dead %d raw_low_prev %d lgv_ %d raw_debounced %d \n",
-        name.c_str(), reset, raw_, debounce_level, raw_low_, dead_, raw_low_prev_, lgv_, raw_debounced_), true, IN_SERVICE);
-    }
-    else
-    {
-      raw_debounced_ = raw_;   // 1st low, or persistent (3rd+): pass raw_ through
-    }
-    dead_prev_ = dead_;
-    if ( sp.debug()==57 )
-      sendTxBuf(String::format("not yet dead %s reset %d raw %d < %d raw_low %d dead %d raw_low_prev %d lgv_ %d raw_debounced %d \n",
-        name.c_str(), reset, raw_, debounce_level, raw_low_, dead_, raw_low_prev_, lgv_, raw_debounced_), true, IN_SERVICE);
+  raw_ = analogRead(pin_);
+  raw_low_ = raw_ < debounce_level;
+  if ( reset ) raw_low_prev_ = raw_low_;
+  dead_ = raw_low_ && raw_low_prev_ && !reset;  // two consecutive low readings
+  raw_low_prev_ = raw_low_;
+  if ( !raw_low_ )
+  {
+    lgv_ = raw_;             // update last-good-value on every valid reading
+    raw_debounced_ = raw_;   // pass through
+  }
+  else if ( dead_ && !dead_prev_ && !reset )
+  {
+    // exactly 2nd consecutive low: hold last good value
+    raw_debounced_ = lgv_;
+    sendTxBuf(String::format(
+      "trip %s reset %d raw %d < %d raw_low %d dead %d "
+      "raw_low_prev %d lgv_ %d raw_debounced %d \n",
+      name.c_str(), reset, raw_, debounce_level, raw_low_, dead_,
+      raw_low_prev_, lgv_, raw_debounced_), true, IN_SERVICE);
+  }
+  else
+  {
+    raw_debounced_ = raw_;   // 1st low, or persistent (3rd+): pass raw_ through
+  }
+  dead_prev_ = dead_;
+  if ( sp.debug()==57 )
+    sendTxBuf(String::format(
+      "not yet dead %s reset %d raw %d < %d raw_low %d dead %d "
+      "raw_low_prev %d lgv_ %d raw_debounced %d \n",
+      name.c_str(), reset, raw_, debounce_level, raw_low_, dead_,
+      raw_low_prev_, lgv_, raw_debounced_), true, IN_SERVICE);
 
-    return ( raw_debounced_ );
+  return raw_debounced_;
   }
   bool dead() { return dead_; }
 protected:
@@ -105,14 +116,16 @@ class Shunt
 {
 public:
   Shunt();
-  Shunt(const String name, const uint8_t port, float *sp_ib_scale, float *sp_Ib_bias, const float v2a_s,
-    const uint8_t vc_pin, const uint8_t vo_pin, const uint8_t vh3v3_pin, const bool using_opAmp, const bool using_kf);
+  Shunt(const String name, const uint8_t port, float* sp_ib_scale,
+    float* sp_Ib_bias, const float v2a_s, const uint8_t vc_pin,
+    const uint8_t vo_pin, const uint8_t vh3v3_pin, const bool using_opAmp,
+    const bool using_kf);
   ~Shunt();
   // operators
   // functions
   bool bare_shunt() { return ( bare_shunt_ ); };
   uint64_t dt_ms() { return sample_time_ - sample_time_z_; }; // ms
-  void convert(const bool disconnect, const bool reset, Sensors *Sen);
+  void convert(const bool disconnect, const bool reset, Sensors* Sen);
   float Ishunt_cal() { return Ishunt_cal_; };
   float ishunt_cal() { return Ishunt_cal_ / ap.nP(); };
   float Ishunt_cal_kf() { return Ishunt_cal_kf_; };
@@ -128,7 +141,7 @@ public:
   void sample_filter_kf(const bool reset_kf);
   void sample_Vc();
   void sample_Vo();
-  uint64_t sample_time(void) { return sample_time_; };
+  uint64_t sample_time() { return sample_time_; };
   float vshunt() { return vshunt_; };
   int16_t vshunt_int() { return vshunt_int_; };
   float Vc() { return Vc_; };
@@ -146,9 +159,10 @@ protected:
   float vshunt_;        // Sensed shunt voltage, V
   float vshunt_kf_;     // Sensed kalman filtered shunt voltage, V
   float Ishunt_cal_;    // Sensed bank current, calibrated ADC, A
-  float Ishunt_cal_kf_; // Sensed kalman filtered bank current, calibrated ADC, A
-  float *sp_ib_bias_;   // Global bias, A
-  float *sp_ib_scale_;  // Global scale, A
+  float Ishunt_cal_kf_; // Sensed kalman filtered bank current,
+                        // calibrated ADC, A
+  float* sp_ib_bias_;   // Global bias, A
+  float* sp_ib_scale_;  // Global scale, A
   bool reset_;       // Status of reset command input
   uint64_t sample_time_;   // Exact moment of hardware sample, ms
   uint64_t sample_time_z_; // Exact moment of past hardware sample, ms
@@ -163,10 +177,11 @@ protected:
   float Vo_Vc_;         // Sensed Vo-Vc, difference in output of op amps, V
   bool using_opamp_; // Using differential hardware amp
   bool using_kf_;    // Using Kalman Filter.  If not, set filter = input
-  KalmanFilter *KF_;    // Noise filter
-  AnalogReadP2 *Vc_read_; // Debounced analog read for Vc
-  AnalogReadP2 *Vo_read_; // Debounced analog read for Vo
-  TFDelay *Bare_delay_;   // Persistence declaring bare_ after Vc_read_ transition
+  KalmanFilter* KF_;    // Noise filter
+  AnalogReadP2* Vc_read_; // Debounced analog read for Vc
+  AnalogReadP2* Vo_read_; // Debounced analog read for Vo
+  TFDelay* Bare_delay_; // Persistence declaring bare_ after Vc_read_
+                        // transition
 };
 
 
@@ -175,8 +190,9 @@ class Sensors
 {
 public:
   Sensors();
-  Sensors(double T, double T_temp, Pins *pins, Sync *ReadSensors, Sync *ReadTemp, Sync *Talk, Sync *Summarize,
-    uint64_t time_now, uint64_t millis, BatteryMonitor *Mon);
+  Sensors(double T, double T_temp, Pins* pins, Sync* ReadSensors,
+    Sync* ReadTemp, Sync* Talk, Sync* Summarize, uint64_t time_now,
+    uint64_t millis, BatteryMonitor* Mon);
   ~Sensors();
   // Getters and setters for encapsulated member variables
   void cTime(const double input) { ctime_ = input; }
@@ -294,36 +310,74 @@ public:
   bool display() { return display_; }
   void bms_off(const bool input) { bms_off_ = input; }
   bool bms_off() { return bms_off_; }
-  Sync *ReadSensors;          // Handle to debug read time
-  Sync *ReadTemp;             // Handle to debug read temperature time
+  Sync* ReadSensors;          // Handle to debug read time
+  Sync* ReadTemp;             // Handle to debug read temperature time
   void sat(const bool input) { sat_ = input; }
   bool sat() { return sat_; }
   void saturated(const bool input) { saturated_ = input; }
   bool saturated() { return saturated_; }
-  Shunt *ShuntAmp;            // Ib sense amplified
-  Shunt *ShuntNoAmp;          // Ib sense non-amplified
-  Sync *Summarize;            // Handle to debug read time
-  Sync *Talk;                 // Handle to debug talk time
-  BatterySim *Sim;            // Used to model Vb and Ib.   Use Talk 'Xp?' to toggle model on/off
-  void select_volt_and_current_and_temp(BatteryMonitor *Mon);      // Make final signal selection
-  float ib() { return Ib_ / ap.nP(); };                            // Battery unit current, A
-  float ib_amp() { return Ib_amp_ / ap.nP(); };                    // Battery amp unit current, A
-  float ib_amp_hdwe() { return Ib_amp_hdwe_ / ap.nP(); };          // Battery amp unit current, A
-  float ib_amp_hdwe_f() { return Ib_amp_hdwe_f_ / ap.nP(); };      // Battery amp 2-pole filtered unit current, A
-  float ib_amp_hdwe_kf() { return Ib_amp_hdwe_kf_ / ap.nP(); };    // Battery amp kalman filtered unit current, A
-  float ib_amp_model() { return Ib_amp_model_ / ap.nP(); };        // Battery amp model unit current, A
-  float ib_amp_vo_vc() { return ShuntAmp->Vo_Vc(); };              // Battery amp kalman filter input, V
-  float ib_amp_vo_vc_kf() { return ShuntAmp->Vo_Vc_kf(); };        // Battery amp kalman filter output, V
-  float ib_hdwe() { return Ib_hdwe_ / ap.nP(); };                  // Battery select hardware unit current, A
-  float ib_hdwe_model() { return Ib_hdwe_model_ / ap.nP(); };      // Battery select hardware model unit current, A
-  float ib_model() { return Ib_model_ / ap.nP(); };                // Battery select model unit current, A
-  float ib_model_in() { return Ib_model_in_ / ap.nP(); };          // Battery select model input unit current, A
-  float ib_noa() { return Ib_noa_ / ap.nP(); };                    // Battery noa unit current, A
-  float ib_noa_hdwe() { return Ib_noa_hdwe_ / ap.nP(); };          // Battery no amp unit current, A
-  float ib_noa_hdwe_kf() { return Ib_noa_hdwe_kf_ / ap.nP(); };    // Battery no amp kalman filtered unit current, A
-  float ib_noa_model() { return Ib_noa_model_ / ap.nP(); };        // Battery no amp model unit current, A
-  float ib_noa_vo_vc() { return ShuntNoAmp->Vo_Vc(); };            // Battery no amp kalman filter input, V
-  float ib_noa_vo_vc_kf() { return ShuntNoAmp->Vo_Vc_kf(); };      // Battery no amp kalman filter output, V
+  Shunt* ShuntAmp;            // Ib sense amplified
+  Shunt* ShuntNoAmp;          // Ib sense non-amplified
+  Sync* Summarize;            // Handle to debug read time
+  Sync* Talk;                 // Handle to debug talk time
+  BatterySim* Sim;            // Used to model Vb and Ib. Use Talk 'Xp?' to
+                              // toggle model on/off
+  // Make final signal selection
+  void select_volt_and_current_and_temp(BatteryMonitor* Mon);
+  
+  // Battery unit current, A
+  float ib() { return Ib_ / ap.nP(); };
+
+  // Battery amp unit current, A
+  float ib_amp() { return Ib_amp_ / ap.nP(); };
+
+  // Battery amp unit current, A
+  float ib_amp_hdwe() { return Ib_amp_hdwe_ / ap.nP(); };
+
+  // Battery amp 2-pole filtered unit current, A
+  float ib_amp_hdwe_f() { return Ib_amp_hdwe_f_ / ap.nP(); };
+
+  // Battery amp kalman filtered unit current, A
+  float ib_amp_hdwe_kf() { return Ib_amp_hdwe_kf_ / ap.nP(); };
+
+  // Battery amp model unit current, A
+  float ib_amp_model() { return Ib_amp_model_ / ap.nP(); };
+
+  // Battery amp kalman filter input, V
+  float ib_amp_vo_vc() { return ShuntAmp->Vo_Vc(); };
+
+  // Battery amp kalman filter output, V
+  float ib_amp_vo_vc_kf() { return ShuntAmp->Vo_Vc_kf(); };
+
+  // Battery select hardware unit current, A
+  float ib_hdwe() { return Ib_hdwe_ / ap.nP(); };
+
+  // Battery select hardware model unit current, A
+  float ib_hdwe_model() { return Ib_hdwe_model_ / ap.nP(); };
+
+  // Battery select model unit current, A
+  float ib_model() { return Ib_model_ / ap.nP(); };
+
+  // Battery select model input unit current, A
+  float ib_model_in() { return Ib_model_in_ / ap.nP(); };
+
+  // Battery noa unit current, A
+  float ib_noa() { return Ib_noa_ / ap.nP(); };
+
+  // Battery no amp unit current, A
+  float ib_noa_hdwe() { return Ib_noa_hdwe_ / ap.nP(); };
+
+  // Battery no amp kalman filtered unit current, A
+  float ib_noa_hdwe_kf() { return Ib_noa_hdwe_kf_ / ap.nP(); };
+
+  // Battery no amp model unit current, A
+  float ib_noa_model() { return Ib_noa_model_ / ap.nP(); };
+
+  // Battery no amp kalman filter input, V
+  float ib_noa_vo_vc() { return ShuntNoAmp->Vo_Vc(); };
+
+  // Battery no amp kalman filter output, V
+  float ib_noa_vo_vc_kf() { return ShuntNoAmp->Vo_Vc_kf(); };
   float Ib_amp_add();
   float Ib_amp_max();
   float Ib_amp_min();
@@ -335,50 +389,57 @@ public:
   void pretty_print();
   void reset_temp(const bool reset) { reset_temp_ = reset; };
   bool reset_temp() { return ( reset_temp_ ); };
-  void select_print(Sensors *Sen, BatteryMonitor *Mon);
+  void select_print(Sensors* Sen, BatteryMonitor* Mon);
   void shunt_print();         // Print selection result
-  void shunt_select_initial(const bool reset);   // Choose between shunts for model
+  // Choose between shunts for model
+  void shunt_select_initial(const bool reset);
   float Tb_noise();
-  void Tb_load(const uint16_t vb_pin, const bool reset);           // Analog read of Tb
-  void Tb_print(void);                                             // Print Tb result
-  float vb() { return Vb_ / ap.nS(); };                            // Battery select unit voltage, V
-  float vb_hdwe() { return Vb_hdwe_ / ap.nS(); };                  // Battery select hardware unit voltage, V
-  void vb_load(const uint16_t vb_pin, const bool reset);           // Analog read of Vb
+  void Tb_load(const uint16_t vb_pin, const bool reset); // Analog read of Tb
+  void Tb_print();                                       // Print Tb result
+  
+  // Battery select unit voltage, V
+  float vb() { return Vb_ / ap.nS(); };
+
+  // Battery select hardware unit voltage, V
+  float vb_hdwe() { return Vb_hdwe_ / ap.nS(); };
+  void vb_load(const uint16_t vb_pin, const bool reset); // Analog read of Vb
   float Vb_add();
   float Vb_noise();
-  void vb_print(void);                  // Print Vb result
-  Fault *Flt;
-  ScaleBrk *sel_brk_hdwe;                  // Active/active scale break
+  void vb_print();                  // Print Vb result
+  Fault* Flt;
+  ScaleBrk* sel_brk_hdwe;                  // Active/active scale break
 protected:
-  LagExp *AmpFilt;      // Noise filter for calibration
+  LagExp* AmpFilt;      // Noise filter for calibration
   uint64_t dt_ib_;                // Delta update of selected Ib sample, ms
   uint64_t dt_ib_hdwe_;           // Delta update of Ib sample, ms
-  RecursiveRMSMonitorFP *IbAmpRMS; // RMS noise monitor for amp
-  RecursiveRMSMonitorFP *IbNoaRMS; // RMS noise monitor for noa
-  void ib_choose_active_standby(void);   // Deliberate choice based on inputs and results
-  void ib_choose_hi_lo(void);   // Deliberate choice based on inputs and results
-  uint64_t inst_millis_;          // millis offset to account for setup() time, ms
+  RecursiveRMSMonitorFP* IbAmpRMS; // RMS noise monitor for amp
+  RecursiveRMSMonitorFP* IbNoaRMS; // RMS noise monitor for noa
+  // Deliberate choice based on inputs and results
+  void ib_choose_active_standby();
+  void ib_choose_hi_lo();   // Deliberate choice based on inputs and results
+  uint64_t inst_millis_;  // millis offset to account for setup() time, ms
   uint64_t inst_time_;            // UTC Zulu at instantiation, s
-  LagExp *NoaFilt;      // Noise filter for calibration
-  PRBS_7 *Prbn_Tb_;     // Tb noise generator model only
-  PRBS_7 *Prbn_Vb_;     // Vb noise generator model only
-  PRBS_7 *Prbn_Ib_amp_; // Ib amplified sensor noise generator model only
-  PRBS_7 *Prbn_Ib_noa_; // Ib non-amplified sensor noise generator model only
-  bool reset_temp_;  // Keep track of temperature reset, stored for plotting, T=reset
+  LagExp* NoaFilt;      // Noise filter for calibration
+  PRBS_7* Prbn_Tb_;     // Tb noise generator model only
+  PRBS_7* Prbn_Vb_;     // Vb noise generator model only
+  PRBS_7* Prbn_Ib_amp_; // Ib amplified sensor noise generator model only
+  PRBS_7* Prbn_Ib_noa_; // Ib non-amplified sensor noise generator model only
+  bool reset_temp_;  // Keep track of temperature reset, stored for plotting,
+                     // T=reset
   uint64_t sample_time_ib_;       // Exact moment of selected Ib sample, ms
   uint64_t sample_time_ib_hdwe_;  // Exact moment of Ib sample, ms
   uint64_t sample_time_Tb_;       // Exact moment of Tb sample, ms
   uint64_t sample_time_Tb_hdwe_;  // Exact moment of Tb sample, ms
   uint64_t sample_time_vb_;       // Exact moment of selected Vb sample, ms
   uint64_t sample_time_vb_hdwe_;  // Exact moment of Vb sample, ms
-  LagExp *SelFiltCal;             // Noise filter for calibration
-  LagExp *TbHdweFilt;                 // Noise filter for calibration
-  LagExp *TbModelFilt;                // Noise filter for calibration
-  LagExp *VbFilt;                 // Noise filter for calibration
-  RecursiveRMSMonitorFP *VbRMS;   // RMS noise monitor for Vb
-  RecursiveRMSMonitorFP *VcRMS;   // RMS noise monitor for Vc
-  AnalogReadP2 *Tb_read_;      // Tb sense debounce
-  AnalogReadP2 *Vb_read_;      // Vb sense debounce
+  LagExp* SelFiltCal;             // Noise filter for calibration
+  LagExp* TbHdweFilt;                 // Noise filter for calibration
+  LagExp* TbModelFilt;                // Noise filter for calibration
+  LagExp* VbFilt;                 // Noise filter for calibration
+  RecursiveRMSMonitorFP* VbRMS;   // RMS noise monitor for Vb
+  RecursiveRMSMonitorFP* VcRMS;   // RMS noise monitor for Vc
+  AnalogReadP2* Tb_read_;      // Tb sense debounce
+  AnalogReadP2* Vb_read_;      // Vb sense debounce
   int Tb_raw_;                 // Raw analog read, integer
   float Tb_volt_;              // Sensed battery bank temperature at ADC, V
   int Vb_raw_;                 // Raw analog read, integer
@@ -413,25 +474,28 @@ protected:
   float Ib_amp_;               // Initial selected amp battery bank current, A
   float Ib_amp_hdwe_;          // Sensed amp battery bank current, A
   float Ib_amp_hdwe_f_;        // Sensed, filtered amp battery bank current, A
-  float Ib_amp_hdwe_kf_;       // Sensed, kalman filtered amp battery bank current, A
+  float Ib_amp_hdwe_kf_; // Sensed, kalman filtered amp battery bank current, A
   float Ib_amp_model_;         // Modeled amp battery bank current, A
   float Ib_amp_rms_;           // Amp battery bank current noise RMS, A
-  float Ib_hdwe_f_;            // Sensed, selected filtered battery bank current, A
-  float Ib_hdwe_kf_;           // Sensed, selected kalman filtered battery bank current, A
-  float Ib_hdwe_f_cal_;        // Sensed, filtered selected battery bank current for cal display, A
+  float Ib_hdwe_f_; // Sensed, selected filtered battery bank current, A
+  float Ib_hdwe_kf_;  // Sensed, selected kalman filtered battery bank
+                      // current, A
+  float Ib_hdwe_f_cal_;  // Sensed, filtered selected battery bank current for
+                         // cal display, A
   float Ib_noa_;               // Initial selected noa battery bank current, A
   float Ib_noa_hdwe_;          // Sensed noa battery bank current, A
   float Ib_noa_hdwe_f_;        // Sensed, filtered noa battery bank current, A
-  float Ib_noa_hdwe_kf_;       // Sensed, kalman filtered noa battery bank current, A
+  float Ib_noa_hdwe_kf_; // Sensed, kalman filtered noa battery bank current, A
   float Ib_noa_rms_;           // Noa battery bank current noise RMS, A
   float Ib_noa_model_;         // Modeled noa battery bank current, A
   float Ib_hdwe_;              // Sensed battery bank current, A
   float Ib_hdwe_model_;        // Selected model hardware signal, A
   float Ib_model_;             // Modeled battery bank current, A
-  float Ib_model_in_;          // Battery bank current input to model (modified by cutback), A
+  float Ib_model_in_;  // Battery bank current input to model (modified by
+                       // cutback), A
   float Vb_rms_;               // Battery bank voltage noise RMS, V
   float Vc_rms_;               // Battery bank voltage noise RMS, V
-  float Wb_;                   // Sensed battery bank power, use to compare to other shunts, W
+  float Wb_;  // Sensed battery bank power, use to compare to other shunts, W
   uint64_t now_;     // Time at sample, ms
   uint64_t now_temp_;// Time at sample, ms
   double ctime_;               // Decimal time, seconds since 1/1/2021
@@ -445,7 +509,8 @@ protected:
   uint64_t end_inj_;  // End of print injection, ms
   double control_time_;        // Decimal time, seconds since 1/1/2021
   bool display_;            // Use display
-  bool bms_off_;            // Calculated by BatteryMonitor, battery off, low voltage, switched by battery management system?
-  bool sat_;                // Battery potential saturation status based on Temp and VOC
-  bool saturated_;          // Battery confirmed saturation status based on Temp and VOC
+  bool bms_off_;  // Calculated by BatteryMonitor, battery off, low voltage,
+                  // switched by battery management system?
+  bool sat_;  // Battery potential saturation status based on Temp and VOC
+  bool saturated_;  // Battery confirmed saturation status based on Temp and VOC
 };

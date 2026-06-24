@@ -114,7 +114,7 @@ uint64_t last_sync = millis();   // Timekeeping
 
 int num_timeouts = 0;           // Number of Particle.connect() needed to unfreeze
 String hm_string = "00:00";     // time, hh:mm
-Pins *myPins;                   // Photon hardware pin mapping used
+Pins* myPins;                   // Photon hardware pin mapping used
 
 // Setup
 void setup()
@@ -145,8 +145,8 @@ void setup()
   System.enableFeature(FEATURE_RETAINED_MEMORY);
   if ( sp.debug()==1 || sp.debug()==2 || sp.debug()==3 || sp.debug()==4 )
   {
-    sp.print_history_array();
-    sp.print_fault_header(&pp.pubList);
+  sp.print_history_array();
+  sp.print_fault_header(&pp.pubList);
   }
   sp.nsum(NSUM);  // Store
 
@@ -164,19 +164,19 @@ void loop()
   static uint64_t now = (uint64_t) millis();
   now = (uint64_t) millis();
   bool chitchat = false;
-  static Sync *Talk = new Sync(TALK_DELAY);
+  static Sync* Talk = new Sync(TALK_DELAY);
   #if IN_SERVICE
-    static Sync *NoSaveWarn = new Sync(NO_SAVE_WARN);
+  static Sync* NoSaveWarn = new Sync(NO_SAVE_WARN);
   #endif
   bool read = false;
-  static Sync *ReadSensors = new Sync(READ_DELAY);
+  static Sync* ReadSensors = new Sync(READ_DELAY);
   bool read_temp = false;
-  static Sync *ReadTemp = new Sync(TEMP_DELAY);
+  static Sync* ReadTemp = new Sync(TEMP_DELAY);
   bool display_and_remember;
-  static Sync *DisplayUserSync = new Sync(DISPLAY_USER_DELAY);
+  static Sync* DisplayUserSync = new Sync(DISPLAY_USER_DELAY);
   bool summarizing;
   static bool boot_wait = true;  // waiting for a while before summarizing
-  static Sync *Summarize = new Sync(SUMMARY_DELAY);
+  static Sync* Summarize = new Sync(SUMMARY_DELAY);
   uint64_t elapsed = 0;
   uint64_t elapsed_reset = 0;
   static bool reset = true;
@@ -187,14 +187,14 @@ void loop()
   static uint64_t start_reset = millis();
 
   // Monitor to count Coulombs and run EKF
-  static BatteryMonitor *Mon = new BatteryMonitor(0., 0., sp.Dw());
+  static BatteryMonitor* Mon = new BatteryMonitor(0., 0., sp.Dw());
 
   // Sensor conversions.  The embedded model 'Sim' is contained in Sensors
   uint64_t time_now = (uint64_t) Time.now();
-  static Sensors *Sen = new Sensors(EKF_NOM_DT, 0, myPins, ReadSensors, ReadTemp, Talk, Summarize, time_now, start, Mon);
+  static Sensors* Sen = new Sensors(EKF_NOM_DT, 0, myPins, ReadSensors, ReadTemp, Talk, Summarize, time_now, start, Mon);
 
   // Battery saturation debounce
-  static TFDelay *Is_sat_delay = new TFDelay(false, T_SAT, T_DESAT, EKF_NOM_DT);
+  static TFDelay* Is_sat_delay = new TFDelay(false, T_SAT, T_DESAT, EKF_NOM_DT);
 
 
   ///////////////////////////////////////////////////////////// Top of loop////////////////////////////////////////
@@ -219,62 +219,62 @@ void loop()
 
   if ( read )
   {
-    // Warn if parameters have been changed but not saved
-    #if IN_SERVICE
-      if ( NoSaveWarn->update(now, reset) && sp.dirty() )
-      {
-        sendTxBuf("WARNING: unsaved Retained parameter.  Enter 'w' to save.\n", true, IN_SERVICE);
-      }
-    #endif
-
-    // Sample Ib
-    if ( reset_kf ) sendTxBuf(" SOC_Particle:  reseting kfs\n", true, IN_SERVICE);
-    Sen->ShuntAmp->sample(reset_kf);
-    Sen->ShuntNoAmp->sample(reset_kf);
-
-    Sen->reset(reset);
-
-    // Check for really slow data capture and run EKF each read frame
-    // ap.eframe_mult() = max(int(float(READ_DELAY)*float(EKF_EFRAME_MULT)/float(ReadSensors->delay())+0.9999), 1);
-
-    update_publish_frame();
-
-    // Read sensors, model signals, select between them, synthesize injection signals on current
-    // Inputs:  sp.config, sp.sim_chm
-    // Outputs: Sen->Ib, Sen->Vb, sp.inj_bias
-    sense_synth_select(reset, reset_temp, reset_kf, ReadSensors->now(), elapsed, myPins, Mon, Sen);
-
-    // Calculate Ah remaining
-    // Inputs:  sp.mon_chm, Sen->Ib, Sen->Vb, Sen->Tb_f
-    // States:  Mon.soc
-    // Outputs: tcharge_wt, tcharge_ekf
-    monitor(reset, reset_temp, reset_ekf, now, Is_sat_delay, Mon, Sen);
-
-    // Re-init Coulomb Counter to EKF if it is different than EKF or if never saturated
-    Mon->regauge(Sen->Tb_f(), Sen);
-
-    // Empty battery
-    if ( sp.modeling() && reset && Sen->Sim->q()<=0. ) Sen->Ib(0.);
-
-    // Debug for read
-    if ( sp.debug()==12 ) debug_12(Mon, Sen);
-
-    // Publish for variable print rate
-    if ( cp.publishS )
+  // Warn if parameters have been changed but not saved
+  #if IN_SERVICE
+    if ( NoSaveWarn->update(now, reset) && sp.dirty() )
     {
-      assign_publist(&pp.pubList, ReadSensors->now(), unit, hm_string, Sen, num_timeouts, Mon);
-      static bool wrote_last_time = false;
-      if ( wrote_last_time )
-        digitalWrite(myPins->status_led, LOW);
-      else
-        digitalWrite(myPins->status_led, HIGH);
-      wrote_last_time = !wrote_last_time;
+    sendTxBuf("WARNING: unsaved Retained parameter.  Enter 'w' to save.\n", true, IN_SERVICE);
     }
+  #endif
 
-    // Print
-    print_shunt_serial(reset, Sen);
-    print_signal_sel_serial(reset, Sen, Mon, Sen->Sim);
-    print_rapid_data(reset, Sen, Mon, reset_temp);
+  // Sample Ib
+  if ( reset_kf ) sendTxBuf(" SOC_Particle:  reseting kfs\n", true, IN_SERVICE);
+  Sen->ShuntAmp->sample(reset_kf);
+  Sen->ShuntNoAmp->sample(reset_kf);
+
+  Sen->reset(reset);
+
+  // Check for really slow data capture and run EKF each read frame
+  // ap.eframe_mult() = max(int(float(READ_DELAY)*float(EKF_EFRAME_MULT)/float(ReadSensors->delay())+0.9999), 1);
+
+  update_publish_frame();
+
+  // Read sensors, model signals, select between them, synthesize injection signals on current
+  // Inputs:  sp.config, sp.sim_chm
+  // Outputs: Sen->Ib, Sen->Vb, sp.inj_bias
+  sense_synth_select(reset, reset_temp, reset_kf, ReadSensors->now(), elapsed, myPins, Mon, Sen);
+
+  // Calculate Ah remaining
+  // Inputs:  sp.mon_chm, Sen->Ib, Sen->Vb, Sen->Tb_f
+  // States:  Mon.soc
+  // Outputs: tcharge_wt, tcharge_ekf
+  monitor(reset, reset_temp, reset_ekf, now, Is_sat_delay, Mon, Sen);
+
+  // Re-init Coulomb Counter to EKF if it is different than EKF or if never saturated
+  Mon->regauge(Sen->Tb_f(), Sen);
+
+  // Empty battery
+  if ( sp.modeling() && reset && Sen->Sim->q()<=0. ) Sen->Ib(0.);
+
+  // Debug for read
+  if ( sp.debug()==12 ) debug_12(Mon, Sen);
+
+  // Publish for variable print rate
+  if ( cp.publishS )
+  {
+    assign_publist(&pp.pubList, ReadSensors->now(), unit, hm_string, Sen, num_timeouts, Mon);
+    static bool wrote_last_time = false;
+    if ( wrote_last_time )
+    digitalWrite(myPins->status_led, LOW);
+    else
+    digitalWrite(myPins->status_led, HIGH);
+    wrote_last_time = !wrote_last_time;
+  }
+
+  // Print
+  print_shunt_serial(reset, Sen);
+  print_signal_sel_serial(reset, Sen, Mon, Sen->Sim);
+  print_rapid_data(reset, Sen, Mon, reset_temp);
 
   }  // end read (high speed frame)
 
@@ -282,8 +282,8 @@ void loop()
   // Bluetooth display drivers.   Also convenient update time for saving parameters (remember)
   if ( display_and_remember )
   {
-    serial_display(Sen, Mon);
-    sp.put_Time_now(max( sp.Time_now(), (uint32_t)Time.now()));  // If happen to connect to wifi (assume updated automatically), save new time
+  serial_display(Sen, Mon);
+  sp.put_Time_now(max( sp.Time_now(), (uint32_t)Time.now()));  // If happen to connect to wifi (assume updated automatically), save new time
   }
 
   
@@ -298,8 +298,8 @@ void loop()
   // runs of Serial inputs
   if ( chitter(chitchat && !reset_temp, Mon, Sen) )  // Parse inputs to queues; returns true if any queue has work
   {
-    chatter();  // Prioritize commands to describe.  ctl_str and asap_str queues always run.  Others only with chitchat
-    describe(Mon, Sen);  // Run the commands
+  chatter();  // Prioritize commands to describe.  ctl_str and asap_str queues always run.  Others only with chitchat
+  describe(Mon, Sen);  // Run the commands
   }
 
   
@@ -315,13 +315,13 @@ void loop()
   // Initialize complete once sensors and models started and summary written
   if ( read )
   {
-    reset = reset_ekf = reset_kf = cp.ekf_reset_print = cp.kf_reset_print = false;
-    if ( reset_temp ) sendTxBuf("*", true, IN_SERVICE);
+  reset = reset_ekf = reset_kf = cp.ekf_reset_print = cp.kf_reset_print = false;
+  if ( reset_temp ) sendTxBuf("*", true, IN_SERVICE);
   }
   if ( read_temp && elapsed_reset>TEMP_DELAY && reset_temp )
   {
-    sendTxBuf("...temp init complete\n", true, IN_SERVICE);
-    reset_temp = false;
+  sendTxBuf("...temp init complete\n", true, IN_SERVICE);
+  reset_temp = false;
   }
 
 

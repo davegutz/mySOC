@@ -62,17 +62,17 @@ enum ibSel {UsingNoa=-1, KeepTrying=0, UsingAmp=1, UsingNone=2};
 enum dispw {conn=0, diff_ib=1, red_loss=2, fail_ib=3, fail_ibm=4, fail_vb=5, flt_tb=6, flt_ekf=7, SAT=8, off=9, accy=10, time_long=11, Count};
 
 /*
-                  ^ scale
-                  |
+          ^ scale
+          |
 ------            |          ------- 1.0 ==> all lg
-       -          |        -
-         -        |      -
-      |    -------------             0.0 ==> all sm
-      |    |      |     |    |
+     -          |        -
+     -        |      -
+    |    -------------             0.0 ==> all sm
+    |    |      |     |    |
    n_lo   n_hi    |   p_lo   p_hi
-                  |
-                  |
-                  v
+          |
+          |
+          v
 */
 struct ScaleBrk
 {
@@ -84,13 +84,13 @@ struct ScaleBrk
   float p_hi;
   ScaleBrk(const float n_l, const float n_h, const float p_l, const float p_h) : n_lo(n_l), n_hi(n_h), p_lo(p_l), p_hi(p_h)
   {
-    n_d = n_hi - n_lo;
-    p_d = p_hi - p_lo;
+  n_d = n_hi - n_lo;
+  p_d = p_hi - p_lo;
   }
   String pretty_print()
   {
-    String txBuf = String::format("ScaleBrk  [%7.3f %7.3f  %7.3f %7.3f]\n", n_lo, n_hi, p_lo, p_hi);
-    return ( txBuf );
+  String txBuf = String::format("ScaleBrk  [%7.3f %7.3f  %7.3f %7.3f]\n", n_lo, n_hi, p_lo, p_hi);
+  return txBuf;
   }
 };
 
@@ -141,7 +141,7 @@ struct ScaleBrk
 #define failAssign(bval, bit) if (bval) bitSet(falw_, bit); else bitClear(falw_, bit)
 #define dispAssign(bval, bit) if (bval) bitSet(cp.disp_word, bit); else bitClear(cp.disp_word, bit)
 
-String bitMapPrint(char *buf, const int16_t fw, const uint8_t num);
+String bitMapPrint(char* buf, const int16_t fw, const uint8_t num);
 
 
 // Model-based fault detector
@@ -151,10 +151,10 @@ class Looparound
 {
 public:
   Looparound();
-  Looparound(BatteryMonitor *Mon, Sensors *Sen, const float wrap_hi_volt, const float wrap_lo_volt, const double wrap_trim_gain,
-    const float imin, const float imax, const float err_max);
+  Looparound(BatteryMonitor* Mon, Sensors* Sen, const float wrap_hi_volt, const float wrap_lo_volt, const double wrap_trim_gain,
+  const float imin, const float imax, const float err_max);
   ~Looparound();
-  void calculate(const bool reset, const bool disable_fault, const float ib, Sensors *Sen, const bool freeze);
+  void calculate(const bool reset, const bool disable_fault, const float ib, Sensors* Sen, const bool freeze);
   float dv_dyn() { return dv_dyn_; };
   float e_wrap() { return e_wrap_; };
   float e_wrap_filt() { return e_wrap_filt_; };
@@ -177,14 +177,14 @@ public:
   float ib_wrp_tau() { return WrapErrFilt_->tau(); };
   uint8_t lo_fail() { return lo_fail_; };
   uint8_t lo_fault() { return lo_fault_; };
-  String pretty_print(Sensors *Sen);
+  String pretty_print(Sensors* Sen);
   bool reset() { return reset_; };
   float vb() { return vb_; };
   float voc() { return voc_; };
   float voc_soc() { return voc_soc_; };
 protected:
-  Chemistry *chem_;         // Chemistry
-  LagExp *ChargeTransfer_;  // ChargeTransfer model {ib, vb} --> {voc}, ioc=ib for Battery version
+  Chemistry* chem_;         // Chemistry
+  LagExp* ChargeTransfer_;  // ChargeTransfer model {ib, vb} --> {voc}, ioc=ib for Battery version
   float dv_dyn_;            // Effective Randles voltage drop, V
   float e_wrap_;            // Wrap error, V
   float e_wrap_filt_;       // Wrap error, V
@@ -204,16 +204,16 @@ protected:
   float imin_;              // Current range min, A
   uint8_t lo_fail_;         // Fail bit
   uint8_t lo_fault_;        // Fault bit
-  BatteryMonitor *Mon_;     // Monitor ptr
+  BatteryMonitor* Mon_;     // Monitor ptr
   bool reset_;              // If resetting or not
-  Sensors *Sen_;            // Sensors ptr
-  TustinIntegrator *Trim_;  // Trim integrator
+  Sensors* Sen_;            // Sensors ptr
+  TustinIntegrator* Trim_;  // Trim integrator
   float vb_;                // Looparound version of vb, V
   float voc_;               // Looparound version of voc, V 
   float voc_soc_;           // Looparound version of voc_soc, V 
-  LagExp *WrapErrFilt_;     // Noise filter for voltage wrap
-  TFDelay *WrapHi_;         // Wrap test persistence
-  TFDelay *WrapLo_;         // Wrap test persistence
+  LagExp* WrapErrFilt_;     // Noise filter for voltage wrap
+  TFDelay* WrapHi_;         // Wrap test persistence
+  TFDelay* WrapLo_;         // Wrap test persistence
   float wrap_hi_volt_;      // Wrap high voltage (hyst +), V
   float wrap_lo_volt_;      // Wrap low voltage (hyst -), V
   double wrap_trim_gain_;   // Trim gain, r/s
@@ -225,11 +225,11 @@ class Fault
 {
 public:
   Fault();
-  Fault(const double T, uint8_t *sp_preserving, BatteryMonitor *Mon, Sensors *Sen);
+  Fault(const double T, uint8_t* sp_preserving, BatteryMonitor* Mon, Sensors* Sen);
   ~Fault();
   bool cc_diff_fa() { return failRead(CC_DIFF_FA); };
   float cc_diff() { return cc_diff_; };
-  void cc_diff(const bool reset, Sensors *Sen, BatteryMonitor *Mon);
+  void cc_diff(const bool reset, Sensors* Sen, BatteryMonitor* Mon);
   float cc_diff_thr() { return cc_diff_thr_; };
   float cc_diff_thr_;     // Threshold Coulomb Counters difference faults, soc fraction
   bool disable_amp_fault() { return disable_amp_fault_; };
@@ -258,9 +258,9 @@ public:
   ibSel ib_choice() { return ib_choice_; };
   ibSel ib_choice_past() { return ib_choice_last_; };
   uint16_t ib_decision() { return ib_decision_;  };
-  void ib_decision_active_standby(Sensors *Sen);
-  void ib_decision_hi_lo(Sensors *Sen);
-  void ib_diff(const bool reset, Sensors *Sen, BatteryMonitor *Mon);
+  void ib_decision_active_standby(Sensors* Sen);
+  void ib_decision_hi_lo(Sensors* Sen);
+  void ib_diff(const bool reset, Sensors* Sen, BatteryMonitor* Mon);
   float ib_diff() { return ( ib_diff_ ); };
   bool ib_diff_fa() { return ( failRead(IB_DIFF_HI_FA) || failRead(IB_DIFF_LO_FA) ); };
   float ib_diff_f() { return ( ib_diff_f_ ); };
@@ -276,55 +276,55 @@ public:
   float ib_dyn_n() { return WrapLoopNoa->ib_dyn(); };
   bool ib_is_functional() { return ib_is_functional_; };
   bool ib_lo_active() { return ib_lo_active_; };
-  void ib_logic(const bool reset, Sensors *Sen, BatteryMonitor *Mon);
+  void ib_logic(const bool reset, Sensors* Sen, BatteryMonitor* Mon);
   bool ib_noa_bare() { return faultRead(IB_NOA_BARE); };
   bool ib_noa_fa() { return failRead(IB_NOA_FA); };
   bool ib_noa_flt() { return faultRead(IB_NOA_FLT); };
   bool ib_noa_hi() { return ib_noa_hi_; };
   bool ib_noa_lo() { return ib_noa_lo_; };
-  void ib_quiet(const bool reset, Sensors *Sen);
+  void ib_quiet(const bool reset, Sensors* Sen);
   float ib_quiet() { return ib_quiet_; };
   float ib_quiet_thr() { return ib_quiet_thr_; };
   float ib_quiet_thr_;     // Threshold below which ib is quiet, A pk
   float ib_rate() { return ib_rate_; };
-  void ib_range(const bool reset, Sensors *Sen, BatteryMonitor *Mon);
+  void ib_range(const bool reset, Sensors* Sen, BatteryMonitor* Mon);
   bool ib_really_quiet() { return ib_really_quiet_; };
   int8_t ib_sel_stat() { return ib_sel_stat_; };
   void ib_sel_stat(const int sel_stat) { ib_sel_stat_ = sel_stat; };
-  void ib_wrap(const bool reset, Sensors *Sen, BatteryMonitor *Mon);
-  TFDelay *IbLoLimitedHi;   // Persistence low amp limited high active status
-  TFDelay *IbLoLimitedLo;   // Persistence low amp limited low active status
+  void ib_wrap(const bool reset, Sensors* Sen, BatteryMonitor* Mon);
+  TFDelay* IbLoLimitedHi;   // Persistence low amp limited high active status
+  TFDelay* IbLoLimitedLo;   // Persistence low amp limited low active status
   int8_t latch_fake() { return latch_fake_; };
   void latch_fake(const bool cmd) { latch_fake_ = cmd; };
   int8_t latched_fail() { return latch_; };
   void latched_fail(const bool cmd) { latch_ = cmd; };
-  Looparound *WrapLoopAmp;    // Looparound for Ib amp
-  Looparound *WrapLoopNoa;    // Looparound for Ib noa
+  Looparound* WrapLoopAmp;    // Looparound for Ib amp
+  Looparound* WrapLoopNoa;    // Looparound for Ib noa
   bool no_fails() { return !latch_; };
   bool no_fails_fake() { return !latch_fake_; };
   bool preserving() { return *sp_preserving_; };
   void preserving(const bool cmd) {  sp.put_Preserving(cmd); };
-  void pretty_print(Sensors *Sen, BatteryMonitor *Mon);
+  void pretty_print(Sensors* Sen, BatteryMonitor* Mon);
   bool record() { if ( ap.fake_faults() ) return no_fails_fake(); else return no_fails(); };
   bool red_loss() { return faultRead(RED_LOSS); };
   bool reset_all_faults() { return reset_all_faults_; };
   void reset_all_faults(const bool cmd) { reset_all_faults_ = cmd; };
   bool reset_all_faults_print() { return reset_all_faults_print_; };
   void reset_all_faults_select();
-  void select_all_logic(Sensors *Sen, BatteryMonitor *Mon, const bool reset);
-  void shunt_check(Sensors *Sen, BatteryMonitor *Mon, const bool reset);  // Range check Ib signals
+  void select_all_logic(Sensors* Sen, BatteryMonitor* Mon, const bool reset);
+  void shunt_check(Sensors* Sen, BatteryMonitor* Mon, const bool reset);  // Range check Ib signals
   void shunt_select_initial(const bool reset);   // Choose between shunts for model
-  void Tb_check(Sensors *Sen, const float _tb_min, const float _tb_max, const bool reset);  // Range check Tb
+  void Tb_check(Sensors* Sen, const float _tb_min, const float _tb_max, const bool reset);  // Range check Tb
   bool Tb_fa() { return failRead(TB_FA); };
   bool Tb_flt() { return faultRead(TB_FLT); };
   int8_t tb_sel_status() { return tb_sel_stat_; };
-  void vb_check(Sensors *Sen, BatteryMonitor *Mon, const float _vb_min, const float _vb_max, const bool reset);  // Range check Vb
+  void vb_check(Sensors* Sen, BatteryMonitor* Mon, const float _vb_min, const float _vb_max, const bool reset);  // Range check Vb
   bool vb_fail() { return ( vb_fa_lt() || vb_sel_stat_==0 ); };
   bool vb_fa_lt() { return failRead(VB_FA_LT); };
   bool vb_flt() { return faultRead(VB_FLT); };
   int8_t vb_sel_stat() { return vb_sel_stat_; };
   int8_t vb_sel_stat_past() { return vb_sel_stat_last_; };
-  void vc_check(Sensors *Sen, BatteryMonitor *Mon, const float _vc_min, const float _vc_max, const bool reset);  // Range check Vc
+  void vc_check(Sensors* Sen, BatteryMonitor* Mon, const float _vc_min, const float _vc_max, const bool reset);  // Range check Vc
   bool vc_fa() { return failRead(VC_FA); };
   bool vc_flt() { return faultRead(VC_FLT); };
   void wrap_err_filt_state(const float in) { WrapErrFilt->lstate(in); }
@@ -343,30 +343,30 @@ public:
   bool wrap_lo_n_fa() { return failRead(WRAP_LO_N_FA); };
   bool wrap_lo_n_flt() { return faultRead(WRAP_LO_N_FLT); };
   bool wrap_m_and_n_fa() { return ( (failRead(WRAP_LO_M_FA) && failRead(WRAP_LO_N_FA)) ||
-                                       (failRead(WRAP_HI_M_FA) && failRead(WRAP_HI_N_FA))  ); };
+                     (failRead(WRAP_HI_M_FA) && failRead(WRAP_HI_N_FA))  ); };
   bool wrap_m_fa() { return failRead(WRAP_LO_M_FA) || failRead(WRAP_HI_M_FA); };
   bool wrap_n_fa() { return failRead(WRAP_LO_N_FA) || failRead(WRAP_HI_N_FA); };
-  void wrap_scalars(BatteryMonitor *Mon);
+  void wrap_scalars(BatteryMonitor* Mon);
   bool wrap_vb_fa() { return failRead(WRAP_VB_FA); };
 protected:
-  TFDelay *CcdiffPer;       // Persistence cc_diff ekf fail amp
-  TFDelay *IbAmpHardFail;   // Persistence ib hard fail amp
-  TFDelay *IbdPosPer;       // Persistence ib diff hi instantaneous
-  TFDelay *IbdNegPer;       // Persistence ib diff lo instantaneous
-  TFDelay *IbdHiPer;        // Persistence ib diff hi
-  TFDelay *IbdLoPer;        // Persistence ib diff lo
-  LagExp *IbDiffFilt;       // Noise filter for signal selection
-  TFDelay *IbNoAmpHardFail; // Persistence ib hard fail noa
-  General2_Pole *QuietFilt; // Linear filter to test for quiet
-  TFDelay *QuietPer;        // Persistence ib quiet disconnect detection
-  TFDelay *QuietPerFunc;    // Persistence ib quiet normal functional detection
-  RateLagExp *QuietRate;    // Linear filter to calculate rate for quiet
-  TFDelay *TbHardFail;      // Persistence Tb hard fail
-  TFDelay *VbHardFail;      // Persistence vb hard fail
-  TFDelay *VcHardFail;      // Persistence vc hard fail
-  LagExp *WrapErrFilt;      // Noise filter for voltage wrap
-  TFDelay *WrapHi;          // Time high wrap fail persistence
-  TFDelay *WrapLo;          // Time low wrap fail persistence
+  TFDelay* CcdiffPer;       // Persistence cc_diff ekf fail amp
+  TFDelay* IbAmpHardFail;   // Persistence ib hard fail amp
+  TFDelay* IbdPosPer;       // Persistence ib diff hi instantaneous
+  TFDelay* IbdNegPer;       // Persistence ib diff lo instantaneous
+  TFDelay* IbdHiPer;        // Persistence ib diff hi
+  TFDelay* IbdLoPer;        // Persistence ib diff lo
+  LagExp* IbDiffFilt;       // Noise filter for signal selection
+  TFDelay* IbNoAmpHardFail; // Persistence ib hard fail noa
+  General2_Pole* QuietFilt; // Linear filter to test for quiet
+  TFDelay* QuietPer;        // Persistence ib quiet disconnect detection
+  TFDelay* QuietPerFunc;    // Persistence ib quiet normal functional detection
+  RateLagExp* QuietRate;    // Linear filter to calculate rate for quiet
+  TFDelay* TbHardFail;      // Persistence Tb hard fail
+  TFDelay* VbHardFail;      // Persistence vb hard fail
+  TFDelay* VcHardFail;      // Persistence vc hard fail
+  LagExp* WrapErrFilt;      // Noise filter for voltage wrap
+  TFDelay* WrapHi;          // Time high wrap fail persistence
+  TFDelay* WrapLo;          // Time low wrap fail persistence
   float cc_diff_;           // EKF tracking error, C
   bool cc_diff_fa_;         // EKF tested disagree, T = error
   float cc_diff_empty_slr_; // Scale cc_diff when soc low, scalar
@@ -407,7 +407,7 @@ protected:
   bool rate_noa_;           // ib_noa rate fault, T=fault
   bool reset_all_faults_;   // Reset all fault logic, gets reset before serial call
   bool reset_all_faults_print_;  // Reset all fault logic
-  uint8_t *sp_preserving_;  // Saving fault buffer.   Stopped recording.  T=preserve
+  uint8_t* sp_preserving_;  // Saving fault buffer.   Stopped recording.  T=preserve
   bool splrr_amp_;          // ib_amp soft fault preceeded by local rate or range, T=preserve
   bool splrr_noa_;          // ib_noa soft fault preceeded by local rate or range, T=preserve
   int8_t tb_sel_stat_;      // Memory of Tb signal selection, 0=none, 1=sensor
@@ -422,5 +422,5 @@ protected:
 
 // Misc
 
-float scale_select(const float in, const ScaleBrk *brk, const float lo, const float hi);
-float scale_select(const float in, const ScaleBrk *brk, const float lo, const float hi, int8_t *sel_stat);
+float scale_select(const float in, const ScaleBrk* brk, const float lo, const float hi);
+float scale_select(const float in, const ScaleBrk* brk, const float lo, const float hi, int8_t* sel_stat);

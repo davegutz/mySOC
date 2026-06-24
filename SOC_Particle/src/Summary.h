@@ -29,5 +29,5 @@
 #include "FaultStore.h"
 
 // Function prototypes
-void print_all_fault_buffer(const String code, struct Flt_st *sum, const uint16_t iflt, const uint16_t nflt);
-void reset_all_fault_buffer(const String code, struct Flt_st *sum, const uint16_t iflt, const uint16_t nflt);
+void print_all_fault_buffer(const String code, struct Flt_st* sum, const uint16_t iflt, const uint16_t nflt);
+void reset_all_fault_buffer(const String code, struct Flt_st* sum, const uint16_t iflt, const uint16_t nflt);

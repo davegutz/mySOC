@@ -39,8 +39,8 @@ class Coulombs
 {
 public:
   Coulombs();
-  Coulombs(double *sp_delta_q, const double q_cap_rated,
-    const double s_coul_eff, const float dx_voc, const float dy_voc, const float dz_voc);
+  Coulombs(double* sp_delta_q, const double q_cap_rated,
+  const double s_coul_eff, const float dx_voc, const float dy_voc, const float dz_voc);
   ~Coulombs();
   void apply_cap_scale(const double scale);
   void apply_delta_q(const double delta_q);
@@ -48,10 +48,10 @@ public:
   void apply_delta_q_t(const double delta_q, const double tb_f);
   void apply_soc(const double soc, const double tb_f);
   double calculate_capacity(const double tb_f);
-  Chemistry *chem() { return &chem_; };
+  Chemistry* chem() { return &chem_; };
   void chem_pretty_print () { chem_.pretty_print(); };
   void coul_eff(const double coul_eff) { coul_eff_ = coul_eff; };
-  virtual double count_coulombs(Sensors *Sen, const bool reset_temp, const float charge_curr, const bool sat,
+  virtual double count_coulombs(Sensors* Sen, const bool reset_temp, const float charge_curr, const bool sat,
   const bool saturated);
   double d_delta_q() { return(d_delta_q_); };
   double delta_q() { return(*sp_delta_q_); };
@@ -74,7 +74,7 @@ public:
   double soc_min() { return(soc_min_); };
   double time_neg() { return(time_neg_); };
   double time_pos() { return(time_pos_); };
-  virtual float vsat(void) = 0;
+  virtual float vsat() = 0;
 protected:
   bool resetting_ = false;  // Sticky flag to coordinate user testing of coulomb counters, T=performing an external reset of counter
   double coul_eff_;   // Coulombic efficiency - the fraction of charging input that gets turned into usable Coulombs
@@ -96,7 +96,7 @@ protected:
   double soc_ekf_min_; // Minimum SOC for EKF operation
   double soc_inf_;    // Fraction of saturation charge (q_capacity_) available (-inf - inf)
   double soc_min_;    // As battery cools, the voltage drops and there appears a minimum soc it can deliver
-  double *sp_delta_q_;// Charge since saturated, C
+  double* sp_delta_q_;// Charge since saturated, C
   double tb_f_;       // Temperature, deg C
   double tb_f_rate_;  // Tb rate, deg C / s
   double Tb_f_;       // Temperature, deg C

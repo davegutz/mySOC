@@ -31,12 +31,12 @@ public:
   KalmanFilter(const double dt, const double init_pos, const double Q_std, const double R_std);
   ~KalmanFilter();
   double calculate(const bool reset, const double dt, const double in);
-  double **Fx() { return Fx_; };
-  double *x() { return x_; };
+  double** Fx() { return Fx_; };
+  double* x() { return x_; };
   void kf_init(const double in);
   double kf_v() { return x_[1]; };
   void predict();
-  void pretty_print(void);
+  void pretty_print();
   void print_serial_header(const char suffix);
   void print_serial();
   void q_std(const double q) { Q_stdsq_ = max(q * q, 0.); };
@@ -46,19 +46,19 @@ private:
   double dt_;     // Update time, s
   const int ROWS_ = 2;
   const int COLS_ = 2;
-  double **Fx_;   // State transition
-  double *G_;     // Control B matrix mapping inputs to states
-  double *H_;     // Jacobian
-  double *K_;     // Kalman gain
-  double **P_;    // Kalman probability matrix
-  double **P_prior_;  // Intermediate Kalman probability matrix
-  double **Q_;    
+  double** Fx_;   // State transition
+  double* G_;     // Control B matrix mapping inputs to states
+  double* H_;     // Jacobian
+  double* K_;     // Kalman gain
+  double** P_;    // Kalman probability matrix
+  double** P_prior_;  // Intermediate Kalman probability matrix
+  double** Q_;    
   double Q_stdsq_; // Standard deviation squared of the process noise
   bool reset_; // Reset command status
   double R_stdsq_;    // Standard deviation squared of the measurement noise
   double S_;
   double u_;      // Measurement update for x
-  double *x_;
-  double *x_prior_;  // Intermediate calculation
+  double* x_;
+  double* x_prior_;  // Intermediate calculation
   double y_;
 };

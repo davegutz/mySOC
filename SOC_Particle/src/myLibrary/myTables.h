@@ -3,10 +3,10 @@
 
 // Interpolating, clipping, 1 and 2-D arbitrarily spaced table look-up
 
-void binsearch(double x, double *v, int n, int *high, int *low, double *dx);
-double tab1(double x, double *v, double *y, int n);
-double tab1clip(double x, double *v, double *y, int n);
-double tab2(double x1, double x2, double *v1, double *v2, double *y, int n1, int n2);
+void binsearch(double x, double* v, int n, int* high, int* low, double* dx);
+double tab1(double x, double* v, double* y, int n);
+double tab1clip(double x, double* v, double* y, int n);
+double tab2(double x1, double x2, double* v1, double* v2, double* y, int n1, int n2);
 
 class TableInterp
 {
@@ -16,12 +16,12 @@ public:
   virtual ~TableInterp();
   // operators
   // functions
-  virtual double interp(void);
+  virtual double interp();
   void pretty_print();
 protected:
   uint16_t n1_;
-  double *x_;
-  double *v_;
+  double* x_;
+  double* v_;
 };
 
 // 1-D Interpolation Table Lookup
@@ -58,7 +58,7 @@ class TableInterp2D : public TableInterp
 public:
   TableInterp2D();
   TableInterp2D(const uint16_t n, const uint16_t m, double x[],
-                double y[], double v[]);
+        double y[], double v[]);
   ~TableInterp2D();
   //operators
   void put_dx(const double inp) { dx_ = inp; }
@@ -74,6 +74,6 @@ protected:
   double dy_;  // Bias on input into table lookup
   double dz_;  // Bias on calculated output of table lookup
   uint16_t n2_;
-  double *y_;
+  double* y_;
 };
 

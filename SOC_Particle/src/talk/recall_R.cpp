@@ -35,82 +35,82 @@ extern VolatilePars ap; // Various adjustment parameters shared at system level
 extern CommandPars cp;  // Various parameters shared at system level
 extern Flt_st mySum[NSUM];  // Summaries for saving charge history
 
-bool recall_R(const char letter_1, BatteryMonitor *Mon, Sensors *Sen)
+bool recall_R(const char letter_1, BatteryMonitor* Mon, Sensors* Sen)
 {
-    bool found = true;
-    switch ( letter_1 )
-    {
-        case ( 'b' ):  // Rb:  Reset battery states (also hys)
-            Sen->Sim->init_battery_sim(true, Sen);  // Reset sim battery state
-            Mon->init_battery_mon(true, Sen);       // Reset mon battery state
-            break;
+  bool found = true;
+  switch ( letter_1 )
+  {
+    case ( 'b' ):  // Rb:  Reset battery states (also hys)
+      Sen->Sim->init_battery_sim(true, Sen);  // Reset sim battery state
+      Mon->init_battery_mon(true, Sen);       // Reset mon battery state
+      break;
 
-        case ( 'e' ):  // Re:  Reset EKF
-            Serial.printf("Reset Extended Kalman filter\n");
-            cp.ekf_reset = true;
-            break;
+    case ( 'e' ):  // Re:  Reset EKF
+      Serial.printf("Reset Extended Kalman filter\n");
+      cp.ekf_reset = true;
+      break;
 
-        case ( 'f' ):  // Rf:  Reset fault Rf
-            Serial.printf("Reset latches\n");
-            Sen->Flt->reset_all_faults(true);
-            break;
+    case ( 'f' ):  // Rf:  Reset fault Rf
+      Serial.printf("Reset latches\n");
+      Sen->Flt->reset_all_faults(true);
+      break;
 
-        case ( 'i' ):  // Ri:  Reset infinite counter
-            Serial.printf("Reset infinite counter\n");
-            cp.inf_reset = true;
-            break;
+    case ( 'i' ):  // Ri:  Reset infinite counter
+      Serial.printf("Reset infinite counter\n");
+      cp.inf_reset = true;
+      break;
 
-        case ( 'k' ):  // Rk:  Reset fault Rk
-            Serial.printf("Reset kalman filters\n");
-            cp.cmd_reset_kf();
-            break;
+    case ( 'k' ):  // Rk:  Reset fault Rk
+      Serial.printf("Reset kalman filters\n");
+      cp.cmd_reset_kf();
+      break;
 
-        case ( 'r' ):  // Rr:  small reset counters
-            Serial.printf("CC reset\n");
-            Sen->Sim->apply_soc(1.0, Sen->Tb_f());
-            Mon->apply_soc(1.0, Sen->Tb_f());
-            cp.cmd_reset();
-            break;
+    case ( 'r' ):  // Rr:  small reset counters
+      Serial.printf("CC reset\n");
+      Sen->Sim->apply_soc(1.0, Sen->Tb_f());
+      Mon->apply_soc(1.0, Sen->Tb_f());
+      cp.cmd_reset();
+      break;
 
-        case ( 'R' ):  // RR:  large reset
-            sendTxBuf("RESET\n", true, IN_SERVICE);
-            Sen->Sim->apply_soc(1.0, Sen->Tb_f());
-            Mon->apply_soc(1.0, Sen->Tb_f());
-            cp.cmd_reset();
-            Sen->ReadSensors->delay(READ_DELAY);
-            Sen->Talk->delay(TALK_DELAY);
-            sp.large_reset();
-            sp.large_reset();
-            cp.large_reset();
-            cp.cmd_reset();
-            chit("RV;", SOON);
-            chit("RS;", SOON);
-            chit("Hd;", SOON);
-            chit("HR;", SOON);
-            chit("Pf;", SOON);
-            chit("Rf;", SOON);
-            chit("Hs;", SOON);
-            chit("Pf;", SOON);
-            break;
+    case ( 'R' ):  // RR:  large reset
+      sendTxBuf("RESET\n", true, IN_SERVICE);
+      Sen->Sim->apply_soc(1.0, Sen->Tb_f());
+      Mon->apply_soc(1.0, Sen->Tb_f());
+      cp.cmd_reset();
+      Sen->ReadSensors->delay(READ_DELAY);
+      Sen->Talk->delay(TALK_DELAY);
+      sp.large_reset();
+      sp.large_reset();
+      cp.large_reset();
+      cp.cmd_reset();
+      chit("RV;", SOON);
+      chit("RS;", SOON);
+      chit("Hd;", SOON);
+      chit("HR;", SOON);
+      chit("Pf;", SOON);
+      chit("Rf;", SOON);
+      chit("Hs;", SOON);
+      chit("Pf;", SOON);
+      break;
 
-        case ( 's' ):  // Rs:  small reset filters
-            Serial.printf("reset\n");
-            cp.cmd_reset();
-            break;
+    case ( 's' ):  // Rs:  small reset filters
+      Serial.printf("reset\n");
+      cp.cmd_reset();
+      break;
 
-        case ( 'S' ):  // RS: renominalize saved pars
-            sp.set_nominal();
-            sp.pretty_print(true);
-            break;
+    case ( 'S' ):  // RS: renominalize saved pars
+      sp.set_nominal();
+      sp.pretty_print(true);
+      break;
 
-        case ( 'V' ):  // RV: renominalize volatile pars
-            ap.set_nominal();
-            ap.pretty_print(true);
-            break;
+    case ( 'V' ):  // RV: renominalize volatile pars
+      ap.set_nominal();
+      ap.pretty_print(true);
+      break;
 
-        default:
-            found = ap.find_adjust(cp.cmd_str) || sp.find_adjust(cp.cmd_str);
-            if (!found) Serial.printf("%s NOT FOUND\n", cp.cmd_str.substring(0,2).c_str());
-    }
-    return found;
+    default:
+      found = ap.find_adjust(cp.cmd_str) || sp.find_adjust(cp.cmd_str);
+      if (!found) Serial.printf("%s NOT FOUND\n", cp.cmd_str.substring(0,2).c_str());
+  }
+  return found;
 }

@@ -42,23 +42,23 @@ extern PublishPars pp;  // For publishing
 extern CommandPars cp;  // Various parameters to be static at system level
 
 // Headers
-String chat_cmd_from(String *source);
+String chat_cmd_from(String* source);
 void delay_no_block(const uint64_t delay_millis);
 String finish_request(const String in_str);
 bool is_finished(const char in_char);
 void print_battery_header();
 void print_battery_serial();
-void print_all_header(Sensors *Sen);
-void print_rapid_data(const bool reset, Sensors *Sen, BatteryMonitor *Mon, const bool reset_temp);
-void print_rapid_header(void);
-void print_rapid_serial(const bool reset, Publish *pubList, Sensors *Sen, BatteryMonitor *Mon);
-void print_sim_serial(const bool initializing_all, const bool reset_temp, Sensors *Sen, BatterySim *Sim);
-void print_sim_header(void);
-void print_shunt_header(Sensors *Sen);
-void print_shunt_serial(const bool reset, Sensors *Sen);
-void print_signal_sel_serial(const bool reset, Sensors *Sen, BatteryMonitor *Mon, BatterySim *Sim);
-void print_signal_sel_header(void);
-void print_ekf_header(void);
+void print_all_header(Sensors* Sen);
+void print_rapid_data(const bool reset, Sensors* Sen, BatteryMonitor* Mon, const bool reset_temp);
+void print_rapid_header();
+void print_rapid_serial(const bool reset, Publish* pubList, Sensors* Sen, BatteryMonitor* Mon);
+void print_sim_serial(const bool initializing_all, const bool reset_temp, Sensors* Sen, BatterySim* Sim);
+void print_sim_header();
+void print_shunt_header(Sensors* Sen);
+void print_shunt_serial(const bool reset, Sensors* Sen);
+void print_signal_sel_serial(const bool reset, Sensors* Sen, BatteryMonitor* Mon, BatterySim* Sim);
+void print_signal_sel_header();
+void print_ekf_header();
 void sendTxBuf(const String& txBuf, const bool sendSerial, const bool sendBLE);
 void sendTxBuf(const char* txBuf, const bool sendSerial, const bool sendBLE);
 void wait_on_user_input();

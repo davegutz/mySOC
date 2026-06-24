@@ -29,7 +29,7 @@ extern SavedPars sp;       // Various parameters to be static at system level an
 extern VolatilePars ap; // Various adjustment parameters shared at system level
 
 // struct Flt_st.  This file needed to avoid circular reference to sp in header files
-void Flt_st::assign(const uint64_t now, BatteryMonitor *Mon, Sensors *Sen)
+void Flt_st::assign(const uint64_t now, BatteryMonitor* Mon, Sensors* Sen)
 {
   this->t_flt = now;
   this->Tb_hdwe_filt = int16_t(Sen->Tb_hdwe_f()*SCL_600);
@@ -54,7 +54,7 @@ void Flt_st::assign(const uint64_t now, BatteryMonitor *Mon, Sensors *Sen)
 }
 
 // struct Flt_st.  This file needed to avoid circular reference to sp in header files
-void Flt_st::assign_unfilt(const uint64_t now, BatteryMonitor *Mon, Sensors *Sen)
+void Flt_st::assign_unfilt(const uint64_t now, BatteryMonitor* Mon, Sensors* Sen)
 {
   this->t_flt = now;
   this->Tb_hdwe_filt = int16_t(Sen->Tb_hdwe()*SCL_600);
@@ -136,40 +136,40 @@ void Flt_st::pretty_print(const String code)
   strcpy(buffer, "---");
   if ( this->t_flt > 1UL )
   {
-    Serial.printf("code %s\n", code.c_str());
-    time_long_2_str((time_t)(this->t_flt / 1000ULL), buffer);
-    Serial.printf("buffer %s\n", buffer);
-    Serial.printf("t %lu\n", this->t_flt);
-    Serial.printf("Tb_hdwe_filt %7.3f\n", float(this->Tb_hdwe_filt)/SCL_600);
-    Serial.printf("vb_hdwe_filt %7.3f\n", float(this->vb_hdwe_filt)/sp.vb_hist_slr());
-    Serial.printf("Vc_hdwe_sum %7.3f\n", float(this->Vc_hdwe_sum)/SCL_3000);
-    Serial.printf("ib_amp_hdwe_filt %7.3f\n", float(this->ib_amp_hdwe_filt)/sp.ib_hist_m_slr());
-    Serial.printf("ib_noa_hdwe_filt %7.3f\n", float(this->ib_noa_hdwe_filt)/sp.ib_hist_n_slr());
-    Serial.printf("Tb_filt %7.3f\n", float(this->Tb_filt)/SCL_600);
-    Serial.printf("vb_filt %7.3f\n", float(this->vb_filt)/sp.vb_hist_slr());
-    Serial.printf("ib_filt %7.3f\n", float(this->ib_filt)/sp.ib_hist_n_slr());
-    Serial.printf("soc %7.4f\n", float(this->soc)/SCL_16000);
-    Serial.printf("soc_min %7.4f\n", float(this->soc_min)/SCL_16000);
-    Serial.printf("soc_ekf %7.4f\n", float(this->soc_ekf)/SCL_16000);
-    Serial.printf("voc_filt %7.3f\n", float(this->voc_filt)/sp.vb_hist_slr());
-    Serial.printf("voc_stat_filt %7.3f\n", float(this->voc_stat_filt)/sp.vb_hist_slr());
-    Serial.printf("e_wrap_filt %7.3f\n", float(this->e_wrap_filt)/sp.vb_hist_slr());
-    Serial.printf("e_wrap_m_filt %7.3f\n", float(this->e_wrap_m_filt)/sp.vb_hist_slr());
-    Serial.printf("e_wrap_m_trim %7.3f\n", float(this->e_wrap_m_trim)/sp.vb_hist_slr());
-    Serial.printf("e_wrap_n_filt %7.3f\n", float(this->e_wrap_n_filt)/sp.vb_hist_slr());
-    Serial.printf("fltw %u falw %u\n", this->fltw, this->falw);
+  Serial.printf("code %s\n", code.c_str());
+  time_long_2_str((time_t)(this->t_flt / 1000ULL), buffer);
+  Serial.printf("buffer %s\n", buffer);
+  Serial.printf("t %lu\n", this->t_flt);
+  Serial.printf("Tb_hdwe_filt %7.3f\n", float(this->Tb_hdwe_filt)/SCL_600);
+  Serial.printf("vb_hdwe_filt %7.3f\n", float(this->vb_hdwe_filt)/sp.vb_hist_slr());
+  Serial.printf("Vc_hdwe_sum %7.3f\n", float(this->Vc_hdwe_sum)/SCL_3000);
+  Serial.printf("ib_amp_hdwe_filt %7.3f\n", float(this->ib_amp_hdwe_filt)/sp.ib_hist_m_slr());
+  Serial.printf("ib_noa_hdwe_filt %7.3f\n", float(this->ib_noa_hdwe_filt)/sp.ib_hist_n_slr());
+  Serial.printf("Tb_filt %7.3f\n", float(this->Tb_filt)/SCL_600);
+  Serial.printf("vb_filt %7.3f\n", float(this->vb_filt)/sp.vb_hist_slr());
+  Serial.printf("ib_filt %7.3f\n", float(this->ib_filt)/sp.ib_hist_n_slr());
+  Serial.printf("soc %7.4f\n", float(this->soc)/SCL_16000);
+  Serial.printf("soc_min %7.4f\n", float(this->soc_min)/SCL_16000);
+  Serial.printf("soc_ekf %7.4f\n", float(this->soc_ekf)/SCL_16000);
+  Serial.printf("voc_filt %7.3f\n", float(this->voc_filt)/sp.vb_hist_slr());
+  Serial.printf("voc_stat_filt %7.3f\n", float(this->voc_stat_filt)/sp.vb_hist_slr());
+  Serial.printf("e_wrap_filt %7.3f\n", float(this->e_wrap_filt)/sp.vb_hist_slr());
+  Serial.printf("e_wrap_m_filt %7.3f\n", float(this->e_wrap_m_filt)/sp.vb_hist_slr());
+  Serial.printf("e_wrap_m_trim %7.3f\n", float(this->e_wrap_m_trim)/sp.vb_hist_slr());
+  Serial.printf("e_wrap_n_filt %7.3f\n", float(this->e_wrap_n_filt)/sp.vb_hist_slr());
+  Serial.printf("fltw %u falw %u\n", this->fltw, this->falw);
   }
 }
 
-void SavedPars::print_fault_header(Publish *pubList)
+void SavedPars::print_fault_header(Publish* pubList)
 {
-    String txBuf;
+  String txBuf;
 
-    txBuf = String::format("Config:  %s \n", pubList->unit.c_str());
-    sendTxBuf(txBuf, true, IN_SERVICE);
+  txBuf = String::format("Config:  %s \n", pubList->unit.c_str());
+  sendTxBuf(txBuf, true, IN_SERVICE);
 
-    txBuf = String::format("fltb,  date,             time_ux,    Tb_h_f, vb_h_f, Vc_h, ib_amp_hdwe_f, ib_noa_hdwe_f, Tb_f, vb_f, ib_f, soc, soc_min, soc_ekf, voc_f, voc_stat_f, e_wrap_filt, e_wrap_m_filt, e_wrap_m_trim, e_wrap_n_filt, fltw, falw,\n");
-    sendTxBuf(txBuf, true, IN_SERVICE);
+  txBuf = String::format("fltb,  date,             time_ux,    Tb_h_f, vb_h_f, Vc_h, ib_amp_hdwe_f, ib_noa_hdwe_f, Tb_f, vb_f, ib_f, soc, soc_min, soc_ekf, voc_f, voc_stat_f, e_wrap_filt, e_wrap_m_filt, e_wrap_m_trim, e_wrap_n_filt, fltw, falw,\n");
+  sendTxBuf(txBuf, true, IN_SERVICE);
 }
 
 void Flt_st::print_flt(const String code)
@@ -180,29 +180,29 @@ void Flt_st::print_flt(const String code)
 
   if ( this->t_flt > 1UL )
   {
-    time_long_2_str((time_t)(this->t_flt / 1000ULL), buffer);
-    txBuf = String::format("%s, %s, %lld, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.4f, %7.4f, %7.4f, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %ld, %ld,\n",
-      code.c_str(), buffer, this->t_flt,
-      float(this->Tb_hdwe_filt)/SCL_600,
-      float(this->vb_hdwe_filt)/sp.vb_hist_slr(),
-      float(this->Vc_hdwe_sum)/SCL_3000,
-      float(this->ib_amp_hdwe_filt)/sp.ib_hist_m_slr(),
-      float(this->ib_noa_hdwe_filt)/sp.ib_hist_n_slr(),
-      float(this->Tb_filt)/SCL_600,
-      float(this->vb_filt)/sp.vb_hist_slr(),
-      float(this->ib_filt)/sp.ib_hist_n_slr(),
-      float(this->soc)/SCL_16000,
-      float(this->soc_min)/SCL_16000,
-      float(this->soc_ekf)/SCL_16000,
-      float(this->voc_filt)/sp.vb_hist_slr(),
-      float(this->voc_stat_filt)/sp.vb_hist_slr(),
-      float(this->e_wrap_filt)/sp.vb_hist_slr(),
-      float(this->e_wrap_m_filt)/sp.vb_hist_slr(),
-      float(this->e_wrap_m_trim)/sp.vb_hist_slr(),
-      float(this->e_wrap_n_filt)/sp.vb_hist_slr(),
-      this->fltw,
-      this->falw);
-    sendTxBuf(txBuf, true, IN_SERVICE);
+  time_long_2_str((time_t)(this->t_flt / 1000ULL), buffer);
+  txBuf = String::format("%s, %s, %lld, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.4f, %7.4f, %7.4f, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %ld, %ld,\n",
+    code.c_str(), buffer, this->t_flt,
+    float(this->Tb_hdwe_filt)/SCL_600,
+    float(this->vb_hdwe_filt)/sp.vb_hist_slr(),
+    float(this->Vc_hdwe_sum)/SCL_3000,
+    float(this->ib_amp_hdwe_filt)/sp.ib_hist_m_slr(),
+    float(this->ib_noa_hdwe_filt)/sp.ib_hist_n_slr(),
+    float(this->Tb_filt)/SCL_600,
+    float(this->vb_filt)/sp.vb_hist_slr(),
+    float(this->ib_filt)/sp.ib_hist_n_slr(),
+    float(this->soc)/SCL_16000,
+    float(this->soc_min)/SCL_16000,
+    float(this->soc_ekf)/SCL_16000,
+    float(this->voc_filt)/sp.vb_hist_slr(),
+    float(this->voc_stat_filt)/sp.vb_hist_slr(),
+    float(this->e_wrap_filt)/sp.vb_hist_slr(),
+    float(this->e_wrap_m_filt)/sp.vb_hist_slr(),
+    float(this->e_wrap_m_trim)/sp.vb_hist_slr(),
+    float(this->e_wrap_n_filt)/sp.vb_hist_slr(),
+    this->fltw,
+    this->falw);
+  sendTxBuf(txBuf, true, IN_SERVICE);
   }
 }
 

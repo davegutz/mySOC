@@ -26,7 +26,7 @@
 #include "Battery.h"
 #include "./hardware/SerialRAM.h"
 
-String time_long_2_str(const time_t current_time, char *tempStr);
+String time_long_2_str(const time_t current_time, char* tempStr);
 
 // SRAM retention summary
 struct Flt_st
@@ -52,8 +52,8 @@ struct Flt_st
   uint32_t fltw = 0;    // Fault word
   uint32_t falw = 0;    // Fail word
   uint32_t dummy = 0;  // padding to absorb Wire.write corruption
-  void assign(const uint64_t now, BatteryMonitor *Mon, Sensors *Sen);
-  void assign_unfilt(const uint64_t now, BatteryMonitor *Mon, Sensors *Sen);
+  void assign(const uint64_t now, BatteryMonitor* Mon, Sensors* Sen);
+  void assign_unfilt(const uint64_t now, BatteryMonitor* Mon, Sensors* Sen);
   void copy_to_Flt_ram_from(Flt_st input);
   void get() {};
   void nominal();
@@ -73,5 +73,5 @@ public:
   void put_nominal();
 
 protected:
-  SerialRAM *rP_;
+  SerialRAM* rP_;
 };

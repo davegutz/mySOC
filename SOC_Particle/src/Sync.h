@@ -29,7 +29,7 @@ class Sync
 {
 public:
   // Constructors
-  Sync(void);
+  Sync();
   Sync(uint64_t delay);
   // Functions
   bool update(bool reset, uint64_t now, bool andCheck);

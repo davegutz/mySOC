@@ -1,0 +1,31 @@
+# Clang-Format Configuration for strict Google C++ Style Guide conformance
+BasedOnStyle: Google
+
+# Strict column limit of 80 characters
+ColumnLimit: 80
+
+# 2-space indentation
+IndentWidth: 2
+ContinuationIndentWidth: 4
+ConstructorInitializerIndentWidth: 4
+
+# Left align pointers (Type* var)
+DerivePointerAlignment: false
+PointerAlignment: Left
+
+# Keep namespace, class, and function braces attached to the declaration line
+BreakBeforeBraces: Attach
+
+# Sort includes alphabetically in categories
+SortIncludes: true
+
+# Access modifier indentation
+AccessModifierOffset: -1
+
+# Do not use tabs
+UseTab: Never
+TabWidth: 8
+
+# Constructor initializer list formatting
+BreakConstructorInitializers: BeforeColon
+PackConstructorInitializers: BinPack

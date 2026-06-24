@@ -64,23 +64,23 @@ public:
   float c_sd;       // Equivalent model for EKF reference.  Parasitic discharge equivalent, Farads
   float r_ss;       // Equivalent model for state space model initialization, ohms
   float soc_ekf_min; // Minimum SOC for EKF operation
-  TableInterp1D *hys_Tn_;     // soc 1-D table, V_min
-  TableInterp2D *hys_Ts_;     // dv-soc 2-D table scalar
-  TableInterp1D *hys_Tx_;     // soc 1-D table, V_max
-  TableInterp2D *hys_T_;      // dv-soc 2-D table, V
-  TableInterp2D *voc_T_;      // SOC-VOC 2-D table, V
-  TableInterp1D *soc_min_T_;  // SOC-MIN 1-D table, V
+  TableInterp1D* hys_Tn_;     // soc 1-D table, V_min
+  TableInterp2D* hys_Ts_;     // dv-soc 2-D table scalar
+  TableInterp1D* hys_Tx_;     // soc 1-D table, V_max
+  TableInterp2D* hys_T_;      // dv-soc 2-D table, V
+  TableInterp2D* voc_T_;      // SOC-VOC 2-D table, V
+  TableInterp1D* soc_min_T_;  // SOC-MIN 1-D table, V
   Chemistry()
   {
-    assign_all_chm();
+  assign_all_chm();
   }
   void assign_BB();   // Battleborn assignment
   void assign_CH();   // CHINS assignment
   void assign_all_chm();  // Assignment executive
-  void assign_hys(const int _n_h, const int _m_h, double *x, double *y, double *t, double *s,
-    double *tx, double *tn); // Worker bee Hys
-  void assign_soc_min(const int _n_n, double *x, double *t);  // Worker bee SOC_MIN
-  void assign_voc_soc(const int _n_s, const int _m_t, double *x, double *y, double *t); // Worker bee VOC_SOC
+  void assign_hys(const int _n_h, const int _m_h, double* x, double* y, double* t, double* s,
+  double* tx, double* tn); // Worker bee Hys
+  void assign_soc_min(const int _n_n, double* x, double* t);  // Worker bee SOC_MIN
+  void assign_voc_soc(const int _n_s, const int _m_t, double* x, double* y, double* t); // Worker bee VOC_SOC
   String decode(const uint8_t mod);
   double lookup_voc(const double soc, const double tb_f);
   void pretty_print();

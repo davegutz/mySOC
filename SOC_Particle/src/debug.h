@@ -26,24 +26,24 @@
 #pragma once
 #include "subs.h"
 
-void add_verify(String *src, const String addend);
+void add_verify(String* src, const String addend);
 
 #ifdef DEBUG_INIT
-    void debug_m1(BatteryMonitor *Mon, Sensors *Sen);
+  void debug_m1(BatteryMonitor* Mon, Sensors* Sen);
 #endif
 
-void debug_12(BatteryMonitor *Mon, Sensors *Sen);
-void debug_check_m13(Sensors *Sen);
-void debug_check_m23(Sensors *Sen);
-void debug_check_m24(Sensors *Sen);
+void debug_12(BatteryMonitor* Mon, Sensors* Sen);
+void debug_check_m13(Sensors* Sen);
+void debug_check_m23(Sensors* Sen);
+void debug_check_m24(Sensors* Sen);
 
-void debug_check_98(BatteryMonitor *Mon, Sensors *Sen);
-void debug_check_99(BatteryMonitor *Mon, Sensors *Sen);
-void debug_q(BatteryMonitor *Mon, Sensors *Sen);
-void debug_qf(BatteryMonitor *Mon, Sensors *Sen);
-void debug_qs(BatteryMonitor *Mon, Sensors *Sen);
+void debug_check_98(BatteryMonitor* Mon, Sensors* Sen);
+void debug_check_99(BatteryMonitor* Mon, Sensors* Sen);
+void debug_q(BatteryMonitor* Mon, Sensors* Sen);
+void debug_qf(BatteryMonitor* Mon, Sensors* Sen);
+void debug_qs(BatteryMonitor* Mon, Sensors* Sen);
 
 #ifdef SOFT_DEBUG_QUEUE
-    void debug_queue(const String who);
+  void debug_queue(const String who);
 #endif
 

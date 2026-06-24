@@ -34,8 +34,8 @@ public:
   // operators
   // functions
   void predict_ekf(const double u, const bool freeze);
-  virtual void pretty_print(void);
-  void print_ekf_serial(BatteryMonitor *Mon, const bool freeze);
+  virtual void pretty_print();
+  void print_ekf_serial(BatteryMonitor* Mon, const bool freeze);
   void update_ekf(const double z, double x_min, double x_max);
   double x() { return ( x_ ); };
   double y() { return ( y_ ); };
@@ -65,14 +65,14 @@ protected:
   double Tb_f_for_hx_;  // Tb_f used for the hx_ calculation, C
   double x_for_hx_;     // soc used for the hx_ calculation, scalar
   /*
-    Implement this function for your EKF model.
-    @param fx gets output of state-transition function f(x)
-    @param F gets Jacobian of f(x)
-    @param hx gets output of observation function h(x)
-    @param H gets Jacobian of h(x)
+  Implement this function for your EKF model.
+  @param fx gets output of state-transition function f(x)
+  @param F gets Jacobian of f(x)
+  @param hx gets output of observation function h(x)
+  @param H gets Jacobian of h(x)
   */
-  virtual void ekf_predict(double *Fx, double *Bu) = 0;
-  virtual void ekf_update(double *hx, double *H, double *x, double *tb_f) = 0;
+  virtual void ekf_predict(double* Fx, double* Bu) = 0;
+  virtual void ekf_update(double* hx, double* H, double* x, double* tb_f) = 0;
 };
 
 // Methods

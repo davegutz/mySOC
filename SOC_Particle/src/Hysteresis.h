@@ -32,7 +32,7 @@ class Hysteresis
 {
 public:
   Hysteresis();
-  Hysteresis(Chemistry *chem);
+  Hysteresis(Chemistry* chem);
   ~Hysteresis();
   float calculate(const float ib, const float soc, const float hys_scale);
   float dv_hys() { return dv_hys_; };
@@ -56,7 +56,7 @@ protected:
   float ioc_;          // Current out, A
   float dv_hys_;       // State, voc_-voc_stat_, V
   float dv_dot_;       // Calculated voltage rate, V/s
-  Chemistry *chem_;    // Chemistry
+  Chemistry* chem_;    // Chemistry
 };
 
 

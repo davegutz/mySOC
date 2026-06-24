@@ -61,13 +61,13 @@
 // Setup
 #include "local_config.h"
 #if !defined(IB_FORCE)
-    #define IB_FORCE 0
+  #define IB_FORCE 0
 #endif
 #if !defined(DISAB_TB_FA)
-    #define DISAB_TB_FA false
+  #define DISAB_TB_FA false
 #endif
 #if !defined(DISAB_VB_FA_LT)
-    #define DISAB_VB_FA_LT false
+  #define DISAB_VB_FA_LT false
 #endif
 
 const char unit[] = version_str "_" HDWE_UNIT;
@@ -110,7 +110,7 @@ const char unit[] = version_str "_" HDWE_UNIT;
 #define T_SAT                 24        // Saturation time, sec (>21 for no SAT with Dv0.82)
 const float T_DESAT =         20;       // De-saturation time, sec
 #if !defined(TEMP_INIT_DELAY)
-    #define TEMP_INIT_DELAY 700         // Time after power on to start reading temp, ms (700)
+  #define TEMP_INIT_DELAY 700         // Time after power on to start reading temp, ms (700)
 #endif
 #define CC_DIFF_LO_SOC_SLR    4.        // Large to disable cc_diff
 #define TAU_ERR_FILT          5.        // Current sensor difference filter time constant, s (5.)
@@ -169,7 +169,7 @@ const float QUIET_RES (QUIET_SET/10.);  // Quiet reset persistence, sec ('up 1 d
 #define NOMINAL_VB   (13.*NS)           // Middle of the road Vb for decent reversionary operation, V (13.)
 #define IMAX_NUM        100000.         // Simulation limit to prevent NaN, A (1e5)
 #if !defined(WRAP_SOC_HI_OFF)
-    #define WRAP_SOC_HI_OFF     0.97        // Disable e_wrap_hi when saturated (0.97)
+  #define WRAP_SOC_HI_OFF     0.97        // Disable e_wrap_hi when saturated (0.97)
 #endif
 #define WRAP_SOC_HI_SLR     1000.       // Huge to disable e_wrap (1000)
 #define WRAP_SOC_LO_OFF_ABS 0.35        // Disable e_wrap when near empty (soc lo any Tb, 0.35)
@@ -198,120 +198,120 @@ const float QUIET_RES (QUIET_SET/10.);  // Quiet reset persistence, sec ('up 1 d
 
 // Default values for constants that can be overridden
 #if !defined(IB_HARD_SET)
-    #define IB_HARD_SET        1.0          // Signal selection volt range fail persistence, s (1.)
+  #define IB_HARD_SET        1.0          // Signal selection volt range fail persistence, s (1.)
 #endif
 #if !defined(IB_HARD_RES)
-    #define IB_HARD_RES        2.0          // Signal selection volt range fail reset persistence, s (2.)
+  #define IB_HARD_RES        2.0          // Signal selection volt range fail reset persistence, s (2.)
 #endif
 #if !defined(NOM_DS)
-    #define NOM_DS             0.0          // Nominal VOC(SOC) del soc (Ds) 0.0)
+  #define NOM_DS             0.0          // Nominal VOC(SOC) del soc (Ds) 0.0)
 #endif
 #if !defined(NOM_DY)
-    #define NOM_DY             0.0          // Nominal Dy Sim table bias (Dy) (0.0)
+  #define NOM_DY             0.0          // Nominal Dy Sim table bias (Dy) (0.0)
 #endif
 #if !defined(VV)
-    #define VV                   0          // Nominal verbosity (vv) (0)
+  #define VV                   0          // Nominal verbosity (vv) (0)
 #endif
 #if !defined(TEMP_BIAS)
-    #define TEMP_BIAS          0.0          // Nominal bias on Tb (D^) (0.0)
+  #define TEMP_BIAS          0.0          // Nominal bias on Tb (D^) (0.0)
 #endif
 #if !defined(NOM_VB_ADD)
-    #define NOM_VB_ADD         0.0          // Nominal bias on Vb (Dv) (0.0)
+  #define NOM_VB_ADD         0.0          // Nominal bias on Vb (Dv) (0.0)
 #endif
 #if !defined(NOM_VC_ADD)
-    #define NOM_VC_ADD         0.0          // Nominal bias on Vc (D3) (0.0)
+  #define NOM_VC_ADD         0.0          // Nominal bias on Vc (D3) (0.0)
 #endif
 #if !defined(IB_ABS_MAX_AMP)
-    #define IB_ABS_MAX_AMP (float(NOM_UNIT_CAP)*float(NP))
+  #define IB_ABS_MAX_AMP (float(NOM_UNIT_CAP)*float(NP))
 #endif
 #if !defined(IB_ABS_MAX_NOA)
-    #define IB_ABS_MAX_NOA (float(NOM_UNIT_CAP)*float(NP))
+  #define IB_ABS_MAX_NOA (float(NOM_UNIT_CAP)*float(NP))
 #endif
 #if !defined(HDWE_IB_HI_LO_AMP_LO)
-    #define HDWE_IB_HI_LO_AMP_LO (-float(NOM_UNIT_CAP)*float(NP))
+  #define HDWE_IB_HI_LO_AMP_LO (-float(NOM_UNIT_CAP)*float(NP))
 #endif
 #if !defined(HDWE_IB_HI_LO_AMP_HI)
-    #define HDWE_IB_HI_LO_AMP_HI (float(NOM_UNIT_CAP)*float(NP))
+  #define HDWE_IB_HI_LO_AMP_HI (float(NOM_UNIT_CAP)*float(NP))
 #endif
 #if !defined(HDWE_IB_HI_LO_NOA_LO)
-    #define HDWE_IB_HI_LO_NOA_LO (HDWE_IB_HI_LO_AMP_LO - 1.)
+  #define HDWE_IB_HI_LO_NOA_LO (HDWE_IB_HI_LO_AMP_LO - 1.)
 #endif
 #if !defined(HDWE_IB_HI_LO_NOA_HI)
-    #define HDWE_IB_HI_LO_NOA_HI (HDWE_IB_HI_LO_AMP_HI + 1.)
+  #define HDWE_IB_HI_LO_NOA_HI (HDWE_IB_HI_LO_AMP_HI + 1.)
 #endif
 #if !defined(CURR_BIAS_AMP)
-    #define CURR_BIAS_AMP 0.
+  #define CURR_BIAS_AMP 0.
 #endif
 #if !defined(CURR_BIAS_NOA)
-    #define CURR_BIAS_NOA 0.
+  #define CURR_BIAS_NOA 0.
 #endif
 #if !defined(CURR_SCALE_AMP)
-    #define CURR_SCALE_AMP 1.
+  #define CURR_SCALE_AMP 1.
 #endif
 #if !defined(CURR_SCALE_NOA)
-    #define CURR_SCALE_NOA 1.
+  #define CURR_SCALE_NOA 1.
 #endif
 #if !defined(CURR_SCALE_DISCH)
-    #define CURR_SCALE_DISCH 1.
+  #define CURR_SCALE_DISCH 1.
 #endif
 #if !defined(VB_SCALE)
-    #define VB_SCALE 1.
+  #define VB_SCALE 1.
 #endif
 #if !defined(VOLT_BIAS)
-    #define VOLT_BIAS 0.
+  #define VOLT_BIAS 0.
 #endif
 #if !defined(CURR_BIAS_ALL)
-    #define CURR_BIAS_ALL 0.
+  #define CURR_BIAS_ALL 0.
 #endif
 #if !defined(SHUNT_GAIN)
-    #define SHUNT_GAIN            1333. // Shunt V2A gain (scale with 'SA' and 'SB'), A/V (1333 is 100A/0.075V)
+  #define SHUNT_GAIN            1333. // Shunt V2A gain (scale with 'SA' and 'SB'), A/V (1333 is 100A/0.075V)
 #endif
 #if !defined(KF_USE_AMP)
-    #define KF_USE_AMP        false
+  #define KF_USE_AMP        false
 #endif
 #if !defined(HDWE_2WIRE)
-    #define HDWE_2WIRE        true
+  #define HDWE_2WIRE        true
 #endif
 #if !defined(KF_USE_NOA)
-    #define KF_USE_NOA        true
+  #define KF_USE_NOA        true
 #endif
 #if !defined(KF_Q_STD)
-    #define KF_Q_STD        0.0003 // Shunt KF process uncertainty this combo gives 10:1 attenuation  tune 2025128 like ishunt_cal_filt F_W_I=0.5, F_Z_I=0.8
+  #define KF_Q_STD        0.0003 // Shunt KF process uncertainty this combo gives 10:1 attenuation  tune 2025128 like ishunt_cal_filt F_W_I=0.5, F_Z_I=0.8
 #endif
 #if !defined(KF_R_STD)
-    #define KF_R_STD        0.1000 // Shunt KF state uncertainty  tune 2025128 like ishunt_cal_filt F_W_I=0.5, F_Z_I=0.8
+  #define KF_R_STD        0.1000 // Shunt KF state uncertainty  tune 2025128 like ishunt_cal_filt F_W_I=0.5, F_Z_I=0.8
 #endif
 #if !defined(EWLO_TRM_SLR)
-    #define EWLO_TRM_SLR    25. // Amp looparound low error trim scalar.  Should provide hysteresis (~1 V) authority (25.)
+  #define EWLO_TRM_SLR    25. // Amp looparound low error trim scalar.  Should provide hysteresis (~1 V) authority (25.)
 #endif
 #if !defined(EWHI_TRM_SLR)
-    #define EWHI_TRM_SLR    25. // Amp looparound high error trim scalar.  Should provide hysteresis (~1 V) authority (25.)
+  #define EWHI_TRM_SLR    25. // Amp looparound high error trim scalar.  Should provide hysteresis (~1 V) authority (25.)
 #endif
 #if !defined(FI_NOM)
-    #define FI_NOM    1.0 // Hi wrap threshold nominal scalar (1.0)  // Fi
+  #define FI_NOM    1.0 // Hi wrap threshold nominal scalar (1.0)  // Fi
 #endif
 #if !defined(FO_NOM)
-    #define FO_NOM    1.0 // Lo wrap threshold nominal scalar (1.0)  // Fo
+  #define FO_NOM    1.0 // Lo wrap threshold nominal scalar (1.0)  // Fo
 #endif
 #if !defined(VSAT_ADD)
-    #define VSAT_ADD    0.0f // Bias on nominal vsat (0.0f)
+  #define VSAT_ADD    0.0f // Bias on nominal vsat (0.0f)
 #endif
 #if !defined(VTAB_BIAS)
-    #define VTAB_BIAS   0.0 // Bias on voc_soc table (* 'Dw'), V (0.0)
+  #define VTAB_BIAS   0.0 // Bias on voc_soc table (* 'Dw'), V (0.0)
 #endif
 
 // Ib hardware
 #if !defined(SHUNT_AMP_R1)
-    #define SHUNT_AMP_R1    1500. // Internal amp resistance 196x, ohms (1500)
+  #define SHUNT_AMP_R1    1500. // Internal amp resistance 196x, ohms (1500)
 #endif
 #if !defined(SHUNT_AMP_R2)
-    #define SHUNT_AMP_R2    332000. // Internal amp resistance 196x, ohms (332000)
+  #define SHUNT_AMP_R2    332000. // Internal amp resistance 196x, ohms (332000)
 #endif
 #if !defined(SHUNT_NOA_R1)
-    #define SHUNT_NOA_R1    1500. // Internal amp resistance 29.4x, ohms (1500)
+  #define SHUNT_NOA_R1    1500. // Internal amp resistance 29.4x, ohms (1500)
 #endif
 #if !defined(SHUNT_NOA_R2)
-    #define SHUNT_NOA_R2    33200. // Internal amp resistance 29.4x, ohms (33200)
+  #define SHUNT_NOA_R2    33200. // Internal amp resistance 29.4x, ohms (33200)
 #endif
 #if !defined(VRAW_BARE_DETECTED)
   #define VRAW_BARE_DETECTED 500 // Level of common voltage to declare circuit unconnected, V (50UL)
@@ -319,87 +319,87 @@ const float QUIET_RES (QUIET_SET/10.);  // Quiet reset persistence, sec ('up 1 d
 
 // Vb Hardware
 #if !defined(VB_SENSE_R_LO)
-    #define VB_SENSE_R_LO   4700 // Vb low sense resistor, ohm (4700)
+  #define VB_SENSE_R_LO   4700 // Vb low sense resistor, ohm (4700)
 #endif
 #if !defined(VB_SENSE_R_HI)
-    #define VB_SENSE_R_HI   22000 // Vb high sense resistor, ohm (22000)
+  #define VB_SENSE_R_HI   22000 // Vb high sense resistor, ohm (22000)
 #endif
 
 // Chemistry and modeling
 #if !defined(COULOMBIC_EFF_SCALE)
-    #define COULOMBIC_EFF_SCALE 1.0 // Scalar on Coulombic efficiency of battery, fraction of charge that gets used (1.0)
+  #define COULOMBIC_EFF_SCALE 1.0 // Scalar on Coulombic efficiency of battery, fraction of charge that gets used (1.0)
 #endif
 #if !defined(CHEM)
-    #define CHEM    0 // Chemistry monitor code integer, 0=Battleborn (0)
+  #define CHEM    0 // Chemistry monitor code integer, 0=Battleborn (0)
 #endif
 #if !defined(NOM_UNIT_CAP)
-    #define NOM_UNIT_CAP    108.4 // Nominal battery unit capacity (* 'Sc' or 'BS'/'BP'), Ah (108.4)
+  #define NOM_UNIT_CAP    108.4 // Nominal battery unit capacity (* 'Sc' or 'BS'/'BP'), Ah (108.4)
 #endif
 #if !defined(CHEM_NOM_VSAT)
-    #define CHEM_NOM_VSAT   13.85 // Nominal saturation voltage at 25C, V (13.85)
+  #define CHEM_NOM_VSAT   13.85 // Nominal saturation voltage at 25C, V (13.85)
 #endif
 #if !defined(HYS_SCALE)
-    #define HYS_SCALE   1.0 // Scalar on hysteresis (1.0)
+  #define HYS_SCALE   1.0 // Scalar on hysteresis (1.0)
 #endif
 
 // Bank configuration
 #if !defined(NS)
-    #define NS  1.0 // Number of series batteries in bank (* 'BS') (1.0)
+  #define NS  1.0 // Number of series batteries in bank (* 'BS') (1.0)
 #endif
 #if !defined(NP)
-    #define NP  1.0 // Number of parallel batteries in bank (* 'BP') (1.0)
+  #define NP  1.0 // Number of parallel batteries in bank (* 'BP') (1.0)
 #endif
 
 // Faults
 #if !defined(FAKE_FAULTS)
-    #define FAKE_FAULTS false // Detect and display faults but don't change signals (false)
+  #define FAKE_FAULTS false // Detect and display faults but don't change signals (false)
 #endif
 #if !defined(CC_DIFF_SOC_DIS_THRESH)
-    #define CC_DIFF_SOC_DIS_THRESH  0.5 // Signal selection threshold for Coulomb counter EKF disagree test (0.5)
+  #define CC_DIFF_SOC_DIS_THRESH  0.5 // Signal selection threshold for Coulomb counter EKF disagree test (0.5)
 #endif
 #if !defined(EKF_Q_SD_NORM)
-    #define EKF_Q_SD_NORM   0.0015 // Standard deviation of normal EKF process uncertainty, V (0.0015)
+  #define EKF_Q_SD_NORM   0.0015 // Standard deviation of normal EKF process uncertainty, V (0.0015)
 #endif
 #if !defined(EKF_R_SD_NORM)
-    #define EKF_R_SD_NORM   0.5 // Standard deviation of normal EKF state uncertainty, fraction (0-1) (0.5)
+  #define EKF_R_SD_NORM   0.5 // Standard deviation of normal EKF state uncertainty, fraction (0-1) (0.5)
 #endif
 #if !defined(EKF_EFRAME_MULT)
-    #define EKF_EFRAME_MULT 20 // EKF multiframe: READ executes per EKF execute (20)
+  #define EKF_EFRAME_MULT 20 // EKF multiframe: READ executes per EKF execute (20)
 #endif
 #if !defined(VOC_STAT_FILT)
-    #define VOC_STAT_FILT   120. // voc_stat_f_ filtering time constant for EKF, s (120)
+  #define VOC_STAT_FILT   120. // voc_stat_f_ filtering time constant for EKF, s (120)
 #endif
 #if !defined(EKF_CONV)
-    #define EKF_CONV    0.025 // EKF tracking error indicating convergence, V (0.025)
+  #define EKF_CONV    0.025 // EKF tracking error indicating convergence, V (0.025)
 #endif
 #if !defined(ASK_DURING_BOOT)
-    #define ASK_DURING_BOOT       0   // Flag to ask for application of this file to * retained adjustements 0=retain,1=ask,2=force default
+  #define ASK_DURING_BOOT       0   // Flag to ask for application of this file to * retained adjustements 0=retain,1=ask,2=force default
 #endif
 #if !defined(SNAP_WAIT)
-    #define SNAP_WAIT             10000ULL  // Interval between fault snapshots (10000ULL = 10 sec)
+  #define SNAP_WAIT             10000ULL  // Interval between fault snapshots (10000ULL = 10 sec)
 #endif
 #if !defined(RAW_BARE_SET)
-    #define RAW_BARE_SET   1. // Raw bare set persistence, s (1)
+  #define RAW_BARE_SET   1. // Raw bare set persistence, s (1)
 #endif
 #if !defined(RAW_BARE_RES)
-    #define RAW_BARE_RES   2. // Raw bare reset persistence, s (2)
+  #define RAW_BARE_RES   2. // Raw bare reset persistence, s (2)
 #endif
 #if !defined(IN_SERVICE)
-    #define IN_SERVICE      true // In service flag for testing (true)
+  #define IN_SERVICE      true // In service flag for testing (true)
 #endif
 #if !defined(TB_HDWE_MIN)
-    #define TB_HDWE_MIN   -20.0
+  #define TB_HDWE_MIN   -20.0
 #endif
 #if !defined(TB_HDWE_MAX)   
-    #define TB_HDWE_MAX   150.0
+  #define TB_HDWE_MAX   150.0
 #endif
 
 // Conversion gains
 // Voltage measurement gains
 #if !defined(HDWE_BARE)
-    const float VB_CONV_GAIN = float(PHOTON_ADC_VOLT) * float(VB_SENSE_R_HI + VB_SENSE_R_LO) /
-                                  float(VB_SENSE_R_LO) / float(PHOTON_ADC_COUNT) * float(VB_S);
-    const float VB_RAW_CONV_GAIN = float(PHOTON_ADC_VOLT) / float(PHOTON_ADC_COUNT) * float(VB_S);
+  const float VB_CONV_GAIN = float(PHOTON_ADC_VOLT) * float(VB_SENSE_R_HI + VB_SENSE_R_LO) /
+                  float(VB_SENSE_R_LO) / float(PHOTON_ADC_COUNT) * float(VB_S);
+  const float VB_RAW_CONV_GAIN = float(PHOTON_ADC_VOLT) / float(PHOTON_ADC_COUNT) * float(VB_S);
 #endif
 const float VC_CONV_GAIN = float(PHOTON_ADC_VOLT) / float(PHOTON_ADC_COUNT) * float(VC_S);
 const float VO_CONV_GAIN = float(PHOTON_ADC_VOLT) / float(PHOTON_ADC_COUNT) * float(VO_S);

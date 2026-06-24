@@ -34,7 +34,7 @@ extern char buffer[256];
 *   Global variables used:  None.
 *   Functions called:   None.
 */
-void binsearch(double x, double *v, int n, int *high, int *low, double *dx)
+void binsearch(double x, double* v, int n, int* high, int* low, double* dx)
 {
   int mid;
 
@@ -45,29 +45,29 @@ void binsearch(double x, double *v, int n, int *high, int *low, double *dx)
   /* Check endpoints  */
   if (x >= *(v + *high))
   {
-    *low = *high;
-    *dx = 0.;
+  *low = *high;
+  *dx = 0.;
   }
   else if (x <= *(v + *low))
   {
-    *high = *low;
-    *dx = 0.;
+  *high = *low;
+  *dx = 0.;
   }
 
   /* Search if necessary  */
   else
   {
-    while ((*high - *low) > 1)
-    {
-      mid = (*low + *high) / 2;
-      if (*(v + mid) > x)
-        *high = mid;
-      else
-        *low = mid;
-    }
-    *dx = (x - *(v + *low)) / (*(v + *high) - *(v + *low));
-    if ( sp.debug()==93 )
-        Serial.printf("binsearch: x %19.15f high %d low %d v[high] %19.15f v[low] %19.15f dx %19.15f\n", x, *high, *low, *(v + *high), *(v + *low), *dx);
+  while ((*high - *low) > 1)
+  {
+    mid = (*low + *high) / 2;
+    if (*(v + mid) > x)
+    *high = mid;
+    else
+    *low = mid;
+  }
+  *dx = (x - *(v + *low)) / (*(v + *high) - *(v + *low));
+  if ( sp.debug()==93 )
+    Serial.printf("binsearch: x %19.15f high %d low %d v[high] %19.15f v[low] %19.15f dx %19.15f\n", x, *high, *low, *(v + *high), *(v + *low), *dx);
   }
 } /* End binsearch    */
 
@@ -93,14 +93,14 @@ void binsearch(double x, double *v, int n, int *high, int *low, double *dx)
 *   Global variables used:  None.
 *   Functions called:   binsearch.
 */
-double tab1(double x, double *v, double *y, int n)
+double tab1(double x, double* v, double* y, int n)
 {
   double dx;
   int high, low;
-  void binsearch(double x, double *v, int n, int *high,
-                 int *low, double *dx);
+  void binsearch(double x, double* v, int n, int* high,
+         int* low, double* dx);
   if (n < 1)
-    return y[0];
+  return y[0];
   binsearch(x, v, n, &high, &low, &dx);
   return *(y + low) + dx * (*(y + high) - *(y + low));
 } /* End tab1 */
@@ -116,14 +116,14 @@ double tab1(double x, double *v, double *y, int n)
 *   Outputs:
 *       tab1        Result of table lookup
 */
-double tab1clip(double x, double *v, double *y, int n)
+double tab1clip(double x, double* v, double* y, int n)
 {
   double dx;
   int high, low;
-  void binsearch(double x, double *v, int n, int *high,
-                 int *low, double *dx);
+  void binsearch(double x, double* v, int n, int* high,
+         int* low, double* dx);
   if (n < 1)
-    return y[0];
+  return y[0];
   binsearch(x, v, n, &high, &low, &dx);
   return *(y + low) + fmax(fmin(dx, 1.), 0.) * (*(y + high) - *(y + low));
 } /* End tab1clip */
@@ -151,15 +151,15 @@ double tab1clip(double x, double *v, double *y, int n)
 *   Global variables used:  None.
 *   Functions called:   binsearch (natively clipping)
 */
-double tab2(double x1, double x2, double *v1, double *v2, double *y, int n1,
-            int n2)
+double tab2(double x1, double x2, double* v1, double* v2, double* y, int n1,
+      int n2)
 {
   double dx1, dx2, r0, r1;
   int high1, high2, low1, low2, temp1, temp2;
-  void binsearch(double x, double *v, int n, int *high,
-                 int *low, double *dx);
+  void binsearch(double x, double* v, int n, int* high,
+         int* low, double* dx);
   if (n1 < 1 || n2 < 1)
-    return y[0];
+  return y[0];
   binsearch(x1, v1, n1, &high1, &low1, &dx1);  // clips
   binsearch(x2, v2, n2, &high2, &low2, &dx2);  // clips
   temp1 = low2 * n1 + low1;
@@ -168,22 +168,22 @@ double tab2(double x1, double x2, double *v1, double *v2, double *y, int n1,
   r1 = *(y + temp2) + dx1 * (*(y + high2 * n1 + high1) - *(y + temp2));
   double result = r0 + dx2 * (r1 - r0);
   if ( sp.debug()==93 )
-    Serial.printf("tab2: x %7.3f y %7.3f high1 %d high2 %d low1 %d low2 %d  temp1 %d temp2 %d dx1 %17.15f dx2 %17.15f r0 %17.15f r1 %17.15f result %19.15f\n", \
-        x1, x2, high1, high2, low1, low2, temp1, temp2, dx1, dx2, r0, r1, result);
+  Serial.printf("tab2: x %7.3f y %7.3f high1 %d high2 %d low1 %d low2 %d  temp1 %d temp2 %d dx1 %17.15f dx2 %17.15f r0 %17.15f r1 %17.15f result %19.15f\n", \
+    x1, x2, high1, high2, low1, low2, temp1, temp2, dx1, dx2, r0, r1, result);
   return result;
 } /* End tab2 */
 
 // class TableInterp
 // constructors
 TableInterp::TableInterp()
-    : n1_(0) {}
+  : n1_(0) {}
 TableInterp::TableInterp(const uint16_t n, double x[])
-    : n1_(n)
+  : n1_(n)
 {
   x_ = new double[n1_];
   for (uint16_t i = 0; i < n1_; i++)
   {
-    x_[i] = x[i];
+  x_[i] = x[i];
   }
 }
 
@@ -193,28 +193,28 @@ TableInterp::~TableInterp()
 }
 // operators
 // functions
-double TableInterp::interp(void)
+double TableInterp::interp()
 {
-  return (-999.);
+  return -999.;
 }
-void TableInterp::pretty_print(void)
+void TableInterp::pretty_print()
 {
   #if !IN_SERVICE
-    uint16_t i;
-    Serial.printf("    x={");
-    for ( i = 0; i < n1_; i++ )
-    {
-      Serial.printf("%7.3f, ", x_[i]);
-    }
-    Serial.printf("};\n");
-    Serial.printf("    v={");
-    for ( i = 0; i < n1_; i++ )
-    {
-      Serial.printf("%7.3f, ", v_[i]);
-    }
-    Serial.printf("};\n");
+  uint16_t i;
+  Serial.printf("    x={");
+  for ( i = 0; i < n1_; i++ )
+  {
+    Serial.printf("%7.3f, ", x_[i]);
+  }
+  Serial.printf("};\n");
+  Serial.printf("    v={");
+  for ( i = 0; i < n1_; i++ )
+  {
+    Serial.printf("%7.3f, ", v_[i]);
+  }
+  Serial.printf("};\n");
   #else
-      Serial.printf("TableInterp: silent DEPLOY\n");
+    Serial.printf("TableInterp: silent DEPLOY\n");
   #endif
 }
 
@@ -222,12 +222,12 @@ void TableInterp::pretty_print(void)
 // constructors
 TableInterp1D::TableInterp1D() : TableInterp() {}
 TableInterp1D::TableInterp1D(const uint16_t n, double x[], double v[])
-    : TableInterp(n, x)
+  : TableInterp(n, x)
 {
   v_ = new double[n1_];
   for (uint16_t i = 0; i < n1_; i++)
   {
-    v_[i] = v[i];
+  v_[i] = v[i];
   }
 }
 TableInterp1D::~TableInterp1D()
@@ -238,19 +238,19 @@ TableInterp1D::~TableInterp1D()
 // functions
 double TableInterp1D::interp(double x)
 {
-  return (tab1(x, x_, v_, n1_));
+  return tab1(x, x_, v_, n1_);
 }
 
 // 1-D Interpolation Table Lookup
 // constructors
 TableInterp1Dclip::TableInterp1Dclip() : TableInterp() {}
 TableInterp1Dclip::TableInterp1Dclip(const uint16_t n, double x[], double v[])
-    : TableInterp(n, x)
+  : TableInterp(n, x)
 {
   v_ = new double[n1_];
   for (uint16_t i = 0; i < n1_; i++)
   {
-    v_[i] = v[i];
+  v_[i] = v[i];
   }
 }
 TableInterp1Dclip::~TableInterp1Dclip()
@@ -261,7 +261,7 @@ TableInterp1Dclip::~TableInterp1Dclip()
 // functions
 double TableInterp1Dclip::interp(double x)
 {
-  return (tab1(x, x_, v_, n1_));
+  return tab1(x, x_, v_, n1_);
 }
 
 // 2-D Interpolation Table Lookup
@@ -270,28 +270,28 @@ x = {x1, x2, ...xn}
 y = {y1, y2, ...ym}
 v = {v11, v12, ...v1n, v21, v22, ...v2n, ...............  vm1, vm2, ...vmn}
   = {v11, v12, ...v1n,
-     v21, v22, ...v2n,
-     ...............
-     vm1, vm2, ...vmn}
+   v21, v22, ...v2n,
+   ...............
+   vm1, vm2, ...vmn}
 */
 // constructors
 TableInterp2D::TableInterp2D() : TableInterp() {}
 TableInterp2D::TableInterp2D(const uint16_t n, const uint16_t m, double x[],
-                             double y[], double v[])
-    : TableInterp(n, x), dx_(0.), dy_(0.), dz_(0.)
+               double y[], double v[])
+  : TableInterp(n, x), dx_(0.), dy_(0.), dz_(0.)
 {
   n2_ = m;
   y_ = new double[n2_];
   for (uint16_t j = 0; j < n2_; j++)
   {
-    y_[j] = y[j];
+  y_[j] = y[j];
   }
   v_ = new double[n1_ * n2_];
   for (uint16_t i = 0; i < n1_; i++)
-    for (uint16_t j = 0; j < n2_; j++)
-    {
-      v_[i + j * n1_] = v[i + j * n1_];
-    }
+  for (uint16_t j = 0; j < n2_; j++)
+  {
+    v_[i + j * n1_] = v[i + j * n1_];
+  }
 }
 TableInterp2D::~TableInterp2D()
 {
@@ -308,19 +308,19 @@ double TableInterp2D::interp(double x, double y)
 void TableInterp2D::pretty_print()
 {
   #if !IN_SERVICE
-    uint16_t i, j;
-    Serial.printf("    dx%7.3f dy%7.3f dz%7.3f\n", dx_, dy_, dz_);
-    Serial.printf("    y={"); for ( j=0; j<n2_; j++ ) Serial.printf("%7.3f, ", y_[j] - dy_); Serial.printf("};\n");
-    Serial.printf("    x={"); for ( i=0; i<n1_; i++ ) Serial.printf("%7.3f, ", x_[i] - dx_); Serial.printf("};\n");
-    Serial.printf("    v={\n");
-    for ( j=0; j<n2_; j++ )
-    {
-      Serial.printf("      {");
-      for ( i=0; i<n1_; i++ ) Serial.printf("%7.3f, ", v_[j*n1_+i] + dz_);
-      Serial.printf("},\n");
-    }
-    Serial.printf("      };\n");
+  uint16_t i, j;
+  Serial.printf("    dx%7.3f dy%7.3f dz%7.3f\n", dx_, dy_, dz_);
+  Serial.printf("    y={"); for ( j=0; j<n2_; j++ ) Serial.printf("%7.3f, ", y_[j] - dy_); Serial.printf("};\n");
+  Serial.printf("    x={"); for ( i=0; i<n1_; i++ ) Serial.printf("%7.3f, ", x_[i] - dx_); Serial.printf("};\n");
+  Serial.printf("    v={\n");
+  for ( j=0; j<n2_; j++ )
+  {
+    Serial.printf("      {");
+    for ( i=0; i<n1_; i++ ) Serial.printf("%7.3f, ", v_[j*n1_+i] + dz_);
+    Serial.printf("},\n");
+  }
+  Serial.printf("      };\n");
   #else
-      Serial.printf("TableInterp2D: silent DEPLOY\n");
+    Serial.printf("TableInterp2D: silent DEPLOY\n");
   #endif
 }

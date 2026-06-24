@@ -24,4 +24,4 @@
 #pragma once
 #include "../Battery.h"
 
-void talkH(BatteryMonitor *Mon, Sensors *Sen);
+void talkH(BatteryMonitor* Mon, Sensors* Sen);

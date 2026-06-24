@@ -32,7 +32,7 @@ Sync::Sync()
   : delay_(0), last_(0ULL), now_(0ULL), stat_(false), updateDiff_(0), updateTime_(0), updateTimeInput_(0.)
 {}
 Sync::Sync(uint64_t delay)
-    : delay_(delay), last_(0ULL), now_(0ULL), stat_(false), updateDiff_(0), updateTime_(0)
+  : delay_(delay), last_(0ULL), now_(0ULL), stat_(false), updateDiff_(0), updateTime_(0)
 {
   updateTimeInput_ = float(delay_)/1000.f;
 }
@@ -45,8 +45,8 @@ bool Sync::update(bool reset, uint64_t now, bool andCheck)
   stat_ = reset || ((updateDiff_>=delay_) && andCheck);
   if ( stat_ )
   {
-    last_ = now_;
-    updateTime_ = double(updateDiff_)/1000.;
+  last_ = now_;
+  updateTime_ = double(updateDiff_)/1000.;
   }
   return( stat_ );
 }
@@ -57,8 +57,8 @@ bool Sync::update(uint64_t now, bool reset, bool andCheck)
   stat_ = ((updateDiff_>=delay_) || reset) && andCheck;
   if ( stat_ )
   {
-    last_ = now_;
-    updateTime_ = double(updateDiff_)/1000.;
+  last_ = now_;
+  updateTime_ = double(updateDiff_)/1000.;
   }
   return( stat_ );
 }
@@ -69,8 +69,8 @@ bool Sync::update(uint64_t now, bool reset)
   stat_ = (updateDiff_>=delay_) || reset;
   if ( stat_ )
   {
-    last_ = now_;
-    updateTime_ = double(updateDiff_)/1000.;
+  last_ = now_;
+  updateTime_ = double(updateDiff_)/1000.;
   }
   return( stat_ );
 }
@@ -81,8 +81,8 @@ bool Sync::updateN(uint64_t now, bool reset, bool orCheck)
   stat_ = reset || ((stat_ && (updateDiff_<delay_)) || orCheck);
   if ( stat_ )
   {
-    last_ = now_;
-    updateTime_ = double(updateDiff_)/1000.;
+  last_ = now_;
+  updateTime_ = double(updateDiff_)/1000.;
   }
   return( stat_ );
 }
