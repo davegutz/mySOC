@@ -21,6 +21,7 @@ Dependencies:
     - matplotlib (plots)
     - reportlab  (figures, pdf)
 """
+
 from json.encoder import encode_basestring
 
 from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files
@@ -44,7 +45,7 @@ def extract(function_call_string: str) -> list[str]:
     try:
         # Remove leading/trailing whitespace for clean parsing
         source_line = function_call_string.strip()
-        tree = ast.parse(source_line, mode='eval')
+        tree = ast.parse(source_line, mode="eval")
     except SyntaxError as e:
         print(f"ValueError source_line:  {source_line}")
         raise ValueError(f"Invalid function call syntax: {e}")
@@ -75,23 +76,22 @@ def extract(function_call_string: str) -> list[str]:
 
 
 class Arg:
-
     def __init__(self, directive=None, value=None):
         self.directive = directive  # e.g. 'add='
         self.val = value
-        
+
     def __str__(self):
         if self.directive is None and self.val is None:
-            return ''
+            return ""
         else:
-            return ', ' + self.directive + self.val
+            return ", " + self.directive + self.val
 
 
 class Line:
     def __init__(self, in_str):
-        self.header = in_str.split('(')[0]
+        self.header = in_str.split("(")[0]
         in_list = extract(in_str)
-        self.plt_dir = 'plt'
+        self.plt_dir = "plt"
         self.x = None
         self.x_txt = None
         self.y = None
@@ -102,7 +102,7 @@ class Line:
         self.ls_arg = Arg()
         self.mk_arg = Arg()
         self.mk_sz_arg = Arg()
-        self.mk_ev_arg= Arg()
+        self.mk_ev_arg = Arg()
         self.stairs_arg = Arg()
         self.warn_arg = Arg()
         self.lw_arg = Arg()
@@ -117,36 +117,36 @@ class Line:
                 self.y = I
             elif i == 4:
                 self.y_txt = I
-            if I.__contains__('label='):  # labels are built into plq if label=None.  So skip them
+            if I.__contains__("label="):  # labels are built into plq if label=None.  So skip them
                 continue
-            elif I.__contains__('add='):
-                self.add_arg = Arg('add=', I.replace('add=', ""))
-            elif I.__contains__('slr='):
-                self.slr_arg = Arg('slr=', I.replace('slr=', ""))
-            elif I.__contains__('color='):
-                self.col_arg = Arg('color=', I.replace('color=', ""))
-            elif I.__contains__('linestyle='):
-                self.ls_arg = Arg('linestyle=', I.replace('linestyle=', ""))
-            elif I.__contains__('linewidth='):
-                self.ls_arg = Arg('linewidth=', I.replace('linewidth=', ""))
-            elif I.__contains__('marker='):
-                self.mk_arg = Arg('marker=', I.replace('marker=', ""))
-            elif I.__contains__('markersize='):
-                self.mk_sz_arg = Arg('markersize=', I.replace('markersize=', ""))
-            elif I.__contains__('markevery='):
-                self.mk_ev_arg = Arg('markevery=', I.replace('markevery=', ""))
-            elif I.__contains__('warn='):
-                self.warn_arg = Arg('warn=', I.replace('warn=', ""))
-            elif I.__contains__('stairs='):
-                self.stairs_arg = Arg('stairs=', I.replace('stairs=', ""))
+            elif I.__contains__("add="):
+                self.add_arg = Arg("add=", I.replace("add=", ""))
+            elif I.__contains__("slr="):
+                self.slr_arg = Arg("slr=", I.replace("slr=", ""))
+            elif I.__contains__("color="):
+                self.col_arg = Arg("color=", I.replace("color=", ""))
+            elif I.__contains__("linestyle="):
+                self.ls_arg = Arg("linestyle=", I.replace("linestyle=", ""))
+            elif I.__contains__("linewidth="):
+                self.ls_arg = Arg("linewidth=", I.replace("linewidth=", ""))
+            elif I.__contains__("marker="):
+                self.mk_arg = Arg("marker=", I.replace("marker=", ""))
+            elif I.__contains__("markersize="):
+                self.mk_sz_arg = Arg("markersize=", I.replace("markersize=", ""))
+            elif I.__contains__("markevery="):
+                self.mk_ev_arg = Arg("markevery=", I.replace("markevery=", ""))
+            elif I.__contains__("warn="):
+                self.warn_arg = Arg("warn=", I.replace("warn=", ""))
+            elif I.__contains__("stairs="):
+                self.stairs_arg = Arg("stairs=", I.replace("stairs=", ""))
 
     def __str__(self):
-        ostr = self.header + '('
+        ostr = self.header + "("
         ostr += self.plt_dir
-        ostr += ', ' + self.x
-        ostr += ', ' + self.x_txt
-        ostr += ', ' + self.y
-        ostr += ', ' + self.y_txt
+        ostr += ", " + self.x
+        ostr += ", " + self.x_txt
+        ostr += ", " + self.y
+        ostr += ", " + self.y_txt
         ostr += self.add_arg.__str__()
         ostr += self.slr_arg.__str__()
         ostr += self.col_arg.__str__()
@@ -167,7 +167,7 @@ def do_one(path_to_infile, path_to_outfile):
     num_plq_in = 0
     os.remove(path_to_outfile)
     print(f"doing {path_to_infile} --> {path_to_outfile}")
-    with (open(path_to_infile, "r", encoding='cp437') as input_file):  # reads all characters even bad ones
+    with open(path_to_infile, "r", encoding="cp437") as input_file:  # reads all characters even bad ones
         with open(path_to_outfile, "a") as output:
             lines = input_file.readlines()
             i = 0
@@ -178,7 +178,7 @@ def do_one(path_to_infile, path_to_outfile):
                     line_ends_comma = (line.count(",\n") > 0) or (line.count(", \n") > 0)
                     # print(f" comma? {line_ends_comma}  {line}")
                     if line_ends_comma:
-                        next_line = lines[i+1]
+                        next_line = lines[i + 1]
                         combined_line = line + " " + next_line.strip() + "\n"
                         line = combined_line
                         # print(f"Error fixed: {combined_line}")
@@ -189,18 +189,20 @@ def do_one(path_to_infile, path_to_outfile):
                     output.write(line)
                 i += 1
 
+
 def main():
-    do_one('./CompareFault - Copy.py', './CompareFault.py')
-    do_one('./DataOverModel - Copy.py', './DataOverModel.py')
-    do_one('./PlotEKF - Copy.py', './PlotEKF.py')
-    do_one('./PlotHist - Copy.py', './PlotHist.py')
-    do_one('./CompareHistSim - Copy.py', './CompareHistSim.py')
-    do_one('./PlotSimS - Copy.py', './PlotSimS.py')
-    do_one('./PlotGP - Copy.py', './PlotGP.py')
-    do_one('./PlotOffOn - Copy.py', './PlotOffOn.py')
-    do_one('./Battery - Copy.py', './Battery.py')
+    do_one("./CompareFault - Copy.py", "./CompareFault.py")
+    do_one("./DataOverModel - Copy.py", "./DataOverModel.py")
+    do_one("./PlotEKF - Copy.py", "./PlotEKF.py")
+    do_one("./PlotHist - Copy.py", "./PlotHist.py")
+    do_one("./CompareHistSim - Copy.py", "./CompareHistSim.py")
+    do_one("./PlotSimS - Copy.py", "./PlotSimS.py")
+    do_one("./PlotGP - Copy.py", "./PlotGP.py")
+    do_one("./PlotOffOn - Copy.py", "./PlotOffOn.py")
+    do_one("./Battery - Copy.py", "./Battery.py")
 
 
 if __name__ == "__main__":
     import sys
+
     main()

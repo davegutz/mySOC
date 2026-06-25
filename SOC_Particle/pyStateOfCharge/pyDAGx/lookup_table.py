@@ -1,11 +1,11 @@
 # lookup_table - multidimensional lookup table class
 # Copyright (C) 2007 RADLogic
-# 
+#
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
-# License as published by the Free Software Foundation; 
+# License as published by the Free Software Foundation;
 # version 2.1 of the License.
-# 
+#
 # This library is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
@@ -37,15 +37,16 @@ This module is probably a good candidate for releasing as open source.
 
 """
 
-__author__ = 'Tim Wegener <twegener@radlogic.com.au>'
-__version__ = '$Revision: 1.1 $'
-__date__ = '$Date: 2010/12/17 13:15:02 $'
+__author__ = "Tim Wegener <twegener@radlogic.com.au>"
+__version__ = "$Revision: 1.1 $"
+__date__ = "$Date: 2010/12/17 13:15:02 $"
 
 from bisect import bisect_right
 
 
 class Error(Exception):
     """Lookup Table Error"""
+
     pass
 
 
@@ -63,7 +64,7 @@ class LookupTable:
     >>> lut.setValueTable([example_1var_func(x) for x in x_axis_values])
 
     Normal situation:
-    
+
     >>> print(example_1var_func(2.5))
     8.5
 
@@ -118,7 +119,7 @@ class LookupTable:
     ...                    for x in x_axis_values])
 
     Normal situation:
-    
+
     >>> print(example_2var_func(x=2.625, y=1.1))
     18.08125
 
@@ -165,14 +166,14 @@ class LookupTable:
     >>> val_x1 = (x1y2-x1y1) * ((y-y1)/(y2-y1)) + x1y1
     >>> print(val_x1)
     12.3
-    
+
     >>> print(lut.lookup(x=x1, y=y))
     12.3
 
     >>> val_x2 = (x2y2-x2y1) * ((y-y1)/(y2-y1)) + x2y1
     >>> print(val_x2)
     22.3
-    
+
     >>> print(lut.lookup(x=x2, y=y))
     22.3
 
@@ -203,7 +204,7 @@ class LookupTable:
     Different sized axes:
 
     Use a linear function this time.
-    
+
     >>> lut = LookupTable()
     >>> x_axis_values = [2., 4., 8., 16., 32.]
     >>> y_axis_values = [1., 1.9, 6., 7.]
@@ -222,9 +223,9 @@ class LookupTable:
     ## >>> lut.setValueTable([[example_2var_func(x, y) for y in y_axis_values]
     ## ...                    for x in x_axis_values])
     >>> ## print('lutv', lut.value_table
-    
+
     Normal situation:
-    
+
     >>> print(example_2var_func(x=2.4, y=1.1))
     9.1
 
@@ -242,7 +243,7 @@ class LookupTable:
     Lookup a value on the top axis value:
     >>> print(lut.lookup(x=32., y=7.))
     86.0
-    
+
     Lookup a value below the bottom axis value:
     >>> print(lut.lookup(x=0.2, y=0.1))
     1.7
@@ -268,7 +269,7 @@ class LookupTable:
     ...                    for x in x_axis_values])
 
     Normal situation:
-    
+
     >>> print(example_3var_func(x=2.4, y=1.1, z=3.3))
     22.3
 
@@ -290,7 +291,7 @@ class LookupTable:
         # value_table - store dependent variable values for each point in the
         #               table
         #    [[[val_x0_y0_...z0, val_x0_y0..._z1, ...], [], ...], ...]
-        self.value_table = [] 
+        self.value_table = []
 
     def addAxis(self, name, axis_values=None):
         """Add an axis definition."""
@@ -346,8 +347,7 @@ class LookupTable:
         # Check that axis values are purely increasing or purely decreasing.
         for axis in self.axes:
             adjacent_axis_values = zip(axis[:-1], axis[1:])
-            delta_signs = [cmp(x, x_next)
-                           for x, x_next in adjacent_axis_values]
+            delta_signs = [cmp(x, x_next) for x, x_next in adjacent_axis_values]
             if 0 in delta_signs:
                 valid = False
             elif -1 in delta_signs and 1 in delta_signs:
@@ -357,7 +357,7 @@ class LookupTable:
         axis_size = tuple([len(axis) for axis in self.axes])
 
         table_size = nestedSequenceSize(self.value_table)
-        
+
         if table_size != axis_size:
             valid = False
 
@@ -369,7 +369,7 @@ class LookupTable:
         Arguments:
         Specify the axis values for the lookup, using the axis names as
         keyword arguments.
-        
+
         """
         # Check that a value table exists.
         if not self.value_table:
@@ -379,7 +379,7 @@ class LookupTable:
         for axis_name in self.axis_names.keys():
             if kwargs.get(axis_name) is None:
                 raise Error("No axis value for '%s'" % axis_name)
-        
+
         # axis_values -- [x, y, ...] for which to find value
         axis_values = [None] * len(self.axes)
 
@@ -388,7 +388,7 @@ class LookupTable:
         #                     possible) table value
         #                    (add 1 for the index of the right side)
         nearest_indexes = [None] * len(self.axes)
-        
+
         for axis_name, axis_value in kwargs.items():
             try:
                 axis_i = self.axis_names[axis_name]
@@ -411,10 +411,10 @@ class LookupTable:
         #         print('axis_values', axis_values
         #         print('nearest_indexes', nearest_indexes
         #         print('value_table', self.value_table
-        
+
         # Need to interpolate on this data.
         return self.interp_n(axis_values, nearest_indexes, self.value_table)
-            
+
     def interp_n(self, axis_values, nearest_indexes, value_table):
         """Linearly interpolate across multiple dimensions.
 
@@ -435,12 +435,12 @@ class LookupTable:
         y1 = value_table[x1_i]
         y2 = value_table[x2_i]
 
-        if hasattr(y1, '__len__'):
+        if hasattr(y1, "__len__"):
             # The value still depends on other axes.
             # Need to recurse, to interpolate on the subspace
             y1 = self.interp_n(axis_values[1:], nearest_indexes[1:], y1)
             y2 = self.interp_n(axis_values[1:], nearest_indexes[1:], y2)
-            
+
         x = axis_values[0]
         axis = self.axes[len(self.axes) - len(axis_values)]
         x1 = axis[x1_i]
@@ -450,7 +450,7 @@ class LookupTable:
         # interp(x, (x1, y1), (x2, y2))
         if self.clip_x:
             x = min(max(x, x1), x2)
-        val = (y2*(x-x1) + y1*(x2-x)) / (x2 - x1)
+        val = (y2 * (x - x1) + y1 * (x2 - x)) / (x2 - x1)
 
         return val
 
@@ -466,7 +466,7 @@ def nestedSequenceSize(nested_sequence):
     level_len = len(nested_sequence)
     sub_sequence_sizes = []
     for sub_sequence in nested_sequence:
-        if (hasattr(sub_sequence, '__len__') and not isinstance(sub_sequence, str, unicode)):
+        if hasattr(sub_sequence, "__len__") and not isinstance(sub_sequence, str, unicode):
             sub_sequence_size = nestedSequenceSize(sub_sequence)
         else:
             sub_sequence_size = None
@@ -479,64 +479,87 @@ def nestedSequenceSize(nested_sequence):
             raise Error("Different sub-sequence sizes found at same level")
 
     if first_sub_sequence_size is None:
-        return level_len,
+        return (level_len,)
     else:
-        return first_sub_sequence_size + level_len,
+        return (first_sub_sequence_size + level_len,)
 
 
 def crosscheck3d():
     """This is just here for testing/debug purposes."""
-    t_dv = [-0.9, -0.7,     -0.5,   -0.3,   0.0,    0.3,    0.5,    0.7,    0.9]
-    t_soc = [0, .5, 1]
-    t_r = [1e-6, 0.064,    0.050,  0.036,  0.015,  0.024,  0.030,  0.046,  1e-6,
-           1e-6, 1e-6,     0.041,  0.021,  0.007,  0.010,  0.020,  1e-6,   1e-6,
-           1e-6, 1e-6,     1e-6,   0.011,  0.005,  0.008,  1e-6,   1e-6,   1e-6]
+    t_dv = [-0.9, -0.7, -0.5, -0.3, 0.0, 0.3, 0.5, 0.7, 0.9]
+    t_soc = [0, 0.5, 1]
+    t_r = [
+        1e-6,
+        0.064,
+        0.050,
+        0.036,
+        0.015,
+        0.024,
+        0.030,
+        0.046,
+        1e-6,
+        1e-6,
+        1e-6,
+        0.041,
+        0.021,
+        0.007,
+        0.010,
+        0.020,
+        1e-6,
+        1e-6,
+        1e-6,
+        1e-6,
+        1e-6,
+        0.011,
+        0.005,
+        0.008,
+        1e-6,
+        1e-6,
+        1e-6,
+    ]
     lut = LookupTable(clip_x=True)
-    lut.addAxis('x', t_dv)
-    lut.addAxis('y', t_soc)
+    lut.addAxis("x", t_dv)
+    lut.addAxis("y", t_soc)
     lut.setValueTable(t_r)
-    res = lut.lookup(x=-.9, y=0)
+    res = lut.lookup(x=-0.9, y=0)
     ev = 1e-6
     print("ev=", ev, "got", res)
     res = lut.lookup(x=0.5, y=0.5)
     ev = 0.029
     print("ev=", ev, "got", res)
-    res = lut.lookup(x=0.7, y=0.)
+    res = lut.lookup(x=0.7, y=0.0)
     ev = 0.046
     print("ev=", ev, "got", res)
-    res = lut.lookup(x=0.9, y=0.)
+    res = lut.lookup(x=0.9, y=0.0)
     ev = 1e-6
     print("ev=", ev, "got", res)
-    res = lut.lookup(x=1.0, y=0.)
+    res = lut.lookup(x=1.0, y=0.0)
     ev = 1e-6
     print("ev=", ev, "got", res)
-    res = lut.lookup(x=-0.3, y=1.)
+    res = lut.lookup(x=-0.3, y=1.0)
     ev = 0.011
     print("ev=", ev, "got", res)
 
 
 def crosscheck2d():
-    """This is just here for testing/debug purposes.
-
-    """
+    """This is just here for testing/debug purposes."""
     lut = LookupTable()
-    x_axis_values = [1., 2., 3., 4., 5.]
-    y_axis_values = [1., 2., 3., 4., 5.]
-    lut.addAxis('x', x_axis_values)
-    lut.addAxis('y', y_axis_values)
+    x_axis_values = [1.0, 2.0, 3.0, 4.0, 5.0]
+    y_axis_values = [1.0, 2.0, 3.0, 4.0, 5.0]
+    lut.addAxis("x", x_axis_values)
+    lut.addAxis("y", y_axis_values)
 
     def func(x, y):
         return (2 * x * x) + (3 * y) + 1
 
-    lut.setValueTable([[func(x, y) for y in y_axis_values]
-                       for x in x_axis_values])
+    lut.setValueTable([[func(x, y) for y in y_axis_values] for x in x_axis_values])
 
-    x1 = 4.
-    x2 = 5.
-    y1 = 4.
-    y2 = 5.
+    x1 = 4.0
+    x2 = 5.0
+    y1 = 4.0
+    y2 = 5.0
 
-    x = 6.
+    x = 6.0
     y = 5.5
 
     # Nearest neighbours
@@ -547,19 +570,18 @@ def crosscheck2d():
 
     # Now find the intermediate value points for each x value.
 
-    val_x1 = (x1y2-x1y1) * ((y-y1)/(y2-y1)) + x1y1
-    print('val_x1', val_x1)
+    val_x1 = (x1y2 - x1y1) * ((y - y1) / (y2 - y1)) + x1y1
+    print("val_x1", val_x1)
 
     print(lut.lookup(x=x1, y=y))
 
-    val_x2 = (x2y2-x2y1) * ((y-y1)/(y2-y1)) + x2y1
-    print('val_x2', val_x2
-          )
+    val_x2 = (x2y2 - x2y1) * ((y - y1) / (y2 - y1)) + x2y1
+    print("val_x2", val_x2)
     print(lut.lookup(x=x2, y=y))
 
     # Now interpolate the intermediate values to find the final value.
 
-    print('expected', ((x-x1) * ((val_x2 - val_x1)/(x2-x1))) + val_x1)
+    print("expected", ((x - x1) * ((val_x2 - val_x1) / (x2 - x1))) + val_x1)
 
     print(lut.lookup(x=x, y=y))
 
@@ -568,8 +590,9 @@ def main():
     crosscheck3d()
 
 
-if __name__ == '__main__':  # Example usage.  Ran ok 20260217
+if __name__ == "__main__":  # Example usage.  Ran ok 20260217
     import sys
     import doctest
-    doctest.testmod(sys.modules['__main__'])
+
+    doctest.testmod(sys.modules["__main__"])
     main()

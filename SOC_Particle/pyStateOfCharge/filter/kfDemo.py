@@ -41,10 +41,7 @@ class KalmanFilter1DVelocity:
         self.H = np.array([[1.0, 0.0]])
 
         # Process noise covariance matrix (assuming noise in acceleration)
-        self.Q = np.array([
-            [0.25 * dt**4, 0.5 * dt**3],
-            [0.5 * dt**3, dt**2]
-        ]) * proc_noise_std**2
+        self.Q = np.array([[0.25 * dt**4, 0.5 * dt**3], [0.5 * dt**3, dt**2]]) * proc_noise_std**2
 
         # Measurement noise covariance matrix
         self.R = np.array([[meas_noise_std**2]])
@@ -104,7 +101,8 @@ class KalmanFilter1dVarDt:
         """
         self.x = np.array([initial_position, initial_velocity])  # State vector: [position, velocity]
         self.P = np.array([[1.0, 0.0], [0.0, 1.0]]) * 100  # Large initial uncertainty
-        # self.P = np.diag([initial_covariance, 1.0]) # Covariance matrix: [[pos_cov, pos_vel_cov], [vel_pos_cov, vel_cov]]
+        # self.P = np.diag([initial_covariance, 1.0]) # Covariance matrix: [[pos_cov, pos_vel_cov], [vel_pos_cov,
+        # vel_cov]]
         self.Q_std = proc_noise_std
         self.R = meas_noise_std**2  # Measurement noise covariance (scalar)
 
@@ -119,12 +117,10 @@ class KalmanFilter1dVarDt:
             dt (float): The time difference since the last prediction/update.
         """
         # State transition matrix (constant velocity model)
-        F = np.array([[1.0, dt],
-                      [0.0, 1.0]])
+        F = np.array([[1.0, dt], [0.0, 1.0]])
 
         # Process noise covariance matrix (assuming noise affects acceleration)
-        G = np.array([[0.5 * dt**2],
-                      [dt]])
+        G = np.array([[0.5 * dt**2], [dt]])
         Q = G @ G.T * self.Q_std**2
 
         # Predict state and covariance
@@ -165,23 +161,38 @@ class KalmanFilter1dVarDt:
         """
         return self.P
 
+
 # Example Usage:
 if __name__ == "__main__":
     dt = 0.1  # Time step (seconds)
     process_noise_std = 0.1  # Standard deviation of acceleration noise
     measurement_noise_std = 0.5  # Standard deviation of position measurement noise
-    kf1 = KalmanFilter1DVelocity(initial_position=0.0, initial_velocity=0.0,
-                               dt=dt, proc_noise_std=process_noise_std,
-                               meas_noise_std=measurement_noise_std)
-    kf2 = KalmanFilter1DVelocity(initial_position=0.0, initial_velocity=0.0,
-                               dt=dt, proc_noise_std=process_noise_std,
-                               meas_noise_std=measurement_noise_std)
-    kf3 = KalmanFilter1dVarDt(initial_position=0.0, initial_velocity=0.0,
-                              proc_noise_std=process_noise_std,
-                              meas_noise_std=measurement_noise_std)
-    kf4 = KalmanFilter1dVarDt(initial_position=0.0, initial_velocity=0.0,
-                              proc_noise_std=process_noise_std,
-                              meas_noise_std=measurement_noise_std)
+    kf1 = KalmanFilter1DVelocity(
+        initial_position=0.0,
+        initial_velocity=0.0,
+        dt=dt,
+        proc_noise_std=process_noise_std,
+        meas_noise_std=measurement_noise_std,
+    )
+    kf2 = KalmanFilter1DVelocity(
+        initial_position=0.0,
+        initial_velocity=0.0,
+        dt=dt,
+        proc_noise_std=process_noise_std,
+        meas_noise_std=measurement_noise_std,
+    )
+    kf3 = KalmanFilter1dVarDt(
+        initial_position=0.0,
+        initial_velocity=0.0,
+        proc_noise_std=process_noise_std,
+        meas_noise_std=measurement_noise_std,
+    )
+    kf4 = KalmanFilter1dVarDt(
+        initial_position=0.0,
+        initial_velocity=0.0,
+        proc_noise_std=process_noise_std,
+        meas_noise_std=measurement_noise_std,
+    )
     mr1 = Saved()
     mv1 = Saved()
     mr2 = Saved()
@@ -218,7 +229,7 @@ if __name__ == "__main__":
         mr2.velo.append(true_velocity2)
     t = 0
     for i in range(N):
-        dt_noise = max(np.random.normal(dt, 0.005), .0001)
+        dt_noise = max(np.random.normal(dt, 0.005), 0.0001)
         t += dt + dt_noise
         true_position3 += true_velocity3 * dt_noise
         # Add some random noise to the measurement
@@ -275,43 +286,43 @@ if __name__ == "__main__":
     mv4.time = mr4.time
     mv4.dt = mr4.dt
 
-    run_str1 = 'data 1'
-    ver_str1 = 'filtered 1'
-    run_str2 = 'data 2'
-    ver_str2 = 'filtered 2'
-    run_str3 = 'data 1 var dt'
-    ver_str3 = 'filtered 1 var dt'
-    run_str4 = 'data 2 var dt'
-    ver_str4 = 'filtered 2 var dt'
+    run_str1 = "data 1"
+    ver_str1 = "filtered 1"
+    run_str2 = "data 2"
+    ver_str2 = "filtered 2"
+    run_str3 = "data 1 var dt"
+    ver_str3 = "filtered 1 var dt"
+    run_str4 = "data 2 var dt"
+    ver_str4 = "filtered 2 var dt"
 
     plt.figure()
     plt.subplot(121)
-    plt.title(' kfDemo.py cons dt=0.1')
-    plq(plt, mr1, 'time', mr1, 'pos', color='blue', linestyle='-', label='pos1' + run_str1)
-    plq(plt, mv1, 'time', mv1, 'pos', color='red', linestyle='--', label='pos1' + ver_str1)
-    plq(plt, mr2, 'time', mr2, 'pos', color='magenta', linestyle='-', label='pos2' + run_str2)
-    plq(plt, mv2, 'time', mv2, 'pos', color='black', linestyle='--', label='pos2' + ver_str2)
+    plt.title(" kfDemo.py cons dt=0.1")
+    plq(plt, mr1, "time", mr1, "pos", color="blue", linestyle="-", label="pos1" + run_str1)
+    plq(plt, mv1, "time", mv1, "pos", color="red", linestyle="--", label="pos1" + ver_str1)
+    plq(plt, mr2, "time", mr2, "pos", color="magenta", linestyle="-", label="pos2" + run_str2)
+    plq(plt, mv2, "time", mv2, "pos", color="black", linestyle="--", label="pos2" + ver_str2)
     plt.legend(loc=1)
     plt.subplot(122)
-    plq(plt, mr1, 'time', mr1, 'velo', color='blue', linestyle='-', label='velo' + run_str1)
-    plq(plt, mv1, 'time', mv1, 'velo', color='red', linestyle='--', label='velo' + ver_str1)
-    plq(plt, mr2, 'time', mr2, 'velo', color='magenta', linestyle='-', label='velo' + run_str2)
-    plq(plt, mv2, 'time', mv2, 'velo', color='black', linestyle='--', label='velo' + ver_str2)
+    plq(plt, mr1, "time", mr1, "velo", color="blue", linestyle="-", label="velo" + run_str1)
+    plq(plt, mv1, "time", mv1, "velo", color="red", linestyle="--", label="velo" + ver_str1)
+    plq(plt, mr2, "time", mr2, "velo", color="magenta", linestyle="-", label="velo" + run_str2)
+    plq(plt, mv2, "time", mv2, "velo", color="black", linestyle="--", label="velo" + ver_str2)
     plt.legend(loc=1)
 
     plt.figure()
     plt.subplot(121)
-    plt.title(' kfDemo.py var dt')
-    plq(plt, mr3, 'time', mr3, 'pos', color='blue', linestyle='-', label='pos1' + run_str3)
-    plq(plt, mv3, 'time', mv3, 'pos', color='red', linestyle='--', label='pos1' + ver_str3)
-    plq(plt, mr4, 'time', mr4, 'pos', color='magenta', linestyle='-', label='pos2' + run_str4)
-    plq(plt, mv4, 'time', mv4, 'pos', color='black', linestyle='--', label='pos2' + ver_str4)
+    plt.title(" kfDemo.py var dt")
+    plq(plt, mr3, "time", mr3, "pos", color="blue", linestyle="-", label="pos1" + run_str3)
+    plq(plt, mv3, "time", mv3, "pos", color="red", linestyle="--", label="pos1" + ver_str3)
+    plq(plt, mr4, "time", mr4, "pos", color="magenta", linestyle="-", label="pos2" + run_str4)
+    plq(plt, mv4, "time", mv4, "pos", color="black", linestyle="--", label="pos2" + ver_str4)
     plt.legend(loc=1)
     plt.subplot(122)
-    plq(plt, mr3, 'time', mr3, 'velo', color='blue', linestyle='-', label='velo' + run_str3)
-    plq(plt, mv3, 'time', mv3, 'velo', color='red', linestyle='--', label='velo' + ver_str3)
-    plq(plt, mr4, 'time', mr4, 'velo', color='magenta', linestyle='-', label='velo' + run_str4)
-    plq(plt, mv4, 'time', mv4, 'velo', color='black', linestyle='--', label='velo' + ver_str4)
+    plq(plt, mr3, "time", mr3, "velo", color="blue", linestyle="-", label="velo" + run_str3)
+    plq(plt, mv3, "time", mv3, "velo", color="red", linestyle="--", label="velo" + ver_str3)
+    plq(plt, mr4, "time", mr4, "velo", color="magenta", linestyle="-", label="velo" + run_str4)
+    plq(plt, mv4, "time", mv4, "velo", color="black", linestyle="--", label="velo" + ver_str4)
     plt.legend(loc=1)
 
     plt.show(block=True)

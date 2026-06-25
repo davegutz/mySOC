@@ -1,11 +1,11 @@
 # lookup_table - multidimensional lookup table class
 # Copyright (C) 2007 RADLogic
-# 
+#
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
-# License as published by the Free Software Foundation; 
+# License as published by the Free Software Foundation;
 # version 2.1 of the License.
-# 
+#
 # This library is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
@@ -37,33 +37,59 @@ This module is probably a good candidate for releasing as open source.
 
 """
 
-__author__ = 'Tim Wegener <twegener@radlogic.com.au>'
-__version__ = '$Revision: 1.1 $'
-__date__ = '$Date: 2010/12/17 13:15:02 $'
+__author__ = "Tim Wegener <twegener@radlogic.com.au>"
+__version__ = "$Revision: 1.1 $"
+__date__ = "$Date: 2010/12/17 13:15:02 $"
 
 from pyDAGx.lookup_table import LookupTable
 
 
 def crosscheck3d():
     """This is just here for testing/debug purposes."""
-    t_dv = [-0.9, -0.7,     -0.5,   -0.3,   0.0,    0.3,    0.5,    0.7,    0.9]
-    t_soc = [0, .5, 1]
-    t_r = [1e-6, 0.064,    0.050,  0.036,  0.015,  0.024,  0.030,  0.046,  1e-6,
-           1e-6, 1e-6,     0.050,  0.036,  0.015,  0.024,  0.030,  1e-6,   1e-6,
-           1e-6, 1e-6,     1e-6,   0.036,  0.015,  0.024,  1e-6,   1e-6,   1e-6]
+    t_dv = [-0.9, -0.7, -0.5, -0.3, 0.0, 0.3, 0.5, 0.7, 0.9]
+    t_soc = [0, 0.5, 1]
+    t_r = [
+        1e-6,
+        0.064,
+        0.050,
+        0.036,
+        0.015,
+        0.024,
+        0.030,
+        0.046,
+        1e-6,
+        1e-6,
+        1e-6,
+        0.050,
+        0.036,
+        0.015,
+        0.024,
+        0.030,
+        1e-6,
+        1e-6,
+        1e-6,
+        1e-6,
+        1e-6,
+        0.036,
+        0.015,
+        0.024,
+        1e-6,
+        1e-6,
+        1e-6,
+    ]
     lut = LookupTable(clip_x=True)
-    lut.addAxis('x', t_dv)
-    lut.addAxis('y', t_soc)
+    lut.addAxis("x", t_dv)
+    lut.addAxis("y", t_soc)
     lut.setValueTable(t_r)
-    print("expected 1e-6 got", lut.lookup(x=-.902, y=0.0957))
-    print("expected 1e-6 got", lut.lookup(x=-.9, y=0))
-    print("expected 1e-6 got", lut.lookup(x=.902, y=0.0957))
-    print("expected 1e-6 got", lut.lookup(x=.9, y=0))
+    print("expected 1e-6 got", lut.lookup(x=-0.902, y=0.0957))
+    print("expected 1e-6 got", lut.lookup(x=-0.9, y=0))
+    print("expected 1e-6 got", lut.lookup(x=0.902, y=0.0957))
+    print("expected 1e-6 got", lut.lookup(x=0.9, y=0))
 
 
 def main():
     crosscheck3d()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

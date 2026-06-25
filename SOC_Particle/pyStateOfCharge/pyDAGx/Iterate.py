@@ -1,4 +1,5 @@
-# Iterate class to provide a general purpose solver.   Begins with successive approximation and finishes with Newton-Rapheson
+# Iterate class to provide a general purpose solver.   Begins with successive approximation and finishes with
+# Newton-Rapheson
 # Copyright (C) 2026 Dave Gutz
 #
 # This library is free software; you can redistribute it and/or
@@ -13,30 +14,30 @@
 #
 # See http://www.fsf.org/licensing/licenses/lgpl.txt for full license text.
 
-__author__ = 'Dave Gutz <davegutz@alum.mit.edu>'
-__version__ = '$Revision: 1.1 $'
-__date__ = '$Date: 2023/03/02 13:15:02 $'
+__author__ = "Dave Gutz <davegutz@alum.mit.edu>"
+__version__ = "$Revision: 1.1 $"
+__date__ = "$Date: 2023/03/02 13:15:02 $"
 
 import numpy as np
 
 
 class Iterate:
-    def __init__(self, desc=''):
+    def __init__(self, desc=""):
         self.count = 0
         self.desc = desc
-        self.de = 0.
-        self.des = 0.
-        self.dx = 0.
-        self.e = 0.
-        self.ep = 0.
+        self.de = 0.0
+        self.des = 0.0
+        self.dx = 0.0
+        self.e = 0.0
+        self.ep = 0.0
         self.limited = False
-        self.x = 0.
-        self.xmax = 0.
-        self.xmin = 0.
-        self.xp = 0.
+        self.x = 0.0
+        self.xmax = 0.0
+        self.xmin = 0.0
+        self.xp = 0.0
 
     # Initialize
-    def init(self, xmax=0., xmin=0., eInit=0.):
+    def init(self, xmax=0.0, xmin=0.0, eInit=0.0):
         self.xmax = xmax
         self.xmin = xmin
         self.e = eInit
@@ -57,10 +58,10 @@ class Iterate:
     # Outputs:  self.x
     def iterate(self, verbose=False, success_count=0, en_no_soln=False):
         self.de = self.e - self.ep
-        self.des = np.sign(self.de)*max(abs(self.de), 1e-16)
+        self.des = np.sign(self.de) * max(abs(self.de), 1e-16)
         self.dx = self.x - self.xp
         if verbose:
-            s = self.desc + '(' + "{:2d}".format(self.count) + ':'
+            s = self.desc + "(" + "{:2d}".format(self.count) + ":"
             s += " xmin{:12.8f}".format(self.xmin)
             s += " xmax{:12.8f}".format(self.xmax)
             s += " e{:12.8f}".format(self.e)
@@ -73,21 +74,21 @@ class Iterate:
         # Check min max sign change
         no_soln = False
         if self.count == 2:
-            if self.e*self.ep >= 0 and en_no_soln:  # No solution possible
+            if self.e * self.ep >= 0 and en_no_soln:  # No solution possible
                 no_soln = True
             if abs(self.ep) < abs(self.e):
                 self.x = self.xp
             self.ep = self.e
             self.limited = False
             if verbose:
-                print(self.desc, ':No soln')  # Leaving x at most likely limit value and recalculating...
+                print(self.desc, ":No soln")  # Leaving x at most likely limit value and recalculating...
             return self.e
         else:
             no_soln = False
 
         # Stop after recalc and no_soln
         if self.count == 3 and no_soln is True:
-            self.e = 0.
+            self.e = 0.0
             return self.e
         self.xp = self.x
         self.ep = self.e
@@ -95,7 +96,7 @@ class Iterate:
             self.x = self.xmax  # Do min and max first
         else:
             if self.count > success_count:
-                self.x = max(min(self.x - self.e/self.des*self.dx, self.xmax), self.xmin)
+                self.x = max(min(self.x - self.e / self.des * self.dx, self.xmax), self.xmin)
                 if self.e > 0:
                     self.xmax = self.xp
                 else:
@@ -103,10 +104,10 @@ class Iterate:
             else:
                 if self.e > 0:
                     self.xmax = self.xp
-                    self.x = (self.xmin + self.x) / 2.
+                    self.x = (self.xmin + self.x) / 2.0
                 else:
                     self.xmin = self.xp
-                    self.x = (self.xmax + self.x) / 2.
+                    self.x = (self.xmax + self.x) / 2.0
             if self.x == self.xmax or self.x == self.xmin:
                 self.limited = False
             else:

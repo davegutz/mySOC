@@ -24,29 +24,29 @@ class EKF1x1:
     ekf_update methods in the parent."""
 
     def __init__(self):
-        self.Fx = 0.  # State transition
-        self.Bu = 0.  # Control transition
-        self.Q = 0.  # Process uncertainty
-        self.R = 0.  # State uncertainty
-        self.P = 0.  # Uncertainty covariance
-        self.H = 0.  # Jacobian of h(x)
-        self.S = 0.  # System uncertainty
-        self.K = 0.  # Kalman gain
-        self.hx = 0.  # Output of observation function h(x)
-        self.u_ekf = 0.  # Control input
-        self.x = 1.  # Kalman state variable
-        self.y = 0.  # Residual z-hx
-        self.z = 0.  # Observation of state x
+        self.Fx = 0.0  # State transition
+        self.Bu = 0.0  # Control transition
+        self.Q = 0.0  # Process uncertainty
+        self.R = 0.0  # State uncertainty
+        self.P = 0.0  # Uncertainty covariance
+        self.H = 0.0  # Jacobian of h(x)
+        self.S = 0.0  # System uncertainty
+        self.K = 0.0  # Kalman gain
+        self.hx = 0.0  # Output of observation function h(x)
+        self.u_ekf = 0.0  # Control input
+        self.x = 1.0  # Kalman state variable
+        self.y = 0.0  # Residual z-hx
+        self.z = 0.0  # Observation of state x
         self.x_prior = self.x
         self.P_prior = self.P
         self.x_post = self.x
         self.P_post = self.P
-        self.tb_f_for_hx = 25.
-        self.x_for_hx = 1.
+        self.tb_f_for_hx = 25.0
+        self.x_for_hx = 1.0
         self.freeze = False
         self.reset = False
 
-    def __str__(self, prefix=''):
+    def __str__(self, prefix=""):
         """Returns representation of the object"""
         s = prefix + "EKF1x1:\n"
         s += "  Inputs:\n"
@@ -97,28 +97,29 @@ class EKF1x1:
         self.Fx, self.Bu = self.ekf_predict()
         if not self.reset:
             if not self.freeze:
-                # print("                                                                                                                                                                                                                                                      x = Fx* {:13.8f}".format(self.x), end='')
-                self.x = self.Fx*self.x + self.Bu*self.u_ekf
+                # print("
+                # x = Fx* {:13.8f}".format(self.x), end='')
+                self.x = self.Fx * self.x + self.Bu * self.u_ekf
                 # print("= {:13.8f}".format(self.x))
             self.P = self.Fx * self.P * self.Fx + self.Q
             self.x_prior = self.x
             self.P_prior = self.P
 
     def update_ekf(self, z, x_min, x_max, OPT=None, i_ekf=None):
-        """ 1x1 Extended Kalman Filter update
-            Inputs:
-                z   1x1 input, =voc, dynamic predicted by other model, V
-                R   1x1 Kalman state uncertainty
-                Q   1x1 Kalman process uncertainty
-                H   1x1 Jacobian sensitivity dV/dSOC
-            Outputs:
-                hx  1x1 Estimate of z, V
-                x   1x1 Kalman state variable = Vsoc (0-1 fraction)
-                y   1x1 Residual z-hx, V
-                P   1x1 Kalman uncertainty covariance
-                K   1x1 Kalman gain
-                S   1x1 system uncertainty
-                SI  1x1 system uncertainty inverse
+        """1x1 Extended Kalman Filter update
+        Inputs:
+            z   1x1 input, =voc, dynamic predicted by other model, V
+            R   1x1 Kalman state uncertainty
+            Q   1x1 Kalman process uncertainty
+            H   1x1 Jacobian sensitivity dV/dSOC
+        Outputs:
+            hx  1x1 Estimate of z, V
+            x   1x1 Kalman state variable = Vsoc (0-1 fraction)
+            y   1x1 Residual z-hx, V
+            P   1x1 Kalman uncertainty covariance
+            K   1x1 Kalman gain
+            S   1x1 system uncertainty
+            SI  1x1 system uncertainty inverse
         """
         if not self.reset:
             # self.x = OPT.mon_run.x[i_ekf]
@@ -135,10 +136,10 @@ class EKF1x1:
                 self.K = pht / self.S  # using last-good-value if S=0
             self.y = self.z - self.hx
         if not self.reset and not self.freeze:
-            self.x = max(min(self.x + self.K*self.y, x_max), x_min)
-        i_kh = 1. - self.K*self.H
+            self.x = max(min(self.x + self.K * self.y, x_max), x_min)
+        i_kh = 1.0 - self.K * self.H
         if self.freeze:
-            i_kh = 1.
+            i_kh = 1.0
         if not self.reset and not self.freeze:  # THIS LINE WAS MISSING!
             self.P *= i_kh
         self.x_post = self.x

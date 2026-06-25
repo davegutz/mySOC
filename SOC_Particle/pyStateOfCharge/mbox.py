@@ -21,7 +21,6 @@ import tkinter
 
 # Dialog for application with a main GUI
 class Mbox(object):
-
     root = None
 
     def __init__(self, msg, dict_key=None):
@@ -33,8 +32,8 @@ class Mbox(object):
         tki = tkinter
         self.top = tki.Toplevel(Mbox.root)
 
-        frm = tki.Frame(self.top, borderwidth=4, relief='ridge')
-        frm.pack(fill='both', expand=True)
+        frm = tki.Frame(self.top, borderwidth=4, relief="ridge")
+        frm.pack(fill="both", expand=True)
 
         label = tki.Label(frm, text=msg)
         label.pack(padx=4, pady=4)
@@ -45,12 +44,12 @@ class Mbox(object):
             self.entry = tki.Entry(frm)
             self.entry.pack(pady=4)
 
-            b_submit = tki.Button(frm, text='Submit')
-            b_submit['command'] = lambda: self.entry_to_dict(dict_key)
+            b_submit = tki.Button(frm, text="Submit")
+            b_submit["command"] = lambda: self.entry_to_dict(dict_key)
             b_submit.pack()
 
-        b_cancel = tki.Button(frm, text='Cancel')
-        b_cancel['command'] = self.top.destroy
+        b_cancel = tki.Button(frm, text="Cancel")
+        b_cancel["command"] = self.top.destroy
         b_cancel.pack(padx=4, pady=4)
 
     def entry_to_dict(self, dict_key):
@@ -63,10 +62,9 @@ class Mbox(object):
 
 # Dialog for application without a main GUI
 class MessageBox(object):
-
     def __init__(self, msg, b1, b2, b3, b4, b5, frame, t, entry):
         root = self.root = tkinter.Tk()
-        root.title('Message')
+        root.title("Message")
         self.msg = str(msg)
         self.returning = None
 
@@ -78,11 +76,11 @@ class MessageBox(object):
             root.overrideredirect(True)
 
         # default values for the buttons to return
-        self.b1_return = ''
-        self.b2_return = ''
-        self.b3_return = ''
-        self.b4_return = ''
-        self.b5_return = ''
+        self.b1_return = ""
+        self.b2_return = ""
+        self.b3_return = ""
+        self.b4_return = ""
+        self.b5_return = ""
 
         # if b is a tuple unpack into the button text & return value
         if isinstance(b1, tuple):
@@ -115,29 +113,29 @@ class MessageBox(object):
 
         # buttons
         btn_1 = tkinter.Button(frm_2, width=8, text=b1)
-        btn_1['command'] = self.b1_action
-        btn_1.pack(side='left')
+        btn_1["command"] = self.b1_action
+        btn_1.pack(side="left")
         if not entry:
             btn_1.focus_set()
         btn_2 = tkinter.Button(frm_2, width=8, text=b2)
-        btn_2['command'] = self.b2_action
-        btn_2.pack(side='left')
+        btn_2["command"] = self.b2_action
+        btn_2.pack(side="left")
         btn_3 = tkinter.Button(frm_2, width=8, text=b3)
-        btn_3['command'] = self.b3_action
-        btn_3.pack(side='left')
+        btn_3["command"] = self.b3_action
+        btn_3.pack(side="left")
         btn_4 = tkinter.Button(frm_2, width=10, text=b4)
-        btn_4['command'] = self.b4_action
-        btn_4.pack(side='left')
+        btn_4["command"] = self.b4_action
+        btn_4.pack(side="left")
         btn_5 = tkinter.Button(frm_2, width=10, text=b5)
-        btn_5['command'] = self.b5_action
-        btn_5.pack(side='left')
+        btn_5["command"] = self.b5_action
+        btn_5.pack(side="left")
 
         # the enter button will trigger the focused button's action
-        btn_1.bind('<KeyPress-Return>', func=self.b1_action)
-        btn_2.bind('<KeyPress-Return>', func=self.b2_action)
-        btn_3.bind('<KeyPress-Return>', func=self.b3_action)
-        btn_4.bind('<KeyPress-Return>', func=self.b4_action)
-        btn_5.bind('<KeyPress-Return>', func=self.b5_action)
+        btn_1.bind("<KeyPress-Return>", func=self.b1_action)
+        btn_2.bind("<KeyPress-Return>", func=self.b2_action)
+        btn_3.bind("<KeyPress-Return>", func=self.b3_action)
+        btn_4.bind("<KeyPress-Return>", func=self.b4_action)
+        btn_5.bind("<KeyPress-Return>", func=self.b5_action)
 
         # roughly center the box on screen
         # for accuracy see: https://stackoverflow.com/a/10018670/1217270
@@ -145,7 +143,7 @@ class MessageBox(object):
         xp = (root.winfo_screenwidth() // 2) - (root.winfo_width() // 2)
         yp = (root.winfo_screenheight() // 2) - (root.winfo_height() // 2)
         geom = (root.winfo_width(), root.winfo_height(), xp, yp)
-        root.geometry('{0}x{1}+{2}+{3}'.format(*geom))
+        root.geometry("{0}x{1}+{2}+{3}".format(*geom))
 
         # call self.close_mod when the close button is pressed
         root.protocol("WM_DELETE_WINDOW", self.close_mod)
@@ -155,7 +153,7 @@ class MessageBox(object):
 
         # if t is specified: call time_out after t seconds
         if t:
-            root.after(int(t*1000), func=self.time_out)
+            root.after(int(t * 1000), func=self.time_out)
 
     def b1_action(self, _event):
         try:

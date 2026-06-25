@@ -25,8 +25,10 @@ Raise a window visible at task bar to close all plots.
 import matplotlib.pyplot as plt
 import time
 import platform
-if platform.system() == 'Darwin':
+
+if platform.system() == "Darwin":
     import tkinter as tk
+
     # noinspection PyUnresolvedReferences
     from ttwidgets import TTButton as myButton
 else:
@@ -41,6 +43,7 @@ def do_hardcopy(fig_list, fig_files, pdf_path, pdf_base):
     from datetime import datetime
     from unite_pictures import precleanup_fig_files, pngs_to_pdf
     import threading
+
     if not fig_list or not fig_files or not pdf_base:
         return
     try:
@@ -49,13 +52,15 @@ def do_hardcopy(fig_list, fig_files, pdf_path, pdf_base):
             plt.savefig(fig_file, format="png")
             print("saved", fig_file)
         date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
+
         def _assemble(base=pdf_base, path=pdf_path, dt=date_time):
             try:
                 precleanup_fig_files(output_pdf_name=base, path_to_pdfs=path)
-                print('\ncreating pdf...')
-                pngs_to_pdf(png_folder=path, output_pdf=base + '_' + dt + '.pdf')
+                print("\ncreating pdf...")
+                pngs_to_pdf(png_folder=path, output_pdf=base + "_" + dt + ".pdf")
             except Exception as e:
                 print(f"do_hardcopy pdf ERROR: {e}")
+
         threading.Thread(target=_assemble, daemon=True).start()
     except Exception as e:
         print(f"do_hardcopy ERROR: {e}")
@@ -63,7 +68,7 @@ def do_hardcopy(fig_list, fig_files, pdf_path, pdf_base):
 
 class PlotKiller(tk.Toplevel):
     # noinspection PyUnusedLocal
-    def __init__(self, message, caller, fig_list_=None, fig_files_=None, pdf_path_='.', pdf_base_=None):
+    def __init__(self, message, caller, fig_list_=None, fig_files_=None, pdf_path_=".", pdf_base_=None):
         """Block caller task asking to close all plots then doing so"""
         self.fig_list = fig_list_
         self.fig_files = fig_files_
@@ -71,16 +76,26 @@ class PlotKiller(tk.Toplevel):
         self.pdf_base = pdf_base_
         tk.Toplevel.__init__(self)
         self.title("SOC-close")
-        tk.Button(self, command=self.close_figs, text="close " + message, font=("Courier", 12)).grid(row=0, column=0, columnspan=4, padx=15, pady=15)
-        tk.Label(self, text="t_min:", font=("Courier", 10)).grid(row=1, column=0, padx=5, pady=5, sticky='e')
+        tk.Button(self, command=self.close_figs, text="close " + message, font=("Courier", 12)).grid(
+            row=0, column=0, columnspan=4, padx=15, pady=15
+        )
+        tk.Label(self, text="t_min:", font=("Courier", 10)).grid(row=1, column=0, padx=5, pady=5, sticky="e")
         self.t_min_var = tk.StringVar()
-        tk.Entry(self, textvariable=self.t_min_var, width=10, font=("Courier", 10)).grid(row=1, column=1, padx=5, pady=5)
-        tk.Label(self, text="t_max:", font=("Courier", 10)).grid(row=1, column=2, padx=5, pady=5, sticky='e')
+        tk.Entry(self, textvariable=self.t_min_var, width=10, font=("Courier", 10)).grid(
+            row=1, column=1, padx=5, pady=5
+        )
+        tk.Label(self, text="t_max:", font=("Courier", 10)).grid(row=1, column=2, padx=5, pady=5, sticky="e")
         self.t_max_var = tk.StringVar()
-        tk.Entry(self, textvariable=self.t_max_var, width=10, font=("Courier", 10)).grid(row=1, column=3, padx=5, pady=5)
-        tk.Button(self, command=self.rescale_axes, text="rescale", font=("Courier", 10)).grid(row=2, column=0, columnspan=4, padx=15, pady=5)
+        tk.Entry(self, textvariable=self.t_max_var, width=10, font=("Courier", 10)).grid(
+            row=1, column=3, padx=5, pady=5
+        )
+        tk.Button(self, command=self.rescale_axes, text="rescale", font=("Courier", 10)).grid(
+            row=2, column=0, columnspan=4, padx=15, pady=5
+        )
         if fig_files_ is not None and pdf_base_ is not None:
-            tk.Button(self, command=self.hardcopy, text="Hardcopy", font=("Courier", 10)).grid(row=3, column=0, columnspan=4, padx=15, pady=5)
+            tk.Button(self, command=self.hardcopy, text="Hardcopy", font=("Courier", 10)).grid(
+                row=3, column=0, columnspan=4, padx=15, pady=5
+            )
         self.lift()
         self.mainloop()
         # self.grab_set()  # Prevents other Tkinter windows from being used
@@ -98,7 +113,7 @@ class PlotKiller(tk.Toplevel):
 
     def close_figs(self):
         if self.fig_list is None:
-            plt.close('all')
+            plt.close("all")
         else:
             for fig in self.fig_list:
                 plt.close(fig)
@@ -106,7 +121,7 @@ class PlotKiller(tk.Toplevel):
         self.destroy()
 
 
-def show_and_kill(string, caller, fig_list=None, fig_files=None, pdf_path='.', pdf_base=None, hardcopy=False):
+def show_and_kill(string, caller, fig_list=None, fig_files=None, pdf_path=".", pdf_base=None, hardcopy=False):
     plt.show()
     time.sleep(1)
     if hardcopy:
@@ -114,7 +129,7 @@ def show_and_kill(string, caller, fig_list=None, fig_files=None, pdf_path='.', p
     PlotKiller(string, caller, fig_list, fig_files, pdf_path, pdf_base)
 
 
-def show_killer(string, caller, fig_list=None, fig_files=None, pdf_path='.', pdf_base=None, hardcopy=False):
+def show_killer(string, caller, fig_list=None, fig_files=None, pdf_path=".", pdf_base=None, hardcopy=False):
     if hardcopy:
         do_hardcopy(fig_list, fig_files, pdf_path, pdf_base)
     PlotKiller(string, caller, fig_list, fig_files, pdf_path, pdf_base)
@@ -122,46 +137,44 @@ def show_killer(string, caller, fig_list=None, fig_files=None, pdf_path='.', pdf
 
 def simple_plot1():
     import numpy as np
+
     fig_list = []
     t = np.arange(0.0, 2.0, 0.01)
     s = 1 + np.sin(2 * np.pi * t)
     fig, ax = plt.subplots()
     fig_list.append(fig)
     ax.plot(t, s)
-    ax.set(xlabel='time (s)', ylabel='voltage (mV)',
-           title='Sine wave1')
+    ax.set(xlabel="time (s)", ylabel="voltage (mV)", title="Sine wave1")
     ax.grid()
     fig, ax = plt.subplots()
     fig_list.append(fig)
     ax.plot(t, s)
-    ax.set(xlabel='time (s)', ylabel='voltage (mV)',
-           title='Sine wave2')
+    ax.set(xlabel="time (s)", ylabel="voltage (mV)", title="Sine wave2")
     ax.grid()
     plt.ion()
     plt.show()
-    show_killer('close plots?', 'sp1', fig_list)
+    show_killer("close plots?", "sp1", fig_list)
 
 
 def simple_plot2():
     import numpy as np
+
     t = np.arange(0.0, 2.0, 0.01)
     s = 1 + np.sin(2 * np.pi * t)
     fig, ax = plt.subplots()
     ax.plot(t, s)
-    ax.set(xlabel='time (s)', ylabel='voltage (mV)',
-           title='Sine wave1')
+    ax.set(xlabel="time (s)", ylabel="voltage (mV)", title="Sine wave1")
     ax.grid()
     fig, ax = plt.subplots()
     ax.plot(t, s)
-    ax.set(xlabel='time (s)', ylabel='voltage (mV)',
-           title='Sine wave2')
+    ax.set(xlabel="time (s)", ylabel="voltage (mV)", title="Sine wave2")
     ax.grid()
     plt.ion()
     # plt.show()
-    show_and_kill('close plots?', 'sp2')
+    show_and_kill("close plots?", "sp2")
 
 
-if __name__ == '__main__':  # Example usage.  Ran ok 20260217
+if __name__ == "__main__":  # Example usage.  Ran ok 20260217
     root = tk.Tk()
     tk.Label(root, text="Try opening multiple plots then killing").pack()
     tk.Button(root, text="plot 1", command=simple_plot1).pack()

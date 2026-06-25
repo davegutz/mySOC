@@ -18,11 +18,12 @@
 #
 # See http://www.fsf.org/licensing/licenses/lgpl.txt for full license text.
 
-""" General data-over-model data structure classes for importing data from Particle Photon runs and simulations,
+"""General data-over-model data structure classes for importing data from Particle Photon runs and simulations,
 and for managing data for plotting.
 Dependencies:
     - SavedData  (structures)
 """
+
 from battery_constants import load_off_nominal_battery
 from filter.myFilters import LagExp
 from Colors import Colors
@@ -33,12 +34,25 @@ import numpy as np
 # type: ignore
 class SavedData:
     # noinspection PyPep8Naming
-    def __init__(self, battery=None, rap=None, sel=None, ekf=None, shunt=None, time_end=None, zero_zero=False,
-                 zero_thr=0.02, sync_cTime=None, init_time=None, time_shift=None, str_=None):
+    def __init__(
+        self,
+        battery=None,
+        rap=None,
+        sel=None,
+        ekf=None,
+        shunt=None,
+        time_end=None,
+        zero_zero=False,
+        zero_thr=0.02,
+        sync_cTime=None,
+        init_time=None,
+        time_shift=None,
+        str_=None,
+    ):
         self.str = str_
         i_end = 0
         n = 0
-        ib_lag = 0.
+        ib_lag = 0.0
         IbLag = None
         self.time_shift = time_shift
 
@@ -72,12 +86,10 @@ class SavedData:
                         self.zero_end += 1
                     self.zero_end -= 1  # backup one
                     if self.zero_end == len(self.ib) - 1:
-                        print(Colors.fg.yellow, f"\nWARNING:  Likely ib is zero throughout the data\n",
-                              Colors.reset)
+                        print(Colors.fg.yellow, f"\nWARNING:  Likely ib is zero throughout the data\n", Colors.reset)
                         self.zero_end = 2
                     elif self.zero_end == -1:
-                        print(Colors.fg.yellow, f"\nWARNING:  Likely ib is noisy throughout the data\n",
-                              Colors.reset)
+                        print(Colors.fg.yellow, f"\nWARNING:  Likely ib is noisy throughout the data\n", Colors.reset)
                         self.zero_end = 0
                 except IOError:
                     self.zero_end = 0
@@ -101,44 +113,43 @@ class SavedData:
                     self.c_time_sel = np.array(sel.c_time_sel) - self.time_run_start
                     i_end_sel = np.where(self.c_time_sel <= time_end)[0][-1] + 1
                     i_end = np.minimum(i_end, i_end_sel)
-                    self.zero_end = np.minimum(self.zero_end, i_end-1)
+                    self.zero_end = np.minimum(self.zero_end, i_end - 1)
                 if ekf is not None:
                     self.time_e = np.array(np.atleast_1d(ekf.c_time_e) - self.time_run_start)
                 if shunt is not None:
                     self.c_time_shunt = np.array(shunt.c_time_shunt) - self.time_run_start
                     i_end_shunt = np.where(self.c_time_shunt <= time_end)[0][-1] + 1
                     i_end = np.minimum(i_end, i_end_shunt)
-                    self.zero_end = np.minimum(self.zero_end, i_end-1)
+                    self.zero_end = np.minimum(self.zero_end, i_end - 1)
 
             # Load again with new i_end
             self.assign_all_from(rap, i_end=i_end)
             self.time = np.array(self.cTime) - self.time_run_start
-            self.time_min = self.time / 60.
-            self.time_day = self.time / 3600. / 24.
+            self.time_min = self.time / 60.0
+            self.time_day = self.time / 3600.0 / 24.0
             if self.time_shift:
                 self.time += self.time_shift
             self.ioc = np.array(rap.ib[:i_end])
-            if hasattr(rap, 'qcap'):
+            if hasattr(rap, "qcap"):
                 self.q_capacity = rap.qcap[:i_end]
             # Lag for saturation
             n = len(self.cTime)
             ib_lag = Chemistry_BMS.ib_lag(self.chm[0])
-            IbLag = LagExp(1., ib_lag, -100., 100.)
+            IbLag = LagExp(1.0, ib_lag, -100.0, 100.0)
             self.ib_lag = np.zeros(n)
             # self.sel = np.array(rap.sel[:i_end])
             self.mod_data = np.array(rap.mod[:i_end])
             self.bms_off = np.array(rap.bmso[:i_end])
-            if not hasattr(rap, 'ib_dyn_T'):
-                self.ib_dyn_T = self.vsat*0.
-            if not hasattr(rap, 'ib_dyn_r'):
-                self.ib_dyn_r = np.bool(self.vsat*0.)
-            if not hasattr(rap, 'ib_dyn_lstate'):
-                self.ib_dyn_lstate = self.vsat*0.
-            if not hasattr(rap, 'ib_dyn_rstate'):
-                self.ib_dyn_rstate = self.vsat*0.
+            if not hasattr(rap, "ib_dyn_T"):
+                self.ib_dyn_T = self.vsat * 0.0
+            if not hasattr(rap, "ib_dyn_r"):
+                self.ib_dyn_r = np.bool(self.vsat * 0.0)
+            if not hasattr(rap, "ib_dyn_lstate"):
+                self.ib_dyn_lstate = self.vsat * 0.0
+            if not hasattr(rap, "ib_dyn_rstate"):
+                self.ib_dyn_rstate = self.vsat * 0.0
             self.voc = self.vb - self.dv_dyn
             self.voc_soc_new = None
-
 
         if sel is None:
             pass
@@ -153,9 +164,9 @@ class SavedData:
             self.ccd_fa = np.bool_(np.array(falw) & 2**4)
             self.ib_diff_flt = np.bool_((np.array(fltw) & 2**8) | (np.array(fltw) & 2**9))
             self.ib_diff_fa = np.bool_((np.array(falw) & 2**8) | (np.array(falw) & 2**9))
-            if not hasattr(sel, 'vb_hdwe'):
+            if not hasattr(sel, "vb_hdwe"):
                 self.vb_hdwe = np.array(self.vb)
-            if not hasattr(sel, 'vb_hdwe_f'):
+            if not hasattr(sel, "vb_hdwe_f"):
                 self.vb_hdwe_f = np.array(self.vb_hdwe)
             self.wrap_hi_flt = np.bool_(np.array(fltw) & 2**5)
             self.wrap_lo_flt = np.bool_(np.array(fltw) & 2**6)
@@ -164,8 +175,10 @@ class SavedData:
             self.wrap_lo_m_flt = np.bool_(np.array(fltw) & 2**15)
             self.wrap_hi_n_flt = np.bool_(np.array(fltw) & 2**16)
             self.wrap_lo_n_flt = np.bool_(np.array(fltw) & 2**17)
-            self.Tb_flt = np.bool_(fltw & 2 ** 19)
-            self.wrap_m_and_n_flt = (self.wrap_lo_n_flt & self.wrap_lo_m_flt) | (self.wrap_hi_n_flt & self.wrap_hi_m_flt)
+            self.Tb_flt = np.bool_(fltw & 2**19)
+            self.wrap_m_and_n_flt = (self.wrap_lo_n_flt & self.wrap_lo_m_flt) | (
+                self.wrap_hi_n_flt & self.wrap_hi_m_flt
+            )
             self.fltw = np.array(fltw)
             self.falw = np.array(falw)
             self.dispw = np.array(dispw)
@@ -184,10 +197,10 @@ class SavedData:
             self.ib_amp_bare_flt = np.bool_(np.array(fltw) & 2**11)
             self.ib_dscn_flt = np.bool_(np.array(fltw) & 2**10)
             self.ib_dscn_fa = np.bool_(np.array(falw) & 2**10)
-            self.ib_noa_flt = np.bool_(fltw & 2 ** 3)
-            self.ib_noa_fa = np.bool_(falw & 2 ** 3)
-            self.ib_amp_flt = np.bool_(fltw & 2 ** 2)
-            self.ib_amp_fa = np.bool_(falw & 2 ** 2)
+            self.ib_noa_flt = np.bool_(fltw & 2**3)
+            self.ib_noa_fa = np.bool_(falw & 2**3)
+            self.ib_amp_flt = np.bool_(fltw & 2**2)
+            self.ib_amp_fa = np.bool_(falw & 2**2)
             self.vb_flt = np.bool_(np.array(fltw) & 2**1)
             self.vb_fa_lt = np.bool_(np.array(falw) & 2**1)
             self.Tb_flt = np.bool_(np.array(fltw) & 2**0)
@@ -209,7 +222,7 @@ class SavedData:
         if shunt is None:
             pass
         else:
-            #Load
+            # Load
             self.assign_all_from(shunt, i_end)
             # Special handling
             self.c_time_shunt = np.array(shunt.c_time_shunt[:i_end]) - self.time_run_start
@@ -250,9 +263,9 @@ class SavedData:
         if self.ib_dyn_T_n is None:
             self.ib_dyn_T_n = np.copy(self.dt)
         if self.ib_dyn_tau_m is None:
-            self.ib_dyn_tau_m = np.copy(self.dt) * 0. + 10.
+            self.ib_dyn_tau_m = np.copy(self.dt) * 0.0 + 10.0
         if self.ib_dyn_tau_n is None:
-            self.ib_dyn_tau_n = np.copy(self.dt) * 0. + 10.
+            self.ib_dyn_tau_n = np.copy(self.dt) * 0.0 + 10.0
         if self.ib_dyn_n is None:
             self.ib_dyn_n = np.copy(self.ib_dyn)
         if self.ib_dec is None:
@@ -270,41 +283,41 @@ class SavedData:
         if self.ib_wrp_reset_m is None:
             self.ib_wrp_reset_m = np.copy(self.dt) * 0
         if self.ib_wrp_rate_m is None:
-            self.ib_wrp_rate_m = np.copy(self.dt) * 0.
+            self.ib_wrp_rate_m = np.copy(self.dt) * 0.0
         if self.ib_wrp_state_m is None:
-            self.ib_wrp_state_m = np.copy(self.dt) * 0.
+            self.ib_wrp_state_m = np.copy(self.dt) * 0.0
         if self.ib_wrp_T_m is None:
             self.ib_wrp_T_m = np.copy(self.dt)
         if self.ib_wrp_tau_m is None:
-            self.ib_wrp_tau_m = np.copy(self.dt) * 0. + 10.
+            self.ib_wrp_tau_m = np.copy(self.dt) * 0.0 + 10.0
         if self.ib_wrp_rate_n is None:
-            self.ib_wrp_rate_n = np.copy(self.dt) * 0.
+            self.ib_wrp_rate_n = np.copy(self.dt) * 0.0
         if self.ib_wrp_state_n is None:
-            self.ib_wrp_state_n = np.copy(self.dt) * 0.
+            self.ib_wrp_state_n = np.copy(self.dt) * 0.0
         if self.ib_wrp_T_n is None:
             self.ib_wrp_T_n = np.copy(self.dt)
         if self.ib_wrp_tau_n is None:
-            self.ib_wrp_tau_n = np.copy(self.dt) * 0. + 10.
+            self.ib_wrp_tau_n = np.copy(self.dt) * 0.0 + 10.0
         if self.e_wrap_m is None:
-            self.e_wrap_m = np.copy(self.ib) * 0.
+            self.e_wrap_m = np.copy(self.ib) * 0.0
         if self.e_wrap_m_filt is None:
-            self.e_wrap_m_filt = np.copy(self.ib) * 0.
+            self.e_wrap_m_filt = np.copy(self.ib) * 0.0
         if self.e_wrap_m_reset is None:
             self.e_wrap_m_reset = np.copy(self.ib) * 0
         if self.e_wrap_m_trim is None:
-            self.e_wrap_m_trim = np.copy(self.ib) * 0.
+            self.e_wrap_m_trim = np.copy(self.ib) * 0.0
         if self.ib_amp is None:
-            self.ib_amp = np.copy(self.ib) * 0.
+            self.ib_amp = np.copy(self.ib) * 0.0
         if self.e_wrap_n is None:
-            self.e_wrap_n = np.copy(self.ib) * 0.
+            self.e_wrap_n = np.copy(self.ib) * 0.0
         if self.e_wrap_n_filt is None:
-            self.e_wrap_n_filt = np.copy(self.ib) * 0.
+            self.e_wrap_n_filt = np.copy(self.ib) * 0.0
         if self.e_wrap_n_trim is None:
-            self.e_wrap_n_trim = np.copy(self.ib) * 0.
+            self.e_wrap_n_trim = np.copy(self.ib) * 0.0
         if self.e_wrap is None:
-            self.e_wrap = np.copy(self.ib) * 0.
+            self.e_wrap = np.copy(self.ib) * 0.0
         if self.e_wrap_filt is None:
-            self.e_wrap_filt = np.copy(self.ib) * 0.
+            self.e_wrap_filt = np.copy(self.ib) * 0.0
         if self.mvb is None:
             self.mvb = np.bool(np.copy(self.mod_data))
         if self.Tb_model_f is None:
@@ -321,9 +334,9 @@ class SavedData:
         if self.x_post is None:
             self.x_post = np.copy(self.soc_ekf)
         if self.y_ekf is None:
-            self.y_ekf = np.copy(self.voc_stat) * 0.
-        if hasattr(self, 'y_ekf_f') and self.y_ekf_f is None:
-            self.y_ekf_f = np.copy(self.voc_stat) * 0.
+            self.y_ekf = np.copy(self.voc_stat) * 0.0
+        if hasattr(self, "y_ekf_f") and self.y_ekf_f is None:
+            self.y_ekf_f = np.copy(self.voc_stat) * 0.0
         if self.z is None:
             self.z = np.copy(self.voc_stat)
         if self.H is None:
@@ -331,17 +344,17 @@ class SavedData:
         if self.hx is None:
             self.hx = np.copy(self.voc_stat)
         if self.K is None:
-            self.K = np.copy(self.x) * 0.
+            self.K = np.copy(self.x) * 0.0
         if self.P is None:
-            self.P = np.copy(self.x) * 0.
+            self.P = np.copy(self.x) * 0.0
         if self.P_post is None:
-            self.P_post = np.copy(self.x) * 0.
+            self.P_post = np.copy(self.x) * 0.0
         if self.P_prior is None:
-            self.P_prior = np.copy(self.x) * 0.
+            self.P_prior = np.copy(self.x) * 0.0
         if self.Q is None:
-            self.Q = np.copy(self.x) * 0.
+            self.Q = np.copy(self.x) * 0.0
         if self.S is None:
-            self.S = np.copy(self.x) * 0.
+            self.S = np.copy(self.x) * 0.0
         if self.tb_f_for_hx is None:
             self.tb_f_for_hx = np.copy(self.Tb_f)
         if self.x_for_hx is None:
@@ -355,34 +368,34 @@ class SavedData:
         if init_time:
             self.init_time = init_time
         else:
-            if self.time[0] == 0.:  # no initialization flat detected at beginning of recording
-                self.init_time = 1.
+            if self.time[0] == 0.0:  # no initialization flat detected at beginning of recording
+                self.init_time = 1.0
             else:
-                self.init_time = -4.
+                self.init_time = -4.0
 
         if IbLag is not None:
             for i in range(n):
                 if self.time[i] <= self.init_time:
                     lag_reset = True
-                    if i < n-1:
-                        T_lag = self.cTime[i+1] - self.cTime[i]
+                    if i < n - 1:
+                        T_lag = self.cTime[i + 1] - self.cTime[i]
                     else:
-                        T_lag = self.cTime[i] - self.cTime[i-1]
+                        T_lag = self.cTime[i] - self.cTime[i - 1]
                 else:
                     lag_reset = False
-                    T_lag = self.cTime[i] - self.cTime[i-1]
+                    T_lag = self.cTime[i] - self.cTime[i - 1]
                 self.ib_lag[i] = IbLag.calculate_tau(float(self.ib[i]), lag_reset, T_lag, ib_lag)
 
     def assign_all_from(self, x=None, i_end=None, no_clobber=False):
         """
         Iterates over members of a dataset x, assigns values to numpy.ndarray members
         """
-        exceptions = ['c_time_sel', 'f0']
+        exceptions = ["c_time_sel", "f0"]
         for name in list(x.dtype.names):
             if no_clobber and hasattr(self, name) and not exceptions.__contains__(name):
-                print(Colors.fg.yellow, end='')
-                print(f'WARNING:  {name} repeated (clobbering).  Change serial.cpp')
-                print(Colors.reset, end='')
+                print(Colors.fg.yellow, end="")
+                print(f"WARNING:  {name} repeated (clobbering).  Change serial.cpp")
+                print(Colors.reset, end="")
                 continue
             if i_end is None:
                 setattr(self, name, x[name])
@@ -402,19 +415,19 @@ class SavedData:
                 try:
                     setattr(self, name, np.array(np.atleast_1d(getattr(x, name)[:i_end])))
                 except IndexError:
-                    print(Colors.fg.red, end='')
-                    print(f'\nERROR: EKF data too short.  Rerun longer')
-                    print(Colors.reset, end='')
+                    print(Colors.fg.red, end="")
+                    print(f"\nERROR: EKF data too short.  Rerun longer")
+                    print(Colors.reset, end="")
                     exit(1)
 
-    def truncate(self, i_end=None, key_attr='time'):
+    def truncate(self, i_end=None, key_attr="time"):
         """
         Iterates over members of a self, assigns values to numpy.ndarray members
         up to i_end.
         """
         for attr_name in dir(self):
             # Filter out built-in attributes and methods
-            if not attr_name.startswith('__') and not callable(getattr(self, attr_name)):
+            if not attr_name.startswith("__") and not callable(getattr(self, attr_name)):
                 member = getattr(self, attr_name)
                 if isinstance(member, np.ndarray):
                     # Ensure the slice doesn't exceed the bounds of rap_self.ib
@@ -453,7 +466,7 @@ class SavedDataSim:
             pass
         else:
             self.cTime = np.array(data.c_time_sim)
-            self.time = self.cTime  - time_run_start
+            self.time = self.cTime - time_run_start
             if time_end is None:
                 i_end = len(self.time)
             else:
@@ -495,14 +508,14 @@ class SavedDataSim:
             else:
                 setattr(self, name, getattr(x, name)[:i_end])
 
-    def truncate(self, i_end=None, key_attr='time'):
+    def truncate(self, i_end=None, key_attr="time"):
         """
         Iterates over members of a self, assigns values to numpy.ndarray members
         up to i_end.
         """
         for attr_name in dir(self):
             # Filter out built-in attributes and methods
-            if not attr_name.startswith('__') and not callable(getattr(self, attr_name)):
+            if not attr_name.startswith("__") and not callable(getattr(self, attr_name)):
                 member = getattr(self, attr_name)
                 if isinstance(member, np.ndarray):
                     # Ensure the slice doesn't exceed the bounds of rap_self.ib

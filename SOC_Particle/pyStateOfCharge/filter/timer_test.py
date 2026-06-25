@@ -1,4 +1,5 @@
 import time
+
 # from tkinter import *
 import tkinter as tk
 from tkinter import messagebox
@@ -27,16 +28,13 @@ minute.set("00")
 second.set("00")
 
 # Use of Entry class to take input from the user
-hourEntry = tk.Entry(root, width=3, font=("Arial", 18, ""),
-                     textvariable=hour)
+hourEntry = tk.Entry(root, width=3, font=("Arial", 18, ""), textvariable=hour)
 hourEntry.place(x=80, y=20)
 
-minuteEntry = tk.Entry(root, width=3, font=("Arial", 18, ""),
-                       textvariable=minute)
+minuteEntry = tk.Entry(root, width=3, font=("Arial", 18, ""), textvariable=minute)
 minuteEntry.place(x=130, y=20)
 
-secondEntry = tk.Entry(root, width=3, font=("Arial", 18, ""),
-                       textvariable=second)
+secondEntry = tk.Entry(root, width=3, font=("Arial", 18, ""), textvariable=second)
 secondEntry.place(x=180, y=20)
 
 
@@ -49,7 +47,6 @@ def submit():
     except IOError:
         print("Please input the right value")
     while temp > -1:
-
         # divmod(firstvalue = temp//60, secondvalue = temp%60)
         mins, secs = divmod(temp, 60)
 
@@ -84,8 +81,7 @@ def submit():
 
 
 # button widget
-btn = tk.Button(root, text='Set Time Countdown', bd='5',
-                command=submit)
+btn = tk.Button(root, text="Set Time Countdown", bd="5", command=submit)
 btn.place(x=70, y=120)
 
 # infinite loop which is required to

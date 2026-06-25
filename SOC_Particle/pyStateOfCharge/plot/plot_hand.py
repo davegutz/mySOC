@@ -21,5 +21,5 @@ def main():
     loop_plot(plots)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

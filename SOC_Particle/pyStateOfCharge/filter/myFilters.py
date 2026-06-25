@@ -13,9 +13,9 @@
 #
 # See http://www.fsf.org/licensing/licenses/lgpl.txt for full license text.
 
-__author__ = 'Dave Gutz <davegutz@alum.mit.edu>'
-__version__ = '$Revision: 1.1 $'
-__date__ = '$Date: 2022/06/10 13:15:02 $'
+__author__ = "Dave Gutz <davegutz@alum.mit.edu>"
+__version__ = "$Revision: 1.1 $"
+__date__ = "$Date: 2022/06/10 13:15:02 $"
 
 import numpy as np
 import os
@@ -24,12 +24,12 @@ from pathlib import Path, PurePosixPath
 
 class RateLimit:
     def __init__(self):
-        self.rate_min = 0.
-        self.rate_max = 0.
-        self.y = 0.
-        self.y_past = 0.
-        self.rate = 0.
-        self.dt = 0.
+        self.rate_min = 0.0
+        self.rate_max = 0.0
+        self.y = 0.0
+        self.y_past = 0.0
+        self.rate = 0.0
+        self.dt = 0.0
 
     def update(self, x, reset, dt, min_, max_):
         self.rate_min = min_
@@ -39,7 +39,7 @@ class RateLimit:
             self.y = x
             self.y_past = x
         else:
-            self.y = max(min(x, self.y_past + self.rate_max*self.dt), self.y_past + self.rate_min*self.dt)
+            self.y = max(min(x, self.y_past + self.rate_max * self.dt), self.y_past + self.rate_min * self.dt)
         self.rate = (self.y - self.y_past) / self.dt
         self.y_past = self.y
         return self.y
@@ -47,11 +47,11 @@ class RateLimit:
 
 class SlidingDeadband:
     def __init__(self, hdb):
-        self.z = 0.
+        self.z = 0.0
         self.hdb = hdb
 
     def update(self, in_):
-        self.z = max(min(self.z, in_+self.hdb), in_-self.hdb)
+        self.z = max(min(self.z, in_ + self.hdb), in_ - self.hdb)
         return self.z
 
     def update_res(self, in_, reset):
@@ -71,9 +71,9 @@ class DiscreteFilter:
         self.tau = tau
         self.min = min_
         self.max = max_
-        self.rate = 0.
+        self.rate = 0.0
 
-    def __str__(self, prefix=''):
+    def __str__(self, prefix=""):
         s = prefix + "DiscreteFilter:\n"
         s += "  dt       =    {:7.3f}  // Update time, s\n".format(self.dt)
         s += "  tau      =    {:7.3f}  // Natural frequency, r/s\n".format(self.tau)
@@ -84,7 +84,7 @@ class DiscreteFilter:
 
     def calculate_(self, reset):
         if reset:
-            self.rate = 0.
+            self.rate = 0.0
         return self.rate
 
     def calculate(self, in_, reset, dt):
@@ -116,9 +116,9 @@ class DiscreteFilter2:
         self.zeta = zeta
         self.min = min_
         self.max = max_
-        self.rate = 0.
+        self.rate = 0.0
 
-    def __str__(self, prefix=''):
+    def __str__(self, prefix=""):
         s = prefix + "DiscreteFilter2:\n"
         s += "  dt       =    {:7.3f}  // Update time, s\n".format(self.dt)
         s += "  omega_n  =    {:7.3f}  // Natural frequency, r/s\n".format(self.omega_n)
@@ -130,7 +130,7 @@ class DiscreteFilter2:
 
     def calculate_(self, in_, reset):
         if reset:
-            self.rate = 0.
+            self.rate = 0.0
         return self.rate
 
     def calculate(self, in_, reset, dt):
@@ -160,10 +160,10 @@ class DiscreteIntegrator:
         self.lim = False
         self.max = max_
         self.min = min_
-        self.state = 0.
-        self.rate_state = 0.
+        self.state = 0.0
+        self.rate_state = 0.0
 
-    def __str__(self, prefix=''):
+    def __str__(self, prefix=""):
         s = prefix + "DiscreteIntegrator:\n"
         s += "  dt       =    {:7.3f}  // Update time, s\n".format(self.dt)
         s += "  a        =    {:7.3f}  // Coefficient\n".format(self.a)
@@ -177,22 +177,22 @@ class DiscreteIntegrator:
 
     def new_state(self, new_state):
         self.state = max(min(new_state, self.max), self.min)
-        self.rate_state = 0.
+        self.rate_state = 0.0
 
     def calculate_(self, in_, reset, init_value):
         if reset:
             self.state = init_value
-            self.rate_state = 0.
+            self.rate_state = 0.0
         else:
-            self.state += (self.a*in_ + self.b*self.rate_state) * self.dt / self.c
+            self.state += (self.a * in_ + self.b * self.rate_state) * self.dt / self.c
         if self.state < self.min:
             self.state = self.min
             self.lim = True
-            self.rate_state = 0.
+            self.rate_state = 0.0
         elif self.state > self.max:
             self.state = self.max
             self.lim = True
-            self.rate_state = 0.
+            self.rate_state = 0.0
         else:
             self.lim = False
             self.rate_state = in_
@@ -202,17 +202,17 @@ class DiscreteIntegrator:
         self.dt = dt
         if reset:
             self.state = init_value
-            self.rate_state = 0.
+            self.rate_state = 0.0
         else:
-            self.state += (self.a*in_ + self.b*self.rate_state) * self.dt / self.c
+            self.state += (self.a * in_ + self.b * self.rate_state) * self.dt / self.c
         if self.state < self.min:
             self.state = self.min
             self.lim = True
-            self.rate_state = 0.
+            self.rate_state = 0.0
         elif self.state > self.max:
             self.state = self.max
             self.lim = True
-            self.rate_state = 0.
+            self.rate_state = 0.0
         else:
             self.lim = False
             self.rate_state = in_
@@ -224,17 +224,17 @@ class DiscreteIntegrator:
         self.min = min_
         if reset:
             self.state = init_value
-            self.rate_state = 0.
+            self.rate_state = 0.0
         else:
-            self.state += (self.a*in_ + self.b*self.rate_state) * self.dt / self.c
+            self.state += (self.a * in_ + self.b * self.rate_state) * self.dt / self.c
         if self.state < self.min:
             self.state = self.min
             self.lim = True
-            self.rate_state = 0.
+            self.rate_state = 0.0
         elif self.state > self.max:
             self.state = self.max
             self.lim = True
-            self.rate_state = 0.
+            self.rate_state = 0.0
         else:
             self.lim = False
             self.rate_state = in_
@@ -245,38 +245,39 @@ class AB2Integrator(DiscreteIntegrator):
     """AB2 Integrator"""
 
     def __init__(self, dt, min_, max_):
-        DiscreteIntegrator.__init__(self, dt, min_, max_, 3., -1., 2.)
+        DiscreteIntegrator.__init__(self, dt, min_, max_, 3.0, -1.0, 2.0)
 
-    def __str__(self, prefix=''):
+    def __str__(self, prefix=""):
         s = prefix + "AB2Integrator:\n"
         s += "\n  "
-        s += DiscreteIntegrator.__str__(self, prefix + 'AB2Integrator:')
+        s += DiscreteIntegrator.__str__(self, prefix + "AB2Integrator:")
         return s
 
 
 class InlineExpLag:
     """Inline exponential lag"""
+
     def __init__(self, tau):
         self.tau = tau
-        self.rstate = 0.
-        self.lstate = 0.
-        self.inp = 0.
-        self.rate = 0.
+        self.rstate = 0.0
+        self.lstate = 0.0
+        self.inp = 0.0
+        self.rate = 0.0
 
     def update(self, inp, T, reset=False):
         if reset:
             self.lstate = inp
             self.rstate = inp
         if T > 0:
-            eTt = np.exp(-T/self.tau)
-            meTt = 1. - eTt
-            a = self.tau/T - eTt/meTt
-            b = 1./meTt - self.tau/T
-            c = meTt/T
+            eTt = np.exp(-T / self.tau)
+            meTt = 1.0 - eTt
+            a = self.tau / T - eTt / meTt
+            b = 1.0 / meTt - self.tau / T
+            c = meTt / T
         # noinspection PyUnboundLocalVariable
-        self.rate = c * (a*self.rstate + b*inp - self.lstate)
+        self.rate = c * (a * self.rstate + b * inp - self.lstate)
         self.rstate = inp
-        self.lstate = self.lstate + T*self.rate
+        self.lstate = self.lstate + T * self.rate
         return self.lstate
 
 
@@ -284,18 +285,18 @@ class TustinIntegrator(DiscreteIntegrator):
     """Tustin Integrator"""
 
     def __init__(self, dt, min_, max_):
-        DiscreteIntegrator.__init__(self, dt, min_, max_, 1., 1., 2.)
+        DiscreteIntegrator.__init__(self, dt, min_, max_, 1.0, 1.0, 2.0)
 
-    def __str__(self, prefix=''):
+    def __str__(self, prefix=""):
         s = prefix + "TustinIntegrator:\n"
         s += "\n  "
-        s += DiscreteIntegrator.__str__(self, prefix + 'TustinIntegrator:')
+        s += DiscreteIntegrator.__str__(self, prefix + "TustinIntegrator:")
         return s
 
     def set(self, value=None):
         if value is not None:
             self.state = value
-            self.rate_state = 0.
+            self.rate_state = 0.0
 
 
 class General2Pole(DiscreteFilter2):
@@ -303,23 +304,23 @@ class General2Pole(DiscreteFilter2):
 
     def __init__(self, dt, omega_n, zeta, min_, max_):
         DiscreteFilter2.__init__(self, dt, omega_n, zeta, min_, max_)
-        self.a = 2. * self.zeta * self.omega_n
+        self.a = 2.0 * self.zeta * self.omega_n
         self.b = self.omega_n * self.omega_n
         self.assign_coeff(dt)
         self.AB2 = AB2Integrator(dt, min_, max_)
         self.Tustin = TustinIntegrator(dt, min_, max_)
-        self.in_ = 0.
-        self.out_ = 0.
-        self.accel = 0.
+        self.in_ = 0.0
+        self.out_ = 0.0
+        self.accel = 0.0
         self.saved = Saved2()
 
-    def __str__(self, prefix=''):
+    def __str__(self, prefix=""):
         s = prefix + "General2Pole:\n"
-        s += DiscreteFilter2.__str__(self, prefix + 'General2Pole:')
+        s += DiscreteFilter2.__str__(self, prefix + "General2Pole:")
         s += "\n  "
-        s += self.AB2.__str__(prefix + 'General2Pole:')
+        s += self.AB2.__str__(prefix + "General2Pole:")
         s += "\n  "
-        s += self.Tustin.__str__(prefix + 'General2Pole:')
+        s += self.Tustin.__str__(prefix + "General2Pole:")
         s += "  a        =    {:7.3f}  // Discrete coefficient\n".format(self.a)
         s += "  b        =    {:7.3f}  // Discrete coefficient\n".format(self.b)
         s += "  accel    =    {:7.3f}  // Input\n".format(self.accel)
@@ -343,7 +344,7 @@ class General2Pole(DiscreteFilter2):
 
     def rate_state(self, in_, reset):
         if reset:
-            self.accel = 0.
+            self.accel = 0.0
         else:
             self.accel = self.b * (in_ - self.Tustin.state) - self.a * self.AB2.state
         self.Tustin.calculate(self.AB2.calculate(self.accel, self.dt, reset, 0), self.dt, reset, in_)
@@ -366,22 +367,22 @@ class LagExp(DiscreteFilter):
 
     def __init__(self, dt, tau, min_, max_):
         DiscreteFilter.__init__(self, dt, tau, min_, max_)
-        self.a = 0.
-        self.b = 0.
-        self.c = 0.
-        self.rate = 0.
+        self.a = 0.0
+        self.b = 0.0
+        self.c = 0.0
+        self.rate = 0.0
         self.reset = True
-        self.rstate = 0.
-        self.state = 0.
+        self.rstate = 0.0
+        self.state = 0.0
         self.assign_coeff(tau)
         self.saved = Saved1()
-        self.in_ = 0.
-        self.out_ = 0.
+        self.in_ = 0.0
+        self.out_ = 0.0
 
-    def __str__(self, prefix=''):
+    def __str__(self, prefix=""):
         s = prefix + "LagExp:"
         s += "\n  "
-        s += DiscreteFilter.__str__(self, prefix + 'LagExp:')
+        s += DiscreteFilter.__str__(self, prefix + "LagExp:")
         s += "  a        =    {:7.3f}  // Discrete coefficient\n".format(self.a)
         s += "  b        =    {:7.3f}  // Discrete coefficient\n".format(self.b)
         s += "  c        =    {:7.3f}  // Discrete coefficient\n".format(self.c)
@@ -398,7 +399,7 @@ class LagExp(DiscreteFilter):
         self.tau = _tau
         if self.dt > 0:
             eTt = np.exp(-self.dt / self.tau)
-            meTt = 1. - eTt
+            meTt = 1.0 - eTt
             self.a = self.tau / self.dt - eTt / meTt
             self.b = 1.0 / meTt - self.tau / self.dt
             self.c = meTt / self.dt
@@ -426,7 +427,7 @@ class LagExp(DiscreteFilter):
         self.out_ = self.state
         return self.out_
 
-    def calculate_seeded(self, in_, _out_init, reset, dt, rmax=None, rmin=None, text=''):
+    def calculate_seeded(self, in_, _out_init, reset, dt, rmax=None, rmin=None, text=""):
         self.in_ = in_
         self.reset = reset
         if self.reset:
@@ -434,10 +435,15 @@ class LagExp(DiscreteFilter):
             self.rstate = self.in_
         self.calc_all(self.in_, dt, rmax, rmin)
         self.out_ = self.state
-        if False and self.reset and text == 'Amp':
-            print(text + " seed    r{:3d}".format(self.reset), "                                             ib       {:7.5f}".format(in_),
-                  "   ib_dyn    {:7.5f}".format(self.out_),
-                  "       ib_init {:7.5f}".format(in_), "    ib_dyn_init {:7.5f}".format(_out_init), "dt {:5.3f}".format(dt))
+        if False and self.reset and text == "Amp":
+            print(
+                text + " seed    r{:3d}".format(self.reset),
+                "                                             ib       {:7.5f}".format(in_),
+                "   ib_dyn    {:7.5f}".format(self.out_),
+                "       ib_init {:7.5f}".format(in_),
+                "    ib_dyn_init {:7.5f}".format(_out_init),
+                "dt {:5.3f}".format(dt),
+            )
         return self.out_
 
     def calculate_tau(self, in_, reset, dt, tau_):
@@ -451,7 +457,7 @@ class LagExp(DiscreteFilter):
         self.out_ = self.state
         return self.out_
 
-    def calculate_tau_seeded(self, in_, _out_init, reset, dt, tau_, rmax=None, rmin=None, text=''):
+    def calculate_tau_seeded(self, in_, _out_init, reset, dt, tau_, rmax=None, rmin=None, text=""):
         self.in_ = in_
         self.reset = reset
         self.tau = tau_
@@ -460,10 +466,15 @@ class LagExp(DiscreteFilter):
             self.rstate = self.in_
         self.calc_all(self.in_, dt, rmax, rmin)
         self.out_ = self.state
-        if False and self.reset and text == 'Amp':
-            print(text + " seed    r{:3d}".format(self.reset), "                                             ib       {:7.5f}".format(in_),
-                  "   ib_dyn    {:7.5f}".format(self.out_),
-                  "       ib_init {:7.5f}".format(in_), "    ib_dyn_init {:7.5f}".format(_out_init), "dt {:5.3f}".format(dt))
+        if False and self.reset and text == "Amp":
+            print(
+                text + " seed    r{:3d}".format(self.reset),
+                "                                             ib       {:7.5f}".format(in_),
+                "   ib_dyn    {:7.5f}".format(self.out_),
+                "       ib_init {:7.5f}".format(in_),
+                "    ib_dyn_init {:7.5f}".format(_out_init),
+                "dt {:5.3f}".format(dt),
+            )
         return self.out_
 
     def save(self, time):
@@ -480,21 +491,21 @@ class RateLagExp(DiscreteFilter):
 
     def __init__(self, dt, tau, min_, max_):
         DiscreteFilter.__init__(self, dt, tau, min_, max_)
-        self.a = 0.
-        self.b = 0.
-        self.c = 0.
-        self.rate = 0.
-        self.rstate = 0.
-        self.state = 0.
+        self.a = 0.0
+        self.b = 0.0
+        self.c = 0.0
+        self.rate = 0.0
+        self.rstate = 0.0
+        self.state = 0.0
         self.assign_coeff(tau)
         self.saved = Saved1()
-        self.in_ = 0.
-        self.out_ = 0.
+        self.in_ = 0.0
+        self.out_ = 0.0
 
-    def __str__(self, prefix=''):
+    def __str__(self, prefix=""):
         s = prefix + "LagExp:"
         s += "\n  "
-        s += DiscreteFilter.__str__(self, prefix + 'LagExp:')
+        s += DiscreteFilter.__str__(self, prefix + "LagExp:")
         s += "  a        =    {:7.3f}  // Discrete coefficient\n".format(self.a)
         s += "  b        =    {:7.3f}  // Discrete coefficient\n".format(self.b)
         s += "  c        =    {:7.3f}  // Discrete coefficient\n".format(self.c)
@@ -511,7 +522,7 @@ class RateLagExp(DiscreteFilter):
         self.tau = _tau
         if self.dt > 0:
             eTt = np.exp(-self.dt / self.tau)
-            meTt = 1. - eTt
+            meTt = 1.0 - eTt
             self.a = self.tau / self.dt - eTt / meTt
             self.b = 1.0 / meTt - self.tau / self.dt
             self.c = meTt / self.dt
@@ -567,20 +578,20 @@ class LagTustin(DiscreteFilter):
 
     def __init__(self, dt, tau, min_, max_):
         DiscreteFilter.__init__(self, dt, tau, min_, max_)
-        self.a = 0.
-        self.b = 0.
-        self.rate = 0.
-        self.state = 0.
+        self.a = 0.0
+        self.b = 0.0
+        self.rate = 0.0
+        self.state = 0.0
         self.assign_coeff(tau)
         self.saved = Saved1()
-        self.in_ = 0.
-        self.out_ = 0.
+        self.in_ = 0.0
+        self.out_ = 0.0
         self.reset = True
 
-    def __str__(self, prefix=''):
+    def __str__(self, prefix=""):
         s = prefix + "LagTustin:"
         s += "\n  "
-        s += DiscreteFilter.__str__(self, prefix + 'LagTustin:')
+        s += DiscreteFilter.__str__(self, prefix + "LagTustin:")
         s += "  a        =    {:7.3f}  // Discrete coefficient\n".format(self.a)
         s += "  b        =    {:7.3f}  // Discrete coefficient\n".format(self.b)
         s += "  in_      =    {:7.3f}  // Input\n".format(self.in_)
@@ -613,7 +624,7 @@ class LagTustin(DiscreteFilter):
         self.out_ = self.state
         return self.out_
 
-    def calculate_seeded(self, in_, _out_init, reset, dt, text=''):
+    def calculate_seeded(self, in_, _out_init, reset, dt, text=""):
         self.in_ = in_
         self.reset = reset
         if self.reset:
@@ -623,7 +634,8 @@ class LagTustin(DiscreteFilter):
         # if self.reset:
         #     print(text, " t seed    r{:3d}".format(self.reset), " in       {:7.5f}".format(in_),
         #           "   out    {:7.5f}".format(self.out_), "   rate    {:7.5f}".format(self.rate),
-        #           "       in_init {:7.5f}".format(in_), "    out_init {:7.5f}".format(_out_init), "dt {:5.3f}".format(dt))
+        #           "       in_init {:7.5f}".format(in_), "    out_init {:7.5f}".format(_out_init), "dt
+        # {:5.3f}".format(dt))
         return self.out_
 
     def save(self, time):
@@ -658,50 +670,47 @@ class Saved2:
         self.AB2_rate_state = []
         self.Tustin_state = []
         self.Tustin_rate_state = []
-        
-        
-if __name__ == '__main__':
+
+
+if __name__ == "__main__":
     import sys
     import doctest
     from datetime import datetime
 
-    doctest.testmod(sys.modules['__main__'])
+    doctest.testmod(sys.modules["__main__"])
     import matplotlib.pyplot as plt
 
-
-    def overall(filter_1=Saved1(), filter_2=Saved2(), filename='', fig_files=None, plot_title=None, fig_list=None):
+    def overall(filter_1=Saved1(), filter_2=Saved2(), filename="", fig_files=None, plot_title=None, fig_list=None):
         if fig_files is None:
             fig_files = []
 
         fig_list.append(plt.figure())
         plt.subplot(211)
         plt.title(plot_title)
-        plt.plot(filter_1.time, filter_1.in_, color='blue', label='in 1')
-        plt.plot(filter_1.time, filter_1.out_, color='green', label='out 1')
+        plt.plot(filter_1.time, filter_1.in_, color="blue", label="in 1")
+        plt.plot(filter_1.time, filter_1.out_, color="green", label="out 1")
         plt.legend(loc=3)
         plt.subplot(212)
-        plt.plot(filter_2.time, filter_2.in_, color='blue', label='in 2')
-        plt.plot(filter_2.time, filter_2.out_, color='green', label='out 2')
+        plt.plot(filter_2.time, filter_2.in_, color="blue", label="in 2")
+        plt.plot(filter_2.time, filter_2.out_, color="green", label="out 2")
         plt.legend(loc=3)
         fig_file_name = filename + "_" + str(len(fig_list)) + ".png"
         fig_files.append(fig_file_name)
         if S.save_plots and not S.terse:
-
             plt.savefig(fig_file_name, format="png")
 
         return fig_list, fig_files
 
-
     class Pulsar:
         def __init__(self):
-            self.time_last_hold = 0.
-            self.time_last_rest = -100000.
+            self.time_last_hold = 0.0
+            self.time_last_rest = -100000.0
             self.holding = False
             self.resting = True
             self.index = -1
-            self.amp = [1.,     0.,     -1.,    1.]
-            self.dur = [20.,    0.,     40.,    40.]
-            self.rst = [20.,    20.,    40.,    40.]
+            self.amp = [1.0, 0.0, -1.0, 1.0]
+            self.dur = [20.0, 0.0, 40.0, 40.0]
+            self.rst = [20.0, 20.0, 40.0, 40.0]
             self.pulse_value = self.amp[0]
             self.end_time = self.time_end()
 
@@ -718,7 +727,7 @@ if __name__ == '__main__':
                 self.resting = True
                 self.holding = False
                 self.time_last_rest = time
-                self.pulse_value = 0.
+                self.pulse_value = 0.0
             return self.pulse_value
 
         def time_end(self):
@@ -729,7 +738,6 @@ if __name__ == '__main__':
                 time += rs
             return time
 
-
     def main():
         # Setup to run the transients
         dt = 2
@@ -737,10 +745,10 @@ if __name__ == '__main__':
         time_end = pull.time_end()
         # time_end = 50.
 
-        filter_1 = LagTustin(dt, 5., -10., 10.)
+        filter_1 = LagTustin(dt, 5.0, -10.0, 10.0)
         # print(filter_1)
         # filter_2 = General2Pole(dt, 1., .707, -10., 10.)
-        filter_2 = General2Pole(dt, 0.1, 0.9, -10., 10.)
+        filter_2 = General2Pole(dt, 0.1, 0.9, -10.0, 10.0)
         # print(filter_2)
 
         # Executive tasks
@@ -749,7 +757,7 @@ if __name__ == '__main__':
         # time loop
         for i in range(len(t)):
             in_ = pull.calculate(t[i])
-            reset = (t[i] <= 1)
+            reset = t[i] <= 1
 
             # Models
             filter_1.calculate(in_, reset, dt)
@@ -770,11 +778,10 @@ if __name__ == '__main__':
         fig_files = []
         date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
         filename = PurePosixPath(__file__).stem
-        plot_title = filename + '   ' + date_time
+        plot_title = filename + "   " + date_time
 
         overall(filter_1.saved, filter_2.saved, filename, fig_files, plot_title=plot_title, fig_list=fig_list)
         plt.show()
 
-
-    if __name__ == '__main__':
+    if __name__ == "__main__":
         main()

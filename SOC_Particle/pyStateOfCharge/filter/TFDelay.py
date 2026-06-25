@@ -13,9 +13,9 @@
 #
 # See http://www.fsf.org/licensing/licenses/lgpl.txt for full license text.
 
-__author__ = 'Dave Gutz <davegutz@alum.mit.edu>'
-__version__ = '$Revision: 1.1 $'
-__date__ = '$Date: 2022/06/02 13:15:02 $'
+__author__ = "Dave Gutz <davegutz@alum.mit.edu>"
+__version__ = "$Revision: 1.1 $"
+__date__ = "$Date: 2022/06/02 13:15:02 $"
 
 import numpy as np
 import os
@@ -25,13 +25,13 @@ from pathlib import Path, PurePosixPath
 class TFDelay:
     # Use variable resistor to create tfdteresis from an RC circuit
 
-    def __init__(self, in_=False, t_true=0., t_false=0., dt=0.1):
+    def __init__(self, in_=False, t_true=0.0, t_false=0.0, dt=0.1):
         # Defaults
         self.timer = 0
         self.t_true = t_true
         self.t_false = t_false
-        self.nt = int(max(round(self.t_true/dt)+1, 0))
-        self.nf = int(max(round(self.t_false/dt)+1, 0))
+        self.nt = int(max(round(self.t_true / dt) + 1, 0))
+        self.nf = int(max(round(self.t_false / dt) + 1, 0))
         self.dt = dt
         self.in_ = in_
         self.out = self.in_
@@ -45,7 +45,7 @@ class TFDelay:
             self.time = -self.nt
         self.saved = Saved()
 
-    def __str__(self, prefix=''):
+    def __str__(self, prefix=""):
         s = prefix + "TFDelay:\n"
         s += "  dt  =  {:5.1f}  // s\n".format(self.dt)
         s += "  t_t  = {:5.1f}  // s\n".format(self.t_true)
@@ -87,16 +87,16 @@ class TFDelay:
         return out
 
     def calculate3(self, in_, t_true, t_false):
-        self.nt = int(max(round(t_true / self.dt)+1, 0))
-        self.nf = int(max(round(t_false / self.dt)+1, 0))
+        self.nt = int(max(round(t_true / self.dt) + 1, 0))
+        self.nf = int(max(round(t_false / self.dt) + 1, 0))
         return self.calculate1(in_)
 
     def calculate4t(self, in_, t_true, t_false, dt):
         self.dt = max(dt, 1e-9)
         self.t_true = t_true
         self.t_false = t_false
-        self.nt = int(max(round(self.t_true / self.dt)+1, 0))
-        self.nf = int(max(round(self.t_false / self.dt)+1, 0))
+        self.nt = int(max(round(self.t_true / self.dt) + 1, 0))
+        self.nf = int(max(round(self.t_false / self.dt) + 1, 0))
         return self.calculate1(in_)
 
     def calculate4r(self, in_, t_true, t_false, reset):
@@ -127,7 +127,7 @@ class TFDelay:
         self.saved.out.append(self.out)
 
     def state(self):
-        return self.timer > 0.
+        return self.timer > 0.0
 
 
 class Saved:
@@ -142,47 +142,44 @@ class Saved:
         self.dt = []
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import sys
     import doctest
     from datetime import datetime
 
-    doctest.testmod(sys.modules['__main__'])
+    doctest.testmod(sys.modules["__main__"])
     import matplotlib.pyplot as plt
 
-
-    def overall(tfd=TFDelay().saved, filename='', fig_files=None, plot_title=None, fig_list=None):
+    def overall(tfd=TFDelay().saved, filename="", fig_files=None, plot_title=None, fig_list=None):
         if fig_files is None:
             fig_files = []
 
         fig_list.append(plt.figure())
         plt.subplot(211)
         plt.title(plot_title)
-        plt.plot(tfd.time, tfd.timer, color='red', linestyle='-', label='timer')
-        plt.plot(tfd.time, tfd.nf, color='blue', linestyle='--', label='nf')
-        plt.plot(tfd.time, tfd.nt, color='green', linestyle='-.', label='nt')
+        plt.plot(tfd.time, tfd.timer, color="red", linestyle="-", label="timer")
+        plt.plot(tfd.time, tfd.nf, color="blue", linestyle="--", label="nf")
+        plt.plot(tfd.time, tfd.nt, color="green", linestyle="-.", label="nt")
         plt.legend(loc=3)
         plt.subplot(212)
-        plt.plot(tfd.time, tfd.in_, color='red', linestyle='-', label='in')
-        plt.plot(tfd.time, tfd.out, color='blue', linestyle='--', label='out')
+        plt.plot(tfd.time, tfd.in_, color="red", linestyle="-", label="in")
+        plt.plot(tfd.time, tfd.out, color="blue", linestyle="--", label="out")
         plt.legend(loc=3)
         fig_file_name = filename + "_" + str(len(fig_list)) + ".png"
         fig_files.append(fig_file_name)
         if S.save_plots and not S.terse:
-
             plt.savefig(fig_file_name, format="png")
 
         return fig_list, fig_files
 
-
     def main():
         # Setup to run the transients
-        dt = 10.
-        ttg = 800.
-        tfg = 100.
-        tt = 8.
-        tf = 1.
-        time_end = 1500.
+        dt = 10.0
+        ttg = 800.0
+        tfg = 100.0
+        tt = 8.0
+        tf = 1.0
+        time_end = 1500.0
 
         tfd_long = TFDelay(in_=False, t_true=ttg, t_false=tfg, dt=dt)
         tfd_short = TFDelay(in_=False, t_true=tt, t_false=tf, dt=dt)
@@ -192,8 +189,8 @@ if __name__ == '__main__':
 
         # time loop
         for i in range(len(t)):
-            init_tfd = (t[i] < 100)
-            if 100. <= t[i] < 1000.:
+            init_tfd = t[i] < 100
+            if 100.0 <= t[i] < 1000.0:
                 inp = True
             else:
                 inp = False
@@ -206,25 +203,26 @@ if __name__ == '__main__':
             tfd_long.save(t[i])
             tfd_short.save(t[i])
 
-        # Data
-            if t[i] == 900.:
-                print('long:  ', str(tfd_long))
-                print('short:  ', str(tfd_short))
+            # Data
+            if t[i] == 900.0:
+                print("long:  ", str(tfd_long))
+                print("short:  ", str(tfd_short))
 
         # Plots
         fig_list = []
         fig_files = []
         date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
         filename = PurePosixPath(__file__).stem
-        plot_title = filename + '   ' + date_time
+        plot_title = filename + "   " + date_time
 
-        fig_list, fig_files = overall(tfd_long.saved, filename, fig_files, plot_title='long '+plot_title, fig_list=fig_list)
-        overall(tfd_short.saved, filename, fig_files, plot_title='short '+plot_title, fig_list=fig_list)
+        fig_list, fig_files = overall(
+            tfd_long.saved, filename, fig_files, plot_title="long " + plot_title, fig_list=fig_list
+        )
+        overall(tfd_short.saved, filename, fig_files, plot_title="short " + plot_title, fig_list=fig_list)
 
         # unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', save_pdf_path='figures')
         # cleanup_fig_files(fig_files)
         plt.show()
 
-
-    if __name__ == '__main__':
+    if __name__ == "__main__":
         main()

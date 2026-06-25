@@ -38,7 +38,7 @@ class KF1x1VarDt:
         self.dt = dt
         self.Fx = np.array([[1.0, self.dt], [0.0, 1.0]])  # State transition
         self.G = None
-        self.Bu = 0.  # Control transition
+        self.Bu = 0.0  # Control transition
         # Process noise covariance matrix (assuming noise in acceleration)
         self.Q_std = proc_noise_std
         self.Q = np.array([[0.0, 0.0], [0.0, 0.0]])
@@ -46,23 +46,23 @@ class KF1x1VarDt:
         self.R_stdsq = self.R_std * self.R_std
         self.P = np.array([[1.0, 0.0], [0.0, 1.0]]) * 100  # Uncertainty covariance.  Large initial
         self.H = np.array([[1.0, 0.0]])  # Jacobian of h(x).  Measurement matrix (Only measure position)
-        self.S = 0.  # System uncertainty
-        self.K = 0.  # Kalman gain
-        self.hx = 0.  # Output of observation function h(x)
-        self.u_kf = 0.  # Control input
+        self.S = 0.0  # System uncertainty
+        self.K = 0.0  # Kalman gain
+        self.hx = 0.0  # Output of observation function h(x)
+        self.u_kf = 0.0  # Control input
         self.x = np.array([[initial_position], [initial_velocity]])  # Kalman state vector [position, velocity]
-        self.y_kf = 0.  # Residual z-hx
-        self.y_kf_f = 0.  # Residual filtered z-hx
-        self.z_kf = 0.  # Observation of state x
+        self.y_kf = 0.0  # Residual z-hx
+        self.y_kf_f = 0.0  # Residual filtered z-hx
+        self.z_kf = 0.0  # Observation of state x
         self.x_prior = self.x
         self.P_prior = self.P
         self.x_post = self.x
         self.P_post = self.P
-        self.tb_f_for_hx = 25.
-        self.x_for_hx = 1.
+        self.tb_f_for_hx = 25.0
+        self.x_for_hx = 1.0
         self.reset = False
 
-    def __str__(self, prefix=''):
+    def __str__(self, prefix=""):
         """Returns representation of the object"""
         s = prefix + "KF1x1VarDt:\n"
         s += "  Inputs:\n"
@@ -108,7 +108,7 @@ class KF1x1VarDt:
         self.Fx = np.array([[1.0, self.dt], [0.0, 1.0]])
 
         # Process noise covariance matrix (assuming noise affects acceleration)
-        self.G = np.array([[0.5 * self.dt ** 2], [dt]])
+        self.G = np.array([[0.5 * self.dt**2], [dt]])
         self.Q = self.G @ self.G.T * self.Q_std**2
 
         # Predict state and covariance
@@ -165,19 +165,18 @@ class KF1x1VarDt:
 
     def kf_init(self, in_=None):
         self.u_kf = in_
-        self.Fx = [ [1., self.dt], [0., 1.] ]
-        self.H = [1., 0.]
+        self.Fx = [[1.0, self.dt], [0.0, 1.0]]
+        self.H = [1.0, 0.0]
         self.S = self.R_stdsq
-        self.K = np.array([ [0.], [0.] ])
-        self.x = np.array([ [self.u_kf], [0.] ])
-        self.x_prior = np.array([ [self.u_kf], [0.] ])
+        self.K = np.array([[0.0], [0.0]])
+        self.x = np.array([[self.u_kf], [0.0]])
+        self.x_prior = np.array([[self.u_kf], [0.0]])
         for j in range(self.ROWS):
             for i in range(self.COLS):
-                self.P[i][j] = 0.
-                self.P_prior[i][j] = 0.
-                self.Q[i][j] = 0.
-        self.y_kf = 0.
-
+                self.P[i][j] = 0.0
+                self.P_prior[i][j] = 0.0
+                self.Q[i][j] = 0.0
+        self.y_kf = 0.0
 
     def get_state(self):
         """
@@ -217,8 +216,8 @@ class KF1x1VarDtxx:
         self.ROWS = 2
         self.dt = dt
         self.Fx = np.array([[1.0, self.dt], [0.0, 1.0]])  # State transition
-        self.G  = None
-        self.Bu = 0.  # Control transition
+        self.G = None
+        self.Bu = 0.0  # Control transition
         # Process noise covariance matrix (assuming noise in acceleration)
         self.Q_std = proc_noise_std
         self.Q_stdsq = proc_noise_std * proc_noise_std
@@ -229,17 +228,17 @@ class KF1x1VarDtxx:
         self.P_prior = self.P.copy()
         self.Q = np.array([[0.0, 0.0], [0.0, 0.0]])
         self.H = np.array([[1.0, 0.0]])  # Jacobian of h(x).  Measurement matrix (Only measure position)
-        self.S = 0.  # System uncertainty
-        self.K = np.array([[0.], [0.]])  # Kalman gain
-        self.hx = 0.  # Output of observation function h(x)
-        self.u_kf = 0.  # Control input
+        self.S = 0.0  # System uncertainty
+        self.K = np.array([[0.0], [0.0]])  # Kalman gain
+        self.hx = 0.0  # Output of observation function h(x)
+        self.u_kf = 0.0  # Control input
         self.x = np.array([initial_position, initial_velocity])  # Kalman state vector [position, velocity]
         self.x_prior = self.x.copy()
-        self.y_kf = 0.  # Residual z-hx
-        self.x = np.array([[0.], [0.]])
+        self.y_kf = 0.0  # Residual z-hx
+        self.x = np.array([[0.0], [0.0]])
         self.reset = bool(False)
 
-    def __str__(self, prefix=''):
+    def __str__(self, prefix=""):
         """Returns representation of the object"""
         s = prefix + "KF1x1VarDt:\n"
         s += "  Inputs:\n"
@@ -270,18 +269,18 @@ class KF1x1VarDtxx:
 
     def kf_init(self, in_=None):
         self.u_kf = in_
-        self.Fx = [ [1., self.dt], [0., 1.] ]
-        self.H = [1., 0.]
+        self.Fx = [[1.0, self.dt], [0.0, 1.0]]
+        self.H = [1.0, 0.0]
         self.S = self.R_stdsq
-        self.K = np.array([ [0.], [0.] ])
-        self.x = np.array([ [self.u_kf], [0.] ])
-        self.x_prior = np.array([ [self.u_kf], [0.] ])
+        self.K = np.array([[0.0], [0.0]])
+        self.x = np.array([[self.u_kf], [0.0]])
+        self.x_prior = np.array([[self.u_kf], [0.0]])
         for j in range(self.ROWS):
             for i in range(self.COLS):
-                self.P[i][j] = 0.
-                self.P_prior[i][j] = 0.
-                self.Q[i][j] = 0.
-        self.y_kf = 0.
+                self.P[i][j] = 0.0
+                self.P_prior[i][j] = 0.0
+                self.Q[i][j] = 0.0
+        self.y_kf = 0.0
 
     def predict(self, dt):
         """
@@ -301,14 +300,19 @@ class KF1x1VarDtxx:
         Fx = self.Fx.copy()
 
         # Process noise covariance matrix (assuming noise affects acceleration)
-        self.G = np.array([[0.5 * self.dt ** 2], [dt]])
+        self.G = np.array([[0.5 * self.dt**2], [dt]])
         # self.Q = self.G @ G.T * self.Q_std**2
-        self.Q = np.array([ [dt*dt/4, dt/2], [dt/2, 1]])*dt*dt*self.Q_stdsq
+        self.Q = np.array([[dt * dt / 4, dt / 2], [dt / 2, 1]]) * dt * dt * self.Q_stdsq
 
         # Predict state and covariance
         # self.x = self.Fx @ self.x
         x = self.x.copy()
-        self.x = np.array( [ [float(Fx[0, 0])*float(x[0, 0]) + float(Fx[0, 1])*float(x[1, 0])], [float(Fx[1, 0])*float(x[0, 0]) + float(Fx[1, 1])*float(x[1, 0])] ])
+        self.x = np.array(
+            [
+                [float(Fx[0, 0]) * float(x[0, 0]) + float(Fx[0, 1]) * float(x[1, 0])],
+                [float(Fx[1, 0]) * float(x[0, 0]) + float(Fx[1, 1]) * float(x[1, 0])],
+            ]
+        )
         self.x_prior = self.x.copy()
         p00 = self.P[0, 0]
         p01 = self.P[0, 1]
@@ -319,8 +323,14 @@ class KF1x1VarDtxx:
         q10 = self.Q[1, 0]
         q11 = self.Q[1, 1]
         # self.P = self.Fx @ self.P @ self.Fx.T + self.Q
-        self.P = np.array(( [ [p00 + p01*dt + p10*dt + p11*dt*dt + q00,  p01 + p11*dt + q01],
-                              [p10 + p11*dt + q10,                       p11 + q11]          ] ))
+        self.P = np.array(
+            (
+                [
+                    [p00 + p01 * dt + p10 * dt + p11 * dt * dt + q00, p01 + p11 * dt + q01],
+                    [p10 + p11 * dt + q10, p11 + q11],
+                ]
+            )
+        )
         self.P_prior = self.P.copy()
 
     def update(self, measurement):
@@ -351,21 +361,23 @@ class KF1x1VarDtxx:
         p11 = self.P[1, 1]
         # self.S = self.H @ self.P @ self.H.T + self.R_stdsq
         self.S = p00 + self.R_stdsq
-        PHT = np.array([ [p00], [p10] ])
+        PHT = np.array([[p00], [p10]])
         # self.K = self.P @ self.H.T @ np.linalg.inv(self.S)
-        self.K = np.array([ [p00], [p10] ]) * 1./(p00 + self.R_stdsq)
-        k0 = float(self.K[0,0])
-        k1 = float(self.K[1,0])
+        self.K = np.array([[p00], [p10]]) * 1.0 / (p00 + self.R_stdsq)
+        k0 = float(self.K[0, 0])
+        k1 = float(self.K[1, 0])
 
         # Update state estimate
         # self.y_kf = measurement - (self.H @ self.x)  # Innovation
-        self.y_kf = measurement - float(self.x[0,0])
+        self.y_kf = measurement - float(self.x[0, 0])
         # self.x = self.x + (self.K @ self.y_kf)
-        self.x = np.array( [ [float(self.x[0,0])+self.y_kf*self.K[0,0]], [float(self.x[1,0])+self.y_kf*self.K[1,0]] ] )
+        self.x = np.array(
+            [[float(self.x[0, 0]) + self.y_kf * self.K[0, 0]], [float(self.x[1, 0]) + self.y_kf * self.K[1, 0]]]
+        )
 
         # Update covariance matrix
         # self.P = (np.eye(self.x.shape[0]) - self.K @ self.H) @ self.P
-        self.P = np.array( [[(1-k0)*p00, (1-k0)*p01], [-k1*p00+p10, -k1*p01+p11]])
+        self.P = np.array([[(1 - k0) * p00, (1 - k0) * p01], [-k1 * p00 + p10, -k1 * p01 + p11]])
 
         return float(self.x[0][0])
 

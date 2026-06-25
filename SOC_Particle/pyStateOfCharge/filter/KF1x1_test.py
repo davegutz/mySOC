@@ -22,30 +22,32 @@ from filter.myFilters import General2Pole, LagExp
 from filter.KF1x1 import KF1x1VarDt
 from itertools import pairwise
 
+
 def plot_1(plt=None, mr=None, mv=None, title=None):
     plt.figure()
-    print("plot_11:", end='')
+    print("plot_11:", end="")
     plt.subplot(211)
     plt.title(title)
-    plq(plt, mr, 'time', mr, 'VoVcn', color='blue', linestyle='-', label='VoVcn' + run_str)
-    plq(plt, mr, 'time', mr, 'VoVcn_kf', color='red', linestyle='-', label='VoVcn_kf' + run_str)
-    plq(plt, mr, 'time', mr, 'VoVcn_filt', color='black', linestyle='-', label='VoVcn_filt' + run_str)
-    plq(plt, mr, 'time', mr, 'VoVcn_lag', color='cyan', linestyle='-.', label='VoVcn_lag' + run_str)
+    plq(plt, mr, "time", mr, "VoVcn", color="blue", linestyle="-", label="VoVcn" + run_str)
+    plq(plt, mr, "time", mr, "VoVcn_kf", color="red", linestyle="-", label="VoVcn_kf" + run_str)
+    plq(plt, mr, "time", mr, "VoVcn_filt", color="black", linestyle="-", label="VoVcn_filt" + run_str)
+    plq(plt, mr, "time", mr, "VoVcn_lag", color="cyan", linestyle="-.", label="VoVcn_lag" + run_str)
     top_limit, bottom_limit = plt.ylim()
     plt.legend(loc=1)
     plt.subplot(212)
-    plq(plt, mr, 'time', mr, 'VoVcn_kf', color='red', linestyle='-', label='VoVcn_kf' + run_str)
-    plq(plt, mr, 'time', mr, 'VoVcn_filt', color='black', linestyle='-', label='VoVcn_filt' + run_str)
+    plq(plt, mr, "time", mr, "VoVcn_kf", color="red", linestyle="-", label="VoVcn_kf" + run_str)
+    plq(plt, mr, "time", mr, "VoVcn_filt", color="black", linestyle="-", label="VoVcn_filt" + run_str)
     plt.legend(loc=1)
     plt.ylim(top_limit, bottom_limit)
     return plt
+
 
 def plot_P(plt=None, mr=None, mv=None, title=None, Qstd=None, Rstd=None, data_lag=None):
     steady_only = False
     mv.dt = mr.dt
 
     # Get initial steady offset so can search for start of sweep.  Assume initial 50 seconds are steady.
-    vec_initial = np.where( (mr.time <= 50.) & (mr.time >= 10.) )
+    vec_initial = np.where((mr.time <= 50.0) & (mr.time >= 10.0))
     mr.VoVcn_avg = np.average(mr.VoVcn[vec_initial])
     mr.VoVcn = mr.VoVcn - mr.VoVcn_avg
     mr.VoVcn_kf = mr.VoVcn_kf - mr.VoVcn_avg
@@ -54,9 +56,9 @@ def plot_P(plt=None, mr=None, mv=None, title=None, Qstd=None, Rstd=None, data_la
     std_dev_lag = np.std(mr.VoVcn_lag[vec_initial])
 
     try:
-        index_start_sweep_lag = np.array(np.where( mr.VoVcn_lag < -10.*std_dev_lag))[0, 0]
+        index_start_sweep_lag = np.array(np.where(mr.VoVcn_lag < -10.0 * std_dev_lag))[0, 0]
         time_start_sweep_lag = mr.time[index_start_sweep_lag]
-        index_end_sweep_lag = np.where(mr.time < time_start_sweep_lag + 650.)[0][-1]
+        index_end_sweep_lag = np.where(mr.time < time_start_sweep_lag + 650.0)[0][-1]
         time_end_sweep_lag = mr.time[index_end_sweep_lag]
         print(f"{steady_level_lag=} {std_dev_lag=}")
         print(f"{index_start_sweep_lag=} {time_start_sweep_lag=}")
@@ -67,8 +69,9 @@ def plot_P(plt=None, mr=None, mv=None, title=None, Qstd=None, Rstd=None, data_la
     # Recenter mr.VoVcn for freq analysis:  assume at least 179 sec fr
     # vec_fr = np.arange(index_start_sweep_lag, index_end_sweep_lag)
     if not steady_only:
-        vec_fr_for_avg = np.arange(index_start_sweep_lag + int(0.5*(index_end_sweep_lag - index_start_sweep_lag)),
-                                   index_end_sweep_lag)
+        vec_fr_for_avg = np.arange(
+            index_start_sweep_lag + int(0.5 * (index_end_sweep_lag - index_start_sweep_lag)), index_end_sweep_lag
+        )
     else:
         vec_fr_for_avg = vec_initial
 
@@ -87,29 +90,33 @@ def plot_P(plt=None, mr=None, mv=None, title=None, Qstd=None, Rstd=None, data_la
     mv.VoVcn_kf_avg = np.full((len(mv.VoVcn_kf),), mv.VoVcn_kf_avg)
 
     plt.figure()
-    print("plot_12:", end='')
+    print("plot_12:", end="")
     plt.subplot(211)
-    plt.title(title+'1')
-    plq(plt, mr, 'time', mr, 'VoVcn', color='blue', linestyle='-', label='VoVcn burst_data centered')
-    plq(plt, mr, 'time', mr, 'VoVcn_kf', color='red', linestyle='-', label='VoVcn_kf burst_data centered')
-    plq(plt, mr, 'time', mr, 'VoVcn_filt', color='black', linestyle='-', label='VoVcn_filt burst_data centered')
-    plq(plt, mr, 'time', mr, 'VoVcn_lag', color='cyan', linestyle='--', label='VoVcn_lag burst_data')
-    plq(plt, mv, 'time', mv, 'VoVcn_kf', color='pink', linestyle='-.', label='VoVcn_kf calc')
-    plq(plt, mv, 'time', mv, 'VoVcn_kf_avg', color='orange', linestyle='-', label='VoVcn_kf calc avg')
-    plt.text(0.5, 0.2, f"{Qstd=} Rstd={Rstd}",
-             horizontalalignment='center',
-             verticalalignment='center',
-             transform=plt.gca().transAxes,
-             fontsize=12,
-             color='blue',
-             bbox=dict(facecolor='yellow', alpha=0.5, pad=5))
+    plt.title(title + "1")
+    plq(plt, mr, "time", mr, "VoVcn", color="blue", linestyle="-", label="VoVcn burst_data centered")
+    plq(plt, mr, "time", mr, "VoVcn_kf", color="red", linestyle="-", label="VoVcn_kf burst_data centered")
+    plq(plt, mr, "time", mr, "VoVcn_filt", color="black", linestyle="-", label="VoVcn_filt burst_data centered")
+    plq(plt, mr, "time", mr, "VoVcn_lag", color="cyan", linestyle="--", label="VoVcn_lag burst_data")
+    plq(plt, mv, "time", mv, "VoVcn_kf", color="pink", linestyle="-.", label="VoVcn_kf calc")
+    plq(plt, mv, "time", mv, "VoVcn_kf_avg", color="orange", linestyle="-", label="VoVcn_kf calc avg")
+    plt.text(
+        0.5,
+        0.2,
+        f"{Qstd=} Rstd={Rstd}",
+        horizontalalignment="center",
+        verticalalignment="center",
+        transform=plt.gca().transAxes,
+        fontsize=12,
+        color="blue",
+        bbox=dict(facecolor="yellow", alpha=0.5, pad=5),
+    )
     top_limit, bottom_limit = plt.ylim()
     plt.legend(loc=1)
     plt.subplot(212)
-    plq(plt, mr, 'time', mr, 'VoVcn_kf', color='red', linestyle='-', label='VoVcn_kf burst_data centered')
-    plq(plt, mr, 'time', mr, 'VoVcn_filt', color='black', linestyle='-', label='VoVcn_filt burst_data centered')
-    plq(plt, mv, 'time', mv, 'VoVcn_kf', color='pink', linestyle='-.', label='VoVcn_kf calc')
-    plq(plt, mv, 'time', mv, 'VoVcn_kf_avg', color='orange', linestyle='-', label='VoVcn_kf calc avg')
+    plq(plt, mr, "time", mr, "VoVcn_kf", color="red", linestyle="-", label="VoVcn_kf burst_data centered")
+    plq(plt, mr, "time", mr, "VoVcn_filt", color="black", linestyle="-", label="VoVcn_filt burst_data centered")
+    plq(plt, mv, "time", mv, "VoVcn_kf", color="pink", linestyle="-.", label="VoVcn_kf calc")
+    plq(plt, mv, "time", mv, "VoVcn_kf_avg", color="orange", linestyle="-", label="VoVcn_kf calc avg")
     plt.ylim(top_limit, bottom_limit)
     plt.legend(loc=1)
 
@@ -118,51 +125,59 @@ def plot_P(plt=None, mr=None, mv=None, title=None, Qstd=None, Rstd=None, data_la
     # steady_only = True
     if not steady_only:
         # Detect positive zero crossings
-        is_positive = mr.VoVcn_lag[index_start_sweep_lag:index_end_sweep_lag]  > 0
+        is_positive = mr.VoVcn_lag[index_start_sweep_lag:index_end_sweep_lag] > 0
         positive_crossings = (~is_positive[:-1]) & is_positive[1:]
-        mr.crossing_indices = np.where(positive_crossings)[0] + 1 + index_start_sweep_lag  # Add 1 to account for the shift
+        mr.crossing_indices = (
+            np.where(positive_crossings)[0] + 1 + index_start_sweep_lag
+        )  # Add 1 to account for the shift
         mr.time_zero_crossing = mr.time[mr.crossing_indices]
 
         mv.time = mr.time
-        is_positive = mv.VoVcn_kf[index_start_sweep_lag:index_end_sweep_lag]  > 0
+        is_positive = mv.VoVcn_kf[index_start_sweep_lag:index_end_sweep_lag] > 0
         positive_crossings = (~is_positive[:-1]) & is_positive[1:]
-        mv.crossing_indices = np.where(positive_crossings)[0] + 1 + index_start_sweep_lag  # Add 1 to account for the shift
+        mv.crossing_indices = (
+            np.where(positive_crossings)[0] + 1 + index_start_sweep_lag
+        )  # Add 1 to account for the shift
         mv.time_zero_crossing = mv.time[mv.crossing_indices]
 
         # For simplicity assume mv zero crossing is always after mr zero crossing (lags behave like lags)
         # This also implies minimum phase behavior (magnitude decreasing) so normalize to max
-        print("Time:    Frequency, Hz  /  Magnitude, dB   /  Phase, deg / raw_lag(s) / data_lag_lag(deg) / data_lag_lag(s) / lag(s)")
+        print(
+            "Time:    Frequency, Hz  /  Magnitude, dB   /  Phase, deg / raw_lag(s) / data_lag_lag(deg) /"
+            "data_lag_lag(s) / lag(s)"
+        )
         transfer_function = []
-        mag_normal = 0.
-        for j in range(len(mr.time_zero_crossing)-1):
+        mag_normal = 0.0
+        for j in range(len(mr.time_zero_crossing) - 1):
             time = mr.time_zero_crossing[j]
             index = mr.crossing_indices[j]
-            period = mr.time_zero_crossing[j+1] - mr.time_zero_crossing[j]
-            frequency = 1. / period
-            ang_freq = frequency * 2. * np.pi
-            data_lag_lag_deg = np.atan2(data_lag*ang_freq, 1.) * 180./np.pi
-            data_lag_lag = data_lag_lag_deg / 360. * period
+            period = mr.time_zero_crossing[j + 1] - mr.time_zero_crossing[j]
+            frequency = 1.0 / period
+            ang_freq = frequency * 2.0 * np.pi
+            data_lag_lag_deg = np.atan2(data_lag * ang_freq, 1.0) * 180.0 / np.pi
+            data_lag_lag = data_lag_lag_deg / 360.0 * period
             raw_lag = mv.time_zero_crossing[j] - mr.time_zero_crossing[j]
             lag = raw_lag + data_lag_lag
-            input = mr.VoVcn_lag[mr.crossing_indices[j]:mr.crossing_indices[j+1]]
+            input = mr.VoVcn_lag[mr.crossing_indices[j] : mr.crossing_indices[j + 1]]
             input_magnitude = max(input) - min(input)
             if j >= len(mv.crossing_indices) - 1:
                 break
-            response = mv.VoVcn_kf[mv.crossing_indices[j]:mv.crossing_indices[j+1]]
-            response_magnitude = (max(response)[0] - min(response)[0])
-            tf_magnitude = 20.*np.log10(response_magnitude/input_magnitude)
-            tf_phase = -360. * lag / period
+            response = mv.VoVcn_kf[mv.crossing_indices[j] : mv.crossing_indices[j + 1]]
+            response_magnitude = max(response)[0] - min(response)[0]
+            tf_magnitude = 20.0 * np.log10(response_magnitude / input_magnitude)
+            tf_phase = -360.0 * lag / period
             if frequency < 2.5:
                 mag_normal = max(mag_normal, tf_magnitude)
-            transfer_function.append([frequency, tf_magnitude, tf_phase, time, raw_lag, data_lag_lag_deg,
-                                      data_lag_lag, lag, index])
+            transfer_function.append(
+                [frequency, tf_magnitude, tf_phase, time, raw_lag, data_lag_lag_deg, data_lag_lag, lag, index]
+            )
             # print(f"{frequency}  /  {tf_magnitude}    / {tf_phase}")
         transfer_function = np.array(transfer_function)
         transfer_function[:, 1] -= mag_normal
 
         # Cleanup the result
         d = np.diff(transfer_function, axis=0)[:, 0]
-        pos_indeces = np.where(d > 0.)
+        pos_indeces = np.where(d > 0.0)
         transfer_function = transfer_function[pos_indeces]
         # Go through one-by-one and delete bad steps
         tf_clean = []
@@ -171,25 +186,28 @@ def plot_P(plt=None, mr=None, mv=None, title=None, Qstd=None, Rstd=None, data_la
         n = len(transfer_function[:, 0])
         k = 1
         while k < n:
-            if (abs(transfer_function[k, 0] - tf_clean[k_clean][0]) < 1. and
-                    (transfer_function[k, 0] - tf_clean[k_clean][0]) > 0.):
+            if (
+                abs(transfer_function[k, 0] - tf_clean[k_clean][0]) < 1.0
+                and (transfer_function[k, 0] - tf_clean[k_clean][0]) > 0.0
+            ):
                 tf_clean.append(transfer_function[k, :])
                 k_clean += 1
             k += 1
         tf_clean = np.array(tf_clean)
         for j in range(len(tf_clean)):
-            print("{:8.2f}: ".format(tf_clean[j][3]),
-                  "{:7.1f} Hz / ".format(tf_clean[j][0]),
-                  "{:7.1f} dB / ".format(tf_clean[j][1]),
-                  "{:7.1f} deg / ".format(tf_clean[j][2]),
-                  "{:7.3f} s  / ".format(tf_clean[j][4]),
-                  "{:7.1f} deg  / ".format(tf_clean[j][5]),
-                  "{:7.3f} s  / ".format(tf_clean[j][6]),
-                  "{:7.3f} s  / ".format(tf_clean[j][7]),
-                  )
+            print(
+                "{:8.2f}: ".format(tf_clean[j][3]),
+                "{:7.1f} Hz / ".format(tf_clean[j][0]),
+                "{:7.1f} dB / ".format(tf_clean[j][1]),
+                "{:7.1f} deg / ".format(tf_clean[j][2]),
+                "{:7.3f} s  / ".format(tf_clean[j][4]),
+                "{:7.1f} deg  / ".format(tf_clean[j][5]),
+                "{:7.3f} s  / ".format(tf_clean[j][6]),
+                "{:7.3f} s  / ".format(tf_clean[j][7]),
+            )
         mv.time_clean = tf_clean[:, 3]
         mv.f_clean = tf_clean[:, 0]
-        mv.w_clean = mv.f_clean * 2. * np.pi
+        mv.w_clean = mv.f_clean * 2.0 * np.pi
         mv.mdB_clean = tf_clean[:, 1]
         mv.phs_clean = tf_clean[:, 2]
 
@@ -200,7 +218,7 @@ def plot_P(plt=None, mr=None, mv=None, title=None, Qstd=None, Rstd=None, data_la
     mr.amp_VoVcn_steady = np.max(mr.VoVcn_steady) - np.min(mr.VoVcn_steady)
     mv.amp_VoVcn_kf_steady = np.max(mv.VoVcn_kf_steady) - np.min(mv.VoVcn_kf_steady)
     mr.amp_VoVcn_steady_lag = np.max(mr.VoVcn_steady_lag) - np.min(mr.VoVcn_steady_lag)
-    print(f" amp VoVcn_kf_steady  {mv.amp_VoVcn_kf_steady}   amp VoVcn_steady {mr.amp_VoVcn_steady}" )
+    print(f" amp VoVcn_kf_steady  {mv.amp_VoVcn_kf_steady}   amp VoVcn_steady {mr.amp_VoVcn_steady}")
     attenuation = mv.amp_VoVcn_kf_steady / mr.amp_VoVcn_steady
     attenuation_lag = mr.amp_VoVcn_steady_lag / mr.amp_VoVcn_steady
 
@@ -208,32 +226,31 @@ def plot_P(plt=None, mr=None, mv=None, title=None, Qstd=None, Rstd=None, data_la
         phase45_tf_index = 0
         phase90_tf_index = 0
         db3_tf_index = 0
-        for j in range(len(tf_clean)-1):
+        for j in range(len(tf_clean) - 1):
             frequency = tf_clean[j][0]
             phase_dg = tf_clean[j][2]
             mag_db = tf_clean[j][1]
             time = tf_clean[j][3]
-            if mag_db < tf_clean[db3_tf_index][1] and mag_db >= -3.:
+            if mag_db < tf_clean[db3_tf_index][1] and mag_db >= -3.0:
                 db3_tf_index = j
-            if  phase_dg < tf_clean[phase45_tf_index][2] and phase_dg >= -45.:
-                phase45_tf_index =j
-            if phase_dg < tf_clean[phase90_tf_index][2] and phase_dg >= -90.:
+            if phase_dg < tf_clean[phase45_tf_index][2] and phase_dg >= -45.0:
+                phase45_tf_index = j
+            if phase_dg < tf_clean[phase90_tf_index][2] and phase_dg >= -90.0:
                 phase90_tf_index = j
         freq_3db = tf_clean[db3_tf_index][0]
-        tau_3db = 1. / (freq_3db * 2. * np.pi)
+        tau_3db = 1.0 / (freq_3db * 2.0 * np.pi)
         mag_3db = tf_clean[db3_tf_index][1]
         time_3db = tf_clean[db3_tf_index][3]
         freq_45 = tf_clean[phase45_tf_index][0]
-        tau_45 = 1. / (freq_45 * 2. * np.pi)
+        tau_45 = 1.0 / (freq_45 * 2.0 * np.pi)
         phase_45 = tf_clean[phase45_tf_index][2]
         time_45 = tf_clean[phase45_tf_index][3]
 
         freq_90 = tf_clean[phase90_tf_index][0]
-        omega_90 = freq_90 * 2. * np.pi
-        tau_90 = 1. / (freq_90 * 2. * np.pi)
+        omega_90 = freq_90 * 2.0 * np.pi
+        tau_90 = 1.0 / (freq_90 * 2.0 * np.pi)
         phase_90 = tf_clean[phase90_tf_index][2]
         time_90 = tf_clean[phase90_tf_index][3]
-
 
         print(f"{attenuation=} {attenuation_lag=}")
         print(f"{time_3db=} {freq_3db=} {mag_3db=}")
@@ -246,44 +263,85 @@ def plot_P(plt=None, mr=None, mv=None, title=None, Qstd=None, Rstd=None, data_la
         metric_string += "  -3db @    {:4.2f} Hz,  ({:5.1f} sec)\n".format(freq_3db, time_3db)
         metric_string += "  -45 deg @ {:4.2f} Hz   ({:5.1f} sec)\n\n".format(freq_45, time_45)
         metric_string += "  -90 deg @ {:4.2f} Hz   ({:5.1f} sec)\n\n".format(freq_90, time_90)
-        metric_string += "  tau @ -3db = {:5.3f}\n  tau @ -45 = {:5.3f}\n  omega90 = {:5.3f}\n".format(tau_3db, tau_45, omega_90)
-        res_title = "Qstd, Rstd, data_lag, attenuation_lag, amp_steady_kf, amp_steady, attenuation, tau_3db, tau_45, omega_90,"
-        res = [Qstd, Rstd, data_lag, attenuation_lag, mv.amp_VoVcn_kf_steady, mr.amp_VoVcn_steady, attenuation, tau_3db, tau_45, omega_90]
+        metric_string += "  tau @ -3db = {:5.3f}\n  tau @ -45 = {:5.3f}\n  omega90 = {:5.3f}\n".format(
+            tau_3db, tau_45, omega_90
+        )
+        res_title = (
+            "Qstd, Rstd, data_lag, attenuation_lag, amp_steady_kf, amp_steady, attenuation, tau_3db, tau_45, omega_90,"
+        )
+        res = [
+            Qstd,
+            Rstd,
+            data_lag,
+            attenuation_lag,
+            mv.amp_VoVcn_kf_steady,
+            mr.amp_VoVcn_steady,
+            attenuation,
+            tau_3db,
+            tau_45,
+            omega_90,
+        ]
     else:
-        res_title = "Qstd, Rstd, data_lag, attenuation_lag,  amp_steady_kf, amp_steady, attenuation, tau_3db, tau_45, omega_90,"
-        res = [Qstd, Rstd, data_lag, attenuation_lag, mv.amp_VoVcn_kf_steady, mr.amp_VoVcn_steady, attenuation,  0., 0., 0.]
+        res_title = (
+            "Qstd, Rstd, data_lag, attenuation_lag,  amp_steady_kf, amp_steady, attenuation, tau_3db, tau_45, omega_90,"
+        )
+        res = [
+            Qstd,
+            Rstd,
+            data_lag,
+            attenuation_lag,
+            mv.amp_VoVcn_kf_steady,
+            mr.amp_VoVcn_steady,
+            attenuation,
+            0.0,
+            0.0,
+            0.0,
+        ]
 
     plt.figure()
-    print("plot_P1:", end='')
-    plt.figtext(0.1, 0.3, metric_string, fontsize=10, color='black', horizontalalignment='left',
-                verticalalignment='center', bbox=dict(facecolor='orange', alpha=0.5, pad=5))
+    print("plot_P1:", end="")
+    plt.figtext(
+        0.1,
+        0.3,
+        metric_string,
+        fontsize=10,
+        color="black",
+        horizontalalignment="left",
+        verticalalignment="center",
+        bbox=dict(facecolor="orange", alpha=0.5, pad=5),
+    )
     plt.subplot(311)
-    plt.title(title+'2')
-    plq(plt, mr, 'time', mr, 'VoVcn', color='blue', linestyle='-', label='VoVcn' + run_str)
-    plq(plt, mr, 'time', mr, 'VoVcn_kf', color='red', linestyle='-', label='VoVcn_kf' + run_str)
-    plq(plt, mr, 'time', mr, 'VoVcn_filt', color='black', linestyle='-', label='VoVcn_filt' + run_str)
-    plq(plt, mr, 'time', mr, 'VoVcn_lag', color='cyan', linestyle='--', label='VoVcn_lag' + run_str)
-    plq(plt, mv, 'time', mv, 'VoVcn_kf', color='pink', linestyle='-.', label='VoVcn_kf' + ver_str)
-    plt.text(0.5, 0.2, f"{Qstd=} Rstd={Rstd}",
-             horizontalalignment='center',
-             verticalalignment='center',
-             transform=plt.gca().transAxes,
-             fontsize=12,
-             color='blue',
-             bbox=dict(facecolor='yellow', alpha=0.5, pad=5))
+    plt.title(title + "2")
+    plq(plt, mr, "time", mr, "VoVcn", color="blue", linestyle="-", label="VoVcn" + run_str)
+    plq(plt, mr, "time", mr, "VoVcn_kf", color="red", linestyle="-", label="VoVcn_kf" + run_str)
+    plq(plt, mr, "time", mr, "VoVcn_filt", color="black", linestyle="-", label="VoVcn_filt" + run_str)
+    plq(plt, mr, "time", mr, "VoVcn_lag", color="cyan", linestyle="--", label="VoVcn_lag" + run_str)
+    plq(plt, mv, "time", mv, "VoVcn_kf", color="pink", linestyle="-.", label="VoVcn_kf" + ver_str)
+    plt.text(
+        0.5,
+        0.2,
+        f"{Qstd=} Rstd={Rstd}",
+        horizontalalignment="center",
+        verticalalignment="center",
+        transform=plt.gca().transAxes,
+        fontsize=12,
+        color="blue",
+        bbox=dict(facecolor="yellow", alpha=0.5, pad=5),
+    )
     plt.legend(loc=1)
     left_limit, right_limit = plt.xlim()
     if not steady_only:
         plt.subplot(324)
-        plt.semilogx(mv.w_clean, mv.mdB_clean, color='red', linestyle='-', label='mag_dB' + ver_str)
+        plt.semilogx(mv.w_clean, mv.mdB_clean, color="red", linestyle="-", label="mag_dB" + ver_str)
         plt.ylim([-18, 6])
         plt.legend(loc=1)
         plt.subplot(326)
-        plt.semilogx(mv.w_clean, mv.phs_clean, color='red', linestyle='-', label='phs_deg' + ver_str)
+        plt.semilogx(mv.w_clean, mv.phs_clean, color="red", linestyle="-", label="phs_deg" + ver_str)
         plt.ylim([-180, 0])
         plt.legend(loc=1)
 
     return plt, res, res_title
+
 
 def running_rms(signal, window_size):
     """
@@ -308,13 +366,13 @@ def running_rms(signal, window_size):
     window = np.ones(window_size) / float(window_size)
 
     # Convolve the squared signal with the window to get the moving average of squares
-    moving_average_of_squares = np.convolve(squared_signal, window, mode='valid')
+    moving_average_of_squares = np.convolve(squared_signal, window, mode="valid")
 
     # Take the square root to get the running RMS
     running_rms_amplitude = np.sqrt(moving_average_of_squares)
 
     # Copy first window points to beginning to get same array size out as in
-    running_rms_amplitude = np.insert(running_rms_amplitude, 0, running_rms_amplitude[0:window_size-1])
+    running_rms_amplitude = np.insert(running_rms_amplitude, 0, running_rms_amplitude[0 : window_size - 1])
 
     return running_rms_amplitude
 
@@ -362,7 +420,7 @@ class SavedData:
             # Truncate
             if time_end is not None:
                 i_end = np.where(self.time <= time_end)[0][-1] + 1
-                self.truncate(i_end, 'time')
+                self.truncate(i_end, "time")
 
     def __str__(self):
         s = "{},".format(self.unit[self.i])
@@ -383,14 +441,14 @@ class SavedData:
         for name in list(x.dtype.names):
             setattr(self, name, x[name])
 
-    def truncate(self, i_end=None, key_attr='time'):
+    def truncate(self, i_end=None, key_attr="time"):
         """
         Iterates over members of an self, assigns values to numpy.ndarray members
         from rap_self.ib up to i_end.
         """
         for attr_name in dir(self):
             # Filter out built-in attributes and methods
-            if not attr_name.startswith('__') and not callable(getattr(self, attr_name)):
+            if not attr_name.startswith("__") and not callable(getattr(self, attr_name)):
                 member = getattr(self, attr_name)
                 if isinstance(member, np.ndarray):
                     # Ensure the slice doesn't exceed the bounds of rap_self.ib
@@ -411,12 +469,13 @@ def load_data_KF1x1_test(path_to_data, time_end):
     hdr_key_x = "unit_shunt,"  # Find one self of title
     unit_key_x = "shunt_unit"
 
-    data_file_clean = write_clean_file(path_to_data, type_='_shunt', hdr_key=hdr_key_x, unit_key=unit_key_x)
+    data_file_clean = write_clean_file(path_to_data, type_="_shunt", hdr_key=hdr_key_x, unit_key=unit_key_x)
     if data_file_clean is None:
         return None, None, None, None, None, None
     import numpy as np
+
     if data_file_clean is not None:
-        mon_raw = np.genfromtxt(data_file_clean, delimiter=',', names=True, dtype=float).view(np.recarray)
+        mon_raw = np.genfromtxt(data_file_clean, delimiter=",", names=True, dtype=float).view(np.recarray)
     else:
         mon_raw = None
         print(f"load_data_KF1x1_test: returning mon=None")
@@ -444,16 +503,19 @@ if __name__ == "__main__":
     VCO level Ampl .001 - 0, Offs 0-0, Freq 0-0, Duty 50-50
     Top level - Sweep.   - Freq 0 - 5.0, Ampl 0.01 - 0.01, Offs 0.0 - 0.0, Duty 50% - 50%,
                     Mode Log.   Direction Forth, Time 360s.  OK - OK quickly to freeze it at 0 Hz then quickly VCO - OK
-    'clear' in GUI then 'Cx45000' on tty,  wait 60 sec. Turn on generator and press OK on function generator.  When it reaches 5.0 Hz again press
+    'clear' in GUI then 'Cx45000' on tty,  wait 60 sec. Turn on generator and press OK on function generator.  When it
+    reaches 5.0 Hz again press
     OK to stop.  Then press VCO - OK quickly
     """
 
     import numpy as np
     import matplotlib.pyplot as plt
     from plot.plq import plq as plq
-    plt.rcParams['axes.grid'] = True
-    plt.rcParams['legend.fontsize'] = 'small'
+
+    plt.rcParams["axes.grid"] = True
+    plt.rcParams["legend.fontsize"] = "small"
     from butterHighPassDemo import butter_highpass_filter
+
     time_end = None
 
     """
@@ -470,7 +532,6 @@ if __name__ == "__main__":
     # data_file = './noise_study/sschirp_soc2p2_hi_lo_chg.csv'  # Cx4800, Base
     # data_file = './noise_study/sweepchirp_soc2p2_hi_lo_chg.csv'  # Cx46000, Base
 
-
     """
     # Reconstruct and look at 2 vs 1 filter in VoVcn
     0.  Test setup:  FY6900 Dominty Function Generator.  FY6900 CH 1 connected across shunt leads.
@@ -481,10 +542,9 @@ if __name__ == "__main__":
     2.  Press Cx16000 to collect ss data for 60s
     3.  After 60 s press Sweep then OK.  When it reaches 5.0 Hz again press OK to stop then VCO OK to go back steady
     """
-    data_file = './noise_study/sweepchirp1_soc2p2_hi_lo_chg.csv'  # Cx46000, new base 20251231
+    data_file = "./noise_study/sweepchirp1_soc2p2_hi_lo_chg.csv"  # Cx46000, new base 20251231
     doing_doe = False  # Toggle this to see various kf implemented in python
     cutoff_freq_hz = 0.05  # hpf
-
 
     """
     # Reconstruct and look at 2 vs 1 filter in VoVcn
@@ -496,12 +556,11 @@ if __name__ == "__main__":
     2.  Press Cx16000 to collect ss data for 60s
     3.  After 60 s press Sweep then OK.  When it reaches 5.0 Hz again press OK to stop then VCO OK to go back steady
     """
-    data_file = './noise_study/sweepchirp3_soc2p2_hi_lo_chg.csv'  # Cx46000, new base 20251231
+    data_file = "./noise_study/sweepchirp3_soc2p2_hi_lo_chg.csv"  # Cx46000, new base 20251231
     doing_doe = True  # Toggle this to see various kf implemented in python
     cutoff_freq_hz = 0.05  # hpf
     Qstd = 0.0003  # Standard deviation of acceleration noise
     Rstd = 0.1000  # Standard deviation of voltage measurement noise
-
 
     """
     # Reconstruct and look at 2 vs 1 filter in VoVcn
@@ -519,11 +578,9 @@ if __name__ == "__main__":
     Qstd = 0.0003  # Standard deviation of acceleration noise
     Rstd = 0.0100  # Standard deviation of voltage measurement noise
 
-
-
-############################################################33
+    ############################################################33
     mr, data_file_clean = load_data_KF1x1_test(data_file, time_end)
-    title = 'VoVc Base KF1x1_test.py var dt'
+    title = "VoVc Base KF1x1_test.py var dt"
     dt = 0.1  # Time step (seconds) used only on init
 
     # Some initializations
@@ -535,30 +592,29 @@ if __name__ == "__main__":
     N = len(mr.time)
     total_time = mr.time[-1]
     sample_freq_hz = float(N) / total_time
-    sample_time = 1. / sample_freq_hz
-    sample_freq_rps = sample_freq_hz * 2. * np.pi
-    nyquist_freq_rps = sample_freq_rps / 2.
-    min_possible_data_lag = 0.07 / nyquist_freq_rps * 50.
-    vec_initial = np.where( (mr.time <= 50.) & (mr.time >= 10.) )
-    data_lag = min_possible_data_lag * 5.
+    sample_time = 1.0 / sample_freq_hz
+    sample_freq_rps = sample_freq_hz * 2.0 * np.pi
+    nyquist_freq_rps = sample_freq_rps / 2.0
+    min_possible_data_lag = 0.07 / nyquist_freq_rps * 50.0
+    vec_initial = np.where((mr.time <= 50.0) & (mr.time >= 10.0))
+    data_lag = min_possible_data_lag * 5.0
     print(f" nyquist {nyquist_freq_rps} r/s, min possible tau {min_possible_data_lag} s, data_lag {data_lag}, s")
     mr.VoVcn = butter_highpass_filter(mr.vovcn, cutoff_freq_hz, sample_freq_hz, 2)
     mr.VoVcn_kf = butter_highpass_filter(mr.vovcnkf, cutoff_freq_hz, sample_freq_hz, 2)
     mr_lag = LagExp(dt=sample_time, tau=data_lag, max_=3.3, min_=-3.3)
     mr.VoVcn_lag = []
 
-    mr.VoVcn_lag = [mr_lag.calculate(mr.VoVcn[i], reset=i<1, dt=mr.dt[i]) for i in range(N)]
-
+    mr.VoVcn_lag = [mr_lag.calculate(mr.VoVcn[i], reset=i < 1, dt=mr.dt[i]) for i in range(N)]
 
     mr.VoVcn_lag = np.array(mr.VoVcn_lag)
     steady_level_lag = np.average(mr.VoVcn_lag[vec_initial])
     mr.VoVcn_lag = np.array(mr.VoVcn_lag)
 
     # Old 2-pole for reference
-    VoVcnFilt = General2Pole(0.1, 0.5, 0.8, -3., 3.)
+    VoVcnFilt = General2Pole(0.1, 0.5, 0.8, -3.0, 3.0)
     mr.VoVcn_filt = []
     for i in range(N):
-        if i==0:
+        if i == 0:
             lagged_val2 = VoVcnFilt.calculate(mr.VoVcn_kf[i], reset=True, dt=mr.dt[i])
         else:
             lagged_val2 = VoVcnFilt.calculate(mr.VoVcn[i], reset=False, dt=mr.dt[i])
@@ -566,11 +622,12 @@ if __name__ == "__main__":
     mr.VoVcn_filt = np.array(mr.VoVcn_filt)
 
     # Local kf
-    kfVoVcn = KF1x1VarDt(initial_position=0.0, initial_velocity=0.0, dt=dt, proc_noise_std=Qstd*2.,
-                         meas_noise_std=Rstd*2.)
+    kfVoVcn = KF1x1VarDt(
+        initial_position=0.0, initial_velocity=0.0, dt=dt, proc_noise_std=Qstd * 2.0, meas_noise_std=Rstd * 2.0
+    )
 
-    run_str = ' chirp data'
-    ver_str = ' calc'
+    run_str = " chirp data"
+    ver_str = " calc"
 
     mv = Saved()
     v_rat = None
@@ -583,34 +640,35 @@ if __name__ == "__main__":
         vf, v_rat = kfVoVcn.get_state()
         mv.VoVcn.append(vf[0])
 
-    plt = plot_1(plt, mr, mv, title + ' F1')
+    plt = plot_1(plt, mr, mv, title + " F1")
 
     if doing_doe:
         ii = 0
         Res = []
-        for Qstd, Rstd in [ [0.0003, 0.100], [0.0003, 0.010], [0.003, 0.001] ]:
-        # for Qstd, Rstd in \
-        #         [
-        #             [0.0003,  0.0100], [0.0003, 0.1000],
-        #             [0.0006,  0.1000], [0.00015, 0.1000],
-        #             [0.0003,  0.2000], [0.0003,  0.0500],
-        #             [0.0006,  0.0100], [0.00015, 0.0100],
-        #             [0.0003,  0.0100], [0.0006, 0.0100],  [0.00015, 0.0100],
-        #             [0.00003, 0.0100], [0.00003, 0.0200], [0.00003, 0.0050],
-        #             [1.5,    0.00001], [0.0003,  0.1000],
-        #         ]:
+        for Qstd, Rstd in [[0.0003, 0.100], [0.0003, 0.010], [0.003, 0.001]]:
+            # for Qstd, Rstd in \
+            #         [
+            #             [0.0003,  0.0100], [0.0003, 0.1000],
+            #             [0.0006,  0.1000], [0.00015, 0.1000],
+            #             [0.0003,  0.2000], [0.0003,  0.0500],
+            #             [0.0006,  0.0100], [0.00015, 0.0100],
+            #             [0.0003,  0.0100], [0.0006, 0.0100],  [0.00015, 0.0100],
+            #             [0.00003, 0.0100], [0.00003, 0.0200], [0.00003, 0.0050],
+            #             [1.5,    0.00001], [0.0003,  0.1000],
+            #         ]:
             ii += 1
 
             print(f"{Qstd=} {Rstd=}")
-            kfVoVcn = KF1x1VarDt(initial_position=0.0, initial_velocity=0.0, dt=dt,
-                                 proc_noise_std=Qstd, meas_noise_std=Rstd)
-            kfVoVcnX = KF1x1VarDt(initial_position=0.0, initial_velocity=0.0, dt=dt,
-                                  proc_noise_std=Qstd, meas_noise_std=Rstd)
+            kfVoVcn = KF1x1VarDt(
+                initial_position=0.0, initial_velocity=0.0, dt=dt, proc_noise_std=Qstd, meas_noise_std=Rstd
+            )
+            kfVoVcnX = KF1x1VarDt(
+                initial_position=0.0, initial_velocity=0.0, dt=dt, proc_noise_std=Qstd, meas_noise_std=Rstd
+            )
             lagVoVcn = LagExp(dt=dt, tau=data_lag, min_=-3.3, max_=3.3)
 
-
-            run_str = '_chirp_data'
-            ver_str = '_calc'
+            run_str = "_chirp_data"
+            ver_str = "_calc"
 
             # Data structures
             mv = Saved()
@@ -628,28 +686,49 @@ if __name__ == "__main__":
                 VoVcn_kf, v_rat = kfVoVcn.get_state()
                 mv.VoVcn_kf.append(VoVcn_kf)
 
-                if mr.dt[i] < data_lag/2.:
-                    vf_lag = lagVoVcn.calculate_tau(mr.VoVcn[0], i<1, mr.dt[i], data_lag)
+                if mr.dt[i] < data_lag / 2.0:
+                    vf_lag = lagVoVcn.calculate_tau(mr.VoVcn[0], i < 1, mr.dt[i], data_lag)
                 else:
                     vf_lag = mr.VoVcn[0]
                 mv.VoVcn.append(vf_lag)
 
-            plt, res, res_title = plot_P(plt, mr, mv, title + ' FP' + str(ii), Qstd=Qstd, Rstd=Rstd, data_lag=data_lag)
+            plt, res, res_title = plot_P(plt, mr, mv, title + " FP" + str(ii), Qstd=Qstd, Rstd=Rstd, data_lag=data_lag)
             Res.append(res)
 
         # Summarize
         print(f"{res_title}")
         for i in range(len(Res)):
-            print("{:9.6f},{:9.6f},{:9.6f},{:9.6f},{:9.6f},{:9.6f},{:9.6f},{:9.6f},{:9.6f},{:9.6f},"\
-                  .format(Res[i][0], Res[i][1], Res[i][2], Res[i][3], Res[i][4], Res[i][5], Res[i][6], Res[i][7], Res[i][8], Res[i][9]))
-        csv_file = 'KF1x1.csv'
+            print(
+                "{:9.6f},{:9.6f},{:9.6f},{:9.6f},{:9.6f},{:9.6f},{:9.6f},{:9.6f},{:9.6f},{:9.6f},".format(
+                    Res[i][0],
+                    Res[i][1],
+                    Res[i][2],
+                    Res[i][3],
+                    Res[i][4],
+                    Res[i][5],
+                    Res[i][6],
+                    Res[i][7],
+                    Res[i][8],
+                    Res[i][9],
+                )
+            )
+        csv_file = "KF1x1.csv"
         with open(csv_file, "w") as output:
-            output.write(res_title + '\n')
+            output.write(res_title + "\n")
             for i in range(len(Res)):
-                output.write("{:9.6f},{:9.6f},{:9.6f},{:9.6f},{:9.6f},{:9.6f},{:9.6f},{:9.6f},{:9.6f},{:9.6f},\n" \
-                             .format(Res[i][0], Res[i][1], Res[i][2], Res[i][3], Res[i][4], Res[i][5], Res[i][6], Res[i][7], Res[i][8], Res[i][9]))
+                output.write(
+                    "{:9.6f},{:9.6f},{:9.6f},{:9.6f},{:9.6f},{:9.6f},{:9.6f},{:9.6f},{:9.6f},{:9.6f},\n".format(
+                        Res[i][0],
+                        Res[i][1],
+                        Res[i][2],
+                        Res[i][3],
+                        Res[i][4],
+                        Res[i][5],
+                        Res[i][6],
+                        Res[i][7],
+                        Res[i][8],
+                        Res[i][9],
+                    )
+                )
 
     plt.show(block=True)
-
-
-

@@ -13,7 +13,7 @@
 #
 # See http://www.fsf.org/licensing/licenses/lgpl.txt for full license text.
 
-""" General data-over-model plotting options
+"""General data-over-model plotting options
 Dependencies:
     - SavedData  (structures)
 """
@@ -31,16 +31,28 @@ class PlotOptions:
     sv: Optional[SavedDataSim] = None
     smr: Optional[SavedDataSim] = None
     smv: Optional[SavedDataSim] = None
-    filename: Optional[str] = ''
-    plot_title: Optional[str] = ''
+    filename: Optional[str] = ""
+    plot_title: Optional[str] = ""
     strict_overplot: Optional[bool] = False
-    run_type: Optional[str] = ''
+    run_type: Optional[str] = ""
     save_plots: Optional[bool] = True
     terse: Optional[bool] = True
 
-
-    def __init__(self, mr=None, mv=None, sr=None, sv=None, smr=None, smv=None, filename=None, plot_title=None,
-                 strict_overplot=None, run_type='None', save_plots=False, terse=True):
+    def __init__(
+        self,
+        mr=None,
+        mv=None,
+        sr=None,
+        sv=None,
+        smr=None,
+        smv=None,
+        filename=None,
+        plot_title=None,
+        strict_overplot=None,
+        run_type="None",
+        save_plots=False,
+        terse=True,
+    ):
         self.mr = mr
         self.mv = mv
         self.sr = sr
@@ -52,10 +64,9 @@ class PlotOptions:
         self.strict_overplot = strict_overplot
         self.save_plots = save_plots
         self.run_type = run_type
-        self.run_is_run = self.run_type=='RunSim' or self.run_type=='RunRun'
-        self.ver_is_sim = self.run_type == 'RunSim'
-        self.ver_is_run = self.run_type == 'RunRun'
+        self.run_is_run = self.run_type == "RunSim" or self.run_type == "RunRun"
+        self.ver_is_sim = self.run_type == "RunSim"
+        self.ver_is_run = self.run_type == "RunRun"
         self.run_is_stdy = not self.run_is_run
         self.ver_is_stdy = not self.ver_is_run and not self.ver_is_sim
         self.terse = terse
-

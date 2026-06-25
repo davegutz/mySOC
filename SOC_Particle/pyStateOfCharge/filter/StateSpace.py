@@ -35,10 +35,10 @@ class StateSpace:
         self.x = np.zeros(shape=n)
         self.x_dot = self.x
         self.x_past = self.x
-        self.dt = 0.
+        self.dt = 0.0
         self.saved = Saved()
 
-    def __str__(self, prefix=''):
+    def __str__(self, prefix=""):
         """Returns representation of the object"""
         s = prefix + "StateSpace:\n"
         s += "  A = \n {}\n".format(self.A)
@@ -71,7 +71,7 @@ class StateSpace:
             self.calc_x_dot(self.u)
             self.y = self.C @ self.x_past + self.D @ self.u  # u
         else:
-            self.AinvB = np.array(1/self.A)
+            self.AinvB = np.array(1 / self.A)
             self.x = -self.AinvB * self.u
             self.x_past = self.x
             self.calc_x_dot(self.u)
@@ -80,8 +80,8 @@ class StateSpace:
 
     def save(self, time):
         self.saved.time = np.append(self.saved.time, time)
-        self.saved.time_min = np.append(self.saved.time_min, time / 60.)
-        self.saved.time_day = np.append(self.saved.time_day, time / 3600. / 24.)
+        self.saved.time_min = np.append(self.saved.time_min, time / 60.0)
+        self.saved.time_day = np.append(self.saved.time_day, time / 3600.0 / 24.0)
         self.saved.y = np.append(self.saved.y, self.y)
         if not self.saved.u:
             self.saved.u = self.u.reshape(1, 2)
@@ -123,10 +123,11 @@ class Saved:
         self.x_past = []
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import sys
     import doctest
-    doctest.testmod(sys.modules['__main__'])
+
+    doctest.testmod(sys.modules["__main__"])
     r_0 = 0.003
     r_ctOld = 0.0016
     r_ct = 0.0077
@@ -135,33 +136,30 @@ if __name__ == '__main__':
     c_ct = tau_ct / r_ctOld
     c_dif = tau_dif / r_ct
     dt = 0.1
-    print('RcCc=', tau_ct, 'RdCd=', tau_dif)
-    print('Cc=', c_ct, 'Cd=', c_dif)
-    print('r_0=', r_0, 'r_ctOld=', r_ctOld, 'r_ct=', r_ct)
-    print('dt=', dt)
+    print("RcCc=", tau_ct, "RdCd=", tau_dif)
+    print("Cc=", c_ct, "Cd=", c_dif)
+    print("r_0=", r_0, "r_ctOld=", r_ctOld, "r_ct=", r_ct)
+    print("dt=", dt)
 
     # ss model dim 1 where r_ctOld combined with r_0
     def construct_state_space_model_1():
         a = np.array([-1 / tau_dif])
-        b = np.array([1. / c_dif])
+        b = np.array([1.0 / c_dif])
         c = np.array([1])
         d = np.array([r_0 + r_ctOld])
         AinvB = b / a
         return a, b, c, d, AinvB
 
     def construct_state_space_model():
-        print('-1/Rc/Cc=', -1/tau_ct, '-1/Rd/Cd=', -1/tau_dif)
-        print('1/Cc=', 1/c_ct, '1/Cd=', 1/c_dif)
-        print('r_0=', r_0)
-        a = np.array([[-1 / tau_ct, 0],
-                      [0, -1 / tau_dif]])
-        b = np.array([[1 / c_ct,   0],
-                      [1 / c_dif,  0]])
-        c = np.array([1., 1])
+        print("-1/Rc/Cc=", -1 / tau_ct, "-1/Rd/Cd=", -1 / tau_dif)
+        print("1/Cc=", 1 / c_ct, "1/Cd=", 1 / c_dif)
+        print("r_0=", r_0)
+        a = np.array([[-1 / tau_ct, 0], [0, -1 / tau_dif]])
+        b = np.array([[1 / c_ct, 0], [1 / c_dif, 0]])
+        c = np.array([1.0, 1])
         d = np.array([r_0, 1])
-        AinvB = inv(a)*b
+        AinvB = inv(a) * b
         return a, b, c, d, AinvB
-
 
     def construct_state_space_model_1l(dt_=0.1, tau_dif_=tau_dif, max_=100, min_=-100):
         one_order = LagExp(dt_, tau=tau_dif_, min_=min_, max_=max_)
@@ -170,32 +168,34 @@ if __name__ == '__main__':
     def main():
 
         import matplotlib.pyplot as plt
-        if sys.platform == 'darwin':
-            import matplotlib
-            matplotlib.use('tkagg')
 
-        plt.rcParams['axes.grid'] = True
-        plt.rcParams['legend.fontsize'] = 'small'
+        if sys.platform == "darwin":
+            import matplotlib
+
+            matplotlib.use("tkagg")
+
+        plt.rcParams["axes.grid"] = True
+        plt.rcParams["legend.fontsize"] = "small"
 
         ss = StateSpace(2, 2, 1)
         ss.A, ss.B, ss.C, ss.D, ss.AinvB = construct_state_space_model()
-        print('')
-        print('Model::')
-        print('A=', ss.A)
-        print('B=', ss.B)
-        print('C=', ss.C)
-        print('D=', ss.D)
-        print('AinvB=', ss.AinvB)
-        ss.init_state_space([0., 0.])
+        print("")
+        print("Model::")
+        print("A=", ss.A)
+        print("B=", ss.B)
+        print("C=", ss.C)
+        print("D=", ss.D)
+        print("AinvB=", ss.AinvB)
+        ss.init_state_space([0.0, 0.0])
 
         ss1 = StateSpace(1, 1, 1)
         ss1.A, ss1.B, ss1.C, ss1.D, ss1.AinvB = construct_state_space_model_1()
-        ss1.init_state_space(0.)
+        ss1.init_state_space(0.0)
 
         ssl = construct_state_space_model_1l(tau_dif)
-        print('')
-        print('Model_1l::')
-        print('tau_dif', tau_dif)
+        print("")
+        print("Model_1l::")
+        print("tau_dif", tau_dif)
 
         n = 12
         t = []
@@ -204,13 +204,13 @@ if __name__ == '__main__':
         out = []
         out_1 = []
         out_1l = []
-        print('    t, reset, in,    out2x, out_1, out_1l')
+        print("    t, reset, in,    out2x, out_1, out_1l")
         s = ""
         for i in range(n):
-            t.append(i*dt)
-            reset = t[i] == 0.
+            t.append(i * dt)
+            reset = t[i] == 0.0
             if t[i] > dt:
-                inp_ = -75./0.4*t[i]
+                inp_ = -75.0 / 0.4 * t[i]
             inp.append(inp_)
             ss.calc_x_dot([inp_, 0])
             ss.update(dt, reset)
@@ -218,7 +218,7 @@ if __name__ == '__main__':
             ss1.update(dt, reset)
             out.append(ss.y)
             out_1.append(ss1.y[0])
-            dv_dyn = ssl.calculate(inp_, reset, dt)*r_ct + inp_*(r_0 + r_ctOld)
+            dv_dyn = ssl.calculate(inp_, reset, dt) * r_ct + inp_ * (r_0 + r_ctOld)
             out_1l.append(dv_dyn)
             s += "{:7.3f},".format(t[i])
             s += "{:2d},".format(reset)
@@ -229,16 +229,15 @@ if __name__ == '__main__':
         print(s)
         plt.figure()  # init 1
         plt.subplot(211)
-        plt.title('StateSpace')
-        plt.plot(t, out, color='red', linestyle='--', label='out_2nd_ord')
-        plt.plot(t, out_1, color='blue', linestyle='-.', label='out_1st_ord')
-        plt.plot(t, out_1l, color='green', linestyle=':', label='out_exp_lag')
+        plt.title("StateSpace")
+        plt.plot(t, out, color="red", linestyle="--", label="out_2nd_ord")
+        plt.plot(t, out_1, color="blue", linestyle="-.", label="out_1st_ord")
+        plt.plot(t, out_1l, color="green", linestyle=":", label="out_exp_lag")
         plt.legend(loc=1)
         plt.subplot(212)
-        plt.plot(t, inp, color='black', linestyle='-', label='input')
+        plt.plot(t, inp, color="black", linestyle="-", label="input")
 
         plt.show()
 
-
-    if __name__ == '__main__':
+    if __name__ == "__main__":
         main()

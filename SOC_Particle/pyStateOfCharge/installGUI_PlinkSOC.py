@@ -30,24 +30,25 @@ result = None
 GUI_PlinkSOC_dest_path = None
 
 # Create executable
-GUI_PlinkSOC_path = str(PurePosixPath(os.getcwd()) / 'GUI_PlinkSOC.png')
-if sys.platform == 'win32':
-
+GUI_PlinkSOC_path = str(PurePosixPath(os.getcwd()) / "GUI_PlinkSOC.png")
+if sys.platform == "win32":
     # Check executable is local
     if sys.executable.__contains__(str(Path("venv") / "Scripts" / "python")):
         pass
     else:
-        print(Colors.fg.red, 'failed:  need to use local venv interpreter', Colors.reset)
+        print(Colors.fg.red, "failed:  need to use local venv interpreter", Colors.reset)
         exit(1)
 
-    GUI_PlinkSOC_dest_path = str(PurePosixPath(os.getcwd()) / 'dist' / 'GUI_PlinkSOC' / '_internal' / 'GUI_PlinkSOC.png')
-    test_cmd_create = 'pyinstaller .\\GUI_PlinkSOC.py --i GUI_PlinkSOC.png -y'
+    GUI_PlinkSOC_dest_path = str(
+        PurePosixPath(os.getcwd()) / "dist" / "GUI_PlinkSOC" / "_internal" / "GUI_PlinkSOC.png"
+    )
+    test_cmd_create = "pyinstaller .\\GUI_PlinkSOC.py --i GUI_PlinkSOC.png -y"
     result = run_shell_cmd(test_cmd_create, silent=False)
     if result == -1:
-        print(Colors.fg.red, 'failed', Colors.reset)
+        print(Colors.fg.red, "failed", Colors.reset)
         exit(1)
     else:
-        print(Colors.fg.green, 'success', Colors.reset)
+        print(Colors.fg.green, "success", Colors.reset)
 
     # Provide dependencies
     shutil.copyfile(GUI_PlinkSOC_path, GUI_PlinkSOC_dest_path)
@@ -56,11 +57,11 @@ if sys.platform == 'win32':
 
 # Install as deeply as possible
 test_cmd_install = None
-if sys.platform == 'linux':
+if sys.platform == "linux":
     try:
         login = os.getlogin()
     except OSError:
-        login = os.environ['LOGNAME']
+        login = os.environ["LOGNAME"]
     desktop_entry = f"""[Desktop Entry]
 Name=GUI_PlinkSOC
 Exec={sys.executable} /home/{login}/Documents/GitHub/mySolarStateOfCharge/SOC_Particle/pyStateOfCharge/GUI_PlinkSOC.py
@@ -77,78 +78,90 @@ Categories=Utility
     with open(f"/home/{login}/Desktop/GUI_PlinkSOC.desktop", "w") as text_file:
         result = text_file.write("%s" % desktop_entry)
     if result == -1:
-        print(Colors.fg.red, 'failed', Colors.reset)
+        print(Colors.fg.red, "failed", Colors.reset)
     else:
-        print(Colors.fg.green, 'success', Colors.reset)
+        print(Colors.fg.green, "success", Colors.reset)
 
     #  Launch permission
-    test_cmd_launch = f'gio set /home/{login}/Desktop/GUI_PlinkSOC.desktop metadata::trusted true'
+    test_cmd_launch = f"gio set /home/{login}/Desktop/GUI_PlinkSOC.desktop metadata::trusted true"
     result = run_shell_cmd(test_cmd_launch, silent=False)
     if result == -1:
-        print(Colors.fg.red, 'gio set failed', Colors.reset)
+        print(Colors.fg.red, "gio set failed", Colors.reset)
     else:
-        print(Colors.fg.green, 'gio set success', Colors.reset)
-    test_cmd_perm = 'chmod a+x ~/Desktop/GUI_PlinkSOC.desktop'
+        print(Colors.fg.green, "gio set success", Colors.reset)
+    test_cmd_perm = "chmod a+x ~/Desktop/GUI_PlinkSOC.desktop"
     result = run_shell_cmd(test_cmd_perm, silent=False)
     if result == -1:
-        print(Colors.fg.red, 'failed', Colors.reset)
+        print(Colors.fg.red, "failed", Colors.reset)
     else:
-        print(Colors.fg.green, 'success', Colors.reset)
+        print(Colors.fg.green, "success", Colors.reset)
 
     # Check executable is local
     if sys.executable.__contains__(str(Path("venv") / "bin" / "python")):
         pass
     else:
-        print(Colors.fg.red, 'failed:  need to use local venv interpreter', Colors.reset)
+        print(Colors.fg.red, "failed:  need to use local venv interpreter", Colors.reset)
         exit(1)
 
     # Execute permission
-    test_cmd_perm = 'chmod a+x ~/Desktop/GUI_PlinkSOC.desktop'
+    test_cmd_perm = "chmod a+x ~/Desktop/GUI_PlinkSOC.desktop"
     result = run_shell_cmd(test_cmd_perm, silent=False)
     if result == -1:
         print(Colors.fg.red, f"'chmod ...' failed code {result}", Colors.reset)
     else:
-        print(Colors.fg.green, 'chmod success', Colors.reset)
+        print(Colors.fg.green, "chmod success", Colors.reset)
 
     # Move file
     try:
         if debug:  # Leaves shortcut on desktop for troubleshooting
             pass
         else:
-            result = shutil.move(f'/home/{login}/Desktop/GUI_PlinkSOC.desktop',
-                                 '/usr/share/applications/GUI_PlinkSOC.desktop')
+            result = shutil.move(
+                f"/home/{login}/Desktop/GUI_PlinkSOC.desktop", "/usr/share/applications/GUI_PlinkSOC.desktop"
+            )
     except PermissionError:
-        print(Colors.fg.red,
-              "Stop and establish sudo permissions"
-              "  or "
-              f"sudo mv /home/{login}//Desktop/GUI_PlinkSOC.desktop /usr/share/applications/.",
-              Colors.reset)
+        print(
+            Colors.fg.red,
+            "Stop and establish sudo permissions"
+            "  or "
+            f"sudo mv /home/{login}//Desktop/GUI_PlinkSOC.desktop /usr/share/applications/.",
+            Colors.reset,
+        )
         exit(1)
 
-    if result != '/usr/share/applications/GUI_PlinkSOC.desktop':
+    if result != "/usr/share/applications/GUI_PlinkSOC.desktop":
         if debug:
             print(Colors.fg.red, ".desktop file held on Desktop for debugging", Colors.reset)
         else:
             print(Colors.fg.red, f"'mv ...' failed code {result}", Colors.reset)
     else:
-        print(Colors.fg.green,
-              'mv success.  Browse apps :: and make it favorites.  Open and set path to dataReduction'
-              "you shouldn't have to remake shortcuts",
-              Colors.reset)
+        print(
+            Colors.fg.green,
+            "mv success.  Browse apps :: and make it favorites.  Open and set path to dataReduction"
+            "you shouldn't have to remake shortcuts",
+            Colors.reset,
+        )
 
-elif sys.platform == 'darwin':
-    print(Colors.fg.green,
-          f"Make sure 'Python Launcher' (Python Script Preferences) option for 'Allow override with #! in script' is checked.\n"
-          f"in Finder double-click on 'GUI_PlinkSOC.png'.  Edit-copy the image\n"
-          f"in Finder ctrl-click on 'GUI_PlinkSOC.py'\n"
-          f"   - 'Get Info', click on 2nd icon, paste.   Drag item to taskbar",
-          Colors.reset)
-elif sys.platform == 'win32':
-    print(Colors.fg.green,
-          f"Browse to executable in 'dist/GUI_PlinkSOC' and double-click\n"
-          f" Create shortcut first time and move Desktop\n"
-          f" double-click on  'GUI_PlinkSOC.exe - Shortcut', set paths on buttons, pin to taskbar.")
-    print(Colors.fg.red,
-          f"In shortcut properties, make sure 'Start in:' is this folder where this script resides\n"
-          f" After the first time you do this on a particular Windows install you shouldn't have to remake shortcuts\n",
-          Colors.reset)
+elif sys.platform == "darwin":
+    print(
+        Colors.fg.green,
+        "Make sure 'Python Launcher' (Python Script Preferences) option for "
+        "'Allow override with #! in script' is checked.\n"
+        f"in Finder double-click on 'GUI_PlinkSOC.png'.  Edit-copy the image\n"
+        f"in Finder ctrl-click on 'GUI_PlinkSOC.py'\n"
+        f"   - 'Get Info', click on 2nd icon, paste.   Drag item to taskbar",
+        Colors.reset,
+    )
+elif sys.platform == "win32":
+    print(
+        Colors.fg.green,
+        f"Browse to executable in 'dist/GUI_PlinkSOC' and double-click\n"
+        f" Create shortcut first time and move Desktop\n"
+        f" double-click on  'GUI_PlinkSOC.exe - Shortcut', set paths on buttons, pin to taskbar.",
+    )
+    print(
+        Colors.fg.red,
+        f"In shortcut properties, make sure 'Start in:' is this folder where this script resides\n"
+        f" After the first time you do this on a particular Windows install you shouldn't have to remake shortcuts\n",
+        Colors.reset,
+    )

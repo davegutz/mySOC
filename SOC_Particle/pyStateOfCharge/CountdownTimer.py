@@ -19,7 +19,8 @@ import tkinter as tk
 import sys
 import time
 import platform
-if platform.system() == 'Darwin':
+
+if platform.system() == "Darwin":
     # noinspection PyUnresolvedReferences
     from ttwidgets import TTButton as myButton  # Need for macOS - ignore warning
 else:
@@ -29,7 +30,7 @@ bg_color = "lightgray"
 
 
 class CountdownTimer(tk.Toplevel):
-    def __init__(self,  root_, time_, max_flash=30, exit_function=None, trigger=False, title="SOC-countdown"):
+    def __init__(self, root_, time_, max_flash=30, exit_function=None, trigger=False, title="SOC-countdown"):
         """Block caller task asking to close all plots then doing so"""
         tk.Toplevel.__init__(self)
         self.title(title)
@@ -38,13 +39,13 @@ class CountdownTimer(tk.Toplevel):
         self.flasher_label = None
         self.max_flashes = int(max_flash)
         self.flashes = 0
-        self.attributes('-topmost', True)
-        self.attributes('-topmost', False)
+        self.attributes("-topmost", True)
+        self.attributes("-topmost", False)
         self.initial_time = time_
         self.time = tk.IntVar(self, time_ + 1)
         self.lift()
         self.button = myButton(self, command=self.begin, text="START " + str(time_) + " sec timer")
-        self.button.pack(side='top', fill='x')
+        self.button.pack(side="top", fill="x")
         # self.center()
         self.exit_function = exit_function
         self.trigger = trigger
@@ -62,7 +63,7 @@ class CountdownTimer(tk.Toplevel):
         # calculate position x and y coordinates
         x = (screen_width / 2) - (width / 2)
         y = (screen_height / 2) - (height / 2)
-        self.geometry('%dx%d+%d+%d' % (width, height, x, y))
+        self.geometry("%dx%d+%d+%d" % (width, height, x, y))
 
     def close(self):
         if self._flasher_after_id is not None:
@@ -84,7 +85,7 @@ class CountdownTimer(tk.Toplevel):
         if self.trigger:
             self.trigger = False
             self._countdown_after_id = self.after(1000, self.begin)
-            self.button.config(text='wait')
+            self.button.config(text="wait")
             return
         # Use caffiene instead
         # thread = Thread(target=stay_awake, kwargs={'up_set_min': float(self.time.get()) / 60.})
@@ -96,29 +97,29 @@ class CountdownTimer(tk.Toplevel):
     def countdown(self):
         """Countdown in seconds then exit"""
         self.time.set(self.time.get() - 1)
-        self.button.config(text=str(self.time.get()), fg='black', bg=bg_color, font=("Courier", 96))
+        self.button.config(text=str(self.time.get()), fg="black", bg=bg_color, font=("Courier", 96))
         if self.time.get() > 0:
             self.lift()
             # self.center()
             self._countdown_after_id = self.after(1000, self.countdown)
         else:
             self.time.set(self.initial_time)
-            self.button.config(text=str(self.initial_time), fg='white', bg=bg_color, font=("Courier", 96))
+            self.button.config(text=str(self.initial_time), fg="white", bg=bg_color, font=("Courier", 96))
             if self.exit_function is not None:
                 self.exit_function()
             if self.flasher_window is None:  # window is not busy
-                self.flasher_start('0')  # display message
+                self.flasher_start("0")  # display message
 
     def flasher_start(self, text):
         """function which creates window with message"""
         # create window with messages
         self.flasher_window = tk.Toplevel()
         self.flasher_window.geometry("300x200")
-        self.flasher_label = tk.Label(self.flasher_window, text=text, bg='red', fg='black', font=("Courier", 96))
-        self.flasher_label.pack(side='bottom')
-        self.flasher_window.configure(bg='red')
-        self.flasher_window.attributes('-topmost', True)
-        self.flasher_window.attributes('-topmost', False)
+        self.flasher_label = tk.Label(self.flasher_window, text=text, bg="red", fg="black", font=("Courier", 96))
+        self.flasher_label.pack(side="bottom")
+        self.flasher_window.configure(bg="red")
+        self.flasher_window.attributes("-topmost", True)
+        self.flasher_window.attributes("-topmost", False)
         self.flasher_window.lift()
         self.bell()
 
@@ -129,14 +130,14 @@ class CountdownTimer(tk.Toplevel):
         """function which changes background in displayed window"""
         try:
             if self.flashes < self.max_flashes:
-                if self.flasher_label['bg'] == 'red':
-                    self.flasher_label['bg'] = 'white'
-                    self.flasher_window.configure(bg='white')
+                if self.flasher_label["bg"] == "red":
+                    self.flasher_label["bg"] = "white"
+                    self.flasher_window.configure(bg="white")
                 else:
                     self.flashes += 1
-                    self.flasher_label['text'] = str(self.flashes)
-                    self.flasher_label['bg'] = 'red'
-                    self.flasher_window.configure(bg='red')
+                    self.flasher_label["text"] = str(self.flashes)
+                    self.flasher_label["bg"] = "red"
+                    self.flasher_window.configure(bg="red")
 
                 # update window
                 self._flasher_after_id = self.after(500, self.flasher_update)
@@ -144,8 +145,8 @@ class CountdownTimer(tk.Toplevel):
                 self.flasher_window.destroy()
                 self.destroy()
         except Exception as e:
-            print('e=', e)
-            print('killing flasher window')
+            print("e=", e)
+            print("killing flasher window")
             if self.flasher_window is not None:
                 try:
                     self.flasher_window.destroy()
@@ -158,7 +159,7 @@ def start_timer():
     CountdownTimer(root, 5, max_flash=5, exit_function=None, trigger=True)
 
 
-def stay_awake(up_set_min=3.):
+def stay_awake(up_set_min=3.0):
     """Keep computer awake using shift key when recording then return to previous state"""
 
     # Timer starts
@@ -171,13 +172,13 @@ def stay_awake(up_set_min=3.):
         # noinspection PyUnresolvedReferences
         pyautogui.FAILSAFE = False
     while True and (up_time_min < up_set_min):
-        time.sleep(30.)
-        up_time_min = (time.time() - start_time) / 60.
+        time.sleep(30.0)
+        up_time_min = (time.time() - start_time) / 60.0
         print(f"stay_awake CountdownTimer: {up_time_min=}")
     print(f"stay_awake: ending\n")
 
 
-if __name__ == '__main__':  # Example usage.  Ran ok 20260217
+if __name__ == "__main__":  # Example usage.  Ran ok 20260217
     root = tk.Tk()
     tk.Label(root, text="Try timer variations").pack()
     tk.Button(root, text="Timer", command=start_timer).pack()

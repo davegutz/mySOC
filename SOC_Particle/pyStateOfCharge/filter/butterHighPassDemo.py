@@ -2,6 +2,7 @@ import numpy as np
 from scipy import signal
 import matplotlib.pyplot as plt
 
+
 def butter_highpass_filter(data, cutoff_freq, fs, order=5):
     """
     Designs and applies a digital high-pass Butterworth filter to data.
@@ -21,7 +22,7 @@ def butter_highpass_filter(data, cutoff_freq, fs, order=5):
 
     # Design the filter coefficients (b and a)
     # 'high' specifies a high-pass filter
-    b, a = signal.butter(order, normal_cutoff, btype='high', analog=False)
+    b, a = signal.butter(order, normal_cutoff, btype="high", analog=False)
 
     # Apply the filter using filtfilt to avoid phase delay
     filtered_data = signal.filtfilt(b, a, data)
@@ -30,9 +31,8 @@ def butter_highpass_filter(data, cutoff_freq, fs, order=5):
 
 # Example Usage:
 if __name__ == "__main__":
-
     # 1. Define filter parameters
-    fs = 1000.0       # Sampling rate (Hz)
+    fs = 1000.0  # Sampling rate (Hz)
     cutoff_freq = 50.0  # Cutoff frequency (Hz)
     order = 5
 
@@ -47,11 +47,11 @@ if __name__ == "__main__":
 
     # 4. (Optional) Plot the results to visualize the effect
     plt.figure(figsize=(10, 6))
-    plt.plot(t, data, label='Original signal', alpha=0.5)
-    plt.plot(t, filtered_data, label='Filtered signal (HPF)', color='red', linewidth=2)
-    plt.title('High-Pass Filter Example')
-    plt.xlabel('Time (seconds)')
-    plt.ylabel('Amplitude')
+    plt.plot(t, data, label="Original signal", alpha=0.5)
+    plt.plot(t, filtered_data, label="Filtered signal (HPF)", color="red", linewidth=2)
+    plt.title("High-Pass Filter Example")
+    plt.xlabel("Time (seconds)")
+    plt.ylabel("Amplitude")
     plt.legend()
     plt.grid(True)
     plt.show()

@@ -13,9 +13,9 @@
 #
 # See http://www.fsf.org/licensing/licenses/lgpl.txt for full license text.
 
-__author__ = 'Dave Gutz <davegutz@alum.mit.edu>'
-__version__ = '$Revision: 1.1 $'
-__date__ = '$Date: 2025/09/27 13:15:02 $'
+__author__ = "Dave Gutz <davegutz@alum.mit.edu>"
+__version__ = "$Revision: 1.1 $"
+__date__ = "$Date: 2025/09/27 13:15:02 $"
 
 
 class Scale:
@@ -39,7 +39,7 @@ class Scale:
             o = (i - self.i_n) / self.di * self.do + self.o_n
         return o * o
 
-    def __str__(self, prefix=''):
+    def __str__(self, prefix=""):
         """Returns representation of the object"""
         s = prefix + "Scale:\n"
         s += "  i_n = {:7.3f}    // Minimum input break\n".format(self.i_n)
@@ -52,7 +52,10 @@ class Scale:
 
 
 class ScaleSelector:
-    """ Scale select between a high and low set of inputs.  Low might be a precise, amplified sensor and high might be the high range equivalent
+    """Scale select between a high and low set of inputs.
+
+    Low might be a precise, amplified sensor and high might be the high range
+    equivalent
     """
 
     def __init__(self, n_lo, n_hi, p_lo, p_hi):
@@ -80,17 +83,18 @@ class ScaleSelector:
     p_d = p_hi - p_lo
     
     """
+
     def scale_select(self, inp, sm, lg):
         if self.n_hi <= inp <= self.p_lo:
             return sm
         elif inp <= self.n_lo or inp >= self.p_hi:
             return lg
         elif inp < self.n_hi:
-            return (inp - self.n_lo) / self.n_d * ( sm - lg ) + lg
+            return (inp - self.n_lo) / self.n_d * (sm - lg) + lg
         else:
-            return (inp - self.p_lo) / self.p_d * ( lg - sm ) + sm
+            return (inp - self.p_lo) / self.p_d * (lg - sm) + sm
 
-    def __str__(self, prefix=''):
+    def __str__(self, prefix=""):
         """Returns representation of the object"""
         s = prefix + "Scale:\n"
         s += "  i_big_neg = {:7.3f}    // Negative big break\n".format(self.i_big_neg)

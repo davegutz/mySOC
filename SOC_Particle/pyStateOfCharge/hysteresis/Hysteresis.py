@@ -13,9 +13,9 @@
 #
 # See http://www.fsf.org/licensing/licenses/lgpl.txt for full license text.
 
-__author__ = 'Dave Gutz <davegutz@alum.mit.edu>'
-__version__ = '$Revision: 1.1 $'
-__date__ = '$Date: 2022/11/12 13:15:02 $'
+__author__ = "Dave Gutz <davegutz@alum.mit.edu>"
+__version__ = "$Revision: 1.1 $"
+__date__ = "$Date: 2022/11/12 13:15:02 $"
 
 import numpy as np
 from unite_pictures import cleanup_fig_files
@@ -26,8 +26,18 @@ from pathlib import Path, PurePosixPath
 class Hysteresis:
     # Use variable resistor to create hysteresis from an RC circuit
 
-    def __init__(self, scale=1., dv_hys=0.0, chem=0, scale_cap=1., slr_cap_chg=1., slr_cap_dis=1., slr_hys_chg=1., slr_hys_dis=1.,
-                 chemistry=None):
+    def __init__(
+        self,
+        scale=1.0,
+        dv_hys=0.0,
+        chem=0,
+        scale_cap=1.0,
+        slr_cap_chg=1.0,
+        slr_cap_dis=1.0,
+        slr_hys_chg=1.0,
+        slr_hys_dis=1.0,
+        chemistry=None,
+    ):
         # Defaults
         self.chm = chem
         self.scale_cap = scale_cap
@@ -43,24 +53,24 @@ class Hysteresis:
         self.dv_min_abs = chemistry.dv_min_abs
         self.scale = scale
         self.disabled = self.scale < 1e-5
-        self.res = 0.
-        self.slr = 1.
-        self.soc = 0.
-        self.ib = 0.
-        self.ibs = 0.
-        self.ioc = 0.
+        self.res = 0.0
+        self.slr = 1.0
+        self.soc = 0.0
+        self.ib = 0.0
+        self.ibs = 0.0
+        self.ioc = 0.0
         self.dv_hys = dv_hys
-        self.dv_dot = 0.
-        self.tau = 0.
+        self.dv_dot = 0.0
+        self.tau = 0.0
         self.saved = Saved()
 
-    def __str__(self, prefix=''):
+    def __str__(self, prefix=""):
         s = prefix + "Hysteresis:\n"
-        res, slr = self.look_hys(dv=0., soc=0.8, chem=self.chm)
+        res, slr = self.look_hys(dv=0.0, soc=0.8, chem=self.chm)
         s += "  res(median) =  {:6.4f}  // Null resistance, Ohms\n".format(res)
         s += "  chm      =    {:7.3f}  // Chemistry\n".format(self.chm)
         s += "  cap      = {:10.1f}  // Capacitance, Farads\n".format(self.cap)
-        s += "  tau      = {:10.1f}  // Null time constant, sec\n".format(res*self.cap)
+        s += "  tau      = {:10.1f}  // Null time constant, sec\n".format(res * self.cap)
         s += "  ib       =    {:7.3f}  // Current in, A\n".format(self.ib)
         s += "  ibs      =    {:7.3f}  // Scaled current in, A\n".format(self.ibs)
         s += "  ioc      =    {:7.3f}  // Current out, A\n".format(self.ioc)
@@ -69,7 +79,9 @@ class Hysteresis:
         s += "  res      =    {:7.3f}  // Variable resistance value, ohms\n".format(self.res)
         s += "  dv_dot   =    {:7.3f}  // Calculated voltage rate, V/s\n".format(self.dv_dot)
         s += "  dv_hys   =    {:7.3f}  // Delta voltage state, V\n".format(self.dv_hys)
-        s += "  disabled =     {:2.0f}      // Hysteresis disabled by low scale input < 1e-5, T=disabled\n".format(self.disabled)
+        s += "  disabled =     {:2.0f}      // Hysteresis disabled by low scale input < 1e-5, T=disabled\n".format(
+            self.disabled
+        )
         s += "  hys_scale=    {:7.3f}  // Scalar on hys\n".format(self.scale)
         s += "  scale_cap=    {:7.3f}  // Scalar on cap\n".format(self.scale_cap)
         return s
@@ -79,18 +91,18 @@ class Hysteresis:
         self.ib = ib
         self.soc = soc
         if self.disabled:
-            self.res = 0.
-            self.slr = 1.
+            self.res = 0.0
+            self.slr = 1.0
             self.ibs = self.ib
             self.ioc = ib
-            self.dv_dot = 0.
+            self.dv_dot = 0.0
         else:
             self.res, self.slr = self.look_hys(self.dv_hys, self.soc, self.chm)
             self.ioc = self.dv_hys / self.res
             self.ibs = self.ib * self.slr
-            self.dv_dot = (self.ibs - self.ioc) / (self.cap*self.scale_cap)
+            self.dv_dot = (self.ibs - self.ioc) / (self.cap * self.scale_cap)
             self.tau = self.res * self.cap * self.scale_cap
-            if self.dv_hys >= 0.:
+            if self.dv_hys >= 0.0:
                 self.dv_dot /= self.slr_cap_chg
             else:
                 self.dv_dot /= self.slr_cap_dis
@@ -103,8 +115,8 @@ class Hysteresis:
     def look_hys(self, dv, soc, chem=0):
         self.chm = chem
         if self.disabled:
-            self.res = 0.
-            self.slr = 1.
+            self.res = 0.0
+            self.slr = 1.0
         else:
             self.res = self.lut.interp(x_=dv, y_=soc)
             self.slr = self.luts.interp(x_=dv, y_=soc)
@@ -122,15 +134,15 @@ class Hysteresis:
         self.saved.ioc.append(self.ioc)
         self.saved.tau.append(self.tau)
 
-    def update(self, dt, init_high=False, init_low=False, e_wrap=0., chem=0):
+    def update(self, dt, init_high=False, init_low=False, e_wrap=0.0, chem=0):
         self.chm = chem
         dv_max = self.lu_x.interp(x_=self.soc)
         dv_min = self.lu_n.interp(x_=self.soc)
 
         # Aliasing - return
-        if self.tau < dt * 4.:
+        if self.tau < dt * 4.0:
             if self.disabled:
-                self.dv_hys = 0.
+                self.dv_hys = 0.0
             else:
                 if self.ib >= 0:
                     self.dv_hys = dv_max
@@ -144,18 +156,18 @@ class Hysteresis:
 
         if init_low:
             self.dv_hys = max(self.dv_min_abs, -e_wrap)
-            self.dv_dot = 0.  # break positive feedback loop
+            self.dv_dot = 0.0  # break positive feedback loop
         if init_high:
             self.dv_hys = -self.dv_min_abs
-            self.dv_dot = 0.  # break positive feedback loop
+            self.dv_dot = 0.0  # break positive feedback loop
 
         # normal ODE integration
         self.dv_hys += self.dv_dot * dt
         self.dv_hys = max(min(self.dv_hys, dv_max), dv_min)
-        if self.dv_hys >= 0.:
-            return max(min(self.dv_hys*self.scale*self.slr_hys_chg, dv_max), dv_min), self.tau
+        if self.dv_hys >= 0.0:
+            return max(min(self.dv_hys * self.scale * self.slr_hys_chg, dv_max), dv_min), self.tau
         else:
-            return max(min(self.dv_hys*self.scale*self.slr_hys_dis, dv_max), dv_min), self.tau
+            return max(min(self.dv_hys * self.scale * self.slr_hys_dis, dv_max), dv_min), self.tau
 
 
 class Saved:
@@ -173,68 +185,130 @@ class Saved:
         self.tau = []
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import sys
     import doctest
     from datetime import datetime
     from unite_pictures import unite_pictures_into_pdf
 
-    doctest.testmod(sys.modules['__main__'])
+    doctest.testmod(sys.modules["__main__"])
     import matplotlib.pyplot as plt
 
-
-    def overall(hys=Hysteresis().saved, filename='', fig_files=None, plot_title=None, fig_list=None):
+    def overall(hys=Hysteresis().saved, filename="", fig_files=None, plot_title=None, fig_list=None):
         if fig_files is None:
             fig_files = []
 
         fig_list.append(plt.figure())
         plt.subplot(221)
         plt.title(plot_title)
-        plt.plot(hys.time, hys.soc, color='red', label='soc')
+        plt.plot(hys.time, hys.soc, color="red", label="soc")
         plt.legend(loc=3)
         plt.subplot(222)
-        plt.plot(hys.time, hys.res, color='black', label='res, Ohm')
+        plt.plot(hys.time, hys.res, color="black", label="res, Ohm")
         plt.legend(loc=3)
         plt.subplot(223)
-        plt.plot(hys.time, hys.ib, color='blue', label='ib, A')
-        plt.plot(hys.time, hys.ioc, color='green', label='ioc, A')
+        plt.plot(hys.time, hys.ib, color="blue", label="ib, A")
+        plt.plot(hys.time, hys.ioc, color="green", label="ioc, A")
         plt.legend(loc=2)
         plt.subplot(224)
-        plt.plot(hys.time, hys.dv_hys, color='red', label='dv_hys, V')
+        plt.plot(hys.time, hys.dv_hys, color="red", label="dv_hys, V")
         plt.legend(loc=2)
         fig_file_name = filename + "_" + str(len(fig_list)) + ".png"
         fig_files.append(fig_file_name)
         if S.save_plots and not S.terse:
-
             plt.savefig(fig_file_name, format="png")
 
         fig_list.append(plt.figure())
         plt.subplot(111)
         plt.title(plot_title)
-        plt.plot(hys.soc, hys.dv_hys, color='red', label='dv_hys vs soc')
+        plt.plot(hys.soc, hys.dv_hys, color="red", label="dv_hys vs soc")
         plt.legend(loc=2)
         fig_file_name = filename + "_" + str(len(fig_list)) + ".png"
         fig_files.append(fig_file_name)
         if S.save_plots and not S.terse:
-
             plt.savefig(fig_file_name, format="png")
 
         return fig_list, fig_files
 
-
     class Pulsar:
         def __init__(self):
-            self.time_last_hold = 0.
-            self.time_last_rest = -100000.
+            self.time_last_hold = 0.0
+            self.time_last_rest = -100000.0
             self.holding = False
             self.resting = True
             self.index = -1
-            self.amp = [100., 0., -100., -100., -100., -100., -100., -100., -100., -100., -100., -100.,
-                        100., 100., 100., 100., 100., 100., 100., 100., 100., 100.]
-            self.dur = [16000., 0., 600., 600., 600., 600., 600., 600., 600., 600., 600., 600.,
-                        600., 600., 600., 600., 600., 600., 600., 600., 600., 600.]
-            self.rst = [600., 7200., 3600., 3600., 3600., 3600., 3600., 3600., 3600., 3600., 3600., 7200.,
-                        3600., 3600., 3600., 3600., 3600., 3600., 3600., 3600., 3600., 46800.]
+            self.amp = [
+                100.0,
+                0.0,
+                -100.0,
+                -100.0,
+                -100.0,
+                -100.0,
+                -100.0,
+                -100.0,
+                -100.0,
+                -100.0,
+                -100.0,
+                -100.0,
+                100.0,
+                100.0,
+                100.0,
+                100.0,
+                100.0,
+                100.0,
+                100.0,
+                100.0,
+                100.0,
+                100.0,
+            ]
+            self.dur = [
+                16000.0,
+                0.0,
+                600.0,
+                600.0,
+                600.0,
+                600.0,
+                600.0,
+                600.0,
+                600.0,
+                600.0,
+                600.0,
+                600.0,
+                600.0,
+                600.0,
+                600.0,
+                600.0,
+                600.0,
+                600.0,
+                600.0,
+                600.0,
+                600.0,
+                600.0,
+            ]
+            self.rst = [
+                600.0,
+                7200.0,
+                3600.0,
+                3600.0,
+                3600.0,
+                3600.0,
+                3600.0,
+                3600.0,
+                3600.0,
+                3600.0,
+                3600.0,
+                7200.0,
+                3600.0,
+                3600.0,
+                3600.0,
+                3600.0,
+                3600.0,
+                3600.0,
+                3600.0,
+                3600.0,
+                3600.0,
+                46800.0,
+            ]
             self.pulse_value = self.amp[0]
             self.end_time = self.time_end()
 
@@ -251,7 +325,7 @@ if __name__ == '__main__':
                 self.resting = True
                 self.holding = False
                 self.time_last_rest = time
-                self.pulse_value = 0.
+                self.pulse_value = 0.0
             return self.pulse_value
 
         def time_end(self):
@@ -261,7 +335,6 @@ if __name__ == '__main__':
             for rs in self.rst:
                 time += rs
             return time
-
 
     def main():
         # Setup to run the transients
@@ -282,12 +355,12 @@ if __name__ == '__main__':
         for i in range(len(t)):
             current_in = pull.calculate(t[i])
 
-            init_ekf = (t[i] <= 1)
+            init_ekf = t[i] <= 1
             if init_ekf:
                 hys.init(0.0)
 
             # Models
-            soc = min(max(soc + current_in / 100. * dt / 20000., 0.), 1.)
+            soc = min(max(soc + current_in / 100.0 * dt / 20000.0, 0.0), 1.0)
             hys.calculate_hys(ib=current_in, soc=soc)
             hys.update(dt=dt)
 
@@ -296,18 +369,18 @@ if __name__ == '__main__':
             hys.save(t[i])
 
         # Data
-        print('hys:  ', str(hys))
+        print("hys:  ", str(hys))
 
         # Plots
         fig_list = []
         fig_files = []
         date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
         filename = PurePosixPath(__file__).stem
-        plot_title = filename + '   ' + date_time
+        plot_title = filename + "   " + date_time
 
         fig_list, fig_files = overall(hys.saved, filename, fig_files, plot_title=plot_title, fig_list=fig_list)
 
-        unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', save_pdf_path='../figures')
+        unite_pictures_into_pdf(outputPdfName=filename + "_" + date_time + ".pdf", save_pdf_path="../figures")
         cleanup_fig_files(fig_files)
         plt.show()
 

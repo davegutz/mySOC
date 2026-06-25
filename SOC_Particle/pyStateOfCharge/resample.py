@@ -13,9 +13,9 @@
 #
 # See http://www.fsf.org/licensing/licenses/lgpl.txt for full license text.
 
-__author__ = 'Dave Gutz <davegutz@alum.mit.edu>'
-__version__ = '$Revision: 1.1 $'
-__date__ = '$Date: 2022/10/23 03:44:00 $'
+__author__ = "Dave Gutz <davegutz@alum.mit.edu>"
+__version__ = "$Revision: 1.1 $"
+__date__ = "$Date: 2022/10/23 03:44:00 $"
 
 # https://www.programcreek.com/python/example/95947/scipy.ndimage.interpolation.zoom  example 22
 
@@ -49,8 +49,18 @@ def resample(data, dt_resamp, time_var, specials=None, make_time_float=True):
         new_n += 1
         new_time.append(start + float(new_n) * dt_resamp)
     # print("resample:  new time", new_time)
-    print("resample:  start new", new_time[0], "end new", new_time[-1], "len new", len(new_time), "end new - end",
-          new_time[-1]-end, "dt_resamp", dt_resamp)
+    print(
+        "resample:  start new",
+        new_time[0],
+        "end new",
+        new_time[-1],
+        "len new",
+        len(new_time),
+        "end new - end",
+        new_time[-1] - end,
+        "dt_resamp",
+        dt_resamp,
+    )
 
     # Index for new array
     irec = np.zeros(new_n)
@@ -59,7 +69,7 @@ def resample(data, dt_resamp, time_var, specials=None, make_time_float=True):
 
     # New array
     if make_time_float:
-        resamp = np.array(new_time, dtype=[(time_var, 'float64')])
+        resamp = np.array(new_time, dtype=[(time_var, "float64")])
     else:
         resamp = np.array(new_time, dtype=[(time_var, time_type)])
     for var_name, typ in data.dtype.descr:
@@ -72,43 +82,43 @@ def resample(data, dt_resamp, time_var, specials=None, make_time_float=True):
                 if spec[0] == var_name:
                     order = spec[1]
                     if type(order) is not int or order < -1 or order > 1:
-                        raise Exception('order=', order, 'from', spec, 'must be -1, 0 or 1')
+                        raise Exception("order=", order, "from", spec, "must be -1, 0 or 1")
 
         # Add interpolated values
         new_var = []
         num = 0
         ext = None
-        for i in range(n-1):
+        for i in range(n - 1):
             time_base = float(data[time_var][i])
-            time_ext = float(data[time_var][i+1])
+            time_ext = float(data[time_var][i + 1])
             dtime = time_ext - time_base
             if order >= 0:
                 base = float(var[i])
-                ext = float(var[i+1])
+                ext = float(var[i + 1])
                 time = time_base
-                if typ == '<f8':
+                if typ == "<f8":
                     while time < time_ext and num < new_n:
-                        val = base + (ext-base) * (time-time_base) * order / dtime
+                        val = base + (ext - base) * (time - time_base) * order / dtime
                         new_var.append(val)
                         num += 1
                         time = new_time[num]
                 else:
                     while time < time_ext and num < new_n:
-                        val = int(round(base + (ext-base) * (time-time_base) * order / dtime))
+                        val = int(round(base + (ext - base) * (time - time_base) * order / dtime))
                         new_var.append(val)
                         num += 1
                         time = new_time[num]
             else:
-                ext = var[i+1]
-                print('ext', ext)
+                ext = var[i + 1]
+                print("ext", ext)
         new_var.append(ext)
         num += 1
 
         if var_name != time_var:
-            if typ == '<f8':
+            if typ == "<f8":
                 resamp = rf.rec_append_fields(resamp, var_name, np.array(new_var, dtype=float))
-            elif typ == '<U18' or typ == '<U21':
-                resamp = rf.rec_append_fields(resamp, var_name, np.array(new_var, dtype='<U21'))
+            elif typ == "<U18" or typ == "<U21":
+                resamp = rf.rec_append_fields(resamp, var_name, np.array(new_var, dtype="<U21"))
             else:
                 resamp = rf.rec_append_fields(resamp, var_name, np.array(new_var, dtype=int))
 
