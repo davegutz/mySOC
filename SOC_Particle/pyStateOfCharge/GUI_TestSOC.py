@@ -47,12 +47,15 @@ from CompareRunRun import compare_run_run
 from CompareRunHist import compare_run_hist
 from CountdownTimer import CountdownTimer
 import shutil
-import pyperclip
 import subprocess
 import datetime
 import platform
 from Colors import Colors
 from test_soc_util import run_shell_cmd
+from typing import Optional
+
+grab_start_time: Optional[float]
+timer: Optional[CountdownTimer]
 
 if platform.system() == "Darwin":
     # noinspection PyUnresolvedReferences
@@ -637,6 +640,7 @@ def monitor_putty_done():
                     return
         except Exception as e:
             print(f"Error monitoring putty file: {e}")
+    # noinspection PyTypeChecker,PyUnfilledParameters
     master.after(1000, monitor_putty_done)
 
 
@@ -800,7 +804,7 @@ def kill_putty(sys_=None, silent=True):
         print(f"kill_putty: SYS = {sys_} unknown")
     if not silent:
         print(command + "\n")
-        print(Colors.bg.brightblack, Colors.fg.wheat)
+        print(Colors.fg.wheat)
         result = run_shell_cmd(command, silent=silent)
         print(Colors.reset)
         print(command + "\n")
@@ -812,7 +816,7 @@ def kill_putty(sys_=None, silent=True):
     return result
 
 
-def look_putty(sys_=None, silent=True):
+def look_putty(sys_=None):
     if sys_ == "Linux":
         try:
             output = subprocess.check_output(["pgrep", "-f", "putty"]).decode("ascii")

@@ -119,14 +119,25 @@ cmd_window_title_prefix = "plink-terminal-server"  # Unique title set in bat fil
 cmd_window_pids = set()  # Windows: every cmd.exe window we ever spawned this session (belt+suspenders)
 run_start_time = None  # Set at grab_start, used to print elapsed time on DONE
 auto_running = False  # Track if AUTO process is active
-auto_fig_list = None  # Handles to figures from the most recently completed AUTO case
+auto_fig_list: Optional[list] = None  # Handles to figures from the most recently completed AUTO case
 auto_case_index = 0  # Current AUTO case index (0-based)
 auto_case_total = 0  # Total number of AUTO cases
 _monitor_after_id: Optional[str] = None  # Pending after() ID for monitor_plink_done; used to cancel stale loops
+run_start_time: Optional[float]
+timer: Optional[CountdownTimer]
 
 
 sys.stdout = _Tee(sys.__stdout__, _log_file)
 sys.stderr = _Tee(sys.__stderr__, _log_file)
+
+
+def find_executable(name: str) -> Optional[str]:
+    """Find executable in PATH."""
+    for path in os.environ.get("PATH", "").split(os.pathsep):
+        exe = os.path.join(path, name)
+        if os.path.isfile(exe) and os.access(exe, os.X_OK):
+            return exe
+    return None
 
 
 # Executive class to control the global variables
@@ -482,7 +493,7 @@ def compare_run(show_killer_=True):
     register_last_task(compare_run)
     if not Test.key_exists_in_file:
         tkinter.messagebox.showwarning(message="Test Key '" + Test.key + "' does not exist in " + Test.file_txt)
-        return
+        return None
     update_data_buttons()
     if modeling.get():
         print("compare_run_sim.  save_pdf_path", str(PurePosixPath(Test.version_path) / "figures"))
@@ -498,7 +509,7 @@ def compare_run(show_killer_=True):
     else:
         if not Ref.key_exists_in_file:
             tkinter.messagebox.showwarning(message="Ref Key '" + Ref.key + "' does not exist in " + Ref.file_txt)
-            return
+            return None
         print("GUI_PlinkSOC compare_run:  Ref", Ref.file_path, Ref.key)
         print("GUI_PlinkSOC compare_run:  Test", Test.file_path, Test.key)
         keys = [(Ref.file_txt, Ref.key), (Test.file_txt, Test.key)]
@@ -744,11 +755,11 @@ def run_sim_all_batch():
             folder = config.get("folder", Test.dataReduction_folder)
             version = config.get("version", Test.version)
             battery = config.get("battery", Test.battery)
-            macro = config.get("macro", "")
-            case_desc = f"version={version!r}, macro={macro!r}"
+            macro_ = config.get("macro", "")
+            case_desc = f"version={version!r}, macro={macro_!r}"
 
             version_path = str(PurePosixPath(folder) / version)
-            file_txt = create_file_txt(macro, Test.unit, battery)
+            file_txt = create_file_txt(macro_, Test.unit, battery)
             file_path = str(PurePosixPath(version_path) / file_txt)
             key = create_file_key(version, Test.unit, battery)
 
@@ -768,7 +779,7 @@ def run_sim_all_batch():
                     hardcopy=True,
                     show_killer_=False,
                     fig_list=all_fig_list,
-                    shift_soc_s=macro not in no_shift_soc_s,
+                    shift_soc_s=macro_ not in no_shift_soc_s,
                 )
                 if result is not None:
                     all_fig_list = result[0]
@@ -860,15 +871,17 @@ def open_plink_window():
     grab_all_nominal()
     Test.create_file_path_and_key()
     Test.update_key_label()
-    start_plink(fg_color="#F5DEB3", bg_color="#2F4F4F")
+    start_plink(fg_color="#F5DEB3", bg_color_="#2F4F4F")
 
 
 def _cancel_monitor_plink():
     global _monitor_after_id
     if _monitor_after_id is not None:
+        # noinspection PyBroadException
         try:
             master.after_cancel(_monitor_after_id)
         except Exception:
+            print(Colors.fg.red, 'error near line 884 of GUI_PlinkSOC.py', Colors.reset)
             pass
         _monitor_after_id = None
 
@@ -900,6 +913,7 @@ def monitor_plink_done():
         save_data()
         tk.messagebox.showinfo(title="Done " + start_button.cget("text"), message="Run Complete")
         return
+    # noinspection PyTypeChecker,PyUnfilledParameters
     _monitor_after_id = master.after(1000, monitor_plink_done)
 
 
@@ -1102,17 +1116,21 @@ def _close_all_plink_windows_windows(silent=True):
 
 
 def _pid_comm(pid):
+    # noinspection PyBroadException
     try:
         return subprocess.check_output(["ps", "-o", "comm=", "-p", str(pid)]).decode().strip()
     except Exception:
+        print(Colors.fg.red, 'error near line 1123 of GUI_PlinkSOC.py', Colors.reset)
         return ""
 
 
 def _pid_ppid(pid):
+    # noinspection PyBroadException
     try:
         out = subprocess.check_output(["ps", "-o", "ppid=", "-p", str(pid)]).decode().strip()
         return int(out) if out else None
     except Exception:
+        print(Colors.fg.red, 'error near line 1133 of GUI_PlinkSOC.py', Colors.reset)
         return None
 
 
@@ -1131,7 +1149,6 @@ def _is_self_or_ancestor(pid):
 
 def kill_plink(sys_=None, silent=True):
     global plink_pid, cmd_window_pid, linux_terminal_pid
-    command = ""
     if plink_pid:
         if sys_ == "Windows":
             command = f"taskkill /f /pid {plink_pid} /t"
@@ -1184,7 +1201,6 @@ def kill_plink(sys_=None, silent=True):
                 return 0
 
     # If we reached here, either plink_pid was None or we want to be sure
-    command = ""
     if sys_ == "Linux":
         command = 'pkill -e plink; pkill -f "plink-terminal-server"'
     elif sys_ == "Windows":
@@ -1198,7 +1214,7 @@ def kill_plink(sys_=None, silent=True):
 
     print(f"Terminating Plink with command: {command}")
     if not silent:
-        print(Colors.bg.brightblack, Colors.fg.wheat)
+        print(Colors.fg.wheat)
         result = run_shell_cmd(command, silent=silent)
         print(Colors.reset)
         if result == -1:
@@ -1213,7 +1229,7 @@ def kill_plink(sys_=None, silent=True):
     return result
 
 
-def look_plink(sys_=None, silent=True):
+def look_plink(sys_=None):
     if sys_ == "Linux":
         try:
             output = subprocess.check_output(["pgrep", "plink"]).decode("ascii")
@@ -1337,18 +1353,22 @@ def close_auto_windows(close_figs=False):
     kill_plink(platform.system())
     _cancel_monitor_plink()
     if timer is not None:
+        # noinspection PyBroadException
         try:
             timer.close()
-        except Exception:
+        except Exception as ee:
+            print(Colors.fg.red, ee, 'error near line 1362 of GUI_PlinkSOC.py', Colors.reset)
             pass
         timer = None
     for widget in master.winfo_children():
         if isinstance(widget, tk.Toplevel):
+            # noinspection PyBroadException
             try:
                 t = widget.title()
                 if t in ("SOC-close", "SOC-countdown"):
                     widget.destroy()
             except Exception:
+                print(Colors.fg.red, 'error near line 1373 of GUI_PlinkSOC.py', Colors.reset)
                 pass
     if close_figs:
         plt.close("all")
@@ -1364,6 +1384,7 @@ def _get_putty_serial_line(session_name):
                 if line.startswith("SerialLine="):
                     return line.split("=", 1)[1].strip()
     elif platform.system() == "Windows":
+        # noinspection PyBroadException
         try:
             import winreg
 
@@ -1372,6 +1393,7 @@ def _get_putty_serial_line(session_name):
                 value, _ = winreg.QueryValueEx(key, "SerialLine")
                 return value
         except Exception:
+            print(Colors.fg.red, 'error near line 1398 of GUI_PlinkSOC.py', Colors.reset)
             pass
     return None
 
@@ -1500,12 +1522,16 @@ def grab_auto():
         print(f"Saved configuration: {saved_config}")
 
         def set_red(widget):
+            # noinspection PyBroadException
             try:
                 widget.config(fg="red", activeforeground="red")
+            # noinspection PyBroadException
             except Exception:
+                # noinspection PyBroadException
                 try:
                     widget.config(fg="red")
                 except Exception:
+                    print(Colors.fg.red, 'error near line 1535 of GUI_PlinkSOC.py', Colors.reset)
                     pass
 
         auto_running = True
@@ -1611,32 +1637,37 @@ def grab_auto():
                                 print(f"***READY*** detected for config {index + 1}. Triggering start_button.")
                                 grab_start()
                                 # After starting, wait for DONE
+                                # noinspection PyTypeChecker,PyUnfilledParameters
                                 master.after(1000, check_completion)
                                 return
                     except Exception as e_:
                         print(f"Error monitoring plink file for READY in AUTO: {e_}")
 
+                # noinspection PyTypeChecker,PyUnfilledParameters
                 master.after(1000, check_ready_and_start)
 
             def check_completion():
                 if Path(plink_test_csv_path.get()).is_file():
                     try:
-                        with open(plink_test_csv_path.get(), "rb") as f:
-                            f.seek(0, 2)
-                            size = f.tell()
-                            f.seek(max(0, size - 1024))
-                            last_data = f.read().decode("utf-8", errors="ignore")
+                        with open(plink_test_csv_path.get(), "rb") as f_:
+                            f_.seek(0, 2)
+                            size = f_.tell()
+                            f_.seek(max(0, size - 1024))
+                            last_data = f_.read().decode("utf-8", errors="ignore")
                             if "***DONE***" in last_data:
                                 print(f"***DONE*** detected for config {index + 1}")
                                 close_auto_windows(close_figs=False)
                                 save_data(show_killer_=False)
+                                # noinspection PyTypeChecker,PyUnfilledParameters
                                 master.after(1000, lambda: process_next_config(index + 1))
                                 return
-                    except Exception as e:
-                        print(f"Error monitoring plink file for DONE in AUTO: {e}")
+                    except Exception as e_:
+                        print(f"Error monitoring plink file for DONE in AUTO: {e_}")
 
+                # noinspection PyTypeChecker,PyUnfilledParameters
                 master.after(1000, check_completion)
 
+            # noinspection PyTypeChecker,PyUnfilledParameters
             master.after(1000, check_ready_and_start)
 
         # Start the sequential processing
@@ -1719,15 +1750,19 @@ def save_data(show_killer_=True):
         if auto_overwrite.get() or _was_auto:
             print("auto over-write triggering comparison")
             # In AUTO mode close the previous case's figures now, before new ones are created
-            if auto_running and auto_fig_list is not None:
-                for _fig in auto_fig_list:
-                    try:
-                        plt.close(_fig)
-                    except Exception:
-                        pass
-                auto_fig_list = None
+            if auto_running:
+                _fig_list = auto_fig_list
+                if _fig_list is not None:
+                    for _fig in _fig_list:
+                        # noinspection PyBroadException
+                        try:
+                            plt.close(_fig)
+                        except Exception:
+                            print(Colors.fg.red, 'error near line 1763 of GUI_PlinkSOC.py', Colors.reset)
+                            pass
+                    auto_fig_list = None
             result = compare_run(show_killer_=show_killer_)
-            if result is not None:
+            if isinstance(result, (list, tuple)):
                 auto_fig_list = result[0]
     else:
         print("plink test file non-existent or too small (<64 bytes) probably already done")
@@ -1853,7 +1888,7 @@ def is_plink_ready():
     return False
 
 
-def start_plink(command_to_paste=None, force_if_ready=False, force_kill=False, fg_color="#00ff00", bg_color="#000000"):
+def start_plink(command_to_paste=None, force_if_ready=False, force_kill=False, fg_color="#00ff00", bg_color_="#000000"):
     global plink_pid, cmd_window_pid, cmd_window_pids, linux_terminal_pid
     lookup_test()
     if look_plink(platform.system()):
@@ -1893,7 +1928,7 @@ def start_plink(command_to_paste=None, force_if_ready=False, force_kill=False, f
         kill_plink(platform.system())
         print(f"restarting plink   plink -load {test_filename.get()}")
         if platform.system() == "Linux":
-            term = shutil.which("gnome-terminal") or shutil.which("xterm") or "x-terminal-emulator"
+            term = find_executable("gnome-terminal") or find_executable("xterm") or "x-terminal-emulator"
             # Use bash -c for an interactive window that pipes output to tee and stays open
             # User provided: gnome-terminal -- bash -c 'plink -load testsoc3p2 | tee ~/.local/plink_test.csv; exec bash'
             plink_base_cmd = f"plink -batch -T -load {test_filename.get()} | tee {plink_test_csv_path.get()}"
@@ -1913,7 +1948,7 @@ def start_plink(command_to_paste=None, force_if_ready=False, force_kill=False, f
                     "bash",
                     "-c",
                     (
-                        f"echo -e '\\e]11;{bg_color}\\a\\e]10;{fg_color}\\a\\e]0;plink-terminal-server\\a'; "
+                        f"echo -e '\\e]11;{bg_color_}\\a\\e]10;{fg_color}\\a\\e]0;plink-terminal-server\\a'; "
                         f"clear; {plink_cmd}"
                     ),
                 ]
@@ -1921,6 +1956,7 @@ def start_plink(command_to_paste=None, force_if_ready=False, force_kill=False, f
                 proc = subprocess.Popen(cmd)
                 linux_terminal_pid = proc.pid
                 tksleep(1.0)  # Wait for terminal to spawn plink
+                # noinspection PyBroadException
                 try:
                     # Debug: Print full result of pgrep and ps -ef | grep plink
                     pgrep_search = f"plink -batch -T -load {test_filename.get()}"
@@ -1936,15 +1972,18 @@ def start_plink(command_to_paste=None, force_if_ready=False, force_kill=False, f
                     if out:
                         plink_pid = int(out)
                 except Exception:
+                    print(Colors.fg.red, 'error near line 1976 of GUI_PlinkSOC.py', Colors.reset)
                     pass  # plink_pid stays None; kill_plink falls back to pkill
 
                 # Get the parent PID using ps
                 ppid = "Unknown"
+                # noinspection PyBroadException
                 try:
                     ppid_out = subprocess.check_output(["ps", "-o", "ppid=", "-p", str(plink_pid)]).decode().strip()
                     if ppid_out:
                         ppid = ppid_out
                 except Exception:
+                    print(Colors.fg.red, 'error near line 1986 of GUI_PlinkSOC.py', Colors.reset)
                     pass
                 print(f"Spawned PID: {plink_pid}  PPID: {ppid}")
                 if auto_running:
@@ -1957,7 +1996,7 @@ def start_plink(command_to_paste=None, force_if_ready=False, force_kill=False, f
                     "-T",
                     "plink-terminal-server",
                     "-bg",
-                    bg_color,
+                    bg_color_,
                     "-fg",
                     fg_color,
                     "-fs",
@@ -1971,6 +2010,7 @@ def start_plink(command_to_paste=None, force_if_ready=False, force_kill=False, f
                 proc = subprocess.Popen(cmd)
                 linux_terminal_pid = proc.pid
                 tksleep(1.0)  # Wait for terminal to spawn plink
+                # noinspection PyBroadException
                 try:
                     # Debug: Print full result of pgrep and ps -ef | grep plink
                     pgrep_search = f"plink -batch -T -load {test_filename.get()}"
@@ -1985,6 +2025,7 @@ def start_plink(command_to_paste=None, force_if_ready=False, force_kill=False, f
                     if out:
                         plink_pid = int(out)
                 except Exception:
+                    print(Colors.fg.red, 'error near line 2029 of GUI_PlinkSOC.py', Colors.reset)
                     pass  # plink_pid stays None; kill_plink falls back to pkill
 
                 # Get the parent PID using ps
@@ -1993,7 +2034,9 @@ def start_plink(command_to_paste=None, force_if_ready=False, force_kill=False, f
                     ppid_out = subprocess.check_output(["ps", "-o", "ppid=", "-p", str(plink_pid)]).decode().strip()
                     if ppid_out:
                         ppid = ppid_out
-                except Exception:
+                # noinspection PyBroadException
+                except Exception as ee:
+                    print(Colors.fg.red, ee, 'error near line 2040 of GUI_PlinkSOC.py', Colors.reset)
                     pass
                 print(f"Spawned PID: {plink_pid}  PPID: {ppid}")
                 if auto_running:
@@ -2002,7 +2045,7 @@ def start_plink(command_to_paste=None, force_if_ready=False, force_kill=False, f
                 # qterminal / x-terminal-emulator: pass bash -c args separately to avoid single-quote
                 # conflicts when plink_cmd contains quoted strings, and use OSC sequences for colors
                 full_bash_cmd = (
-                    f"echo -e '\\e]11;{bg_color}\\a\\e]10;{fg_color}\\a\\e]0;plink-terminal-server\\a'; "
+                    f"echo -e '\\e]11;{bg_color_}\\a\\e]10;{fg_color}\\a\\e]0;plink-terminal-server\\a'; "
                     f"clear; {plink_cmd}"
                 )
                 cmd = [term, "-e", "bash", "-c", full_bash_cmd]
@@ -2023,7 +2066,9 @@ def start_plink(command_to_paste=None, force_if_ready=False, force_kill=False, f
                     out = subprocess.check_output(["pgrep", "-n", "-f", pgrep_search]).decode().strip()
                     if out:
                         plink_pid = int(out)
-                except Exception:
+                # noinspection PyBroadException
+                except Exception as ee:
+                    print(Colors.fg.red, ee, 'error near line 2072 of GUI_PlinkSOC.py', Colors.reset)
                     pass  # plink_pid stays None; kill_plink falls back to pkill
 
                 # Get the parent PID using ps
@@ -2032,7 +2077,9 @@ def start_plink(command_to_paste=None, force_if_ready=False, force_kill=False, f
                     ppid_out = subprocess.check_output(["ps", "-o", "ppid=", "-p", str(plink_pid)]).decode().strip()
                     if ppid_out:
                         ppid = ppid_out
-                except Exception:
+                # noinspection PyBroadException
+                except Exception as ee:
+                    print(Colors.fg.red, ee, 'error near line 2083 of GUI_PlinkSOC.py', Colors.reset)
                     pass
                 print(f"Spawned PID: {plink_pid}  PPID: {ppid}")
                 if auto_running:
@@ -2100,7 +2147,9 @@ def start_plink(command_to_paste=None, force_if_ready=False, force_kill=False, f
                     parts = last_line.split(",")
                     if len(parts) > 1:
                         plink_pid = int(parts[1].strip('"'))
-            except Exception:
+            # noinspection PyBroadException
+            except Exception as ee:
+                print(Colors.fg.red, ee, 'error near line 2153 of GUI_PlinkSOC.py', Colors.reset)
                 pass  # plink_pid stays None; kill_plink falls back to taskkill /im plink.exe
             print(f"Spawned plink PID: {plink_pid}  cmd window PID: {cmd_window_pid}")
             if auto_running:
@@ -2123,7 +2172,6 @@ def start_plink(command_to_paste=None, force_if_ready=False, force_kill=False, f
             )
             cmd = ["osascript", "-e", script]
             print(f"Running command: {shlex.join(cmd)}")
-            proc = subprocess.Popen(cmd)
             tksleep(1.0)
             try:
                 out = (
@@ -2133,7 +2181,9 @@ def start_plink(command_to_paste=None, force_if_ready=False, force_kill=False, f
                 )
                 if out:
                     plink_pid = int(out)
-            except Exception:
+            # noinspection PyBroadException
+            except Exception as ee:
+                print(Colors.fg.red, ee, 'error near line 2188 of GUI_PlinkSOC.py', Colors.reset)
                 pass  # plink_pid stays None; kill_plink falls back to pkill
 
             # Get the parent PID using ps
@@ -2142,7 +2192,9 @@ def start_plink(command_to_paste=None, force_if_ready=False, force_kill=False, f
                 ppid_out = subprocess.check_output(["ps", "-o", "ppid=", "-p", str(plink_pid)]).decode().strip()
                 if ppid_out:
                     ppid = ppid_out
-            except Exception:
+            # noinspection PyBroadException
+            except Exception as ee:
+                print(Colors.fg.red, ee, 'error near line 2199 of GUI_PlinkSOC.py', Colors.reset)
                 pass
             print(f"Spawned PID: {plink_pid}  PPID: {ppid}")
             if auto_running:
