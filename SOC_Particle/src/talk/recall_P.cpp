@@ -64,7 +64,7 @@ bool recall_P(const char letter_1, BatteryMonitor* Mon, Sensors* Sen) {
       sp.print_fault_array();
       sp.print_fault_header(&pp.pubList);
       txBuf = String::format("\nSen::\n");
-      sendTxBuf(txBuf, true, IN_SERVICE);
+      sendTxBuf(txBuf, true, true);
       Sen->Flt->pretty_print(Sen, Mon);
       break;
 

@@ -125,7 +125,7 @@ void debug_q(BatteryMonitor* Mon, Sensors* Sen) {
       Mon->voc_stat_f(), Mon->voc_soc(), Mon->vsat(), Sen->Vc(), Mon->ib(),
       Sen->Sim->soc(), Mon->soc_ekf(), Mon->soc(), Mon->soc_min(),
       Mon->soc_inf(), sp.modeling());
-  sendTxBuf(txBuf, true, IN_SERVICE);
+  sendTxBuf(txBuf, true, true);
 
   txBuf = String::format(
       "dq_inf/dq_abs%10.1f/%10.1f %8.4f coul_eff*=%9.6f, DAB+=%9.6f\nDQn%10.1f "
@@ -136,7 +136,7 @@ void debug_q(BatteryMonitor* Mon, Sensors* Sen) {
       -(Mon->delta_q_neg() + Mon->delta_q_pos()) /
           nice_zero(Mon->time_neg() + Mon->time_pos(), 1e-6),
       Mon->delta_q_neg(), Mon->time_neg(), Mon->delta_q_pos(), Mon->time_pos());
-  sendTxBuf(txBuf, true, IN_SERVICE);
+  sendTxBuf(txBuf, true, true);
 
   // if ( Sen->Flt->falw() || Sen->Flt->fltw() ) chit("Pf;", SOON);
   // time_long_2_str((time_t)sp.Time_now(), pr.buff);
@@ -144,16 +144,16 @@ void debug_q(BatteryMonitor* Mon, Sensors* Sen) {
   // sendTxBuf(txBuf, true, IN_SERVICE);
   if (Sen->Flt->fltw() > 0UL || Sen->Flt->falw() > 0UL) {
     if (Sen->Flt->falw() > 0UL)
-      sendTxBuf("THERE ARE FAILURES:  ", true, IN_SERVICE);
+      sendTxBuf("THERE ARE FAILURES:  ", true, true);
     else if (Sen->Flt->fltw() > 0UL)
-      sendTxBuf("there are faults:  ", true, IN_SERVICE);
+      sendTxBuf("there are faults:  ", true, true);
     txBuf = String::format("fltw %lu falw %lu\n", Sen->Flt->fltw(),
                            Sen->Flt->falw());
-    sendTxBuf(txBuf, true, IN_SERVICE);
+    sendTxBuf(txBuf, true, true);
   } else {
     txBuf = String::format("no faults:  fltw %lu falw %lu\n", Sen->Flt->fltw(),
                            Sen->Flt->falw());
-    sendTxBuf(txBuf, true, IN_SERVICE);
+    sendTxBuf(txBuf, true, true);
   }
 }
 

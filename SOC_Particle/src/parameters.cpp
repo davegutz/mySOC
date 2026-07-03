@@ -103,23 +103,14 @@ VolatilePars::VolatilePars() : Parameters() {
 VolatilePars::~VolatilePars() {}
 
 void VolatilePars::initialize() {
-#define NVOL 54
+#define NVOL 57
   V_ = new Variable*[NVOL];
-  V_[n_++] =
-      (cycles_inj_p = new FloatV("  ", "XC", NULL, "Number prog cycle", "float",
-                                 0, 1000, &cycles_inj_, 0));  // XC
-  V_[n_++] =
-      (dc_dc_on_p = new BooleanV("  ", "Xd", NULL, "DC-DC charger on", "T=on",
-                                 0, 1, &dc_dc_on_, false));  // Xd
-  V_[n_++] = (disab_ib_fa_p =
-                  new BooleanV("  ", "FI", NULL, "Disab hard range ib",
-                               "T=disab", 0, 1, &disab_ib_fa_, false));  // FI
-  V_[n_++] = (disab_tb_fa_p = new BooleanV(
-                  "  ", "FT", NULL, "Disab hard range tb", "T=disab", 0, 1,
-                  &disab_tb_fa_, DISAB_TB_FA));  // FT
-  V_[n_++] = (dis_vb_fa_lt_p = new BooleanV(
-                  "  ", "FV", NULL, "Disab hard range vb", "T=disab", 0, 1,
-                  &dis_vb_fa_lt_, DISAB_VB_FA_LT));  // FV
+  V_[n_++] = (cc_diff_slr_p =    new FloatV("  ", "SC", NULL, "Slr cc_diff",       "float",     0, 1000, &cc_diff_slr_,            1));  // SC
+  V_[n_++] = (cycles_inj_p =     new FloatV("  ", "XC", NULL, "Number prog cycle", "float",     0, 1000, &cycles_inj_,             0));  // XC
+  V_[n_++] = (dc_dc_on_p =     new BooleanV("  ", "Xd", NULL, "DC-DC charger on", "T=on",       0, 1,    &dc_dc_on_,           false));  // Xd
+  V_[n_++] = (disab_ib_fa_p =  new BooleanV("  ", "FI", NULL, "Disab hard range ib", "T=disab", 0, 1, &disab_ib_fa_,           false));  // FI
+  V_[n_++] = (disab_tb_fa_p =  new BooleanV("  ", "FT", NULL, "Disab hard range tb", "T=disab", 0, 1, &disab_tb_fa_,     DISAB_TB_FA));  // FT
+  V_[n_++] = (dis_vb_fa_lt_p = new BooleanV("  ", "FV", NULL, "Disab hard range vb", "T=disab", 0, 1, &dis_vb_fa_lt_, DISAB_VB_FA_LT));  // FV
   V_[n_++] =
       (ds_voc_soc_p = new FloatV("  ", "Ds", NULL, "VOC(SOC) del soc", "slr",
                                  -0.5, 0.5, &ds_voc_soc_, NOM_DS));  // Ds
@@ -152,12 +143,10 @@ void VolatilePars::initialize() {
   V_[n_++] =
       (ib_noa_add_p = new FloatV("  ", "Dn", NULL, "No amp signal add", "A",
                                  -1000, 1000, &ib_noa_add_, 0));  // Dn
-  V_[n_++] = (ib_max_noa_p = new FloatV(
-                  "  ", "Nm", NULL, "Noa hdwe signal max", "A", 0, __FLT_MAX__,
-                  &ib_noa_max_, (IB_ABS_MAX_NOA / NP / SIZE_MARG)));  // Nm
-  V_[n_++] = (ib_min_noa_p = new FloatV(
-                  "  ", "Nn", NULL, "Noa hdwe signal min", "A", -__FLT_MAX__, 0,
-                  &ib_noa_min_, (-IB_ABS_MAX_NOA / NP / SIZE_MARG)));  // Nn
+  V_[n_++] = (ib_max_amp_p = new FloatV("  ", "Mm", NULL, "Amp hdwe signal max", "A", 0,  __FLT_MAX__, &ib_amp_max_,  (IB_ABS_MAX_AMP / NP / SIZE_MARG)));  // Mm
+  V_[n_++] = (ib_min_amp_p = new FloatV("  ", "Mn", NULL, "Amp hdwe signal min", "A", -__FLT_MAX__, 0, &ib_amp_min_, (-IB_ABS_MAX_AMP / NP / SIZE_MARG)));  // Mn
+  V_[n_++] = (ib_max_noa_p = new FloatV("  ", "Nm", NULL, "Noa hdwe signal max", "A", 0,  __FLT_MAX__, &ib_noa_max_,  (IB_ABS_MAX_NOA / NP / SIZE_MARG)));  // Nm
+  V_[n_++] = (ib_min_noa_p = new FloatV("  ", "Nn", NULL, "Noa hdwe signal min", "A", -__FLT_MAX__, 0, &ib_noa_min_, (-IB_ABS_MAX_NOA / NP / SIZE_MARG)));  // Nn
   V_[n_++] =
       (ib_quiet_slr_p = new FloatV("  ", "Fq", NULL, "Ib quiet det slr", "slr",
                                    0, 1000, &ib_quiet_slr_, 1));  // Fq

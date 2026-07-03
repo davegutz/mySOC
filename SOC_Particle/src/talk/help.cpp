@@ -85,6 +85,8 @@ void talkH(BatteryMonitor* Mon, Sensors* Sen) {
   ap.eframe_mult_p->print_help();       //  ED
   ap.Ib_amp_noise_amp_p->print_help();  //  DM
   sp.ib_bias_noa_p->print_help();       //  Dn
+  ap.ib_max_amp_p->print_help();        //  Mm
+  ap.ib_min_amp_p->print_help();        //  Mn
   ap.ib_max_noa_p->print_help();        //  Nm
   ap.ib_min_noa_p->print_help();        //  Nn
   ap.samp_points_p->print_help();       //  Cx
@@ -104,6 +106,7 @@ void talkH(BatteryMonitor* Mon, Sensors* Sen) {
   ap.talk_delay_p->print_help();        //  D>
   ap.ib_scale_amp_p->print_help();      //  SA
   ap.ib_scale_noa_p->print_help();      //  SB
+  ap.cc_diff_slr_p->print_help();       //  SC
   sp.ib_disch_slr_p->print_help();      //* SD
   ap.hys_scale_p->print_help();         //  Sh
   ap.hys_state_p->print_help();         //  SH
@@ -228,8 +231,8 @@ void talkH(BatteryMonitor* Mon, Sensors* Sen) {
   sendTxBuf("\nw - save * confirm adjustments to SRAM\n", true, IN_SERVICE);
 
   sendTxBuf("\nX<?> - Test Mode.   For example:\n", true, IN_SERVICE);
-  ap.dc_dc_on_p->print_help();  // Xd
-  ap.until_q_p->print_help();   // XQ
+  ap.dc_dc_on_p->print_help();  //  Xd
+  ap.until_q_p->print_help();   //  XQ
   sp.modeling_p->print_help();  //* Xm
   sp.pretty_print_modeling();
 #endif

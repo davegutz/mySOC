@@ -60,6 +60,7 @@ class VolatilePars : public Parameters {
   virtual void initialize();
   virtual void pretty_print(const bool all);
 
+  FloatV* cc_diff_slr_p;
   FloatV* cycles_inj_p;
   BooleanV* dc_dc_on_p;
   BooleanV* disab_ib_fa_p;
@@ -96,6 +97,8 @@ class VolatilePars : public Parameters {
   FloatV* Vb_noise_amp_p;
   FloatV* vc_add_p;
   ULongV* wait_inj_p;
+  FloatV* ib_max_amp_p;
+  FloatV* ib_min_amp_p;
   FloatV* ib_max_noa_p;
   FloatV* ib_min_noa_p;
   FloatV* voc_stat_filt_p;

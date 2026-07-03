@@ -43,25 +43,23 @@ extern SavedPars sp;    // Various parameters to be static at system level and
 Shunt::Shunt() : name_("None"), port_(0x00), bare_shunt_(false) {}
 Shunt::Shunt(const String name, const uint8_t port, float* sp_ib_scale,
              float* sp_Ib_bias, const float v2a_s, const uint8_t vc_pin,
-             const uint8_t vo_pin, const uint8_t vh3v3_pin,
-             const bool using_opAmp, const bool using_kf)
+             const uint8_t vo_pin, const bool using_opAmp, const bool using_kf)
     : name_(name), port_(port), bare_shunt_(false), v2a_s_(v2a_s),
       vshunt_int_(0), vshunt_int_0_(0), vshunt_int_1_(0), vshunt_(0.),
       vshunt_kf_(0.), Ishunt_cal_(0.), Ishunt_cal_kf_(0.),
       sp_ib_bias_(sp_Ib_bias), sp_ib_scale_(sp_ib_scale), reset_(false),
       sample_time_(0UL), sample_time_z_(0UL), dscn_cmd_(false), vc_pin_(vc_pin),
-      vo_pin_(vo_pin), vr_pin_(vh3v3_pin), Vc_raw_(HALF_V3V3 / VH3V3_CONV_GAIN),
+      vo_pin_(vo_pin), Vc_raw_(HALF_V3V3 / VH3V3_CONV_GAIN),
       Vc_(HALF_V3V3), Vo_raw_(0), Vo_(0.), Vo_Vc_(0.),
       using_opamp_(using_opAmp), using_kf_(using_kf) {
   if (using_opamp_)
     Serial.printf("Ib %s sense ADC pin %d started using OpAmp and 3V3 pin %d\n",
-                  name_.c_str(), vo_pin_, vr_pin_);
+                  name_.c_str(), vo_pin_, vc_pin_);
   else
-    Serial.printf("Ib %s sense ADC pins %d and %d started\n", name_.c_str(),
-                  vo_pin_, vc_pin_);
+    Serial.printf("Ib %s sense ADC pins %d and %d started\n",
+                  name_.c_str(), vo_pin_, vc_pin_);
   KF_ = new KalmanFilter(0.1, 0., KF_Q_STD, KF_R_STD);
-  Vc_read_ = new AnalogReadP2(using_opamp_ ? vr_pin_ : vc_pin_);
-  Vc_read_ = new AnalogReadP2(using_opamp_ ? vr_pin_ : vc_pin_);
+  Vc_read_ = new AnalogReadP2(vc_pin_);
   Vo_read_ = new AnalogReadP2(vo_pin_);
   Bare_delay_ = new TFDelay(false, RAW_BARE_SET, RAW_BARE_RES, sample_time_);
 }
@@ -144,10 +142,10 @@ void Shunt::sample(const bool reset_kf) {
   sample_filter_kf(reset_kf);
   if (sp.debug() == 14)
     Serial.printf(
-        "reset_kf %d ADCref %7.3f samp_t %llu vo_pin_%d V0_raw_%d Vo_%7.3f "
-        "Vo_Vc_%7.3f vshunt_kf_%7.3f  Vc_%7.3f\n",
+        "reset_kf %d ADCref %7.3f samp_t %llu vo_pin_ %d V0_raw_ %d Vo_ %7.3f "
+        "Vo_Vc_%7.3f vshunt_kf_ %7.3f  vc_pin_ %d Vc_raw_ %d Vc_ %7.3f\n",
         reset_kf, (float)analogGetReference(), sample_time_, vo_pin_, Vo_raw_,
-        Vo_, Vo_Vc_, vshunt_kf_, Vc_);
+        Vo_, Vo_Vc_, vshunt_kf_, vc_pin_, Vc_raw_, Vc_);
 }
 
 // Basic arithmetic
@@ -213,23 +211,17 @@ Sensors::Sensors(double T, double T_temp, Pins* pins, Sync* ReadSensors,
   T_ = T;
   T_filt_ = T;
   T_temp_ = T_temp;
-#if !defined(HDWE_BARE)
-  this->ShuntAmp = new Shunt(
-      "Amp", 0x49, ap.ib_scale_amp_ptr(), sp.ib_bias_amp_ptr(), SHUNT_AMP_GAIN,
-      pins->Vcm_pin, pins->Vom_pin, pins->Vh3v3_pin, false, KF_USE_AMP);
-  this->ShuntNoAmp =
-      new Shunt("No Amp", 0x48, ap.ib_scale_noa_ptr(), sp.ib_bias_noa_ptr(),
-                SHUNT_NOA_GAIN, pins->Vcn_pin, pins->Von_pin, pins->Vh3v3_pin,
-                false, KF_USE_NOA);
-#else
-  this->ShuntAmp = new Shunt(
-      "Amp", 0x49, ap.ib_scale_amp_ptr(), sp.ib_bias_amp_ptr(), SHUNT_AMP_GAIN,
-      pins->Vcm_pin, pins->Vom_pin, pins->Vh3v3_pin, true, KF_USE_AMP);
-  this->ShuntNoAmp =
-      new Shunt("No Amp", 0x48, ap.ib_scale_noa_ptr(), sp.ib_bias_noa_ptr(),
-                SHUNT_NOA_GAIN, pins->Vcn_pin, pins->Von_pin, pins->Vh3v3_pin,
-                true, KF_USE_NOA);
-#endif
+  #if !defined(HDWE_BARE)
+    const bool using_opAmp = false;
+  #else
+    const bool using_opAmp = true;
+  #endif
+  this->ShuntAmp =  new Shunt("Amp",     0x49, ap.ib_scale_amp_ptr(),
+      sp.ib_bias_amp_ptr(), SHUNT_AMP_GAIN, pins->Vcm_pin, pins->Vom_pin,
+      using_opAmp, KF_USE_AMP);
+  this->ShuntNoAmp = new Shunt("No Amp", 0x48, ap.ib_scale_noa_ptr(),
+      sp.ib_bias_noa_ptr(), SHUNT_NOA_GAIN, pins->Vcn_pin, pins->Von_pin,
+      using_opAmp, KF_USE_NOA);
   this->Sim = new BatterySim(ap.ds_voc_soc(), 0., 0.);
   elapsed_inj_ = 0ULL;
   start_inj_ = 0ULL;
@@ -566,14 +558,16 @@ float Sensors::Ib_noa_noise() {
 // Print Shunt selection data
 void Sensors::shunt_print() {
   Serial.printf(
-      "reset,T,select,inj_bias,  vim,Vsm,Vcm,Vom,Ibhm,  vin,Vsn,Vcn,Von,Ibhn,  "
+      "reset,T,select,inj_bias,  vim,Vsm,Vcm,Vom,Ibhm,Ibxm  vin,Vsn,Vcn,Von,Ibhn,Ibxn  "
       "vi3,vh3, Ib_hdwe,T,Ib_amp_fault,Ib_amp_fail,Ib_noa_fault,Ib_noa_fail,=, "
-      "   %d,%7.3f,%d,%7.3f,    %d,%7.3f,%7.3f,%7.3f,%7.3f,    "
-      "%d,%7.3f,%7.3f,%7.3f,%7.3f,    %7.3f,%7.3f, %d,%d,  %d,%d,\n",
+      "   %d,%7.3f,%d,%7.3f,    %d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,    "
+      "%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,    %7.3f,%7.3f, %d,%d,  %d,%d,\n",
       reset_, T_, sp.ib_force(), sp.inj_bias(), ShuntAmp->vshunt_int(),
       ShuntAmp->vshunt(), ShuntAmp->Vc(), ShuntAmp->Vo(),
-      ShuntAmp->Ishunt_cal(), ShuntNoAmp->vshunt_int(), ShuntNoAmp->vshunt(),
-      ShuntNoAmp->Vc(), ShuntNoAmp->Vo(), ShuntNoAmp->Ishunt_cal(), Ib_hdwe_,
+      ShuntAmp->Ishunt_cal(), ap.ib_amp_max(), 
+      ShuntNoAmp->vshunt_int(), ShuntNoAmp->vshunt(),
+      ShuntNoAmp->Vc(), ShuntNoAmp->Vo(), ShuntNoAmp->Ishunt_cal(), ap.ib_noa_max(), 
+      Ib_hdwe_,
       T_, Flt->ib_amp_flt(), Flt->ib_amp_fa(), Flt->ib_noa_flt(),
       Flt->ib_noa_fa());
 }

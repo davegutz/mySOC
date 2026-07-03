@@ -112,8 +112,7 @@ class Shunt {
   Shunt();
   Shunt(const String name, const uint8_t port, float* sp_ib_scale,
         float* sp_Ib_bias, const float v2a_s, const uint8_t vc_pin,
-        const uint8_t vo_pin, const uint8_t vh3v3_pin, const bool using_opAmp,
-        const bool using_kf);
+        const uint8_t vo_pin, const bool using_opAmp, const bool using_kf);
   ~Shunt();
   // operators
   // functions
@@ -164,7 +163,6 @@ class Shunt {
   bool dscn_cmd_;           // User command to ignore hardware, T=ignore
   uint8_t vc_pin_;          // Common voltage pin
   uint8_t vo_pin_;          // Output voltage pin
-  uint8_t vr_pin_;          // Reference voltage pin, for TSC1200 or INA181
   int Vc_raw_;              // Raw analog read, integer
   float Vc_;                // Sensed Vc, common op amp voltage ref, V
   int Vo_raw_;              // Raw analog read, integer

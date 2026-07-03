@@ -546,8 +546,9 @@ void Fault::pretty_print(Sensors* Sen, BatteryMonitor* Mon) {
   sendTxBuf(txBuf, true, IN_SERVICE);
 
   txBuf =
-      String::format(" soc%7.3f soc_inf%7.3f voc%7.3f  voc_soc%7.3f\n",
-                     Mon->soc(), Mon->soc_inf(), Mon->voc(), Mon->voc_soc()) +
+      String::format(" soc%7.3f soc_ekf%7.3f soc_inf%7.3f voc%7.3f voc_soc%7.3f\n",
+                     Mon->soc(), Mon->soc_ekf(), Mon->soc_inf(), Mon->voc(),
+                     Mon->voc_soc()) +
       String::format(" dis_tb_fa %d  dis_vb_fa %d  dis_ib_fa %d\n",
                      ap.disab_tb_fa(), ap.disab_vb_fa_lt(), ap.disab_ib_fa()) +
       String::format(" ib_is_quiet %d ib_really_quiet %d\n", ib_is_quiet_,

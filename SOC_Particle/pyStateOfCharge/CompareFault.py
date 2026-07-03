@@ -1477,9 +1477,7 @@ def filter_Tb(raw, temp_corr, mon, tb_band=5.0, rated_batt_cap=100.0):
         hys_time_min = np.arange(t_s_min, t_e_min, dt_hys_min, dtype=float)
         min_per_month = 30 * 24 * 60
         if len(hys_time_min) > 2 * min_per_month:
-            print(Colors.fg.red)
-            print("HUGE time range.  Something is wrong with time")
-            print(Colors.reset)
+            print(Colors.fg.red, "HUGE time range.  Something is wrong with time", Colors.reset)
             return None
         h = rf.rec_append_fields(h, "sat", saturated_)
         h = rf.rec_append_fields(h, "saturated", saturated_)

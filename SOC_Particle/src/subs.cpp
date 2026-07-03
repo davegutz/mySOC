@@ -606,7 +606,7 @@ void serial_display(Sensors* Sen, BatteryMonitor* Mon) {
         "%s   Tb,C  VOC,V  Ib,A \n%s   EKF,Ah  chg,hrs  CC, Ah\nPf; for fails. "
         " prints=%ld\n\n",
         disp_Tbop.c_str(), dispBot.c_str(), cp.num_v_print);
-    sendTxBuf(txBuf, true, IN_SERVICE);
+    sendTxBuf(txBuf, true, true);
   } else if (1 <= sp.debug() &&
              sp.debug() <= 4)  // Normal BLE display as long as 'vv4' so can
                                // watch GUI_test in progress
@@ -673,7 +673,8 @@ void setup_serial_ble() {
 
 // Configure hardware pins and report temperature sensor type in setup()
 void setup_pins() {
-  myPins = new Pins(D7, D12, D11, D13, D14, D0, true);
+  //        status_led, Vb_pin, Von_pin, Vom_pin, Vc_pin,    VTb_pin, using_2wir
+  myPins = new Pins(D7, D12,    D11,     D13,     D14,       D0);
   pinMode(myPins->status_led, OUTPUT);
   digitalWrite(myPins->status_led, LOW);
 
