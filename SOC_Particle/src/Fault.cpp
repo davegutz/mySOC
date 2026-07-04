@@ -284,24 +284,20 @@ void Fault::ib_diff(const bool reset, Sensors* Sen, BatteryMonitor* Mon) {
   ib_diff_thr_ = IBATT_DISAGREE_THRESH * ap.ib_diff_slr();
   faultAssign(
       IbdPosPer->calculate((ib_diff_f_ >= ib_diff_thr_), IBATT_INST_DIFF_SET,
-                           IBATT_INST_DIFF_RES, Sen->T(), reset_loc),
-      IB_DIFF_HI_FLT);
+                            IBATT_INST_DIFF_RES, Sen->T(), reset_loc),
+                            IB_DIFF_HI_FLT);
   faultAssign(
       IbdNegPer->calculate((ib_diff_f_ <= -ib_diff_thr_), IBATT_INST_DIFF_SET,
-                           IBATT_INST_DIFF_RES, Sen->T(), reset_loc),
-      IB_DIFF_LO_FLT);
-  failAssign(IbdHiPer->calculate(ib_diff_hi_flt(), IBATT_DISAGREE_SET,
-                                 IBATT_DISAGREE_RES, Sen->T(), reset_loc),
-             IB_DIFF_HI_FA);  // IB_DIFF_FA not latched
-  failAssign(IbdLoPer->calculate(ib_diff_lo_flt(), IBATT_DISAGREE_SET,
-                                 IBATT_DISAGREE_RES, Sen->T(), reset_loc),
-             IB_DIFF_LO_FA);  // IB_DIFF_FA not latched
-
-  // if ( sp.debug()==2 || sp.debug()==4 ) Serial.printf("ib_diff_%7.3f
-  // reset_loc %d disable_amp_fault_ %d ib_diff_f_ %7.3f ib_diff_thr_ %7.3f
-  // ib_lo_active_ %d\n",
-  //    ib_diff_, reset_loc, disable_amp_fault_, ib_diff_f_, ib_diff_thr_,
-  //    ib_lo_active_);
+                            IBATT_INST_DIFF_RES, Sen->T(), reset_loc),
+                            IB_DIFF_LO_FLT);
+  failAssign(
+      IbdHiPer->calculate(ib_diff_hi_flt(), IBATT_DISAGREE_SET,
+                          IBATT_DISAGREE_RES, Sen->T(), reset_loc),
+                          IB_DIFF_HI_FA);  // IB_DIFF_FA not latched
+  failAssign(
+      IbdLoPer->calculate(ib_diff_lo_flt(), IBATT_DISAGREE_SET,
+                          IBATT_DISAGREE_RES, Sen->T(), reset_loc),
+                          IB_DIFF_LO_FA);  // IB_DIFF_FA not latched
 }
 
 // Compare current sensors - failure conditions large difference
@@ -311,8 +307,8 @@ void Fault::ib_logic(const bool reset, Sensors* Sen, BatteryMonitor* Mon) {
   // Difference error, filter, check, persist, doesn't latch
   if (sp.mod_ib()) {
     ib_diff_ = Sen->ib_amp_model() - Sen->ib_noa_model();
-    ib_amp_hi_ = Sen->ib_amp_model() >= HDWE_IB_HI_LO_AMP_HI / ap.nP();
-    ib_amp_lo_ = Sen->ib_amp_model() <= HDWE_IB_HI_LO_AMP_LO / ap.nP();
+    ib_amp_hi_ = Sen->ib_amp_model() >= (HDWE_IB_HI_LO_AMP_HI / ap.nP()) - 1.;
+    ib_amp_lo_ = Sen->ib_amp_model() <= (HDWE_IB_HI_LO_AMP_LO / ap.nP()) + 1.;
     ib_noa_hi_ = Sen->ib_noa_model() >= HDWE_IB_HI_LO_NOA_HI / ap.nP();
     ib_noa_lo_ = Sen->ib_noa_model() <= HDWE_IB_HI_LO_NOA_LO / ap.nP();
     ib_lo_limited_hi_ =

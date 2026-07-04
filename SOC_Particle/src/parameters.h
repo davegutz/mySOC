@@ -60,6 +60,7 @@ class VolatilePars : public Parameters {
   virtual void initialize();
   virtual void pretty_print(const bool all);
 
+  FloatV* bare_slr_p;
   FloatV* cc_diff_slr_p;
   FloatV* cycles_inj_p;
   BooleanV* dc_dc_on_p;
@@ -119,6 +120,8 @@ class VolatilePars : public Parameters {
   FloatV* Vb_scale_p;
 
   // accessors
+  float bare_slr() { return bare_slr_; }
+  void bare_slr(const float input) { bare_slr_ = input; }
   float cc_diff_slr() { return cc_diff_slr_; }
   void cc_diff_slr(const float input) { cc_diff_slr_ = input; }
   float cycles_inj() { return cycles_inj_; }
@@ -246,6 +249,7 @@ class VolatilePars : public Parameters {
   void put_Vb_scale(const float input) { Vb_scale_p->check_set_put(input); }
 
  protected:
+  float bare_slr_;       // Scale bare detection thresh, scalar
   float cc_diff_slr_;    // Scale cc_diff detection thresh, scalar
   float cycles_inj_;     // Number of injection cycles
   bool dc_dc_on_;        // DC-DC charger is on

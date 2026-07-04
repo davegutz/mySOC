@@ -161,7 +161,8 @@ void Shunt::sample_filter_kf(const bool reset_kf) {
 
 // Sample Vc = Vr centering signal for amplifier
 void Shunt::sample_Vc() {
-  Vc_raw_ = Vc_read_->analogReadDebounced(VRAW_BARE_DETECTED, reset_, name_);
+  Vc_raw_ = Vc_read_->analogReadDebounced(VRAW_BARE_DETECTED * ap.bare_slr(),
+                                          reset_, name_);
   if (using_opamp_) {
     Vc_ = float(Vc_raw_) * VH3V3_CONV_GAIN + ap.vc_add();
   } else {
@@ -173,7 +174,8 @@ void Shunt::sample_Vc() {
 void Shunt::sample_Vo() {
   sample_time_z_ = sample_time_;
   sample_time_ = millis();
-  Vo_raw_ = Vo_read_->analogReadDebounced(VRAW_BARE_DETECTED, reset_, name_);
+  Vo_raw_ = Vo_read_->analogReadDebounced(VRAW_BARE_DETECTED * ap.bare_slr(),
+                                          reset_, name_);
   Vo_ = float(Vo_raw_) * VO_CONV_GAIN;
 }
 
@@ -645,11 +647,12 @@ void Sensors::Tb_load(const uint16_t tb_pin, const bool reset) {
   float lnres = log(res);
   if (!sp.mod_tb_dscn()) {
 #if !defined(HDWE_BARE)
-    Tb_raw_ = Tb_read_->analogReadDebounced(VRAW_BARE_DETECTED, reset, "Tb");
+    Tb_raw_ = Tb_read_->analogReadDebounced(
+      VRAW_TB_BARE_DETECTED * ap.bare_slr(), reset, "Tb");
     Tb_volt_ = float(Tb_raw_) * VTB_CONV_GAIN;
     Tb_hdwe_ =
         (1. / max(HDWE_SHA_2WIRE +
-                      (HDWE_SHB_2WIRE + HDWE_SHC_2WIRE * lnres * lnres) * lnres,
+                 (HDWE_SHB_2WIRE + HDWE_SHC_2WIRE * lnres * lnres) * lnres,
                   0.000001)) -
         273.;
     Tb_hdwe_ += hdwe_add;  // Fault injection
@@ -721,7 +724,8 @@ void Sensors::Tb_print() {
 void Sensors::vb_load(const uint16_t vb_pin, const bool reset) {
   if (!sp.mod_vb_dscn()) {
 #if !defined(HDWE_BARE)
-    Vb_raw_ = Vb_read_->analogReadDebounced(VRAW_BARE_DETECTED, reset, "Vb");
+    Vb_raw_ = Vb_read_->analogReadDebounced(VRAW_VB_BARE_DETECTED * ap.bare_slr(),
+                                            reset, "Vb");
     Vb_volt_ = Vb_raw_ * VB_RAW_CONV_GAIN;
     Vb_hdwe_ = float(Vb_raw_) * VB_CONV_GAIN * ap.Vb_scale() + float(VB_A) +
                sp.Vb_bias_hdwe();

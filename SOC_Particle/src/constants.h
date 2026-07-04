@@ -393,8 +393,16 @@ const float QUIET_RES(QUIET_SET /
 #define SHUNT_NOA_R2 33200.  // Internal amp resistance 29.4x, ohms (33200)
 #endif
 #if !defined(VRAW_BARE_DETECTED)
-#define VRAW_BARE_DETECTED \
-  500  // Level of common voltage to declare circuit unconnected, V (50UL)
+#define VRAW_BARE_DETECTED  500
+  // Level of common voltage to declare circuit unconnected, V (50UL)
+#endif
+#if !defined(VRAW_TB_BARE_DETECTED)
+#define VRAW_TB_BARE_DETECTED  860  // 50 C
+  // Level of common voltage to declare Tb circuit unconnected, V (50UL)
+#endif
+#if !defined(VRAW_VB_BARE_DETECTED)
+#define VRAW_VB_BARE_DETECTED  400  // 2 v
+  // Level of common voltage to declare circuit unconnected, V (50UL)
 #endif
 
 // Vb Hardware

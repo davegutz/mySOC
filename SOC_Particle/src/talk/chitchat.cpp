@@ -499,8 +499,8 @@ void describe(BatteryMonitor* Mon, Sensors* Sen) {
       case ('w'):  // w:  confirm write * adjustments to to SRAM
         System.backupRamSync();
         sp.dirty(false);
-        sendTxBuf("SAVED *\n", true, IN_SERVICE);
-        break;
+        sendTxBuf(String::format("SAVED * now dirty=%d\n", sp.dirty()), true, true);
+            break;
 
       case ('W'):  // W<>:  wait.  Skip
         if (cp.cmd_str.substring(1).length()) {

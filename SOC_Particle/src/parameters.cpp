@@ -79,11 +79,11 @@ bool Parameters::is_corrupt() {
     if (V_[i]->is_corrupt())
       sendTxBuf(String::format("\n%s %s corrupt", V_[i]->code().c_str(),
                                V_[i]->description()),
-                true, IN_SERVICE);
+                true, true);
     corruption |= V_[i]->is_corrupt();
   }
   if (corruption) {
-    sendTxBuf(String::format("\ncorrupt****\n"), true, IN_SERVICE);
+    sendTxBuf(String::format("\ncorrupt****\n"), true, true);
     pretty_print(false);
   }
   return corruption;
@@ -103,8 +103,9 @@ VolatilePars::VolatilePars() : Parameters() {
 VolatilePars::~VolatilePars() {}
 
 void VolatilePars::initialize() {
-#define NVOL 57
+#define NVOL 58
   V_ = new Variable*[NVOL];
+  V_[n_++] = (bare_slr_p =       new FloatV("  ", "SZ", NULL, "Slr debounce",      "float",     0, 1000, &bare_slr_,               1));  // SZ
   V_[n_++] = (cc_diff_slr_p =    new FloatV("  ", "SC", NULL, "Slr cc_diff",       "float",     0, 1000, &cc_diff_slr_,            1));  // SC
   V_[n_++] = (cycles_inj_p =     new FloatV("  ", "XC", NULL, "Number prog cycle", "float",     0, 1000, &cycles_inj_,             0));  // XC
   V_[n_++] = (dc_dc_on_p =     new BooleanV("  ", "Xd", NULL, "DC-DC charger on", "T=on",       0, 1,    &dc_dc_on_,           false));  // Xd
@@ -235,18 +236,16 @@ void VolatilePars::initialize() {
 }
 
 void VolatilePars::pretty_print(const bool all) {
-#if !IN_SERVICE
   if (all) {
-    sendTxBuf("volatile all:\n", true, IN_SERVICE);
+    sendTxBuf("volatile all:\n", true, true);
     for (uint8_t i = 0; i < n_; i++) {
       if (!(V_[i]->is_eeram())) {
         V_[i]->print();
       }
     }
   }
-#endif
   if (!all) {
-    sendTxBuf("volatile off:\n", true, IN_SERVICE);
+    sendTxBuf("volatile off:\n", true, true);
     uint8_t count = 0;
     for (uint8_t i = 0; i < n_; i++) {
       if (!(V_[i]->is_eeram())) {
@@ -256,11 +255,11 @@ void VolatilePars::pretty_print(const bool all) {
         }
       }
     }
-    if (count == 0) sendTxBuf("**none**\n\n", true, IN_SERVICE);
+    if (count == 0) sendTxBuf("**none**\n\n", true, true);
   }
   while (n_ != NVOL) {
     delay(5000);
-    sendTxBuf(String::format("set NVOL=%d\n", n_), true, IN_SERVICE);
+    sendTxBuf(String::format("set NVOL=%d\n", n_), true, true);
   }
 }
 
@@ -387,25 +386,25 @@ int SavedPars::num_diffs() {
 
 // Print memory map
 void SavedPars::mem_print() {
-  sendTxBuf("EERAM map:\n", true, IN_SERVICE);
+  sendTxBuf("EERAM map:\n", true, true);
   for (int i = 0; i < n_; i++)
     sendTxBuf(String::format("  0x%04X +%d  %s\n", V_[i]->addr(),
                              V_[i]->eeram_size(), V_[i]->description()),
-              true, IN_SERVICE);
+              true, true);
   sendTxBuf(String::format("  total 0x%04X (%d) of 0x%04X\n", next_, next_,
                            MAX_EERAM),
-            true, IN_SERVICE);
+            true, true);
 }
 
 // Print
 void SavedPars::pretty_print(const bool all) {
   if (all) {
-    sendTxBuf("saved (sp) all\n", true, IN_SERVICE);
+    sendTxBuf("saved (sp) all\n", true, true);
     for (int i = 0; i < n_; i++) {
       V_[i]->print();
     }
-#if !IN_SERVICE
-    sendTxBuf("Xm:\n", true, IN_SERVICE);
+#if !true
+    sendTxBuf("Xm:\n", true, true);
     pretty_print_modeling();
 #endif
   } else {
@@ -417,12 +416,12 @@ void SavedPars::pretty_print(const bool all) {
         V_[i]->print();
       }
     }
-    if (count == 0) sendTxBuf("**none**\n\n", true, IN_SERVICE);
+    if (count == 0) sendTxBuf("**none**\n\n", true, true);
 
     // Build integrity test
     while (n_ != NSAV) {
       delay(5000);
-      sendTxBuf(String::format("set NSAV=%d\n", n_), true, IN_SERVICE);
+      sendTxBuf(String::format("set NSAV=%d\n", n_), true, true);
     }
   }
 }
@@ -442,7 +441,7 @@ void SavedPars::pretty_print_modeling() {
 
   time_long_2_str((time_t)Time_now_, buffer);
   sendTxBuf(String::format(" time %ld hms:  %s\n", Time_now_, buffer), true,
-            IN_SERVICE);
+            true);
 }
 
 // Print faults

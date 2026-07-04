@@ -77,7 +77,7 @@ class AnalogReadP2 {
                          "raw_low_prev %d lgv_ %d raw_debounced %d \n",
                          name.c_str(), reset, raw_, debounce_level, raw_low_,
                          dead_, raw_low_prev_, lgv_, raw_debounced_),
-          true, IN_SERVICE);
+          sp.debug() == 6, sp.debug() == 6);
     } else {
       raw_debounced_ =
           raw_;  // 1st low, or persistent (3rd+): pass raw_ through

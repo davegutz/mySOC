@@ -270,8 +270,7 @@ void loop() {
 // Warn if parameters have been changed but not saved
 #if IN_SERVICE
     if (NoSaveWarn->update(now, reset) && sp.dirty()) {
-      sendTxBuf("WARNING: unsaved Retained parameter.  Enter 'w' to save.\n",
-                true, IN_SERVICE);
+      sendTxBuf(String::format("WARNING: unsaved Retained parameter.  Enter 'w' to save. now dirty=%d\n", sp.dirty()), true, true);
     }
 #endif
 
