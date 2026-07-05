@@ -86,7 +86,7 @@ const char unit[] = version_str "_" HDWE_UNIT;
 #define SUMMARY_WAIT \
   60000UL  // Summarize alive time before first save, ms (60000UL = 1 min) Dh
 #define DISPLAY_USER_DELAY 1200UL  // User display update (1200UL = 1.2 sec)
-#define DP_MULT 4                  // Multiples of read to capture data DP
+#define DP_MULT 1                  // Multiples of read to capture data DP
 #define VB_S 1.0                   // Vb sense scalar (1.0)
 #define VB_A 0.0                   // Vb sense adder, V (0)
 #define PHOTON_ADC_COUNT 4096      // Photon ADC range, counts (4096)
@@ -125,12 +125,9 @@ const float T_DESAT = 20;  // De-saturation time, sec
   700  // Time after power on to start reading temp, ms (700)
 #endif
 #define CC_DIFF_LO_SOC_SLR 4.  // Large to disable cc_diff
-#define TAU_ERR_FILT \
-  5.  // Current sensor difference filter time constant, s (5.)
-#define IB_LO_ACTIVE_SET \
-  0.2  // Ib low range sensor is in-range persistence, s (0.2)
-#define IB_LO_ACTIVE_RES \
-  0.4  // Ib low range sensor is in-range reset persistence, s (0.4)
+#define TAU_ERR_FILT       5.  // Current sensor difference filter time constant, s (5.)
+#define IB_LO_ACTIVE_SET   0.2 // Ib low range sensor is in-range persistence, s (0.2)
+#define IB_LO_ACTIVE_RES   0.4 // Ib low range sensor is in-range reset persistence, s (0.4)
 #define VB_MAX \
   17.  // Signal selection hard fault threshold, V (17. < VB_CONV_GAIN*4095)
 #define VB_MIN \
@@ -185,20 +182,15 @@ const float WRAP_HI_RES =
 #define WRAP_LO_AMPV -0.5  // Wrap low voltage threshold amplified, V (-1.5)
 #define WRAP_HI_NOAV 0.8   // Wrap high voltage threshold non-amplified, V (0.8)
 #define WRAP_LO_NOAV -0.8  // Wrap low voltage threshold non-amplified, V (-0.8)
-#define WRAP_HI_SETAT_MARG 0.2  // Wrap voltage margin to saturation, V (0.2)
-#define WRAP_HI_SETAT_SLR \
-  2.0  // Wrap voltage margin scalar when saturated (2.0)
-#define IBATT_DISAGREE_THRESH \
-  3.  // Signal selection threshold for current disagree test, A (3.)
-const float IBATT_DISAGREE_SET =
-    (WRAP_LO_SET - 1.);  // Signal selection current disagree fail persistence,
-                         // s (WRAP_LO_SET-1) // must be quicker than wrap lo
-#define IBATT_INST_DIFF_SET \
-  0.2  // Persistence on instantaneous current difference, s (0.2)
-#define IBATT_INST_DIFF_RES \
-  0.0  // Persistence reset on instantaneous current difference, s (0.0)
-#define IBATT_DISAGREE_RES \
-  2.0  // Signal selection current disagree reset persistence, s (2.)
+#define WRAP_HI_SETAT_MARG 0.2   // Wrap voltage margin to saturation, V (0.2)
+#define WRAP_HI_SETAT_SLR  2.0   // Wrap voltage margin scalar when saturated (2.0)
+#define IBATT_DISAGREE_THRESH 3. // Signal selection threshold for current disagree test, A (3.)
+const float IBATT_DISAGREE_SET = (WRAP_LO_SET - 1.);
+      // Signal selection current disagree fail persistence,
+      // s (WRAP_LO_SET-1) // must be quicker than wrap lo
+#define IBATT_INST_DIFF_SET  0.2  // Persistence on instantaneous current difference, s (0.2)
+#define IBATT_INST_DIFF_RES  0.0  // Persistence reset on instantaneous current difference, s (0.0)
+#define IBATT_DISAGREE_RES   2.0  // Signal selection current disagree reset persistence, s (2.)
 #define TAU_Q_FILT 0.5    // Quiet rate time constant, sec (0.5)
 #define MIN_Q_FILT -5.0   // Quiet filter minimum, V (-0.5)
 #define MAX_Q_FILT 5.0    // Quiet filter maximum, V (0.5)

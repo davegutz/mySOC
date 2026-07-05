@@ -271,9 +271,7 @@ void Fault::cc_diff(const bool reset, Sensors* Sen, BatteryMonitor* Mon) {
 // Compare current sensors - failure conditions large difference
 void Fault::ib_diff(const bool reset, Sensors* Sen, BatteryMonitor* Mon) {
   bool reset_loc = reset || reset_all_faults_;
-  if (disable_amp_fault_)
-    ib_diff_ = ib_diff_;
-  else if (ib_lo_limited_hi_)
+  if (ib_lo_limited_hi_)
     ib_diff_ = max(0., ib_diff_);  // limit error when low amp is pegged high
   else if (ib_lo_limited_lo_)
     ib_diff_ = min(0., ib_diff_);  // limit error when low amp is pegged low
@@ -377,7 +375,7 @@ void Fault::ib_quiet(const bool reset, Sensors* Sen) {
                        Sen->Ib_amp_hdwe() + Sen->Ib_noa_hdwe(), ib_quiet_,
                        ib_quiet_thr_, ib_is_quiet_, ib_is_functional_,
                        ib_really_quiet_),
-        true, IN_SERVICE);
+        true, true);
 
   // Fault
   faultAssign(ib_is_quiet_, IB_DSCN_FLT);  // initializes false
@@ -517,14 +515,14 @@ void Fault::pretty_print(Sensors* Sen, BatteryMonitor* Mon) {
   String txBuf;
 
   txBuf = String::format("\nLooparound Amp:\n");
-  sendTxBuf(txBuf, true, IN_SERVICE);
+  sendTxBuf(txBuf, true, true);
   txBuf = WrapLoopAmp->pretty_print(Sen);
-  sendTxBuf(txBuf, true, IN_SERVICE);
+  sendTxBuf(txBuf, true, true);
 
   txBuf = String::format("\nLooparound Noa:\n");
-  sendTxBuf(txBuf, true, IN_SERVICE);
+  sendTxBuf(txBuf, true, true);
   txBuf = WrapLoopNoa->pretty_print(Sen);
-  sendTxBuf(txBuf, true, IN_SERVICE);
+  sendTxBuf(txBuf, true, true);
 
   txBuf =
       String::format("\nFault:\n") +
@@ -536,10 +534,10 @@ void Fault::pretty_print(Sensors* Sen, BatteryMonitor* Mon) {
       String::format(" ib_quiet%7.3f thr%7.3f Fq v\n", ib_quiet_,
                      ib_quiet_thr_) +
       String::format(" sel_brk_hdwe:     ");
-  sendTxBuf(txBuf, true, IN_SERVICE);
+  sendTxBuf(txBuf, true, true);
 
   txBuf = Sen->sel_brk_hdwe->pretty_print() + String::format("\n");
-  sendTxBuf(txBuf, true, IN_SERVICE);
+  sendTxBuf(txBuf, true, true);
 
   txBuf =
       String::format(" soc%7.3f soc_ekf%7.3f soc_inf%7.3f voc%7.3f voc_soc%7.3f\n",
@@ -565,7 +563,7 @@ void Fault::pretty_print(Sensors* Sen, BatteryMonitor* Mon) {
                      Sen->Ib_noa_model(), Sen->Ib()) +
       String::format(" Ibh%7.3f Ibh %7.3f Ib%7.3f\n\n", Sen->Ib_hdwe(),
                      Sen->Ib_hdwe_model(), Sen->Ib());
-  sendTxBuf(txBuf, true, IN_SERVICE);
+  sendTxBuf(txBuf, true, true);
 
   // if ( ib_choice_ != ib_choice_last_ || vb_sel_stat_ != vb_sel_stat_last_ ||
   // tb_sel_stat_ != tb_sel_stat_last_ )
@@ -613,7 +611,7 @@ void Fault::pretty_print(Sensors* Sen, BatteryMonitor* Mon) {
       String::format("2-red_loss %2d\n", dispRead(dispw::red_loss)) +
       String::format("1-diff_ib  %2d\n", dispRead(diff_ib)) +
       String::format("0-conn     %2d\n\n", dispRead(conn));
-  sendTxBuf(txBuf, true, IN_SERVICE);
+  sendTxBuf(txBuf, true, true);
   // enum dispw {conn=0, diff_ib=1, red_loss=2, fail_ib=3, fail_ibm=4,
   // fail_vb=5, flt_tb=6, flt_ekf=7, SAT=8, off=9, accy=10, time_long=11,
   // Count};
@@ -626,18 +624,18 @@ void Fault::pretty_print(Sensors* Sen, BatteryMonitor* Mon) {
               "10FEDCBA9876543210   10FExxBA9876543210   BA9876543210\n\n") +
           String::format("  fltw=%8ld       falw=%8ld         dispw=%8ld\n",
                          fltw_, falw_, cp.disp_word);
-  sendTxBuf(txBuf, true, IN_SERVICE);
+  sendTxBuf(txBuf, true, true);
 
   if (ap.fake_faults()) {
     txBuf = String::format("fake_faults=>redl\n");
-    sendTxBuf(txBuf, true, IN_SERVICE);
+    sendTxBuf(txBuf, true, true);
   }
 
   if (sp.Time_now() < 1746684000UL) {
     txBuf =
         String::format("\n\n////////////////// WARN set UT (h;) %lu < %lu\n\n",
                        sp.Time_now(), 1746684000UL);
-    sendTxBuf(txBuf, true, IN_SERVICE);
+    sendTxBuf(txBuf, true, true);
   }
 }
 

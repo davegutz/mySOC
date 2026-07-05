@@ -420,12 +420,12 @@ def main():  # Example usage.  ok on 20260217
         8:  vb_wrap
         9:  dyn_n
     """
-    data_file = "G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20260524a/offSitBmsNoiseBB_soc3p2_hi_lo_bb.csv"
-    unit_key = "g20260524a_soc3p2_hi_lo_bb"
+    data_file = '/home/daveg/.local/SOC_Particle/dataReduction/g20260524a/startfix_soc4p2_hi_lo_bb.csv'
+    unit_key = 'g20260524a_soc4p2_hi_lo_bb'
     time_end = None
-    compare_run_ver = True
-    shift_soc_s = True
-    plots = False
+    compare_run_ver = False
+    shift_soc_s = False
+    plots = True
     use_mon_soc_ = False
     verbose = False
     scale_batt = 1.0
@@ -436,7 +436,7 @@ def main():  # Example usage.  ok on 20260217
     strict_overplot = True
     terse = True
     hardcopy = False
-    mon_str = ""
+    mon_str = ''
 
     compare_run_sim(
         data_file=data_file,

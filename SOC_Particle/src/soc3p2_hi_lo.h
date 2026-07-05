@@ -42,12 +42,10 @@
 #define IB_ABS_MAX_NOA \
   78.5  // Hard range limit of sensor electrically impossible (=1.65 *
         // SHUNT_GAIN * SHUNT_NOA_R1 / SHUNT_NOA_R2 *1.05)
-#define HDWE_IB_HI_LO_NOA_LO \
-  -11.  // Fully NOA bank discharge transition, A (-11)
-#define HDWE_IB_HI_LO_AMP_LO \
-  -10.  // Fully AMP bank discharge transition, A (-10)
-#define HDWE_IB_HI_LO_AMP_HI 10.  // Fully AMP bank charge transition, A (10)
-#define HDWE_IB_HI_LO_NOA_HI 11.  // Fully NOA bank charge transition, A (11)
+#define HDWE_IB_HI_LO_NOA_LO  -11.  // Fully NOA bank discharge transition, A (-11)
+#define HDWE_IB_HI_LO_AMP_LO  -10.  // Fully AMP bank discharge transition, A (-10)
+#define HDWE_IB_HI_LO_AMP_HI   10.  // Fully AMP bank charge transition, A (10)
+#define HDWE_IB_HI_LO_NOA_HI   11.  // Fully NOA bank charge transition, A (11)
 
 // Vb hardware
 #define VB_SENSE_R_LO 4700   // Vb low sense resistor, ohm (4700)

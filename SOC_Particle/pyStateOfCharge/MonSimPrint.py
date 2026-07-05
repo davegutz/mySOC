@@ -1166,8 +1166,9 @@ def print_volt_RunSim(SN, i_temp, i_ekf, t, mon, sim, calc_temp, calc_ekf):
         "    dt                vb                          ib_charge                   ib"
         "_sel         ib                          ib_amp_hdwe                 ib_amp_mode"
         "l                ib_amp                      ib_noa_hdwe                 ib_noa_"
-        "model               ib_noa                disable_amp_fault  ib_diff            "
-        "         ibh                         ib_s                 ib_amp_lo    ib_amp_hi"
+        "model               ib_noa           disable_amp_fault     ib_diff"
+        "                        ib_diff_flt   ib_lo_active    ib_lo_limited_hi  ib_lo_limited_lo"
+        "   ibh                         ib_s                 ib_amp_lo    ib_amp_hi"
         "   ib_noa_lo   ib_noa_hi dis_amp_flt    dt                  ib_amp              "
         "     ib_dyn_T_m           ib_dyn_rstate_m               ib_dyn_lstate_m         "
         "            ib_dyn_m                 vb                    vb_model             "
@@ -1243,7 +1244,15 @@ def print_volt_RunSim(SN, i_temp, i_ekf, t, mon, sim, calc_temp, calc_ekf):
         "{:2d}".format(bool(mon.disable_amp_fault)),
         "{:14.6f}".format(SN.mon_run.ib_diff[G.i]),
         "{:12.6f}".format(mon.ib_diff),
-        "{:14.6f}".format(SN.mon_run.ib_h[G.i]),
+        "{:8d}".format(SN.mon_run.ib_diff_flt[G.i]),
+        "{:4d}".format(mon.Diff.ib_diff_hi_flt or mon.Diff.ib_diff_lo_flt),
+        "{:8d}".format(bool(SN.mon_run.ib_lo_active[G.i])),
+        "{:4d}".format(mon.ib_lo_active),
+        "         x  ",
+        "{:4d}".format(mon.Diff.ib_lo_limited_hi),
+        "         x  ",
+        "{:4d}".format(mon.Diff.ib_lo_limited_lo),
+        "{:20.6f}".format(SN.mon_run.ib_h[G.i]),
         "{:12.6f}".format(mon.ib_hdwe),
         "{:14.6f}".format(SN.mon_run.ib_s[G.i]),
         "{:12.6f}".format(sim.ib),

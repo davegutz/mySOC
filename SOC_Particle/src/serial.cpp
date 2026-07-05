@@ -121,7 +121,9 @@ void print_battery_header() {
   Serial.printf(
       "HDWE_IB_HI_LO_NOA_HI, HDWE_IB_HI_LO_NOA_LO, HYS_IB_THR, "
       "HYS_SOC_MIN_MARG, IB_ABS_MAX_AMP, IB_ABS_MAX_NOA, IB_LO_ACTIVE_SET,");
-  Serial.printf("IB_LO_ACTIVE_RES, IB_MIN_UP, IBATT_DISAGREE_THRESH,");
+  Serial.printf("IB_LO_ACTIVE_RES, IB_MIN_UP, IBATT_INST_DIFF_RES, "
+      "IBATT_INST_DIFF_SET, IBATT_DISAGREE_THRESH, IBATT_DISAGREE_RES, "
+      "IBATT_DISAGREE_SET, ");
   Serial.printf(
       "IMAX_NUM, KF_Q_STD, KF_R_STD, MAX_TRIM_RATE, MAX_WRAP_ERR_FILT, "
       "MAX_Y_FILT, MIN_Y_FILT, MXEPS,");
@@ -130,7 +132,7 @@ void print_battery_header() {
       "RATED_TEMP, SHUNT_AMP_GAIN, SHUNT_NOA_GAIN,");
   Serial.printf(
       "sp_cutback_gain_slr, sp_Dw, sp_ib_disch_slr, sp_s_cap_mon, "
-      "sp_s_cap_sim, sp_vsat_add, TAU_Y_FILT, TB_FILT,");
+      "sp_s_cap_sim, sp_vsat_add, TAU_ERR_FILT, TAU_Y_FILT, TB_FILT,");
   Serial.printf(
       "TB_MAX, TB_MIN, TCHARGE_DISPLAY_DEADBAND, TMAX_FILT, T_RLIM, VB_DC_DC, "
       "VB_MAX, VB_MIN,");
@@ -171,10 +173,12 @@ void print_battery_serial() {
 
   sprintf(
       pr.buff,
-      "%10.7f,%10.7f,%10.7f,%10.7f,%10.7f,%10.7f,%10.7f,%10.7f,%10.7f,%10.7f,",
+      "%10.7f,%10.7f,%10.7f,%10.7f,%10.7f,%10.7f,%10.7f,%10.7f,%10.7f,%10.7f,\
+%10.7f,%10.7f,%10.7f,%10.7f,",
       HYS_IB_THR, HYS_SOC_MIN_MARG, IB_ABS_MAX_AMP, IB_ABS_MAX_NOA,
-      IB_LO_ACTIVE_SET, IB_LO_ACTIVE_RES, IB_MIN_UP, IBATT_DISAGREE_THRESH,
-      IMAX_NUM, KF_Q_STD);
+      IB_LO_ACTIVE_SET, IB_LO_ACTIVE_RES, IB_MIN_UP, IBATT_INST_DIFF_RES,
+      IBATT_INST_DIFF_SET, IBATT_DISAGREE_THRESH, IBATT_DISAGREE_RES,
+      IBATT_DISAGREE_SET, IMAX_NUM, KF_Q_STD);
   Serial.printf("%s", pr.buff);
 
   sprintf(pr.buff,
@@ -188,9 +192,10 @@ void print_battery_serial() {
           sp.cutback_gain_slr(), sp.Dw());
   Serial.printf("%s", pr.buff);
 
-  sprintf(pr.buff, "%10.7f,%10.7f,%10.7f,%10.7f,%10.7f,%10.7f,%10.7f,%10.7f,",
+  sprintf(pr.buff, "%10.7f,%10.7f,%10.7f,%10.7f,%10.7f,%10.7f,%10.7f,%10.7f,\
+  %10.7f,",
           sp.ib_disch_slr(), ap.s_cap_mon(), ap.s_cap_sim(), sp.Vsat_add(),
-          TAU_Y_FILT, TB_FILT, TB_MAX, TB_MIN);
+          TAU_ERR_FILT, TAU_Y_FILT, TB_FILT, TB_MAX, TB_MIN);
   Serial.printf("%s", pr.buff);
 
   sprintf(pr.buff, "%10.7f,%10.7f,%10.7f,%10.7f,%10.7f,%10.7f,%10.7f,%10.7f,",
@@ -434,6 +439,7 @@ void print_signal_sel_header() {
       "ib_wrp_rate_m, ib_wrp_state_m, ib_amp, ib_noa, ");
   Serial.printf(
       "  ib_amp_lo, ib_amp_hi, ib_noa_lo, ib_noa_hi, ib_noa_kf, kfres, kf_v_m, "
+      "ib_lo_limited_hi, ib_lo_limited_hi,"
       "kf_v_n, e_wrap_m_trimmed, e_wrap_n_trimmed, ");
   Serial.printf(
       "  vb_model, voc_m, voc_soc_m, voc_n, voc_soc_n, wrap_m_and_n_fa, "
@@ -532,10 +538,11 @@ void print_signal_sel_serial(const bool reset, Sensors* Sen,
         Sen->Flt->WrapLoopAmp->ib_wrp_state(), Sen->ib_amp(), Sen->ib_noa());
     Serial.printf("%s", pr.buff);
 
-    sprintf(pr.buff, "%d,%d,%d,%d,%9.6f,%d,%9.6f,%9.6f,%9.6f,%9.6f,",
+    sprintf(pr.buff, "%d,%d,%d,%d,%9.6f,%d,%9.6f,%9.6f,%d,%d,%9.6f,%9.6f,",
             Sen->Flt->ib_amp_lo(), Sen->Flt->ib_amp_hi(), Sen->Flt->ib_noa_lo(),
             Sen->Flt->ib_noa_hi(), Sen->ShuntNoAmp->ishunt_cal_kf(),
             cp.kf_reset_print, Sen->ShuntAmp->kf_v(), Sen->ShuntNoAmp->kf_v(),
+            Sen->Flt->ib_lo_limited_hi(), Sen->Flt->ib_lo_limited_lo(),
             Sen->Flt->WrapLoopAmp->e_wrap_trimmed(),
             Sen->Flt->WrapLoopNoa->e_wrap_trimmed());
     Serial.printf("%s", pr.buff);

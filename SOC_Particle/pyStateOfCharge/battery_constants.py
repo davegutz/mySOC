@@ -64,7 +64,10 @@ class BatteryConstants:
     IB_LO_ACTIVE_SET = 0.2
     IB_LO_ACTIVE_RES = 0.4
     IB_MIN_UP = 0.1
+    IBATT_DISAGREE_RES = 2.
     IBATT_DISAGREE_THRESH = 1.0
+    IBATT_INST_DIFF_RES = 0.0
+    IBATT_INST_DIFF_SET = 0.2
     IMAX_NUM = 100
     KF_Q_STD = 0.0003
     KF_R_STD = 0.1
@@ -91,6 +94,7 @@ class BatteryConstants:
     sp_s_cap_sim = 1.0
     sp_vsat_add = 0.0
     T_RLIM = 0.017
+    TAU_ERR_FILT = 5.
     TAU_Y_FILT = 1.0
     TB_FILT = 120.0
     TB_MAX = 60.0
@@ -113,6 +117,7 @@ class BatteryConstants:
     WRAP_HI_SETAT_SLR = 2.0
     WRAP_LO_RES = 4.5
     WRAP_LO_SET = 9.0
+    IBATT_DISAGREE_SET = WRAP_LO_SET - 1.
     WRAP_MOD_C_RATE = 0.02
     WRAP_SOC_HI_OFF = 0.94
     WRAP_SOC_HI_SLR = 1000.0

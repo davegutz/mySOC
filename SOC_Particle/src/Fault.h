@@ -330,6 +330,8 @@ class Fault {
   float ib_dyn_n() { return WrapLoopNoa->ib_dyn(); };
   bool ib_is_functional() { return ib_is_functional_; };
   bool ib_lo_active() { return ib_lo_active_; };
+  bool ib_lo_limited_hi() { return ib_lo_limited_hi_; };
+  bool ib_lo_limited_lo() { return ib_lo_limited_lo_; };
   void ib_logic(const bool reset, Sensors* Sen, BatteryMonitor* Mon);
   bool ib_noa_bare() { return faultRead(IB_NOA_BARE); };
   bool ib_noa_fa() { return failRead(IB_NOA_FA); };
