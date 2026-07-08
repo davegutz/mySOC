@@ -85,7 +85,7 @@ void onBLE_DataReceived(const uint8_t* data, size_t len,
       
       cp.inp_token = true;
       add_verify(&cp.inp_str, serial_str);
-      Serial.printf("add_verified %s\n", serial_str.c_str());
+      sendTxBuf(String::format("add_verified %s\n", serial_str.c_str()), true, true);
       cp.inp_token = false;
       
       serial_str = "";

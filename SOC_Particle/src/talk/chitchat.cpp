@@ -376,11 +376,11 @@ void clear_queues() {
 void cmd_echo(urgency request) {
   if (int(request) == 0)
     sendTxBuf(String::format("cmd: %s\n", cp.cmd_str.c_str()), true,
-              IN_SERVICE);
+              true);
   else
     sendTxBuf(
         String::format("echo: %s, %d\n", cp.cmd_str.c_str(), int(request)),
-        true, IN_SERVICE);
+        true, true);
 }
 
 // Run the commands
