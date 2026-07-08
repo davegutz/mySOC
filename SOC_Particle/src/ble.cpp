@@ -65,37 +65,37 @@ void onBLE_DataReceived(const uint8_t* data, size_t len,
 
   // Parse input
   static String serial_str = "";
-  static bool serial_ready = false;
-  // Each pass try to complete input from avaiable
+  
+  // Each pass try to complete input from available
   ii = 0;
-  while (!serial_ready && (ii < len)) {
+  while (ii < len) {
     char in_char = (char)data[ii++];  // get the new byte
 
     // Intake
-    // if the incoming character to finish, add a ';' and set flags so the main
-    // loop can do something about it:
+    // if the incoming character to finish, add a ';' and append to cp.inp_str
     if (is_finished(in_char)) {
       serial_str += ';';
-      serial_ready = true;
-      break;
-    } else if (in_char == '\r')
-      Serial.printf("\n");  // scroll user terminal
-    else if (in_char == '\b' && serial_str.length()) {
-      Serial.printf("\b \b");                      // scroll user terminal
-      serial_str.remove(serial_str.length() - 1);  // backspace
-    } else
-      serial_str += in_char;  // process new valid character
-  }
-
-  // Pass info to inp_str
-  if (serial_ready) {
-    if (!cp.inp_token) {
+      
+      // Wait briefly if cp.inp_token is locked by another thread
+      int attempts = 0;
+      while (cp.inp_token && attempts < 50) {
+        delay(1);
+        attempts++;
+      }
+      
       cp.inp_token = true;
       add_verify(&cp.inp_str, serial_str);
       Serial.printf("add_verified %s\n", serial_str.c_str());
-      serial_ready = false;
       cp.inp_token = false;
+      
       serial_str = "";
+    } else if (in_char == '\r') {
+      Serial.printf("\n");  // scroll user terminal
+    } else if (in_char == '\b' && serial_str.length()) {
+      Serial.printf("\b \b");                      // scroll user terminal
+      serial_str.remove(serial_str.length() - 1);  // backspace
+    } else {
+      serial_str += in_char;  // process new valid character
     }
   }
 }

@@ -420,10 +420,10 @@ def main():  # Example usage.  ok on 20260217
         8:  vb_wrap
         9:  dyn_n
     """
-    data_file = '/home/daveg/.local/SOC_Particle/dataReduction/g20260524a/startfix_soc4p2_hi_lo_bb.csv'
+    data_file = '/home/daveg/.local/SOC_Particle/plink/dataReduction/g20260524a/startfix_soc4p2_hi_lo_bb.csv'
     unit_key = 'g20260524a_soc4p2_hi_lo_bb'
     time_end = None
-    compare_run_ver = False
+    compare_run_ver = True
     shift_soc_s = False
     plots = True
     use_mon_soc_ = False

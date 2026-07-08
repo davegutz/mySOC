@@ -2434,7 +2434,7 @@ if __name__ == "__main__":  # Example usage.  Ran ok 20260217
     if platform.system() == "Darwin":
         init_button = myButton(
             init_row_frame,
-            text="START HERE and PASTE then\n wait for temp init complete",
+            text="START HERE then\n wait for temp init complete",
             command=grab_init,
             fg="white",
             bg="black",
@@ -2444,7 +2444,7 @@ if __name__ == "__main__":  # Example usage.  Ran ok 20260217
     else:
         init_button = myButton(
             init_row_frame,
-            text="START HERE and PASTE then\n wait for temp init complete",
+            text="START HERE then\n wait for temp init complete",
             command=grab_init,
             fg="white",
             bg="black",
