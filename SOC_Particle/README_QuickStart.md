@@ -411,5 +411,6 @@ If all of that works, the development environment is complete.
 | Converted current wanders ~10 min into a session | Laptop on AC adapter is biasing the ADC. **Do not** connect a laptop on AC power while monitoring; use battery only. |
 | puTTY paste produces `. ? h` | In puTTY → Terminal → Keyboard, set **Enter Key Emulation = CR**. |
 | Device shows wrong year (1999) | Photon's VBAT battery dead or device never synchronized — connect to Wi-Fi once via the Particle app, then use the GUI's `UT` button. |
+| 'Serial Bluetooth' app on phone does not find device | Open 'Bluetooth LE Scanner', find the MAC address (see `socXp2_hi_lo.h`), long press and rename it. |
 
 For the exhaustive list see the [FAQ](README.md#faq) in the main README.

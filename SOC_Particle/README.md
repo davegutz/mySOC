@@ -593,6 +593,14 @@ Custom harness uses the shunt as a junction box for 12 V, Gnd, and the two shunt
 
 Check power, swap USB ports (the left side of the OMEN laptop often does not work), swap to a data-capable USB cable, and bypass USB hubs. Force DFU mode (blinking yellow) by holding MODE + RESET, and confirm the OS sees the device.
 
+### BLE device not found on phone (e.g. in "Serial Bluetooth" app)
+
+At first, the 'Serial Bluetooth' app might not see the Particle Photon 2. To resolve this:
+1. Open the **'Bluetooth LE Scanner'** app on your phone.
+2. Find the device's MAC address amongst the listed units (the MAC address for your unit can be found in `src/socXp2_hi_lo.h` under `HDWE_UNIT` comments or references).
+3. Long press the device in the scanner app and rename it.
+4. Once renamed, it should appear and be selectable in the **'Serial Bluetooth'** app.
+
 ### SOS — 4 flashes (Bus Fault) on Photon 2
 
 Too much memory in use. Reduce `NSUM` in `constants.h`.
