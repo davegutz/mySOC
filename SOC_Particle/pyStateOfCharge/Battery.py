@@ -765,7 +765,7 @@ class BatteryMonitor(Battery, EKF1x1):
             ib_dc = self.ib_past
         else:
             dt_local = self.dt
-            ib_dc = self.ib_past
+            ib_dc = self.ib
         self.ib_dyn = self.ChargeTransfer.calculate_tau_seeded(
             ib_dc, SN.ib_dyn[G.i], reset, dt_local, self.chemistry.tau_ct
         )
@@ -1096,7 +1096,7 @@ class BatteryMonitor(Battery, EKF1x1):
                 self.ib_noa = ib_noa
                 self.ib_noa_pst = ib_noa_pst
                 dt_local = self.dt_past
-                ibnoa = self.ib_noa_pst
+                ibnoa = self.ib_noa
             self.LoopIbNoa.calculate(
                 reset=reset,
                 rp=rp,
@@ -1129,7 +1129,7 @@ class BatteryMonitor(Battery, EKF1x1):
             else:
                 self.ib_amp = ib_amp
                 self.ib_amp_pst = ib_amp_pst
-                ibamp = self.ib_amp_pst
+                ibamp = self.ib_amp
             self.ib_amp_hi = self.ib_amp >= Battery.HDWE_IB_HI_LO_AMP_HI
             self.ib_amp_lo = self.ib_amp <= Battery.HDWE_IB_HI_LO_AMP_LO
             self.ib_noa_hi = self.ib_noa >= Battery.HDWE_IB_HI_LO_NOA_HI

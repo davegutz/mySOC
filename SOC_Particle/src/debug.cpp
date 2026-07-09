@@ -243,11 +243,11 @@ void debug_check_99(BatteryMonitor* Mon, Sensors* Sen) {
         String::format(" Inh    Inhkf Inhrms  SB,    *DB|") +
         String::format(" Ibsel *SDasy|") +
         String::format("voc   voc_soc *DwTab|") + String::format("*Sran|") +
-        String::format(" T  |\n") +
+        String::format("   T  |\n") +
         String::format(
-            "%6.2f|%6.3f %6.3f %5.2f %6.2f|%5.3f %5.3f|%6.2f %6.2f %5.3f %5.2f "
+            "%6.2f|%6.3f %6.3f %5.2f %6.3f|%5.3f %5.3f|%6.2f %6.2f %5.3f %5.2f "
             "%6.2f|%6.2f %6.2f %5.3f %5.2f %6.2f|%6.2f  %5.2f|%5.2f %5.2f  "
-            "%7.2f| %4.2f|%6.4f|\n",
+            "%7.3f| %4.2f|%6.4f|\n",
             Sen->Tb_hdwe_f(), Sen->Vb_hdwe_f(), Sen->Vb_rms(), ap.Vb_scale(),
             sp.Vb_bias_hdwe(), Sen->ShuntAmp->Vc(), Sen->Vc_rms(),
             Sen->Ib_amp_hdwe_f(), Sen->Ib_amp_hdwe_kf(), Sen->Ib_amp_rms(),
@@ -256,7 +256,7 @@ void debug_check_99(BatteryMonitor* Mon, Sensors* Sen) {
             sp.ib_bias_noa(), Sen->Ib_hdwe_f_cal(), sp.ib_disch_slr(),
             Mon->voc(), Mon->voc_soc(), sp.Dw(), ap.slr_res(), Sen->T());
 
-    sendTxBuf(txBuf, true, IN_SERVICE);
+    sendTxBuf(txBuf, true, true);
   }
 }
 

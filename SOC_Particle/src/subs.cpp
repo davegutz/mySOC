@@ -603,9 +603,9 @@ void serial_display(Sensors* Sen, BatteryMonitor* Mon) {
   {
     String txBuf;
     txBuf = String::format(
-        "%s   Tb,C  VOC,V  Ib,A \n%s   EKF,Ah  chg,hrs  CC, Ah\nPf; for fails. "
+        "%s   Tb,C  VOC,V  Ib,A \n%s   EKF,Ah  chg,hrs  CC, Ah\nPf; for fails.  %s %s"
         " prints=%ld\n\n",
-        disp_Tbop.c_str(), dispBot.c_str(), cp.num_v_print);
+        disp_Tbop.c_str(), dispBot.c_str(), HDWE_UNIT, version, cp.num_v_print);
     sendTxBuf(txBuf, true, true);
   } else if (1 <= sp.debug() &&
              sp.debug() <= 4)  // Normal BLE display as long as 'vv4' so can
@@ -613,9 +613,9 @@ void serial_display(Sensors* Sen, BatteryMonitor* Mon) {
   {
     String txBuf;
     txBuf = String::format(
-        "%s   Tb,C  VOC,V  Ib,A \n%s   EKF,Ah  chg,hrs  CC, Ah\nPf; for fails. "
+        "%s   Tb,C  VOC,V  Ib,A \n%s   EKF,Ah  chg,hrs  CC, Ah\nPf; for fails.  %s %s"
         " prints=%ld\n\n",
-        disp_Tbop.c_str(), dispBot.c_str(), cp.num_v_print);
+        disp_Tbop.c_str(), dispBot.c_str(), HDWE_UNIT, version, cp.num_v_print);
     sendTxBuf(txBuf, false, true);
   }
 
@@ -631,9 +631,9 @@ void serial_display(Sensors* Sen, BatteryMonitor* Mon) {
         Sen->Flt->Tb_fa(), Sen->Flt->ib_amp_fa(), Sen->Flt->ib_noa_fa(),
         Sen->Flt->ib_diff_fa(), Sen->Flt->dscn_fa(), Sen->Flt->red_loss());
     Serial.printf(
-        "%s   Tb,C  VOC,V  Ib,A \n%s   EKF,Ah  chg,hrs  CC, Ah\nPf; for fails. "
+        "%s   Tb,C  VOC,V  Ib,A \n%s   EKF,Ah  chg,hrs  CC, Ah\nPf; for fails.  %s %s"
         " prints=%lu\n\n",
-        disp_Tbop.c_str(), dispBot.c_str(), cp.num_v_print);
+        disp_Tbop.c_str(), dispBot.c_str(), HDWE_UNIT, version, cp.num_v_print);
   }
 #endif
 }
