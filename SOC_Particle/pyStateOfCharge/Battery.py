@@ -82,7 +82,6 @@ class Battery(BatteryConstants, Coulombs):
         self,
         OPT=None,
         q_cap_rated=BatteryConstants.NOM_UNIT_CAP * 3600,
-        temp_rlim=0.017,
         t_rated=BatteryConstants.RATED_TEMP,
         Tb_f=BatteryConstants.NOMINAL_TB,
         tweak_test=False,
@@ -326,7 +325,6 @@ class BatteryMonitor(Battery, EKF1x1):
             OPT=OPT,
             q_cap_rated=q_cap_rated_scaled,
             t_rated=t_rated,
-            temp_rlim=temp_rlim,
             Tb_f=Tb_f,
             tweak_test=tweak_test,
             dvoc=dvoc,
@@ -566,8 +564,8 @@ class BatteryMonitor(Battery, EKF1x1):
         self.qcrs_s = 0.0
         self.qcap_s = 0.0
         self.bms_off_s = 0.0
-        # self.Tb_s = 0.
-        # self.Tb_f_s = 0.
+        self.Tb_s = 0.
+        self.Tb_f_s = 0.
         self.vsat_s = 0.0
         self.voc_s = 0.0
         self.voc_stat_s = 0.0
@@ -811,7 +809,6 @@ class BatteryMonitor(Battery, EKF1x1):
             self.voc_stat_f_tau = self.voc_stat_filt.tau
             self.voc_stat_f_T = self.voc_stat_filt.dt
             self.frz = self.bms_off
-            mr = SN.mon_run
             self.predict_ekf(u=ddq_dt, reset=self.reset_ekf, freeze=self.frz, OPT=OPT, i_ekf=i_ekf)  # u = d(q)/dt
             self.update_ekf(
                 z=self.voc_stat_f, x_min=0.0, x_max=Battery.MXEPS, OPT=OPT, i_ekf=i_ekf
@@ -998,6 +995,17 @@ class BatteryMonitor(Battery, EKF1x1):
         self.ib_dyn_lstate_m = self.LoopIbAmp.ChargeTransfer.state
         self.ib_dyn_tau_m = self.LoopIbAmp.ChargeTransfer.tau
         self.dv_dyn_m = self.LoopIbAmp.dv_dyn
+        self.ib_dyn_T_m = self.LoopIbAmp.ChargeTransfer.dt
+        self.ewmhi_thr = self.LoopIbAmp.ewhi_thr
+        self.ewmlo_thr = self.LoopIbAmp.ewlo_thr
+        self.e_wrap_m = self.LoopIbAmp.e_wrap
+        self.e_wrap_m_filt = self.LoopIbAmp.e_wrap_filt
+        self.e_wrap_m_rate = self.LoopIbAmp.e_wrap_rate
+        self.e_wrap_m_trim = self.LoopIbAmp.e_wrap_trim
+        self.wrap_hi_m_flt = self.LoopIbAmp.hi_fault
+        self.wrap_hi_m_fa = self.LoopIbAmp.hi_fail
+        self.wrap_lo_m_flt = self.LoopIbAmp.lo_fault
+        self.wrap_lo_m_fa = self.LoopIbAmp.lo_fail
         self.voc_m = self.LoopIbAmp.voc
         self.voc_soc_m = self.LoopIbAmp.voc_soc
         self.ib_wrp_T_m = self.LoopIbAmp.WrapErrFilt.dt
@@ -1010,6 +1018,17 @@ class BatteryMonitor(Battery, EKF1x1):
         self.ib_dyn_rstate_n = self.LoopIbNoa.ChargeTransfer.rstate
         self.ib_dyn_lstate_n = self.LoopIbNoa.ChargeTransfer.state
         self.ib_dyn_tau_n = self.LoopIbNoa.ChargeTransfer.tau
+        self.ib_dyn_T_n = self.LoopIbNoa.ChargeTransfer.dt
+        self.e_wrap_n = self.LoopIbNoa.e_wrap
+        self.e_wrap_n_filt = self.LoopIbNoa.e_wrap_filt
+        self.e_wrap_n_rate = self.LoopIbNoa.e_wrap_rate
+        self.e_wrap_n_trim = self.LoopIbNoa.e_wrap_trim
+        self.ewnhi_thr = self.LoopIbNoa.ewhi_thr
+        self.ewnlo_thr = self.LoopIbNoa.ewlo_thr
+        self.wrap_hi_n_flt = self.LoopIbNoa.hi_fault
+        self.wrap_hi_n_fa = self.LoopIbNoa.hi_fail
+        self.wrap_lo_n_flt = self.LoopIbNoa.lo_fault
+        self.wrap_lo_n_fa = self.LoopIbNoa.lo_fail
         self.dv_dyn_n = self.LoopIbNoa.dv_dyn
         self.ib_wrp_T_n = self.LoopIbNoa.WrapErrFilt.dt
         self.ib_wrp_tau_n = self.LoopIbNoa.WrapErrFilt.tau
@@ -1058,7 +1077,8 @@ class BatteryMonitor(Battery, EKF1x1):
         pass
 
     def wrap(
-        self, reset=True, ib_noa_hdwe=0.0, SN=None, ib_amp=0.0, ib_noa=0.0, ib_amp_pst=None, ib_noa_pst=None, rp=None
+        self, reset=True, ib_noa_hdwe=0.0, SN=None, ib_amp=0.0, ib_noa=0.0, ib_amp_pst=None,
+            ib_noa_pst=None, rp=None
     ):
         """Wrap logic"""
         dt_local = self.dt
@@ -1070,9 +1090,6 @@ class BatteryMonitor(Battery, EKF1x1):
         elif self.soc <= max(self.soc_min + Battery.WRAP_SOC_LO_OFF_REL, Battery.WRAP_SOC_LO_OFF_ABS):
             ewsat_slr = 1.0
             ewmin_slr = Battery.WRAP_SOC_LO_SLR
-            #  else if ( Mon->voc_soc()>(Mon->vsat()-WRAP_HI_SETAT_MARG) ||
-        #          ( Mon->voc_stat()>(Mon->vsat()-WRAP_HI_SETAT_MARG) && Mon->C_rate()>WRAP_MOD_C_RATE &&
-        # Mon->soc()>WRAP_SOC_MOD_OFF) ) // Use voc_stat to get some anticipation
 
         elif self.voc_soc > (self.vsat - Battery.WRAP_HI_SETAT_MARG) or (
             (self.voc_stat > (self.vsat - Battery.WRAP_HI_SETAT_MARG))
@@ -1110,17 +1127,6 @@ class BatteryMonitor(Battery, EKF1x1):
                 e_wrap_trim_init=SN.mon_run.e_wrap_n_trim[G.i],
                 freeze=False,
             )
-            self.ib_dyn_T_n = self.LoopIbNoa.ChargeTransfer.dt
-            self.e_wrap_n = self.LoopIbNoa.e_wrap
-            self.e_wrap_n_filt = self.LoopIbNoa.e_wrap_filt
-            self.e_wrap_n_rate = self.LoopIbNoa.e_wrap_rate
-            self.e_wrap_n_trim = self.LoopIbNoa.e_wrap_trim
-            self.ewnhi_thr = self.LoopIbNoa.ewhi_thr
-            self.ewnlo_thr = self.LoopIbNoa.ewlo_thr
-            self.wrap_hi_n_flt = self.LoopIbNoa.hi_fault
-            self.wrap_hi_n_fa = self.LoopIbNoa.hi_fail
-            self.wrap_lo_n_flt = self.LoopIbNoa.lo_fault
-            self.wrap_lo_n_fa = self.LoopIbNoa.lo_fail
         if ib_amp is not None:
             if rp.modeling_ib or SN.run_type == "HistSim":
                 self.ib_amp = ib_amp
@@ -1164,17 +1170,6 @@ class BatteryMonitor(Battery, EKF1x1):
                 e_wrap_trim_init=SN.mon_run.e_wrap_m_trim[G.i],
                 freeze=not self.ib_lo_active,
             )
-            self.ib_dyn_T_m = self.LoopIbAmp.ChargeTransfer.dt
-            self.ewmhi_thr = self.LoopIbAmp.ewhi_thr
-            self.ewmlo_thr = self.LoopIbAmp.ewlo_thr
-            self.e_wrap_m = self.LoopIbAmp.e_wrap
-            self.e_wrap_m_filt = self.LoopIbAmp.e_wrap_filt
-            self.e_wrap_m_rate = self.LoopIbAmp.e_wrap_rate
-            self.e_wrap_m_trim = self.LoopIbAmp.e_wrap_trim
-            self.wrap_hi_m_flt = self.LoopIbAmp.hi_fault
-            self.wrap_hi_m_fa = self.LoopIbAmp.hi_fail
-            self.wrap_lo_m_flt = self.LoopIbAmp.lo_fault
-            self.wrap_lo_m_fa = self.LoopIbAmp.lo_fail
 
         # Scale for final selection
         self.e_wrap = self.sel_brk_hdwe.scale_select(ib_noa_hdwe, self.e_wrap_m, self.e_wrap_n)
@@ -1204,7 +1199,6 @@ class BatterySim(Battery):
             OPT=OPT,
             q_cap_rated=q_cap_rated,
             t_rated=t_rated,
-            temp_rlim=temp_rlim,
             Tb_f=Tb_f,
             tweak_test=tweak_test,
             dvoc=OPT.add_voc_sim,
@@ -1261,8 +1255,8 @@ class BatterySim(Battery):
         self.qcrs_s = 0.0
         self.qcap_s = 0.0
         self.bms_off_s = 0
-        # self.Tb_s = 0.
-        # self.Tb_f_s = 0.
+        self.Tb_s = 0.
+        self.Tb_f_s = 0.
         self.vsat_s = 0.0
         self.voc_s = 0.0
         self.voc_stat_s = 0.0
@@ -1691,7 +1685,8 @@ class Diff:
 class Looparound:
     """Compare predicted voltage to actual and track toward zero to eliminate biases"""
 
-    def __init__(self, Mon_, wrap_hi_volt=0.0, wrap_lo_volt=0.0, max_err=None, name=""):
+    def __init__(self, Mon_, wrap_hi_volt=0.0, wrap_lo_volt=0.0, max_err=None,
+                 name=""):
         self.Mon = Mon_
         self.reset = True
         self.dt = 0.0
@@ -1755,7 +1750,7 @@ class Looparound:
         if rp.modeling_vb:
             self.vb = self.Mon.vb_past
         else:
-            self.vb = self.Mon.vb
+            self.vb = self.Mon.vb_past
         self.voc_soc = self.Mon.voc_soc
         if rp.modeling_ib:
             dt_into_ct = self.dt_past

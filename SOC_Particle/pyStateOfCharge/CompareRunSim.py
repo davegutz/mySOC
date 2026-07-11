@@ -423,9 +423,9 @@ def main():  # Example usage.  ok on 20260217
     data_file = '/home/daveg/.local/SOC_Particle/plink/dataReduction/g20260524a/startfix_soc4p2_hi_lo_bb.csv'
     unit_key = 'g20260524a_soc4p2_hi_lo_bb'
     time_end = None
-    compare_run_ver = True
+    compare_run_ver = False
     shift_soc_s = False
-    plots = True
+    plots = False
     use_mon_soc_ = False
     verbose = False
     scale_batt = 1.0
