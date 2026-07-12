@@ -10,7 +10,7 @@ from PlotKiller import show_killer
 #  Graphical interface to Test State of Charge application
 #  Run in PyCharm
 #     or
-#  python3 GUI_TestSOC.py
+#  python3 GUI_PlinkSOC.py
 #
 #  2023-Jun-15  Dave Gutz   Create
 # Copyright (C) 2026 Dave Gutz
@@ -110,7 +110,7 @@ sys.stdout.flush()
 # Tee stdout/stderr to a log file so Console.app shows output when launched as a .app bundle
 _log_dir = os.path.expanduser("~/Library/Logs") if plat == "darwin" else os.path.expanduser("~")
 os.makedirs(_log_dir, exist_ok=True)
-_log_file = open(os.path.join(_log_dir, "GUI_TestSOC.log"), "a", buffering=1)
+_log_file = open(os.path.join(_log_dir, "GUI_PlinkSOC.log"), "a", buffering=1)
 
 plink_pid = None
 linux_terminal_pid = None  # Linux: terminal process (xterm/qterminal) — killed explicitly on stop
@@ -552,8 +552,8 @@ def compare_hist_hist_run():
     if answer is None:
         print("enter operation cancelled")
         return
-    print("GUI_TestSOC compare_hist_hist_run:  Ref", Ref.file_path, Ref.key)
-    print("GUI_TestSOC compare_hist_hist_run:  Test", Test.file_path, Test.key)
+    print("GUI_PlinkSOC compare_hist_hist_run:  Ref", Ref.file_path, Ref.key)
+    print("GUI_PlinkSOC compare_hist_hist_run:  Test", Test.file_path, Test.key)
     compare_hist_hist(
         data_file_run=Ref.file_path,
         unit_key_run=Ref.key,
@@ -582,8 +582,8 @@ def compare_run_run_choose():
                     title="Choose reference file", filetypes=[("csv", ".csv")], initialdir=Ref.dataReduction_folder
                 )
                 ref_folder_path, ref_parent, ref_basename, ref_txt, ref_key = contain_all(ref_path)
-                print("GUI_TestSOC compare_run_run_choose:  Ref", ref_basename, ref_key)
-                print("GUI_TestSOC compare_run_run_choose:  Test", test_basename, test_key)
+                print("GUI_PlinkSOC compare_run_run_choose:  Ref", ref_basename, ref_key)
+                print("GUI_PlinkSOC compare_run_run_choose:  Test", test_basename, test_key)
                 keys = [(ref_basename, ref_key), (test_basename, test_key)]
                 compare_run_run(
                     keys=keys,
@@ -2286,7 +2286,7 @@ if __name__ == "__main__":  # Example usage.  Ran ok 20260217
     print(f"{plink_test_csv_path.get()=}")
     check_auto_plink()
     print("loading icon")
-    icon_path = str(PurePosixPath(ex_root.script_loc) / "GUI_TestSOC.png")
+    icon_path = str(PurePosixPath(ex_root.script_loc) / "GUI_PlinkSOC.png")
     _icon_photo = tk.PhotoImage(file=icon_path)
     master.iconphoto(False, _icon_photo)
     print("icon loaded")
