@@ -34,7 +34,7 @@ order:
 2. **VS Code with the Particle Workbench extension** — to build and flash
    firmware to the Photon 2.
 3. **PyCharm Community + Python 3.12** — to run the regression and
-   data-reduction GUI (`pyStateOfCharge/GUI_TestSOC.py`).
+   data-reduction GUI (`pyStateOfCharge/GUI_PlinkSOC.py`).
 4. **puTTY** — for the `Talk` serial interface to the device.
 5. **The Photon 2 hardware** — see
    [Off-the-Shelf Hardware Description](README.md#off-the-shelf-hardware-description)
@@ -386,7 +386,7 @@ Once installation is complete on any platform:
    Connect.
 2. Type `vv1;` and press Enter. A stream of telemetry lines should appear.
 3. Type `vv0;` to stop the stream. Type `h;` for the help menu.
-4. In PyCharm, run `pyStateOfCharge/GUI_TestSOC.py`. The GUI opens.
+4. In PyCharm, run `pyStateOfCharge/GUI_PlinkSOC.py`. The GUI opens.
 5. Set the **Data Reduction Folder** to a local path.
 6. Click **Init**, paste the clipboard contents into puTTY when prompted, and
    continue through **Start → Reset → Done → Compare**. See

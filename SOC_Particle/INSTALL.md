@@ -124,7 +124,7 @@ Then in VS Code: **Ctrl+Shift+P → Particle: Configure for Device** → choose 
 
 ## 4. PyCharm and Python Environment
 
-The Python companion tool (`pyStateOfCharge/GUI_TestSOC.py`) runs in PyCharm.
+The Python companion tool (`pyStateOfCharge/GUI_PlinkSOC.py`) runs in PyCharm.
 
 ### Ubuntu / Lubuntu
 
@@ -166,7 +166,7 @@ sudo snap install pycharm-community --classic
 
 ## 5. puTTY Serial Terminal
 
-puTTY is required for the `Talk` interface to the Photon2 and integrates with `GUI_TestSOC.py`.
+puTTY is required for the `Talk` interface to the Photon2 and integrates with `GUI_PlinkSOC.py`.
 
 ### Ubuntu / Lubuntu
 
@@ -197,7 +197,7 @@ sudo dmesg | grep tty   # find the device, usually /dev/ttyACM0
 
 - Download the puTTY installer from https://www.putty.org/
 - Find the COM port: **Device Manager → Ports (COM & LPT) → USB Serial Device (COM#)**
-- Add the puTTY folder to the system `PATH` environment variable so `GUI_TestSOC.py` can call it.
+- Add the puTTY folder to the system `PATH` environment variable so `GUI_PlinkSOC.py` can call it.
 
 ### Configuring puTTY sessions
 
@@ -248,9 +248,9 @@ If the device shows SOS 4 (bus fault) after flash:
 
 ## 7. Running the Python GUI
 
-`GUI_TestSOC.py` automates puTTY sessions and data collection.
+`GUI_PlinkSOC.py` automates puTTY sessions and data collection.
 
-1. Open PyCharm and open `SOC_Particle/pyStateOfCharge/GUI_TestSOC.py`.
+1. Open PyCharm and open `SOC_Particle/pyStateOfCharge/GUI_PlinkSOC.py`.
 2. Run it (the venv must be set up per [Section 4](#4-pycharm-and-python-environment)).
 3. Set the **Data Reduction Folder** to your local data folder (not Google Drive for active sessions).
 4. Work top-to-bottom through the GUI buttons:

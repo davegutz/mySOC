@@ -195,7 +195,7 @@ Top-level layout, alphabetically:
 - **datasheets/** — Hardware datasheets, hand-drawn schematics in `Schematics/`, LTSpice models in `pSpice/`, and Rigol scope captures.
 - **doc/** — Schematics images, installation guides, and assorted notes referenced from this README.
 - **lib/** — Particle Workbench imported libraries.
-- **pyStateOfCharge/** — Python data-reduction code (`GUI_TestSOC.py`, `CompareRunRun.py`, `CompareRunSim.py`, `CompareHistSim.py`, `CompareFault.py`, etc.) plus the `pyDAGx/` helper library.
+- **pyStateOfCharge/** — Python data-reduction code (`GUI_PlinkSOC.py`, `CompareRunRun.py`, `CompareRunSim.py`, `CompareHistSim.py`, `CompareFault.py`, etc.) plus the `pyDAGx/` helper library.
 - **src/** — Application source. The entry point is `SOC_Particle.ino`. Subfolders: `Adafruit/` (hand-imported libraries), `hardware/` (miscellaneous device drivers), `myLibrary/` (custom dynamic-filter and EKF utilities), `talk/` (`Talk` command handlers).
 - **target/** — Generated `.elf` files from Particle Workbench builds.
 
@@ -223,7 +223,7 @@ Three real-time access methods, all using the `Serial` API set:
 
 `Serial` (USB) carries all heavy troubleshooting and tests. `Serial1` (BLE) carries a subset. Verbosity is selected with `vv<N>`; type `h` for the command list. See [doc/TestSOC.md](doc/TestSOC.md) for detailed `Talk` usage.
 
-**GUI_TestSOC.py** is a tkinter wrapper around puTTY that automates regression: it starts puTTY, ships a regression macro to the clipboard for paste-in, manages the data-collection folder, backs up captures, then runs `CompareRunRun.py` / `CompareRunSim.py` to produce overplots.
+**GUI_PlinkSOC.py** is a tkinter wrapper around puTTY that automates regression: it starts puTTY, ships a regression macro to the clipboard for paste-in, manages the data-collection folder, backs up captures, then runs `CompareRunRun.py` / `CompareRunSim.py` to produce overplots.
 
 ![Fig.2 — Functional Block Diagram of User Interface](doc/fbd.png)
 **Fig.2** — Functional block diagram of the user interface.
@@ -533,11 +533,12 @@ When switching between desktop and laptop, sync these two and pull the latest Gi
 | Gnd       | Ground                            |
 | 3v3       | 3.3 V supply for all peripherals  |
 | VUSB      | 5 V supply for Photon 2           |
-| A3 (D0)   | 1-Wire temperature sensor         |
 | D7        | Status LED (heartbeat)            |
 | A0 (D11)  | Primary Ib amp (`amp`)            |
 | A1 (D12)  | Vb voltage sense                  |
 | A2 (D13)  | Backup Ib amp (`noa`)             |
+| A3 (D0)   | 1-Wire temperature sensor         |
+| A4 (D1)   | Spare                             |
 | A5 (D14)  | Vc / Vr reference voltage         |
 
 ### Voltage regulator (LM7805)
@@ -548,12 +549,18 @@ LM7805CT with input/output capacitors plus an LPF on Vb and 5 V. The series resi
 - `Gnd` = Gnd rail
 - `Vo`  = 5 V rail
 
-### Passive Ib shunt and Vb low-pass filters
+### Passive low-pass filters for Ib shunt and Vb 
 
 - 1 Hz LPF built into the board.
 - Use the pSpice model (`datasheets/pSpice/opa333_asd1013_5beta.asc`) to verify filter response — the OPA333 10 µF compensation cap interacts with the 1 µF filter cap.
 - Goal: 1 Hz −3 dB bandwidth (the inverter noise enters at 60 Hz; SoC is effectively an integrator).
 
+### Overall Schematic Repeat
+![Fig.1 — State of Charge Wiring Diagram Board Layout](doc/schematics1.png)
+**Fig.1** — State of Charge wiring diagram board layout.
+
+
+### Ib Amplifier Circuit (2 instances - 'amp' and 'noa')
 ![Fig.2 — Ib Filter Module Schematic](doc/schematics2.png)
 **Fig.2** — Ib filter module schematic.
 
@@ -689,7 +696,7 @@ Harmless GTK warning. Don't mask it — that hides real errors.
 
 1. `Talk('vv4')` to raise verbosity.
 2. Reflash if you changed code.
-3. Start `GUI_TestSOC.py` (PyCharm or command line, from `pyStateOfCharge/`).
+3. Start `GUI_PlinkSOC.py` (PyCharm or command line, from `pyStateOfCharge/`).
 4. Browse to `SOC_Particle/pyStateOfCharge` and run.
 
 See `State of Charge Monitor.odt` for the full set of requirements, testing notes, discussion, and forward recommendations.
