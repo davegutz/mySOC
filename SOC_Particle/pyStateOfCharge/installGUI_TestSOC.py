@@ -62,13 +62,13 @@ if sys.platform == "linux":
         login = os.environ["LOGNAME"]
     desktop_entry = f"""[Desktop Entry]
 Name=GUI_TestSOC
-Exec={sys.executable} /home/{login}/Documents/GitHub/mySolarStateOfCharge/SOC_Particle/pyStateOfCharge/GUI_TestSOC.py
-Path=/home/{login}/Documents/GitHub/mySolarStateOfCharge/SOC_Particle/pyStateOfCharge
-Icon=/home/{login}/Documents/GitHub/mySolarStateOfCharge/SOC_Particle/pyStateOfCharge/GUI_TestSOC.png
+Exec={sys.executable} /home/{login}/Documents/GitHub/mySOC/SOC_Particle/pyStateOfCharge/GUI_TestSOC.py
+Path=/home/{login}/Documents/GitHub/mySOC/SOC_Particle/pyStateOfCharge
+Icon=/home/{login}/Documents/GitHub/mySOC/SOC_Particle/pyStateOfCharge/GUI_TestSOC.png
 StartupWMClass=GUI_TestSOC
 comment=app
 Type=Application
-Terminal=true
+Terminal=false
 Encoding=UTF-8
 Categories=Utility
 """
@@ -122,14 +122,17 @@ Categories=Utility
             Colors.fg.red,
             "Stop and establish sudo permissions"
             "  or "
-            f"sudo mv /home/{login}//Desktop/GUI_TestSOC.desktop /usr/share/applications/.",
+            f"sudo mv /home/{login}/Desktop/GUI_TestSOC.desktop /usr/share/applications/.",
             Colors.reset,
         )
         exit(1)
 
     if result != "/usr/share/applications/GUI_TestSOC.desktop":
         if debug:
-            print(Colors.fg.red, ".desktop file held on Desktop for debugging", Colors.reset)
+            print(Colors.fg.red, ".desktop file held on Desktop for debugging.  " +
+                  "Try using 'dex GUI_TestSOC.desktop' or " +
+                  "gio launch GUI_TestSOC.desktop",
+                  Colors.reset)
         else:
             print(Colors.fg.red, f"'mv ...' failed code {result}", Colors.reset)
     else:
