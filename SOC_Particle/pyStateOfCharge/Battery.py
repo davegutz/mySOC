@@ -1172,9 +1172,24 @@ class BatteryMonitor(Battery, EKF1x1):
             )
 
         # Scale for final selection
-        self.e_wrap = self.sel_brk_hdwe.scale_select(ib_noa_hdwe, self.e_wrap_m, self.e_wrap_n)
-        self.e_wrap_filt = self.sel_brk_hdwe.scale_select(ib_noa_hdwe, self.e_wrap_m_filt, self.e_wrap_n_filt)
-        self.e_wrap_rate = self.sel_brk_hdwe.scale_select(ib_noa_hdwe, self.e_wrap_m_rate, self.e_wrap_n_rate)
+        if not rp.modeling_ib:
+            e_wrap_m_val = self.LoopIbAmp.e_wrap
+            e_wrap_n_val = self.LoopIbNoa.e_wrap
+            e_wrap_m_filt_val = self.LoopIbAmp.e_wrap_filt
+            e_wrap_n_filt_val = self.LoopIbNoa.e_wrap_filt
+            e_wrap_m_rate_val = self.LoopIbAmp.e_wrap_rate
+            e_wrap_n_rate_val = self.LoopIbNoa.e_wrap_rate
+        else:
+            e_wrap_m_val = self.e_wrap_m
+            e_wrap_n_val = self.e_wrap_n
+            e_wrap_m_filt_val = self.e_wrap_m_filt
+            e_wrap_n_filt_val = self.e_wrap_n_filt
+            e_wrap_m_rate_val = self.e_wrap_m_rate
+            e_wrap_n_rate_val = self.e_wrap_n_rate
+
+        self.e_wrap = self.sel_brk_hdwe.scale_select(ib_noa_hdwe, e_wrap_m_val, e_wrap_n_val)
+        self.e_wrap_filt = self.sel_brk_hdwe.scale_select(ib_noa_hdwe, e_wrap_m_filt_val, e_wrap_n_filt_val)
+        self.e_wrap_rate = self.sel_brk_hdwe.scale_select(ib_noa_hdwe, e_wrap_m_rate_val, e_wrap_n_rate_val)
 
 
 # noinspection PyPep8Naming

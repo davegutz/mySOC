@@ -68,7 +68,7 @@ Icon=/home/{login}/Documents/GitHub/mySOC/SOC_Particle/pyStateOfCharge/GUI_TestS
 StartupWMClass=GUI_TestSOC
 comment=app
 Type=Application
-Terminal=false
+Terminal=true
 Encoding=UTF-8
 Categories=Utility
 """

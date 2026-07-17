@@ -365,8 +365,8 @@ void sense_synth_select(const bool reset, const bool reset_temp,
   bool storing_fault_data = (now - last_snap) > SNAP_WAIT;
   if (storing_fault_data || reset) last_snap = now;
 
-  // Load Ib and Vb
-  // Outputs: Sen->Ib_model_in, Sen->Ib, Sen->Vb
+  // Load Ib, Vb, and Tb
+  // Outputs: Sen->Ib_model_in, Sen->Ib, Sen->Vb, Sen->Tb
   load_ib_vb_tb(reset, reset_temp, reset_kf, Sen, myPins, Mon);
 
   // Sim initialize as needed from memory

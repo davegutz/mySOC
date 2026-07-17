@@ -332,9 +332,13 @@ class Sensors:
         self.Tb_f = mon_Tb_f + self.dTb
         self.Tb_f_rate = mon_Tb_f_rate
 
-    def calc_temp_pass_1(self, OPT, mon_, sim_, i, rp):
+    def calc_temp_pass_1(self, OPT, mon_, sim_, i, rp, dt=None, reset=None):
         mon = mon_
         sim = sim_
+        if dt is not None:
+            mon.dt = dt
+            sim.dt = dt
+        curr_reset = reset if reset is not None else mon.reset
         if OPT.run_type == "RunSim":
             self.Tb_model_f_rate_fut = OPT.mon_run.Tb_model_f_rate[i]
         else:
@@ -347,7 +351,7 @@ class Sensors:
             mon.Tb_model = OPT.mon_run.Tb_model[i]
         else:
             mon.Tb_model = OPT.mon_run.Tb_f[i]
-        mon.reset_temp = (i < 2) or mon.reset or OPT.run_type == "HistSim"  # make sure temp init is longer than reset
+        mon.reset_temp = (i < 2) or curr_reset or OPT.run_type == "HistSim"  # make sure temp init is longer than reset
         mon.dt_temp = mon.dt
         if OPT.run_type == "RunSim":
             if bool(self.mod_tb[i]):
@@ -374,13 +378,15 @@ class Sensors:
 
         return mon, sim
 
-    def calc_temp_pass_2(self, mon_run, mon, Battery_, rp, i=None):
-        self.temp_load_and_filter(mon_run, mon, Battery_, rp, i)
-        self.select_temp(mon_run, mon, Battery_, rp, i)
+    def calc_temp_pass_2(self, mon_run, mon, Battery_, rp, i=None, dt=None, reset=None):
+        if dt is not None:
+            mon.dt = dt
+        self.temp_load_and_filter(mon_run, mon, Battery_, rp, i, reset=reset)
+        self.select_temp(mon_run, mon, Battery_, rp, i, reset=reset)
         self.assign_tb(mon.Tb, mon.Tb_f, mon.Tb_f_rate)
         return mon
 
-    def select_temp(self, mon_run, mon, Battery_, rp, i=None):
+    def select_temp(self, mon_run, mon, Battery_, rp, i=None, reset=None):
         # select_temp
         mon.Tb_flt = bool(mon_run.Tb_flt[i]) if hasattr(mon_run, "Tb_flt") else False
         mon.Tb_fa = bool(mon_run.Tb_fa[i]) if hasattr(mon_run, "Tb_fa") else False
@@ -413,12 +419,13 @@ class Sensors:
             mon.Tb = self.Tb_past
             mon.Tb_f_rate = mon.Tb_model_f_rate
 
-    def temp_load_and_filter(self, mon_run, mon, Battery_, rp, i):
+    def temp_load_and_filter(self, mon_run, mon, Battery_, rp, i, reset=None):
+        curr_reset = reset if reset is not None else mon.reset
         if hasattr(mon_run, "Tb_hdwe_f"):
             mon.Tb_hdwe_f = self.TbSenseFilt.calculate_tau_seeded(
                 mon.Tb_hdwe,
                 mon_run.Tb_hdwe_f[i],
-                mon.reset or mon.Tb_fa,
+                curr_reset or mon.Tb_fa,
                 mon.dt,
                 Battery_.TB_FILT,
                 rmax=Battery_.T_RLIM,
@@ -428,7 +435,7 @@ class Sensors:
             mon.Tb_hdwe_f = self.TbSenseFilt.calculate_tau_seeded(
                 mon.Tb_hdwe,
                 mon.Tb_hdwe,
-                mon.reset or mon.Tb_fa,
+                curr_reset or mon.Tb_fa,
                 mon.dt,
                 Battery_.TB_FILT,
                 rmax=Battery_.T_RLIM,
@@ -445,7 +452,7 @@ class Sensors:
                 mon.Tb_model_f = self.TbModelFilt.calculate_tau_seeded(
                     mon.Tb_model,
                     mon_run.Tb_model_f[i],
-                    mon.reset or mon.Tb_fa,
+                    curr_reset or mon.Tb_fa,
                     mon.dt,
                     Battery_.TB_FILT,
                     rmax=Battery_.T_RLIM,
@@ -457,7 +464,7 @@ class Sensors:
                 self.Tb_model_f_fut = self.TbModelFilt.calculate_tau_seeded(
                     mon.Tb_model,
                     mon_run.Tb_model_f[i],
-                    mon.reset or mon.Tb_fa,
+                    curr_reset or mon.Tb_fa,
                     mon.dt,
                     Battery_.TB_FILT,
                     rmax=Battery_.T_RLIM,
@@ -469,7 +476,7 @@ class Sensors:
             mon.Tb_model_f = self.TbModelFilt.calculate_tau_seeded(
                 mon.Tb_model,
                 mon.Tb_model,
-                mon.reset or mon.Tb_fa,
+                curr_reset or mon.Tb_fa,
                 mon.dt,
                 Battery_.TB_FILT,
                 rmax=Battery_.T_RLIM,

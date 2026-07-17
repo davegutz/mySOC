@@ -70,7 +70,7 @@ Icon=/home/{login}/Documents/GitHub/mySOC/SOC_Particle/pyStateOfCharge/GUI_Plink
 StartupWMClass=GUI_PlinkSOC
 comment=app
 Type=Application
-Terminal=false
+Terminal=true
 Encoding=UTF-8
 Categories=Utility
 """

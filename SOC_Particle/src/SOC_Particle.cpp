@@ -290,7 +290,7 @@ void loop() {
 
     // Read sensors, model signals, select between them, synthesize injection
     // signals on current Inputs:  sp.config, sp.sim_chm Outputs: Sen->Ib,
-    // Sen->Vb, sp.inj_bias
+    // Sen->Vb, sp.inj_bias, Sen->Tb / Tb_f
     sense_synth_select(reset, reset_temp, reset_kf, ReadSensors->now(), elapsed,
                        myPins, Mon, Sen);
 

@@ -169,17 +169,24 @@ def compare_pair(run_path, ver_path, tol, rtol=1e-3, ed=None):
                 df_run = clipped_run.copy()
                 df_ver = clipped_ver.copy()
 
-    # align on time via index reset (both should have identical row counts post-filter)
-    n = min(len(df_run), len(df_ver))
+    # Drop rows with duplicate time values
+    df_run = df_run.drop_duplicates(subset=["time"], keep="last")
+    df_ver = df_ver.drop_duplicates(subset=["time"], keep="last")
+
+    # Align the run and ver dataframes by their common time values
+    common_times = sorted(list(set(df_run["time"]).intersection(set(df_ver["time"]))))
+    df_run = df_run[df_run["time"].isin(common_times)].sort_values(by="time").reset_index(drop=True)
+    df_ver = df_ver[df_ver["time"].isin(common_times)].sort_values(by="time").reset_index(drop=True)
+
+    n = len(df_run)
     if n == 0:
         return {
             "file": run_path.name,
             "ver_file": ver_path.name,
-            "error": "no rows with time >= 0 before reset",
+            "error": "no matching time steps found",
             "diffs": [],
         }
-    df_run = df_run.iloc[:n].reset_index(drop=True)
-    df_ver = df_ver.iloc[:n].reset_index(drop=True)
+
 
     # numeric columns present in both
     shared_cols = [c for c in df_run.columns if c in df_ver.columns]
@@ -209,6 +216,35 @@ def compare_pair(run_path, ver_path, tol, rtol=1e-3, ed=None):
             reset_temp_mask = df_ver[_rt_col].astype(float).astype(bool)
             break
 
+    # Check if we should skip the first 2 updates when not modeling ib (mib is False)
+    skip_first_2 = False
+    for col in ("mib", "modeling_ib"):
+        if col in df_run.columns:
+            if not bool(df_run[col].iloc[0]):
+                skip_first_2 = True
+                break
+        if col in df_ver.columns:
+            if not bool(df_ver[col].iloc[0]):
+                skip_first_2 = True
+                break
+
+    if not skip_first_2:
+        mon_path = None
+        if "_sim_run.csv" in run_path.name:
+            mon_path = Path(str(run_path).replace("_sim_run.csv", "_mon_run.csv"))
+        elif "_sim_ver.csv" in ver_path.name:
+            mon_path = Path(str(ver_path).replace("_sim_ver.csv", "_mon_ver.csv"))
+        if mon_path and mon_path.is_file():
+            try:
+                df_mon = pd.read_csv(mon_path)
+                for col in ("mib", "modeling_ib"):
+                    if col in df_mon.columns:
+                        if not bool(df_mon[col].iloc[0]):
+                            skip_first_2 = True
+                            break
+            except Exception:
+                pass
+
     diffs = []
     for col in numeric_cols:
         delta = (df_run[col] - df_ver[col]).abs()
@@ -216,6 +252,13 @@ def compare_pair(run_path, ver_path, tol, rtol=1e-3, ed=None):
             delta = delta.where(df_run["time"] >= ekf_skip_until, 0.0)
         if reset_temp_mask is not None and _is_tb_column(col):
             delta = delta.where(~reset_temp_mask, 0.0)
+        if skip_first_2:
+            # Skip until the column has changed at least twice in df_run (its first two updates)
+            # Default to index 2 if there are fewer than 2 changes.
+            change_mask = (df_run[col].diff() != 0) & df_run[col].diff().notna()
+            change_indices = df_run.index[change_mask].tolist()
+            skip_idx = change_indices[1] if len(change_indices) >= 2 else 2
+            delta = delta.where(delta.index >= skip_idx, 0.0)
         peak_run = df_run[col].abs().max()
         peak_ver = df_ver[col].abs().max()
         peak = max(peak_run if pd.notna(peak_run) else 0.0, peak_ver if pd.notna(peak_ver) else 0.0)

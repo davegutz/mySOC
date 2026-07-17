@@ -235,17 +235,9 @@ def replicate(OPT: UserOptions):
                 )
         else:
             calc_temp = True
-        mon, sim = SN.calc_temp_pass_1(OPT, mon, sim, G.i, rp)
-
-        # Input
-        rp.modeling = rp.add_modeling(modeling[G.i])
-        mon.tweak_test = rp.tweak_test
-
         # Basic reset model verification is to init to the input data
         # Tried hard not to re-implement solvers in the Python verification  tool
         # Also, BTW, did not implement signal selection or tweak logic
-        # if hasattr(OPT.mon_run, 'kfres'):
-        #     mon.reset_kf = bool(OPT.mon_run.kfres[G.i])
         reset = None
         if OPT.run_type == "RunSim":
             # Must call Battery logic at least twice with reset=True to initialized seeded transfer functions correctly
@@ -254,6 +246,13 @@ def replicate(OPT: UserOptions):
                 reset = reset or bool(OPT.mon_run.reset[G.i] > 0.0) or bool(OPT.mon_run.reset_all_faults[G.i] > 0.0)
         elif OPT.run_type == "HistSim":
             reset = True
+
+        mon, sim = SN.calc_temp_pass_1(OPT, mon, sim, G.i, rp, reset=reset)
+
+        # Input
+        rp.modeling = rp.add_modeling(modeling[G.i])
+        mon.tweak_test = rp.tweak_test
+
         prn_soc_debug(OPT, time=now, leader="before sim init:         ", i_temp=i_temp, mon=mon, sim=sim)
         mon.reset_kf = reset
 
@@ -272,7 +271,7 @@ def replicate(OPT: UserOptions):
                 sat_s_init = OPT.sim_run.sat_s[G.i]
             sim.sat = sat_s_init
             mon.sat = OPT.mon_run.sat[G.i]
-        mon = SN.calc_temp_pass_2(OPT.mon_run, mon, Battery, rp, G.i)
+        mon = SN.calc_temp_pass_2(OPT.mon_run, mon, Battery, rp, G.i, reset=reset)
         # Models
         SN.update_ib_vb(G.i)
 
