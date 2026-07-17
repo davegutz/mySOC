@@ -891,7 +891,29 @@ class _Tee:
 
 
 def add_to_clip_board(text):
-    pyperclip.copy(text)
+    try:
+        pyperclip.copy(text)
+    except Exception:
+        # Try fallback using tkinter clipboard API
+        try:
+            import tkinter
+            # Create a temporary tk instance to write to clipboard
+            r = tkinter.Tk()
+            r.withdraw()
+            r.clipboard_clear()
+            r.clipboard_append(text)
+            r.update()
+            r.destroy()
+        except Exception:
+            # Both failed, show a warning dialog with the command text and installation advice
+            import tkinter.messagebox
+            msg = (
+                f"Could not copy command to the system clipboard.\n\n"
+                f"To enable auto-copying, please install a clipboard utility. On Linux, run:\n"
+                f"  sudo apt-get install xclip\n\n"
+                f"The command you were trying to copy is:\n\n{text}"
+            )
+            tkinter.messagebox.showwarning(title="Clipboard Copy Failed", message=msg)
 
 
 # Begini - configuration class using .ini files

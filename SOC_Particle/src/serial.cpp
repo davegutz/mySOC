@@ -439,8 +439,8 @@ void print_signal_sel_header() {
       "ib_wrp_rate_m, ib_wrp_state_m, ib_amp, ib_noa, ");
   Serial.printf(
       "  ib_amp_lo, ib_amp_hi, ib_noa_lo, ib_noa_hi, ib_noa_kf, kfres, kf_v_m, "
-      "ib_lo_limited_hi, ib_lo_limited_hi,"
-      "kf_v_n, e_wrap_m_trimmed, e_wrap_n_trimmed, ");
+      "kf_v_n, ib_lo_limited_hi, ib_lo_limited_lo,"
+       "e_wrap_m_trimmed, e_wrap_n_trimmed, ");
   Serial.printf(
       "  vb_model, voc_m, voc_soc_m, voc_n, voc_soc_n, wrap_m_and_n_fa, "
       "ib_is_functional,voltage_low, ");

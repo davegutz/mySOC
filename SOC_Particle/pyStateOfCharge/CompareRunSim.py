@@ -247,7 +247,10 @@ def compare_run_sim(
         # C++ prints cc_dif from the previous cycle (Fault.cc_diff() is set in
         # sense_synth_select before monitor() updates soc_ekf and soc), so the
         # replicate's cc_dif runs one sample ahead.  Shift to align with the run.
-        mon_ver = shift_time(mon_ver, 1, fields=("cc_dif",))
+        # When not modeling_ib, the verification model handles this internally.
+        mib_val = getattr(mon_ver, "mib", None)
+        if mib_val is not None and len(mib_val) > 0 and bool(mib_val[0]):
+            mon_ver = shift_time(mon_ver, 1, fields=("cc_dif",))
 
     # Save all time-dependent struct data to CSV files in the temp folder
     # if hardcopy and plots:

@@ -509,6 +509,7 @@ class BatteryMonitor(Battery, EKF1x1):
         self.qcap = 0.0
         self.qcrs = 0.0
         self.cc_dif = 0.0
+        self.cc_dif_prev = 0.0
 
         if SN is not None:
             self.Tb_hdwe = SN.mon_run.Tb_hdwe[0]
@@ -660,6 +661,7 @@ class BatteryMonitor(Battery, EKF1x1):
         i=None,
         i_ekf=None,
     ):
+        self.cc_dif_prev = self.soc_ekf - self.soc
         self.reset = reset
         self.Tb = Tb
         self.Tb_f = Tb_f
@@ -755,7 +757,13 @@ class BatteryMonitor(Battery, EKF1x1):
             self.ib_charge = 0.0
         if self.bms_off and self.voltage_low:
             self.ib = 0.0
-        self.ib_lag = self.IbLag.calculate_tau(self.ib, reset, self.dt, self.chemistry.ib_lag_tau)
+        ib_lag_reset = reset
+        if G.i < 3:
+            ib_lag_reset = (G.i == 0)
+            if OPT is not None and getattr(OPT, "mon_run", None) is not None:
+                if getattr(OPT.mon_run, "reset", None) is not None:
+                    ib_lag_reset = ib_lag_reset or bool(OPT.mon_run.reset[G.i] > 0.0) or bool(OPT.mon_run.reset_all_faults[G.i] > 0.0)
+        self.ib_lag = self.IbLag.calculate_tau(self.ib, ib_lag_reset, self.dt, self.chemistry.ib_lag_tau)
 
         # Dynamic emf
         if rp.modeling_ib:
@@ -1038,7 +1046,10 @@ class BatteryMonitor(Battery, EKF1x1):
         self.y_ekf = self.y
         self.qcap = self.q_capacity
         self.qcrs = self.q_cap_rated_scaled
-        self.cc_dif = self.soc_ekf - self.soc
+        if rp is not None and not rp.modeling_ib:
+            self.cc_dif = self.cc_dif_prev
+        else:
+            self.cc_dif = self.soc_ekf - self.soc
         self.dt_s = sim.dt
         self.chm_s = sim.chm
         self.qcrs_s = sim.q_cap_rated_scaled
@@ -1172,20 +1183,12 @@ class BatteryMonitor(Battery, EKF1x1):
             )
 
         # Scale for final selection
-        if not rp.modeling_ib:
-            e_wrap_m_val = self.LoopIbAmp.e_wrap
-            e_wrap_n_val = self.LoopIbNoa.e_wrap
-            e_wrap_m_filt_val = self.LoopIbAmp.e_wrap_filt
-            e_wrap_n_filt_val = self.LoopIbNoa.e_wrap_filt
-            e_wrap_m_rate_val = self.LoopIbAmp.e_wrap_rate
-            e_wrap_n_rate_val = self.LoopIbNoa.e_wrap_rate
-        else:
-            e_wrap_m_val = self.e_wrap_m
-            e_wrap_n_val = self.e_wrap_n
-            e_wrap_m_filt_val = self.e_wrap_m_filt
-            e_wrap_n_filt_val = self.e_wrap_n_filt
-            e_wrap_m_rate_val = self.e_wrap_m_rate
-            e_wrap_n_rate_val = self.e_wrap_n_rate
+        e_wrap_m_val = self.LoopIbAmp.e_wrap
+        e_wrap_n_val = self.LoopIbNoa.e_wrap
+        e_wrap_m_filt_val = self.LoopIbAmp.e_wrap_filt
+        e_wrap_n_filt_val = self.LoopIbNoa.e_wrap_filt
+        e_wrap_m_rate_val = self.LoopIbAmp.e_wrap_rate
+        e_wrap_n_rate_val = self.LoopIbNoa.e_wrap_rate
 
         self.e_wrap = self.sel_brk_hdwe.scale_select(ib_noa_hdwe, e_wrap_m_val, e_wrap_n_val)
         self.e_wrap_filt = self.sel_brk_hdwe.scale_select(ib_noa_hdwe, e_wrap_m_filt_val, e_wrap_n_filt_val)
@@ -1422,7 +1425,13 @@ class BatterySim(Battery):
             ib_charge_fut = 0.0
         if self.bms_off and self.voltage_low:
             self.ib = 0.0
-        self.ib_lag = self.IbLag.calculate_tau(self.ib, self.reset, self.dt, self.chemistry.ib_lag_tau)
+        ib_lag_reset = self.reset
+        if G.i < 3:
+            ib_lag_reset = (G.i == 0)
+            if OPT is not None and getattr(OPT, "mon_run", None) is not None:
+                if getattr(OPT.mon_run, "reset", None) is not None:
+                    ib_lag_reset = ib_lag_reset or bool(OPT.mon_run.reset[G.i] > 0.0) or bool(OPT.mon_run.reset_all_faults[G.i] > 0.0)
+        self.ib_lag = self.IbLag.calculate_tau(self.ib, ib_lag_reset, self.dt, self.chemistry.ib_lag_tau)
         # Charge transfer dynamics
         self.ib_dyn = self.ChargeTransfer.calculate_tau_seeded(
             self.ib, SN.ib_dyn_s[G.i], self.reset, self.dt, self.chemistry.tau_ct

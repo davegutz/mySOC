@@ -28,7 +28,7 @@ from local_paths import version_from_data_file, local_paths
 EKF_DEFAULT_FRAME_MULT = 20
 
 # Column names suggesting EKF outputs/state (soc_ekf, voc_ekf, y_ekf, kfres, kf_v_m, *_kf, ekf_reset, flt_ekf, ...)
-_EKF_COL_RE = re.compile(r"(?:^|_)(?:ekf|kf|kfres|kfres_1)(?:_|$)", re.IGNORECASE)
+_EKF_COL_RE = re.compile(r"(?:^|_)(?:ekf|kf|kfres|kfres_1|cc_dif|cc_diff)(?:_|$)", re.IGNORECASE)
 
 # Column names containing "Tb" (temperature) — skipped whenever reset_temp is True
 _TB_COL_RE = re.compile(r"Tb", re.IGNORECASE)
@@ -252,6 +252,9 @@ def compare_pair(run_path, ver_path, tol, rtol=1e-3, ed=None):
             delta = delta.where(df_run["time"] >= ekf_skip_until, 0.0)
         if reset_temp_mask is not None and _is_tb_column(col):
             delta = delta.where(~reset_temp_mask, 0.0)
+        if "reset" in df_ver.columns:
+            reset_mask = df_ver["reset"].astype(float).astype(bool) if df_ver["reset"].dtype in (int, float) else df_ver["reset"].astype(bool)
+            delta = delta.where(~reset_mask, 0.0)
         if skip_first_2:
             # Skip until the column has changed at least twice in df_run (its first two updates)
             # Default to index 2 if there are fewer than 2 changes.

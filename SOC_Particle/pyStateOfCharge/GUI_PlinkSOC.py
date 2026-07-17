@@ -1120,7 +1120,6 @@ def _pid_comm(pid):
     try:
         return subprocess.check_output(["ps", "-o", "comm=", "-p", str(pid)]).decode().strip()
     except Exception:
-        print(Colors.fg.red, 'error near line 1123 of GUI_PlinkSOC.py', Colors.reset)
         return ""
 
 
@@ -1130,8 +1129,54 @@ def _pid_ppid(pid):
         out = subprocess.check_output(["ps", "-o", "ppid=", "-p", str(pid)]).decode().strip()
         return int(out) if out else None
     except Exception:
-        print(Colors.fg.red, 'error near line 1133 of GUI_PlinkSOC.py', Colors.reset)
         return None
+
+
+def _find_and_record_plink_pid(test_name):
+    plink_pid = None
+    ppid = "Unknown"
+    
+    print(f"Debug: searching for processes named exactly 'plink' loading {test_name}...")
+
+    # 1. Find all processes named exactly "plink"
+    try:
+        pids_out = subprocess.check_output(["pgrep", "-x", "plink"]).decode().strip().split()
+        pids = [int(p) for p in pids_out if p.isdigit()]
+    except subprocess.CalledProcessError:
+        pids = []
+
+    # 2. Check the command line of each to find the one matching our test_name
+    for pid in pids:
+        try:
+            cmdline = subprocess.check_output(["ps", "-o", "args=", "-p", str(pid)]).decode().strip()
+            print(f"Debug: found plink PID {pid} with command line: {cmdline}")
+            if f"-load {test_name}" in cmdline:
+                plink_pid = pid
+                break
+        except Exception:
+            pass
+
+    if plink_pid is None:
+        msg = (
+            "Could not find the spawned plink process.\n\n"
+            "This usually means the plink process exited immediately.\n\n"
+            "Please check:\n"
+            "1. PuTTY/plink configuration settings.\n"
+            "2. Serial port permissions (e.g. dialout group).\n"
+            "3. Disconnected or busy hardware."
+        )
+        print(f"{Colors.fg.red}Warning: {msg}{Colors.reset}")
+        tkinter.messagebox.showwarning(title="Plink Process Not Found", message=msg)
+    else:
+        # noinspection PyBroadException
+        try:
+            ppid_out = subprocess.check_output(["ps", "-o", "ppid=", "-p", str(plink_pid)]).decode().strip()
+            if ppid_out:
+                ppid = ppid_out
+        except Exception:
+            pass
+
+    return plink_pid, ppid
 
 
 def _is_self_or_ancestor(pid):
@@ -1928,7 +1973,29 @@ def start_plink(command_to_paste=None, force_if_ready=False, force_kill=False, f
         kill_plink(platform.system())
         print(f"restarting plink   plink -load {test_filename.get()}")
         if platform.system() == "Linux":
-            term = find_executable("gnome-terminal") or find_executable("xterm") or "x-terminal-emulator"
+            term = (
+                find_executable("gnome-terminal")
+                or find_executable("xterm")
+                or find_executable("alacritty")
+                or find_executable("konsole")
+                or find_executable("xfce4-terminal")
+                or find_executable("lxterminal")
+                or find_executable("mate-terminal")
+                or find_executable("kitty")
+                or find_executable("tilix")
+                or find_executable("qterminal")
+                or find_executable("x-terminal-emulator")
+            )
+            if term is None:
+                tkinter.messagebox.showerror(
+                    title="Terminal Emulator Not Found",
+                    message=(
+                        "Could not find a supported terminal emulator on your system.\n\n"
+                        "Please install one of the following:\n"
+                        "gnome-terminal, xterm, alacritty, konsole, xfce4-terminal, lxterminal, mate-terminal, kitty, tilix, qterminal."
+                    )
+                )
+                return
             # Use bash -c for an interactive window that pipes output to tee and stays open
             # User provided: gnome-terminal -- bash -c 'plink -load testsoc3p2 | tee ~/.local/plink_test.csv; exec bash'
             plink_base_cmd = f"plink -batch -T -load {test_filename.get()} | tee {plink_test_csv_path.get()}"
@@ -1956,35 +2023,7 @@ def start_plink(command_to_paste=None, force_if_ready=False, force_kill=False, f
                 proc = subprocess.Popen(cmd)
                 linux_terminal_pid = proc.pid
                 tksleep(1.0)  # Wait for terminal to spawn plink
-                # noinspection PyBroadException
-                try:
-                    # Debug: Print full result of pgrep and ps -ef | grep plink
-                    pgrep_search = f"plink -batch -T -load {test_filename.get()}"
-                    print(f"Debug: pgrep -a -f result for '{pgrep_search}':")
-                    try:
-                        pgrep_out = subprocess.check_output(["pgrep", "-a", "-f", pgrep_search]).decode()
-                        print(pgrep_out)
-                    except subprocess.CalledProcessError:
-                        print("No processes found with pgrep.")
-
-                    # Find the newest plink process matching our session
-                    out = subprocess.check_output(["pgrep", "-n", "-f", pgrep_search]).decode().strip()
-                    if out:
-                        plink_pid = int(out)
-                except Exception:
-                    print(Colors.fg.red, 'error near line 1976 of GUI_PlinkSOC.py', Colors.reset)
-                    pass  # plink_pid stays None; kill_plink falls back to pkill
-
-                # Get the parent PID using ps
-                ppid = "Unknown"
-                # noinspection PyBroadException
-                try:
-                    ppid_out = subprocess.check_output(["ps", "-o", "ppid=", "-p", str(plink_pid)]).decode().strip()
-                    if ppid_out:
-                        ppid = ppid_out
-                except Exception:
-                    print(Colors.fg.red, 'error near line 1986 of GUI_PlinkSOC.py', Colors.reset)
-                    pass
+                plink_pid, ppid = _find_and_record_plink_pid(test_filename.get())
                 print(f"Spawned PID: {plink_pid}  PPID: {ppid}")
                 if auto_running:
                     print(f"AUTO running case No. {auto_case_index + 1} of {auto_case_total}")
@@ -2010,34 +2049,7 @@ def start_plink(command_to_paste=None, force_if_ready=False, force_kill=False, f
                 proc = subprocess.Popen(cmd)
                 linux_terminal_pid = proc.pid
                 tksleep(1.0)  # Wait for terminal to spawn plink
-                # noinspection PyBroadException
-                try:
-                    # Debug: Print full result of pgrep and ps -ef | grep plink
-                    pgrep_search = f"plink -batch -T -load {test_filename.get()}"
-                    print(f"Debug: pgrep -a -f result for '{pgrep_search}':")
-                    try:
-                        pgrep_out = subprocess.check_output(["pgrep", "-a", "-f", pgrep_search]).decode()
-                        print(pgrep_out)
-                    except subprocess.CalledProcessError:
-                        print("No processes found with pgrep.")
-
-                    out = subprocess.check_output(["pgrep", "-n", "-f", pgrep_search]).decode().strip()
-                    if out:
-                        plink_pid = int(out)
-                except Exception:
-                    print(Colors.fg.red, 'error near line 2029 of GUI_PlinkSOC.py', Colors.reset)
-                    pass  # plink_pid stays None; kill_plink falls back to pkill
-
-                # Get the parent PID using ps
-                ppid = "Unknown"
-                try:
-                    ppid_out = subprocess.check_output(["ps", "-o", "ppid=", "-p", str(plink_pid)]).decode().strip()
-                    if ppid_out:
-                        ppid = ppid_out
-                # noinspection PyBroadException
-                except Exception as ee:
-                    print(Colors.fg.red, ee, 'error near line 2040 of GUI_PlinkSOC.py', Colors.reset)
-                    pass
+                plink_pid, ppid = _find_and_record_plink_pid(test_filename.get())
                 print(f"Spawned PID: {plink_pid}  PPID: {ppid}")
                 if auto_running:
                     print(f"AUTO running case No. {auto_case_index + 1} of {auto_case_total}")
@@ -2053,34 +2065,7 @@ def start_plink(command_to_paste=None, force_if_ready=False, force_kill=False, f
                 proc = subprocess.Popen(cmd)
                 linux_terminal_pid = proc.pid
                 tksleep(1.0)  # Wait for terminal to spawn plink
-                try:
-                    # Debug: Print full result of pgrep and ps -ef | grep plink
-                    pgrep_search = f"plink -batch -T -load {test_filename.get()}"
-                    print(f"Debug: pgrep -a -f result for '{pgrep_search}':")
-                    try:
-                        pgrep_out = subprocess.check_output(["pgrep", "-a", "-f", pgrep_search]).decode()
-                        print(pgrep_out)
-                    except subprocess.CalledProcessError:
-                        print("No processes found with pgrep.")
-
-                    out = subprocess.check_output(["pgrep", "-n", "-f", pgrep_search]).decode().strip()
-                    if out:
-                        plink_pid = int(out)
-                # noinspection PyBroadException
-                except Exception as ee:
-                    print(Colors.fg.red, ee, 'error near line 2072 of GUI_PlinkSOC.py', Colors.reset)
-                    pass  # plink_pid stays None; kill_plink falls back to pkill
-
-                # Get the parent PID using ps
-                ppid = "Unknown"
-                try:
-                    ppid_out = subprocess.check_output(["ps", "-o", "ppid=", "-p", str(plink_pid)]).decode().strip()
-                    if ppid_out:
-                        ppid = ppid_out
-                # noinspection PyBroadException
-                except Exception as ee:
-                    print(Colors.fg.red, ee, 'error near line 2083 of GUI_PlinkSOC.py', Colors.reset)
-                    pass
+                plink_pid, ppid = _find_and_record_plink_pid(test_filename.get())
                 print(f"Spawned PID: {plink_pid}  PPID: {ppid}")
                 if auto_running:
                     print(f"AUTO running case No. {auto_case_index + 1} of {auto_case_total}")
@@ -2173,29 +2158,7 @@ def start_plink(command_to_paste=None, force_if_ready=False, force_kill=False, f
             cmd = ["osascript", "-e", script]
             print(f"Running command: {shlex.join(cmd)}")
             tksleep(1.0)
-            try:
-                out = (
-                    subprocess.check_output(["pgrep", "-n", "-f", f"plink -batch -T -load {test_filename.get()}"])
-                    .decode()
-                    .strip()
-                )
-                if out:
-                    plink_pid = int(out)
-            # noinspection PyBroadException
-            except Exception as ee:
-                print(Colors.fg.red, ee, 'error near line 2188 of GUI_PlinkSOC.py', Colors.reset)
-                pass  # plink_pid stays None; kill_plink falls back to pkill
-
-            # Get the parent PID using ps
-            ppid = "Unknown"
-            try:
-                ppid_out = subprocess.check_output(["ps", "-o", "ppid=", "-p", str(plink_pid)]).decode().strip()
-                if ppid_out:
-                    ppid = ppid_out
-            # noinspection PyBroadException
-            except Exception as ee:
-                print(Colors.fg.red, ee, 'error near line 2199 of GUI_PlinkSOC.py', Colors.reset)
-                pass
+            plink_pid, ppid = _find_and_record_plink_pid(test_filename.get())
             print(f"Spawned PID: {plink_pid}  PPID: {ppid}")
             if auto_running:
                 print(f"AUTO running case No. {auto_case_index + 1} of {auto_case_total}")
