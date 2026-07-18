@@ -36,68 +36,48 @@
 class Sensors;
 
 #define RATED_TEMP 25.  // Temperature at NOM_UNIT_CAP, deg C (25)
-#define TCHARGE_DISPLAY_DEADBAND \
-  0.1  // Inside this +/- deadband, charge time is displayed '---', A
-#define T_RLIM \
-  0.00085  // Temperature sensor rate limit to minimize jumps in Coulomb
-           // counting, deg C/s (0.00085 allows 0.05 deg for 1 minute)
-const float VB_DC_DC =
-    13.5;  // DC-DC charger estimated voltage, V (13.5 < v_sat = 13.85)
+#define TCHARGE_DISPLAY_DEADBAND  0.1  // Inside this +/- deadband,
+                                       // charge time is displayed '---', A
+#define T_RLIM  0.00085  // Temperature sensor rate limit to minimize jumps in
+            // Coulomb counting, deg C/s (0.00085 allows 0.05 deg for 1 minute)
+const float VB_DC_DC = 13.5;  // DC-DC charger estimated out, V(< v_sat = 13.85)
 #if !defined(EKF_CONV)  // allow override in config file
-#define EKF_CONV \
-  1.5e-3  // EKF tracking error indicating convergence, V (1.5e-3)
+#define EKF_CONV 1.5e-3  // EKF track error indicating convergence, V (1.5e-3)
 #endif
 #define EKF_T_CONV 30.  // EKF set convergence test time, sec (30.)
-const float EKF_T_RES =
-    (EKF_T_CONV / 2.);       // EKF reset retest time, sec ('up 1, down 2')
+const float EKF_T_RES = (EKF_T_CONV / 2.);  // EKF reset (up 1, down 2')
 #if !defined(VOC_STAT_FILT)  // allow override in config file
 #define VOC_STAT_FILT 120.   // voc_stat_f_ filtering for EKF (120) VF
 #endif
 #if !defined(EKF_Q_SD_NORM)  // allow override in config file
-#define EKF_Q_SD_NORM \
-  0.0015  // Standard deviation of normal EKF process uncertainty, V (0.0015)
+#define EKF_Q_SD_NORM 0.0015  // Stddev EKF process uncertainty, V (0.0015)
 #endif
 #if !defined(EKF_R_SD_NORM)  // allow override in config file
-#define EKF_R_SD_NORM \
-  0.5  // Standard deviation of normal EKF state uncertainty, fraction (0-1)
-       // (0.5)
+#define EKF_R_SD_NORM 0.5  // Stddev EKF state uncertainty, fraction (0-1) (0.5)
 #endif
-#define NOM_DT \
-  0.1  // Nominal update time, s (initialization; actual value varies)
-#define EKF_NOM_DT \
-  0.1  // EKF nominal update time, s (initialization; actual value varies)
+#define NOM_DT 0.1  // Nominal update, s (init val; actual value varies)
+#define EKF_NOM_DT 0.1  // EKF nominal update, s (init; actual value varies)
 #if !defined(EKF_EFRAME_MULT)  // allow override in config file
-#define EKF_EFRAME_MULT \
-  20  // Multiframe rate consistent with READ_DELAY (20 for READ_DELAY=100) ED
+#define EKF_EFRAME_MULT 20  // consistent with READ_DELAY (20 for 100) ED
 #endif
-#define DF2 \
-  1.2  // Threshold to resest Coulomb Counter if different from ekf, fraction
-       // (0.20)
-#define TAU_Y_FILT 5.       // EKF y-filter time constant, sec (5.)
-#define MIN_Y_FILT -0.5     // EKF y-filter minimum, V (-0.5)
-#define MAX_Y_FILT 0.5      // EKF y-filter maximum, V (0.5)
-#define WN_Y_FILT 0.1       // EKF y-filter-2 natural frequency, r/s (0.1)
-#define ZETA_Y_FILT 0.9     // EKF y-fiter-2 damping factor (0.9)
-#define TMAX_FILT 3.        // Maximum y-filter-2 sample time, s (3.)
-#define SOLV_ERR 1e-9       // EKF initialization solver error bound, V (1e-6)
-#define SOLV_MAX_COUNTS 30  // EKF initialization solver max iters (30)
-#define SOLV_SUCC_COUNTS \
-  6  // EKF initialization solver iters to switch from successive approximation
-     // to Newton-Rapheson (6)
-#define SOLV_MAX_STEP \
-  0.2  // EKF initialization solver max step size of soc, fraction (0.2)
+#define DF2 1.2  // Thresh to reset Coul Counter if diff from ekf, frac (0.20)
+#define TAU_Y_FILT 5.  // EKF y-filter time constant, sec (5.)
+#define MIN_Y_FILT -0.5  // EKF y-filter minimum, V (-0.5)
+#define MAX_Y_FILT 0.5  // EKF y-filter maximum, V (0.5)
+#define WN_Y_FILT 0.1  // EKF y-filter-2 natural frequency, r/s (0.1)
+#define ZETA_Y_FILT 0.9  // EKF y-fiter-2 damping factor (0.9)
+#define TMAX_FILT 3.0  // Maximum y-filter-2 sample time, s (3.)
+#define SOLV_ERR 1e-9  // EKF initialization solver error bound, V (1e-6)
+#define SOLV_MAX_COUNTS 30  // EKF init solver max iters (30)
+#define SOLV_SUCC_COUNTS 6  // EKF init solver iters to switch from successive
+                            // approximation to Newton-Rapheson (6)
+#define SOLV_MAX_STEP  0.2  // EKF init solver max step  of soc, fraction (0.2)
 #define HYS_INIT_COUNTS 30  // Maximum initialization iterations hysteresis (50)
-#define HYS_INIT_TOL 1e-8   // Initialization tolerance hysteresis (1e-8)
-// const float MXEPS = 1-1e-6;       // Level of soc that indicates
-// mathematically saturated (threshold is lower for robustness) (1-1e-6) dag
-// 8/3/2023
-const float MXEPS =
-    1.05;  // Level of soc that indicates mathematically saturated (threshold is
-           // higher to catch volt failure modes) (1.05)
-
-#define HYS_SOC_MIN_MARG \
-  0.15  // Add to soc_min to set thr for detecting low endpoint condition for
-        // reset of hysteresis (0.15)
+#define HYS_INIT_TOL 1e-8  // Initialization tolerance hysteresis (1e-8)
+const float MXEPS = 1.05;  // Level of soc that indicates mathematically sat'd
+                           // (thresh higher to catch volt fail modes) (1.05)
+#define HYS_SOC_MIN_MARG 0.15  // Add to soc_min to set thr for detecting low
+                          // endpoint condition for reset of hysteresis (0.15)
 #define HYS_IB_THR 1.0  // Ignore reset if opposite situation exists, A (1.0)
 #if !defined(VM)
 #define VM 0.0
@@ -157,30 +137,31 @@ class Battery : public Coulombs {
  protected:
   bool bms_charging_;  // Indicator that battery is charging, T = charging,
                        // changing soc and voltage
-  bool bms_off_;    // Indicator that battery management system is off, T = off
-                    // preventing current flow
-  double ctime_;    // Current time, s
-  float dt_;        // Update time, s
+  bool bms_off_;  // Indicator that battery management system is off, T = off
+                  // preventing current flow
+  double ctime_;  // Current time, s
+  float dt_;  // Update time, s
   double dv_dsoc_;  // Derivative scaled, V/fraction
-  float dv_dyn_;    // ib-induced back emf, V
-  float dv_hys_;    // Hysteresis state, voc-voc_out, V
-  float ib_;        // Battery terminal current, A
-  float ibs_;       // Hysteresis input current, A
-  float ib_dyn_;    // ib lagged by charge transfer, A
-  bool initializing_;      // Flag to indicate initializingn
-  float ioc_;              // Hysteresis output current, A
-  float nom_vsat_;         // Nominal saturation threshold at 25C, V
-  bool print_now_;         // Print command
+  float dv_dyn_;  // ib-induced back emf, V
+  float dv_hys_;  // Hysteresis state, voc-voc_out, V
+  float ib_;  // Battery terminal current, A
+  float ibs_;  // Hysteresis input current, A
+  float ib_dyn_;  // ib lagged by charge transfer, A
+  bool initializing_;  // Flag to indicate initializingn
+  float ioc_;  // Hysteresis output current, A
+  float nom_vsat_;  // Nominal saturation threshold at 25C, V
+  bool print_now_;  // Print command
   bool soft_reset_print_;  // Soft reset flag
-  double Tb_;              // Battery temperature, deg C
-  double Tb_f_;            // Filtered battery temperature, deg C
-  float vb_;               // Battery terminal voltage, V
-  double voc_;             // Static model open circuit voltage, V
-  double voc_soc_;         // Raw table lookup of voc, V
-  double voc_stat_;        // Static, table lookup value of voc before applying
-                           // hysteresis, V
-  bool voltage_low_;       // Battery below BMS, T = BMS will turn off
-  float vsat_;             // Saturation threshold at temperature, V
+  double Tb_;  // Battery temperature, deg C
+  double Tb_f_;  // Filtered battery temperature, deg C
+  float vb_;  // Battery terminal voltage, V
+  double voc_;  // Static model open circuit voltage, V
+  double voc_soc_;  // Raw table lookup of voc, V
+  double voc_stat_;// Static, table lookup value of voc before applying
+                   // hysteresis, V
+  bool voltage_low_;  // Battery below BMS, T = BMS will turn off
+  float vsat_;  // Saturation threshold at temperature, V
+
   // EKF declarations
   LagExp* ChargeTransfer_;  // ChargeTransfer model {ib, vb} --> {voc}, ioc=ib
                             // for Battery version ChargeTransfer model {ib,
