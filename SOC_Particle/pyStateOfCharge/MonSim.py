@@ -332,6 +332,7 @@ def replicate(OPT: UserOptions):
             saturated=False,
             mon_sat=mon.sat,
             rp=rp,
+            mon_delta_q=mon.delta_q,
         )
 
         # Charge init

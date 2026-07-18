@@ -824,8 +824,11 @@ class BatteryMonitor(Battery, EKF1x1):
             self.soc_ekf = self.x  # x = Vsoc (0-1 ideal capacitor voltage) proxy for soc
             self.y_ekf = self.y
             self.q_ekf = self.soc_ekf * self.q_capacity
+            in_val = self.y_ekf
+            if self.reset_temp and OPT is not None and getattr(OPT, "mon_run", None) is not None:
+                in_val = OPT.mon_run.y_ekf[G.i]
             self.y_ekf_f = self.y_ekf_filt_lag.calculate_seeded(
-                in_=self.y_ekf, _out_init=OPT.mon_run.y_ekf_f[G.i], dt=self.dt_eframe, reset=self.reset_temp
+                in_=in_val, _out_init=OPT.mon_run.y_ekf_f[G.i], dt=self.dt_eframe, reset=self.reset_temp
             )
             self.y_ekf_f_T = self.y_ekf_filt_lag.dt
             self.y_ekf_f_tau = self.y_ekf_filt_lag.tau
@@ -1480,7 +1483,7 @@ class BatterySim(Battery):
 
         return self.vb
 
-    def count_coulombs(self, OPT, SN, chem, reset_temp, tb_f, charge_curr, sat, saturated, mon_sat=None, rp=None):
+    def count_coulombs(self, OPT, SN, chem, reset_temp, tb_f, charge_curr, sat, saturated, mon_sat=None, rp=None, mon_delta_q=None):
         # BatterySim
         """Coulomb counter based on true=actual capacity
         Internal resistance of battery is a loss
@@ -1509,7 +1512,10 @@ class BatterySim(Battery):
         # Saturation and re - init.Goal is to set q_capacity and hold it so remember last saturation status
         if OPT.use_mon_soc or not bool(SN.mon_run.mvb[G.i]):
             if mon_sat or self.reset_temp_past:
-                self.apply_delta_q_brief(SN.delta_q_s[G.i])
+                if mon_delta_q is not None:
+                    self.apply_delta_q_brief(mon_delta_q)
+                else:
+                    self.apply_delta_q_brief(SN.delta_q_s[G.i])
         elif self.model_saturated and reset_temp:
             self.delta_q = 0.0
 
