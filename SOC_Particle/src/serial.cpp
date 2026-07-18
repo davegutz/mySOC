@@ -134,8 +134,8 @@ void print_battery_header() {
       "sp_cutback_gain_slr, sp_Dw, sp_ib_disch_slr, sp_s_cap_mon, "
       "sp_s_cap_sim, sp_vsat_add, TAU_ERR_FILT, TAU_Y_FILT, TB_FILT,");
   Serial.printf(
-      "TB_MAX, TB_MIN, TCHARGE_DISPLAY_DEADBAND, TMAX_FILT, T_RLIM, VB_DC_DC, "
-      "VB_MAX, VB_MIN,");
+      "TB_MAX, TB_MIN, TB_HDWE_MAX, TB_HDWE_MIN, TCHARGE_DISPLAY_DEADBAND, "
+      "TMAX_FILT, T_RLIM, VB_DC_DC, VB_MAX, VB_MIN, ");
   Serial.printf(
       "VOC_STAT_FILT, WN_Y_FILT, WRAP_ERR_FILT, WRAP_HI_AMPV, WRAP_HI_NOAV, "
       "WRAP_HI_RES, WRAP_HI_SET, WRAP_HI_SETAT_MARG,");
@@ -193,9 +193,10 @@ void print_battery_serial() {
   Serial.printf("%s", pr.buff);
 
   sprintf(pr.buff, "%10.7f,%10.7f,%10.7f,%10.7f,%10.7f,%10.7f,%10.7f,%10.7f,\
-  %10.7f,",
+  %10.7f,%10.7f,%10.7f,",
           sp.ib_disch_slr(), ap.s_cap_mon(), ap.s_cap_sim(), sp.Vsat_add(),
-          TAU_ERR_FILT, TAU_Y_FILT, TB_FILT, TB_MAX, TB_MIN);
+          TAU_ERR_FILT, TAU_Y_FILT, TB_FILT, TB_MAX, TB_MIN, TB_HDWE_MAX,
+          TB_HDWE_MIN);
   Serial.printf("%s", pr.buff);
 
   sprintf(pr.buff, "%10.7f,%10.7f,%10.7f,%10.7f,%10.7f,%10.7f,%10.7f,%10.7f,",

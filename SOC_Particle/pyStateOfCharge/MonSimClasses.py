@@ -99,8 +99,8 @@ class Sensors:
             self.Tb_past = self.mon_run.Tb[0] + self.dTb
             self.Tb_f_past = self.mon_run.Tb_f[0] + self.dTb
             self.Tb_f_rate_past = self.mon_run.Tb_f_rate[0]
-            self.TbSenseFilt = LagExp(0, Battery.TB_FILT, Battery.TB_MIN, Battery.TB_MAX)
-            self.TbModelFilt = LagExp(0, Battery.TB_FILT, Battery.TB_MIN, Battery.TB_MAX)
+            self.TbSenseFilt = LagExp(0, Battery.TB_FILT, Battery.TB_HDWE_MIN, Battery.TB_HDWE_MAX)
+            self.TbModelFilt = LagExp(0, Battery.TB_FILT, Battery.TB_HDWE_MIN, Battery.TB_HDWE_MAX)
             self.WrapLoopAmp = SensorLooparound(
                 self.mon_run.ib_amp_hdwe, self.mon_run.ib_dyn_m, self.mon_run.e_wrap_m_trim, self.mon_run.e_wrap_m_filt
             )
@@ -200,8 +200,8 @@ class Sensors:
             self.Tb_past = self.mon_run.Tb_f[0] + self.dTb
             self.Tb_f_past = self.mon_run.Tb_f[0] + self.dTb
             self.Tb_f_rate_past = np.copy(self.Tb_f) * 0.0
-            self.TbModelFilt = LagExp(0, Battery.TB_FILT, Battery.TB_MIN, Battery.TB_MAX)
-            self.TbSenseFilt = LagExp(0, Battery.TB_FILT, Battery.TB_MIN, Battery.TB_MAX)
+            self.TbModelFilt = LagExp(0, Battery.TB_FILT, Battery.TB_HDWE_MIN, Battery.TB_HDWE_MAX)
+            self.TbSenseFilt = LagExp(0, Battery.TB_FILT, Battery.TB_HDWE_MIN, Battery.TB_HDWE_MAX)
 
             self.WrapLoopAmp = SensorLooparound(
                 self.mon_run.ib_amp_hdwe_f,

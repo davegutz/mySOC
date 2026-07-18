@@ -98,7 +98,9 @@ class BatteryConstants:
     TAU_Y_FILT = 1.0
     TB_FILT = 120.0
     TB_MAX = 60.0
-    TB_MIN = -20.0
+    TB_MIN = -40.0
+    TB_HDWE_MAX = 150.0
+    TB_HDWE_MIN = -20.0
     TCHARGE_DISPLAY_DEADBAND = 0.1
     TMAX_FILT = 1.0
     VB_DC_DC = 12.0

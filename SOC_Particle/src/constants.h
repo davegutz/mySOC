@@ -49,8 +49,6 @@ all
 #undef VOLT_BIAS
 #undef CURR_BIAS_ALL
 #undef TEMP_BIAS
-#undef TB_MAX
-#undef TB_MIN
 #undef CHEM_NOM_VSAT
 #undef VOC_STAT_FILT
 
@@ -141,34 +139,35 @@ const float T_DESAT = 20;  // De-saturation time, sec
   1.1  // Signal selection hard fault threshold, V (1.1, 1.4 too high)
 #define IB_MIN_UP \
   0.2  // Min up charge current for come alive, BMS logic, and fault
-#define TB_MAX 60.  // Signal selection hard fault threshold 2wire only, C (60.)
-#define TB_MIN \
-  -40.  // Signal selection hard fault threshold 2wire only, C (-40.)
-#define TB_HARD_SET \
-  1.  // Signal selection Tb 2-wire range fail persistence, s (1.)
-#define TB_HARD_RES \
-  2.  // Signal selection Tb 2-wire range fail reset persistence, s (2.)
-#define VB_HARD_SET 1.  // Signal selection volt range fail persistence, s (1.)
-#define VB_HARD_RES \
-  2.  // Signal selection volt range fail reset persistence, s (2.)
-#define VC_HARD_SET 1.  // Signal selection volt range fail persistence, s (1.)
-#define VC_HARD_RES \
-  2.  // Signal selection volt range fail reset persistence, s (2.)
-#define TB_NOISE 0.         // Tb added noise amplitude, deg C pk-pk
-#define TB_NOISE_SEED 0xe2  // Tb added noise seed 0-255 = 0x00-0xFF (0xe2)
-#define VB_NOISE 0.         // Vb added noise amplitude, V pk-pk
+#if !defined(TB_HDWE_MAX)
+#define TB_HDWE_MAX 150.0  // Hardware electrical limit 2wire only, C (150)
+#endif
+#if !defined(TB_HDWE_MIN)
+#define TB_HDWE_MIN -20.0 // Hardware electrical limit 2wire only, C (-20)
+#endif
+#if !defined(TB_MAX)
+#define TB_MAX  60.  // Hard fault threshold 2wire only, C (60.)
+#endif
+#if !defined(TB_MIN)
+#define TB_MIN -19.  // Hard fault threshold 2wire only, C (-19.)
+#endif
+#define TB_HARD_SET 1.  // Tb 2-wire range fail persistence, s (1.)
+#define TB_HARD_RES 2.  // Tb 2-wire range fail reset persistence, s (2.)
+#define VB_HARD_SET 1.  // Vb range fail persistence, s (1.)
+#define VB_HARD_RES 2.  // Vb range fail reset persistence, s (2.)
+#define VC_HARD_SET 1.  // Vb  range fail persistence, s (1.)
+#define VC_HARD_RES 2.  // Vc range fail reset persistence, s (2.)
+#define TB_NOISE 0.  // Tb added noise amplitude, deg C pk-pk
+#define TB_NOISE_SEED 0xe2 // Tb added noise seed 0-255 = 0x00-0xFF (0xe2)
+#define VB_NOISE 0.  // Vb added noise amplitude, V pk-pk
 #define VB_NOISE_SEED 0xb2  // Vb added noise seed 0-255 = 0x00-0xFF (0xb2)
-#define IB_AMP_NOISE 0.  // Ib amplified sensor added noise amplitude, A pk-pk
-#define IB_NOA_NOISE \
-  0.  // Ib non-amplified sensor added noise amplitude, A pk-pk
-#define IB_AMP_NOISE_SEED \
-  0x01  // Ib amplified sensor added noise seed 0-255 = 0x00-0xFF (0x01)
-#define IB_NOA_NOISE_SEED \
-  0x0a  // Ib non-amplified sensor added noise seed 0-255 = 0x00-0xFF (0x0a)
+#define IB_AMP_NOISE 0.  // Ib amplified added noise amplitude, A pk-pk
+#define IB_NOA_NOISE 0.  // Ib non-amplified added noise amplitude, A pk-pk
+#define IB_AMP_NOISE_SEED 0x01  // Ib amp added noise seed 0x00-0xFF (0x01)
+#define IB_NOA_NOISE_SEED 0x0a  // Ib nonamp added noise seed 0x00-0xFF (0x0a)
 #define WRAP_ERR_FILT 4.  // Wrap error filter time constant, s (4)
-#define F_MAX_T_WRAP \
-  2.8  // Maximum update time of Wrap filter for stability at WRAP_ERR_FILT
-       // (0.7*T for Tustin), s (2.8)
+#define F_MAX_T_WRAP 2.8  // Maximum update time of wrap filter for stability
+                          // at WRAP_ERR_FILT (0.7*T for Tustin), s (2.8)
 #define MAX_WRAP_ERR_FILT 10.  // Anti-windup wrap error filter, V (10)
 const float WRAP_LO_SET = 9.;  // Wrap low failure set time, sec (9) // 9 is
                                // legacy must be quicker than SAT test
@@ -479,12 +478,6 @@ const float QUIET_RES(QUIET_SET /
 #endif
 #if !defined(IN_SERVICE)
 #define IN_SERVICE true  // In service flag for testing (true)
-#endif
-#if !defined(TB_HDWE_MIN)
-#define TB_HDWE_MIN -20.0
-#endif
-#if !defined(TB_HDWE_MAX)
-#define TB_HDWE_MAX 150.0
 #endif
 
 // Conversion gains

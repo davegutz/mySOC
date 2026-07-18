@@ -205,8 +205,7 @@ class BatteryMonitor : public Battery, public EKF_1x1 {
   float calculate(Sensors* Sen, const bool reset, const bool reset_ekf);
   bool converged_ekf() { return ekf_conv_; };
   double delta_q_ekf() { return delta_q_ekf_; };
-  double delta_q_ekf_;  // Charge deficit represented by charge calculated by
-                        // ekf, C
+  double delta_q_ekf_;  // Charge deficit represented by charge, C
   float dv_dyn() { return dv_dyn_; };
   double hx() { return hx_; };
   float ib_charge() { return ib_charge_; };
@@ -235,38 +234,30 @@ class BatteryMonitor : public Battery, public EKF_1x1 {
   float y_ekf_f_lstate() { return y_ekf_f_lstate_; };
 
  protected:
-  LagExp* Yfilt =
-      new LagExp(EKF_NOM_DT, TAU_Y_FILT, MIN_Y_FILT,
-                 MAX_Y_FILT);  // actual update time provided run time
-  SlidingDeadband* SdVb_;      // Sliding deadband filter for Vb
-  TFDelay* EKF_converged;      // Time persistence
-  Iterator* ice_;              // Iteration control for EKF solver
-  LagExp* VocStatFilt =
-      new LagExp(EKF_NOM_DT, VOC_STAT_FILT, VB_MIN,
-                 VB_MAX);        // actual update time provided run time
-  float amp_hrs_remaining_ekf_;  // Discharge amp*time left if drain to q_ekf=0,
-                                 // A-h
-  float amp_hrs_remaining_soc_;  // Discharge amp*time left if drain soc_ to 0,
-                                 // A-h
-  uint8_t eframe_;   // Counter to run EKF slower than Coulomb Counter and
-                     // ChargeTransfer models
-  bool ekf_conv_;    // Check that EKF error is within tolerance (T=converged)
+  LagExp* Yfilt = new LagExp(EKF_NOM_DT, TAU_Y_FILT, MIN_Y_FILT, MAX_Y_FILT);
+  SlidingDeadband* SdVb_;  // Sliding deadband filter for Vb
+  TFDelay* EKF_converged;  // Time persistence
+  Iterator* ice_;  // Iteration control for EKF solver
+  LagExp* VocStatFilt = new LagExp(EKF_NOM_DT, VOC_STAT_FILT, VB_MIN, VB_MAX);
+  float amp_hrs_remaining_ekf_;  // Disch amp*time left if drain to q_ekf=0, A-h
+  float amp_hrs_remaining_soc_;  // Disch amp*time left if drain to soc_0, A-h
+  uint8_t eframe_;  // Run EKF slower than Coul Ctr and ChargeTransfer models
+  bool ekf_conv_;  // Check that EKF error is within tolerance (T=converged)
   float ib_charge_;  // Current input avaiable for charging, A
-  float ib_past_;   // Past value of current to synchronize e_wrap dynamics with
-                    // model, A
-  double q_ekf_;    // Filtered charge calculated by ekf, C
+  float ib_past_;  // Value to synchronize e_wrap dynamics with model, A
+  double q_ekf_;  // Filtered charge calculated by ekf, C
   double soc_ekf_;  // Filtered state of charge from ekf (0-1)
-  float tcharge_;   // Counted charging time to 100%, hr
-  float tcharge_ekf_;   // Solved charging time to 100% from ekf, hr
+  float tcharge_;  // Counted charging time to 100%, hr
+  float tcharge_ekf_;  // Solved charging time to 100% from ekf, hr
   float vb_model_rev_;  // Reversionary model of vb, V
-  float voc_dead_;    // Deadband-filtered, static model open circuit voltage, V
+  float voc_dead_;  // Deadband-filtered, static model open circuit voltage, V
   float voc_stat_f_;  // Filtered voc_stat for EKF use, V
-  double y_ekf_;      // EKF y value, V
-  float y_ekf_f_;     // Filtered EKF y value, V
+  double y_ekf_;  // EKF y value, V
+  float y_ekf_f_;  // Filtered EKF y value, V
   void ekf_predict(double* Fx_, double* Bu_);
   void ekf_update(double* hx, double* H, double* x, double* Tb_f);
-  float y_ekf_f_T_;       // EKF filter
-  float y_ekf_f_tau_;     // EKF filter
+  float y_ekf_f_T_;  // EKF filter
+  float y_ekf_f_tau_;  // EKF filter
   float y_ekf_f_lstate_;  // EKF filter
 };
 
@@ -302,27 +293,24 @@ class BatterySim : public Battery {
   double voc_stat() { return voc_stat_; };
 
  protected:
-  SinInj* Sin_inj_;     // Class to create sine waves
-  SqInj* Sq_inj_;       // Class to create square waves
-  TriInj* Tri_inj_;     // Class to create triangle waves
-  CosInj* Cos_inj_;     // Class to create cosine waves
-  uint32_t duty_;       // Used in Test Mode to inject Fake shunt current (0 -
-                        // uint32_t(255))
+  SinInj* Sin_inj_;  // Class to create sine waves
+  SqInj* Sq_inj_;  // Class to create square waves
+  TriInj* Tri_inj_;  // Class to create triangle waves
+  CosInj* Cos_inj_;  // Class to create cosine waves
+  uint32_t duty_;  // Used in Test Mode to inject Fake shunt current (0 - 255)
   double d_delta_q_s_;  // Charge rate, C/s
-  float ib_charge_;     // Current input avaiable for charging, A
-  float ib_fut_;        // Future value of limited current, A
-  float ib_in_;         // Saved value of current input, A
-  float ib_sat_;  // Threshold to declare saturation.  This regeneratively slows
+  float ib_charge_;  // Current input avaiable for charging, A
+  float ib_fut_;  // Future value of limited current, A
+  float ib_in_;  // Saved value of current input, A
+  float ib_sat_;  // Threshold to declare saturation
+                  // This regeneratively slows
                   // down charging so if too small takes too long, A
-  bool model_cutback_;    // Indicate that modeled current being limited on
-                          // saturation cutback, T = cutback limited
+  bool model_cutback_;  // Modeled current limited on saturation cutback, T=lim
   bool model_saturated_;  // Indicator of maximal cutback, T = cutback saturated
   double q_;              // Charge, C
-  uint32_t sample_time_;  // Exact moment of hardware signal generation, ms
-  uint32_t
-      sample_time_z_;  // Exact moment of past hardware signal generation, ms
-  float sat_cutback_gain_;  // Gain to retard ib when voc exceeds vsat,
-                            // dimensionless
+  uint32_t sample_time_;  // Exact moment hardware signal generation, ms
+  uint32_t sample_time_z_;  // Exact moment past hardware signal generation, ms
+  float sat_cutback_gain_;  // Gain to retard ib when voc exceeds vsat, non dim
   float sat_ib_max_;   // Current cutback to be applied to modeled ib output, A
   float sat_ib_null_;  // Current cutback value for voc=vsat, A
   Hysteresis* hys_;
