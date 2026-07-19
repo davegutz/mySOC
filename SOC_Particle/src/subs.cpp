@@ -309,9 +309,9 @@ void load_ib_vb_tb(const bool reset, const bool reset_temp, const bool reset_kf,
   if (sp.debug() == 15) Sen->vb_print();
 
   // Load temperature Tb
-  Sen->Tb_load(myPins->VTb_pin, reset);
-  Sen->Flt->Tb_check(Sen, TB_MIN, TB_MAX, reset);  // Sets Tb_fa()
-  if (sp.debug() == 18) Sen->Tb_print();
+  Sen->Tb_load(myPins->VTb_pin, reset_temp);
+  Sen->Flt->Tb_check(Sen, TB_MIN, TB_MAX, reset_temp);  // Sets Tb_fa()
+  if (sp.debug() == 16) Sen->Tb_print();
 
   // Power calculation
   Sen->Wb(Sen->Vb() * Sen->Ib());

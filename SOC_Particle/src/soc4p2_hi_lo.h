@@ -51,8 +51,7 @@
 // NP 1 Two 12 V 100 Ah series battery bank would have NOM_UNIT_CAP 100, NS 2,
 // and NP 1 Four 12 V 200 Ah with two in parallel joined with two more in series
 //   would have  NOM_UNIT_CAP 200, NS 2, and NP 2
-#define COULOMBIC_EFF_SCALE \
-  1.0  // Scalar on Coulombic efficiency of battery, fraction of charge that
+#define COULOMBIC_EFF_SCALE 1.0  // Scalar on Coulombic efficiency of battery, fraction of charge that
        // gets used (1.0)
 #define CHEM \
   0  // Chemistry monitor code integer, 0=Battleborn, 1=CHINS-guest room,

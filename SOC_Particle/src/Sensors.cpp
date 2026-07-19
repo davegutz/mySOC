@@ -377,9 +377,9 @@ void Sensors::select_volt_and_current_and_temp(BatteryMonitor* Mon) {
                !ap.fake_faults())  // last good value while flt resolved
     {
       sample_time_Tb_ = sample_time_Tb_hdwe_;
-      // if ( sp.debug()==18 ) Serial.printf("SEL:  Tb_flt%2d fake%2d Tb_fa%2d
-      // Tb_%7.3f Tb_f_%7.3f\n", Flt->Tb_flt(), ap.fake_faults(), Flt->Tb_fa(),
-      // Tb_, Tb_f_);
+      if ( sp.debug()==16 ) Serial.printf("SEL:  Tb_flt%2d fake%2d Tb_fa%2d \
+      Tb_%7.3f Tb_f_%7.3f\n", Flt->Tb_flt(), ap.fake_faults(), Flt->Tb_fa(),
+      Tb_, Tb_f_);
       return;
     } else {
       Tb_ = Tb_model_;
@@ -387,9 +387,9 @@ void Sensors::select_volt_and_current_and_temp(BatteryMonitor* Mon) {
       Tb_f_rate_ = Tb_model_f_rate_;
       sample_time_Tb_ = Sim->sample_time();
     }
-    // if ( sp.debug()==18 ) Serial.printf("SEL:  Tb_flt%2d fake%2d Tb_fa%2d
-    // Tb_%7.3f Tb_f_%7.3f\n", Flt->Tb_flt(), ap.fake_faults(), Flt->Tb_fa(),
-    // Tb_, Tb_f_);
+    if ( sp.debug() == 16 ) Serial.printf("SEL:  Tb_flt%2d fake%2d Tb_fa%2d \
+    Tb_%7.3f Tb_f_%7.3f\n", Flt->Tb_flt(), ap.fake_faults(), Flt->Tb_fa(),
+    Tb_, Tb_f_);
   } else {
     if (Flt->Tb_fa() && !ap.fake_faults()) {
       Tb_ = NOMINAL_TB;
@@ -667,13 +667,12 @@ void Sensors::Tb_load(const uint16_t tb_pin, const bool reset) {
     Tb_hdwe_ = NOMINAL_TB;
     Tb_model_ = NOMINAL_TB + mod_add;  // Fault injection
   }
-  // if ( sp.debug()==18 )
-  // {
-  //   Serial.printf("\nTb_load: T_%7.3f sp.mod_tb() %2d,", T_, sp.mod_tb());
-  //   Serial.printf(" Tb_raw_ %d Tb_volt_ %7.3f res %7.3f lnres %7.3f hdwe_add
-  //   %7.3f Tb_hdwe_ %7.3f mod_add %7.3f Tb_model_ %7.3f\n",
-  //     Tb_raw_, Tb_volt_, res, lnres, hdwe_add, Tb_hdwe_, mod_add, Tb_model_);
-  // }
+  if ( sp.debug() == 16 ){
+    Serial.printf("\nTb_load: T_%7.3f sp.mod_tb() %2d,", T_, sp.mod_tb());
+    Serial.printf(" Tb_raw_ %d Tb_volt_ %7.3f res %7.3f lnres %7.3f hdwe_add \
+%7.3f Tb_hdwe_ %7.3f mod_add %7.3f Tb_model_ %7.3f\n",
+      Tb_raw_, Tb_volt_, res, lnres, hdwe_add, Tb_hdwe_, mod_add, Tb_model_);
+  }
   Tb_hdwe_f_ =
       TbHdweFilt->calculate(Tb_hdwe_, reset || Flt->Tb_fa() || sp.mod_tb_dscn(),
                             ap.Tb_filt(), T_, -T_RLIM, T_RLIM);
@@ -689,7 +688,7 @@ void Sensors::Tb_load(const uint16_t tb_pin, const bool reset) {
   Tb_model_f_rate_ = TbModelFilt->rate();
   Tb_model_f_rstate_ = TbModelFilt->rstate();
   Tb_model_f_lstate_ = TbModelFilt->lstate();
-  if (sp.debug() == 18) {
+  if (sp.debug() == 16) {
     Serial.printf("\nTb_load: T_%7.3f", T_);
     Tb_print();
     Serial.printf("\n");

@@ -375,8 +375,8 @@ class Fault {
   void select_all_logic(Sensors* Sen, BatteryMonitor* Mon, const bool reset);
   void shunt_check(Sensors* Sen, BatteryMonitor* Mon,
                    const bool reset);  // Range check Ib signals
-  void shunt_select_initial(
-      const bool reset);  // Choose between shunts for model
+  void shunt_select_initial(const bool reset);
+    // Choose between shunts for model
   void Tb_check(Sensors* Sen, const float _tb_min, const float _tb_max,
                 const bool reset);  // Range check Tb
   bool Tb_fa() { return failRead(TB_FA); };
