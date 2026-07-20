@@ -459,7 +459,14 @@ class BatteryMonitor(Battery, EKF1x1):
             Battery.HDWE_IB_HI_LO_NOA_HI,
         )
         self.reset_kf = True
+        self.iscm = 0.0
+        self.iscm_f = 0.0
+        self.iscn = 0.0
         self.iscn_f = 0.0
+        self.vovcm = 0.0
+        self.vovcmkf = 0.0
+        self.vovcn = 0.0
+        self.vovcnkf = 0.0
         self.frz = False
         self.wrap_hi_m_flt = False
         self.wrap_hi_m_fa = False
@@ -595,6 +602,8 @@ class BatteryMonitor(Battery, EKF1x1):
         self.tau_hys_s = 0.0
         self.kf_v_m = 0.0
         self.kf_v_n = 0.0
+        self.dtm = 0.0
+        self.dtn = 0.0
         self.y_ekf_f_T = 0.0
         self.y_ekf_f_tau = 0.0
         self.y_ekf_f_state = 0.0
@@ -997,7 +1006,14 @@ class BatteryMonitor(Battery, EKF1x1):
             soc_run = 1e-6
         self.e_soc_ekf = (self.soc_ekf - soc_run) / soc_run
         self.e_voc_ekf = (self.voc - voc_run) / voc_run
+        self.iscm = SN.iscm
+        self.iscm_f = SN.iscm_f
+        self.iscn = SN.iscn
         self.iscn_f = SN.iscn_f
+        self.vovcm = SN.VoVcm
+        self.vovcmkf = SN.VoVcm_f
+        self.vovcn = SN.VoVcn
+        self.vovcnkf = SN.VoVcn_f
         self.mod_data = self.mod
         self.ib_model = SN.ib_in_s
         self.ib_h = self.ib_hdwe
@@ -1007,6 +1023,8 @@ class BatteryMonitor(Battery, EKF1x1):
         self.mtb = rp.modeling_Tb
         self.kf_v_m = SN.kf_v_m
         self.kf_v_n = SN.kf_v_n
+        self.dtm = getattr(getattr(SN, "KfShuntAmp", None), "dt", 0.0)
+        self.dtn = getattr(getattr(SN, "KfShuntNoa", None), "dt", 0.0)
         self.ib_dyn_m = self.LoopIbAmp.ib_dyn
         self.ib_dyn_rstate_m = self.LoopIbAmp.ChargeTransfer.rstate
         self.ib_dyn_lstate_m = self.LoopIbAmp.ChargeTransfer.state
@@ -1875,6 +1893,8 @@ class Saved:
         self.reset_temp = []
         self.dt = []
         self.dt_temp = []
+        self.dtm = []
+        self.dtn = []
         self.chm = []
         self.qcrs = []
         self.bmso = []
@@ -1999,7 +2019,14 @@ class Saved:
         self.Tb_model_f_rate = []
         self.e_wrap_m_reset = []
         self.reset_kf = []
+        self.iscm = []
+        self.iscm_f = []
+        self.iscn = []
         self.iscn_f = []
+        self.vovcm = []
+        self.vovcmkf = []
+        self.vovcn = []
+        self.vovcnkf = []
         self.Tb_model = []
         self.vb_hdwe = []
         self.vb_hdwe_f = []

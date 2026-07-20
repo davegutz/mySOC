@@ -289,6 +289,8 @@ class Sensors:
         self.VoVcn = 0.0
         self.VoVcn_f = 0.0
         self.kf_v_n = 0.0
+        self.iscm = 0.0
+        self.iscm_f = 0.0
         self.iscn = 0.0
         self.iscn_f = 0.0
         if not hasattr(self.mon_run, "Tb"):
@@ -512,6 +514,12 @@ class Sensors:
             self.VoVcn_f, self.kf_v_n = self.KfShuntNoa.get_state()
             self.VoVcn_f = float(self.VoVcn_f)
             self.kf_v_n = float(self.kf_v_n)
+            if hasattr(self.mon_run, "vovcm"):
+                self.iscm = float((self.VoVcm * Battery.SHUNT_AMP_GAIN) / Battery.NP)
+                self.iscm_f = float((self.VoVcm_f * Battery.SHUNT_AMP_GAIN) / Battery.NP)
+            else:
+                self.iscm = 0.0
+                self.iscm_f = 0.0
             self.iscn = float((self.VoVcn * Battery.SHUNT_NOA_GAIN) / Battery.NP)
             self.iscn_f = float((self.VoVcn_f * Battery.SHUNT_NOA_GAIN) / Battery.NP)
 
