@@ -642,12 +642,16 @@ def compare_run_ver_batch():
                 continue
             if line.startswith("#"):
                 if not header_fields:
-                    header_fields = [f.strip() for f in line.lstrip("#").split(",") if f.strip()]
+                    header_fields = [f.strip() for f in line.lstrip("#").split(",")]
                 continue
             if header_fields:
                 values = [v.strip() for v in line.split(",")]
-                if len(values) >= len(header_fields):
-                    data_rows.append(dict(zip(header_fields, values)))
+                row_dict = {}
+                for k, v in zip(header_fields, values):
+                    if k:
+                        row_dict[k] = v
+                if row_dict:
+                    data_rows.append(row_dict)
 
         if not data_rows:
             tkinter.messagebox.showwarning(message="No valid data rows in auto_plink.csv")
@@ -667,10 +671,14 @@ def compare_run_ver_batch():
 
             temp_dir = temp_folder(version)
             if not Path(temp_dir).is_dir():
-                reason = f"temp folder not found: {temp_dir}"
-                print(f"\033[91mRunVer SKIP  {case_desc}: {reason}\033[0m")
-                problem_cases.append((case_desc, reason))
-                continue
+                try:
+                    Path(temp_dir).mkdir(parents=True, exist_ok=True)
+                    print(f"Created missing temp folder: {temp_dir}")
+                except Exception as e:
+                    reason = f"temp folder not found and could not be created: {e}"
+                    print(f"\033[91mRunVer SKIP  {case_desc}: {reason}\033[0m")
+                    problem_cases.append((case_desc, reason))
+                    continue
 
             pairs = find_pairs(temp_dir, option=option_val)
             pairs = [(r, v) for r, v in pairs if "_mon_run" in r.name or "_sim_run" in r.name]
@@ -737,12 +745,16 @@ def run_sim_all_batch():
                 continue
             if line.startswith("#"):
                 if not header_fields:
-                    header_fields = [f.strip() for f in line.lstrip("#").split(",") if f.strip()]
+                    header_fields = [f.strip() for f in line.lstrip("#").split(",")]
                 continue
             if header_fields:
                 values = [v.strip() for v in line.split(",")]
-                if len(values) >= len(header_fields):
-                    data_rows.append(dict(zip(header_fields, values)))
+                row_dict = {}
+                for k, v in zip(header_fields, values):
+                    if k:
+                        row_dict[k] = v
+                if row_dict:
+                    data_rows.append(row_dict)
 
         if not data_rows:
             tkinter.messagebox.showwarning(message="No valid data rows in auto_plink.csv")
@@ -1473,7 +1485,6 @@ def grab_auto():
         with open(auto_plink_path, "r") as f:
             lines = f.readlines()
 
-        header_line = None
         header_fields = []
         data_rows = []
 
@@ -1482,20 +1493,19 @@ def grab_auto():
             if not line:
                 continue
             if line.startswith("#"):
-                if header_line is None:
-                    header_line = line
+                if not header_fields:
                     header_fields = [f.strip() for f in line.lstrip("#").split(",")]
-                    # Filter out empty fields that might occur if there's a trailing comma
-                    header_fields = [f for f in header_fields if f]
-                    print(f"Fields: {header_fields}")
+                    print(f"Fields: {[f for f in header_fields if f]}")
                 continue
 
-            if header_line is not None:
-                values = [v.strip() for v in line.split(",")][: len(header_fields)]
-                if len(values) < len(header_fields):
-                    print(f"Skipping line (too few fields {len(values)} vs {len(header_fields)}): {line}")
-                    continue
-                data_rows.append(values)
+            if header_fields:
+                values = [v.strip() for v in line.split(",")]
+                row_dict = {}
+                for k, v in zip(header_fields, values):
+                    if k:
+                        row_dict[k] = v
+                if row_dict:
+                    data_rows.append(row_dict)
 
         if not data_rows:
             print("No valid data lines found in auto_plink.csv")
@@ -1503,10 +1513,10 @@ def grab_auto():
 
         # Prepare display for the confirmation dialog
         display_lines = []
-        for values in data_rows:
+        for config in data_rows:
             display_parts = []
-            for i in range(min(len(header_fields), len(values))):
-                display_parts.append(f"{header_fields[i]}: {values[i]}")
+            for k, v in config.items():
+                display_parts.append(f"{k}: {v}")
             display_lines.append(" | ".join(display_parts))
 
         all_lines_text = "\n".join(display_lines)
@@ -1622,11 +1632,7 @@ def grab_auto():
                     show_killer(string, "AUTO", fig_list=auto_fig_list)
                 return
 
-            values_ = data_rows[index]
-            # Map values to fields
-            config = {}
-            for i_ in range(min(len(header_fields), len(values_))):
-                config[header_fields[i]] = values_[i_]
+            config = data_rows[index]
 
             print(f"Processing configuration {index + 1}/{len(data_rows)}: {config}")
 

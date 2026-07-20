@@ -103,6 +103,12 @@ void print_all_header(Sensors* Sen) {
     print_signal_sel_header();
     print_ekf_header();
   }
+  if (sp.debug() == 6) {
+    print_sim_header();
+    print_signal_sel_header();
+    print_ekf_header();
+    print_shunt_header(Sen);
+  }
 }
 
 // print battery parameter header
@@ -265,7 +271,7 @@ void print_rapid_data(const bool reset, Sensors* Sen, BatteryMonitor* Mon,
   static uint8_t last_read_debug = 0;
   static double last_cTime = 0.;
   if ((sp.debug() == 1 || sp.debug() == 2 || sp.debug() == 3 ||
-       sp.debug() == 4)) {
+       sp.debug() == 4 || sp.debug() == 6)) {
     if (reset || (last_read_debug != sp.debug())) {
       cp.num_v_print = 0UL;
       print_all_header(Sen);
@@ -390,7 +396,7 @@ void print_shunt_header(Sensors* Sen) {
 
 void print_shunt_serial(const bool reset, Sensors* Sen) {
   static double last_cTime_sh = 0.;
-  if ((sp.debug() == 2) && cp.publishS) {
+  if ((sp.debug() == 2 || sp.debug() == 6) && cp.publishS) {
     double cTime = double(Sen->now()) / 1000.;
     if (!reset && cTime <= last_cTime_sh + 0.00005) return;
     last_cTime_sh = cTime;
@@ -458,7 +464,8 @@ void print_signal_sel_header() {
 void print_signal_sel_serial(const bool reset, Sensors* Sen,
                              BatteryMonitor* Mon, BatterySim* Sim) {
   static double last_cTime_sel = 0.;
-  if ((sp.debug() == 2 || sp.debug() == 4 || sp.debug() == 61) && cp.publishS) {
+  if ((sp.debug() == 2 || sp.debug() == 4 || sp.debug() == 61 ||
+   sp.debug() == 6) && cp.publishS) {
     static uint64_t psss_now_past = Sen->now();
     if (!reset && Sen->cTime() <= last_cTime_sel + 0.00005) return;
     last_cTime_sel = Sen->cTime();
@@ -593,7 +600,8 @@ void print_sim_header() {
 void print_sim_serial(const bool initializing_all, const bool reset_temp,
                       Sensors* Sen, BatterySim* Sim) {
   static double last_cTime_sim = 0.;
-  if ((sp.debug() == 2 || sp.debug() == 3 || sp.debug() == 4) && cp.publishS &&
+  if ((sp.debug() == 2 || sp.debug() == 3 || sp.debug() == 4 || sp.debug() == 6)
+   && cp.publishS &&
       !initializing_all &&
       (reset_temp || Sim->cTime() > last_cTime_sim + 0.00005)) {
     static uint64_t pss_now_past = Sen->now();

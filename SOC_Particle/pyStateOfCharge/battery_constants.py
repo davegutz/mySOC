@@ -104,8 +104,8 @@ class BatteryConstants:
     TCHARGE_DISPLAY_DEADBAND = 0.1
     TMAX_FILT = 1.0
     VB_DC_DC = 12.0
-    VB_MAX = 14.8
-    VB_MIN = 10.0
+    VB_MAX = 17.0
+    VB_MIN = 2.0
     VOC_STAT_FILT = 100.0
     WN_Y_FILT = 1.0
     WRAP_ERR_FILT = 100.0

@@ -365,7 +365,7 @@ float BatteryMonitor::calculate(Sensors* Sen, const bool reset_temp,
                          K_, y_ekf_, soc_, soc_ekf_, y_ekf_f_, converged_ekf()),
           true, IN_SERVICE);
 
-    if (sp.debug() == 3 || sp.debug() == 4)
+    if (sp.debug() == 3 || sp.debug() == 4 || sp.debug() == 6)
       EKF_1x1::print_ekf_serial(this, freeze);  // print EKF in Read frame
   }
   eframe_++;

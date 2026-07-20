@@ -105,7 +105,7 @@ class SavedData:
                 if ekf is not None:
                     self.time_e = np.array(np.atleast_1d(ekf.c_time_e) - self.time_run_start)
                 if shunt is not None:
-                    self.c_time_shunt = np.array(np.atleast_1d(shunt.c_time) - self.time_run_start)
+                    self.c_time_shunt = np.array(np.atleast_1d(shunt.c_time_shunt) - self.time_run_start)
                     i_end = min(i_end, len(self.c_time_shunt))
             else:
                 i_end = len(self.time)

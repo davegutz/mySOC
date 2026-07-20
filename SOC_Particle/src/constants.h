@@ -329,7 +329,7 @@ const float QUIET_RES(QUIET_SET /
   1333.  // Shunt V2A gain (scale with 'SA' and 'SB'), A/V (1333 is 100A/0.075V)
 #endif
 #if !defined(KF_USE_AMP)
-#define KF_USE_AMP false
+#define KF_USE_AMP true
 #endif
 #if !defined(HDWE_2WIRE)
 #define HDWE_2WIRE true

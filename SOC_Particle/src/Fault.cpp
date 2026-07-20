@@ -305,8 +305,8 @@ void Fault::ib_logic(const bool reset, Sensors* Sen, BatteryMonitor* Mon) {
   // Difference error, filter, check, persist, doesn't latch
   if (sp.mod_ib()) {
     ib_diff_ = Sen->ib_amp_model() - Sen->ib_noa_model();
-    ib_amp_hi_ = Sen->ib_amp_model() >= (HDWE_IB_HI_LO_AMP_HI / ap.nP()) - 1.;
-    ib_amp_lo_ = Sen->ib_amp_model() <= (HDWE_IB_HI_LO_AMP_LO / ap.nP()) + 1.;
+    ib_amp_hi_ = Sen->ib_amp_model() >= (HDWE_IB_HI_LO_AMP_HI / ap.nP());
+    ib_amp_lo_ = Sen->ib_amp_model() <= (HDWE_IB_HI_LO_AMP_LO / ap.nP());
     ib_noa_hi_ = Sen->ib_noa_model() >= HDWE_IB_HI_LO_NOA_HI / ap.nP();
     ib_noa_lo_ = Sen->ib_noa_model() <= HDWE_IB_HI_LO_NOA_LO / ap.nP();
     ib_lo_limited_hi_ =

@@ -208,6 +208,7 @@ time_stamp = "XY;"
 zeroPrepHdweNoVb = "HR;Dh1000;W34;Fi2;Fo2;Rs;W34;"
 zero_set_hdwe_no_Vb = "vv0;Xm2;Ca0.50;W20;BZ;Ff1;DP1;HR;Fi2;Fo2;Rf;vv99;W1;<Xm2;"
 tranPrep = "HR;Dh1000;W2;Rs;W48;vv4;W17;"
+tranPrepKf = "HR;Dh1000;W2;Rs;W48;vv6;W17;"
 slowTranPrep = "HR;vv4;W2;Rs;" + slow + "W5;"
 slowTwitchDef = "Rb;Rf;Sh0;Xts;Xf0.004;Mm1000;Mn-1000;Nm1000;Nn-1000;XW10000;XT10;XC2;"
 fastTwitchDef = "Rb;Rf;Xts;Xf0.002;XW10000;XT10;XC1;"
@@ -231,6 +232,7 @@ dmn100 = time_stamp + "Dn-100;Dm-100;"
 cmn100 = time_stamp + "Dn100;Dm100;"
 sc50 = time_stamp + "DI50;"  # 50 amp discharge
 sd50 = time_stamp + "DI-50;"  # 50 amp discharge
+sc30 = time_stamp + "DI30;"  # 30 amp discharge
 c00 = "Pf;W2;Dm;Dn;Rf;W50;"
 dv0 = "Pf;W2;Dv;Rf;W50;"
 s00 = "Pf;W2;DI;Rf;W100;"
@@ -772,7 +774,7 @@ lookup = {
     "stepUp": (
         165,
         modHalfInit + tranPrep + sc50 + "XQ25000;" + s00 + quiet + cleanup + "<XD;",
-        ("Should be normal hard charge step", "", "", ""),
+        ("Should be normal hard charge step", "Like engine start", "", ""),
     ),
     "ibDualMid": (
         130,
@@ -794,7 +796,7 @@ lookup = {
     ),
     "vcFlat": (
         130,
-        modFlatInitHi + tranPrep + "D30.6;" + "XQ25000;" + "Pf;W2;D3;Rf;W50;" + quiet + cleanup + "<XD;",
+        modFlatInitHi + tranPrepKf + "D30.6;" + "XQ25000;" + "Pf;W2;D3;Rf;W50;" + quiet + cleanup + "<XD;",
         (
             "Inject 0.6V into sensed Vc (normally 1.65).  Should fail both currents.",
             "To evaluate plots, start looking at 'Ult 1'. Fault record (frozen).",

@@ -663,6 +663,12 @@ class BatteryMonitor(Battery, EKF1x1):
     ):
         self.cc_dif_prev = self.soc_ekf - self.soc
         self.reset = reset
+        if reset:
+            self.start_reset_time = SN.mon_run.time[G.i]
+            self.reset_temp = True
+        else:
+            elapsed_reset = SN.mon_run.time[G.i] - getattr(self, "start_reset_time", SN.mon_run.time[0])
+            self.reset_temp = (elapsed_reset < 20.0)
         self.Tb = Tb
         self.Tb_f = Tb_f
         self.vb = vb
@@ -766,7 +772,7 @@ class BatteryMonitor(Battery, EKF1x1):
         self.ib_lag = self.IbLag.calculate_tau(self.ib, ib_lag_reset, self.dt, self.chemistry.ib_lag_tau)
 
         # Dynamic emf
-        if rp.modeling_ib:
+        if rp.modeling_vb:
             dt_local = self.dt
             ib_dc = self.ib_past
         else:
@@ -1127,7 +1133,7 @@ class BatteryMonitor(Battery, EKF1x1):
                 self.ib_noa = ib_noa
                 self.ib_noa_pst = ib_noa_pst
                 dt_local = self.dt_past
-                ibnoa = self.ib_noa
+                ibnoa = self.ib_noa_pst
             self.LoopIbNoa.calculate(
                 reset=reset,
                 rp=rp,
@@ -1149,7 +1155,7 @@ class BatteryMonitor(Battery, EKF1x1):
             else:
                 self.ib_amp = ib_amp
                 self.ib_amp_pst = ib_amp_pst
-                ibamp = self.ib_amp
+                ibamp = self.ib_amp_pst
             self.ib_amp_hi = self.ib_amp >= Battery.HDWE_IB_HI_LO_AMP_HI
             self.ib_amp_lo = self.ib_amp <= Battery.HDWE_IB_HI_LO_AMP_LO
             self.ib_noa_hi = self.ib_noa >= Battery.HDWE_IB_HI_LO_NOA_HI
@@ -1782,15 +1788,15 @@ class Looparound:
         else:
             self.vb = self.Mon.vb_past
         self.voc_soc = self.Mon.voc_soc
-        if rp.modeling_ib:
-            dt_into_ct = self.dt_past
-            dt_into_wrap = self.dt_past
-            ib_into_ct = self.ib_past2
-        else:
+        if rp.modeling_vb or rp.modeling_ib:
             dt_into_ct = self.dt
             dt_into_wrap = self.dt
             ib_into_ct = self.ib_past
-
+        else:
+            dt_into_ct = self.dt
+            dt_into_wrap = self.dt
+            ib_into_ct = self.ib
+ 
         self.ib_dyn = self.ChargeTransfer.calculate_tau_seeded(
             ib_into_ct, ib_dyn_init, self.reset, dt_into_ct, self.chem.tau_ct, text=self.name
         )
@@ -1841,7 +1847,7 @@ class Looparound:
             in_=self.hi_fault,
             t_true=Battery.WRAP_HI_SET,
             t_false=Battery.WRAP_HI_RES,
-            dt=self.dt_past,
+            dt=self.dt,
             reset=self.reset,
         )  # non-latching
         self.lo_fault = self.e_wrap_filt <= self.ewlo_thr
@@ -1849,7 +1855,7 @@ class Looparound:
             in_=self.lo_fault,
             t_true=Battery.WRAP_LO_SET,
             t_false=Battery.WRAP_LO_RES,
-            dt=self.dt_past,
+            dt=self.dt,
             reset=self.reset,
         )  # non-latching
         self.ib_past2 = self.ib_past

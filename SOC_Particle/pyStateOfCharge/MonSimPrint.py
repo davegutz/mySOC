@@ -636,17 +636,17 @@ def print_kf_RunSim(SN, i_temp, i_ekf, t, mon, sim, calc_temp, calc_ekf):
         "{:14.7e}".format(SN.mon_run.Q11n[G.i]),
         "{:12.7e}".format(SN.KfShuntNoa.Q[1][1]),
         "{:11.6f}".format(SN.mon_run.xp0n[G.i]),
-        "{:10.6f}".format(float(SN.KfShuntNoa.x_prior[0])),
+        "{:10.6f}".format(float(SN.KfShuntNoa.x_prior[0, 0])),
         "{:11.6f}".format(SN.mon_run.xp1n[G.i]),
-        "{:10.6f}".format(float(SN.KfShuntNoa.x_prior[1])),
+        "{:10.6f}".format(float(SN.KfShuntNoa.x_prior[1, 0])),
         "{:18.7e}".format(SN.mon_run.Pp00n[G.i]),
-        "{:12.7e}".format(SN.KfShuntNoa.P_prior[0][0]),
+        "{:12.7e}".format(SN.KfShuntNoa.P_prior[0, 0]),
         "{:14.7e}".format(SN.mon_run.Pp01n[G.i]),
-        "{:12.7e}".format(SN.KfShuntNoa.P_prior[0][1]),
+        "{:12.7e}".format(SN.KfShuntNoa.P_prior[0, 1]),
         "{:14.7e}".format(SN.mon_run.Pp10n[G.i]),
-        "{:12.7e}".format(SN.KfShuntNoa.P_prior[1][0]),
+        "{:12.7e}".format(SN.KfShuntNoa.P_prior[1, 0]),
         "{:14.7e}".format(SN.mon_run.Pp11n[G.i]),
-        "{:12.7e}".format(SN.KfShuntNoa.P_prior[1][1]),
+        "{:12.7e}".format(SN.KfShuntNoa.P_prior[1, 1]),
         "{:13.8f}".format(SN.mon_run.Sn[G.i]),
         "{:10.8f}".format(SN.KfShuntNoa.S),
         "{:18.7e}".format(SN.mon_run.K0n[G.i]),
@@ -670,7 +670,6 @@ def print_kf_RunSim(SN, i_temp, i_ekf, t, mon, sim, calc_temp, calc_ekf):
     )
     print(Colors.reset, end="")
     return hdr
-
 
 # noinspection PyPep8Naming,PyUnusedLocal
 def print_soc_RunSim(SN, i_temp, t, mon, sim, calc_temp, i_ekf, calc_ekf):

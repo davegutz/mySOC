@@ -189,7 +189,7 @@ void setup() {
   // Enable and print stored history
   System.enableFeature(FEATURE_RETAINED_MEMORY);
   if (sp.debug() == 1 || sp.debug() == 2 || sp.debug() == 3 ||
-      sp.debug() == 4) {
+      sp.debug() == 4 || sp.debug() == 6) {
     sp.print_history_array();
     sp.print_fault_header(&pp.pubList);
   }
