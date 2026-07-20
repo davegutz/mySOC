@@ -1802,13 +1802,13 @@ class Looparound:
         self.vb = self.Mon.vb_past
         self.voc_soc = self.Mon.voc_soc
         if rp.modeling_vb or rp.modeling_ib:
-            dt_into_ct = self.dt
-            dt_into_wrap = self.dt
-            ib_into_ct = self.ib_past
+            dt_into_ct = self.dt_past
+            dt_into_wrap = self.dt_past
+            ib_into_ct = self.ib_past2
         else:
             dt_into_ct = self.dt
             dt_into_wrap = self.dt
-            ib_into_ct = self.ib
+            ib_into_ct = self.ib_past
 
         self.ib_dyn = self.ChargeTransfer.calculate_tau_seeded(
             ib_into_ct, ib_dyn_init, self.reset, dt_into_ct, self.chem.tau_ct, text=self.name
