@@ -190,6 +190,11 @@ def compare_pair(run_path, ver_path, tol, rtol=1e-3, ed=None):
 
     # numeric columns present in both
     shared_cols = [c for c in df_run.columns if c in df_ver.columns]
+    for c in shared_cols:
+        if pd.api.types.is_bool_dtype(df_run[c]):
+            df_run[c] = df_run[c].astype(float)
+        if pd.api.types.is_bool_dtype(df_ver[c]):
+            df_ver[c] = df_ver[c].astype(float)
     numeric_cols = [
         c
         for c in shared_cols
