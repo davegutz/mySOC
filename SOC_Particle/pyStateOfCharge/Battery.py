@@ -693,16 +693,14 @@ class BatteryMonitor(Battery, EKF1x1):
             self.vb_hdwe = SN.mon_run.vb_hdwe[G.i]
         if getattr(SN.mon_run, "vb_hdwe_f", None) is not None:
             self.vb_hdwe_f = SN.mon_run.vb_hdwe_f[G.i]
+        self.ib_amp_pst = self.ib_amp
+        self.ib_noa_pst = self.ib_noa
         if rp.modeling_ib:
             self.ib_amp = self.ib_amp_model
             self.ib_noa = self.ib_noa_model
-            self.ib_amp_pst = SN.mon_run.ib_amp_model[max(G.i - 1, 0)]
-            self.ib_noa_pst = SN.mon_run.ib_noa_model[max(G.i - 1, 0)]
         else:
             self.ib_amp = self.ib_amp_hdwe
             self.ib_noa = self.ib_noa_hdwe
-            self.ib_amp_pst = SN.mon_run.ib_amp_hdwe[max(G.i - 1, 0)]
-            self.ib_noa_pst = SN.mon_run.ib_noa_hdwe[max(G.i - 1, 0)]
         self.ib_hdwe = SN.mon_run.ib_h[G.i]
         if self.chm != chem:
             self.chemistry.assign_all_mod(chem, unit=self.unit)
@@ -781,7 +779,7 @@ class BatteryMonitor(Battery, EKF1x1):
         self.ib_lag = self.IbLag.calculate_tau(self.ib, ib_lag_reset, self.dt, self.chemistry.ib_lag_tau)
 
         # Dynamic emf
-        if rp.modeling_vb:
+        if rp.modeling_vb or rp.modeling_ib:
             dt_local = self.dt
             ib_dc = self.ib_past
         else:
@@ -1142,7 +1140,7 @@ class BatteryMonitor(Battery, EKF1x1):
 
         # Individual wrap logic
         if ib_noa is not None:
-            if rp.modeling_ib or SN.run_type == "HistSim":
+            if rp.modeling_vb or rp.modeling_ib or SN.run_type == "HistSim":
                 self.ib_noa = ib_noa
                 self.ib_noa_pst = ib_noa_pst
                 dt_local = self.dt
@@ -1151,7 +1149,7 @@ class BatteryMonitor(Battery, EKF1x1):
                 self.ib_noa = ib_noa
                 self.ib_noa_pst = ib_noa_pst
                 dt_local = self.dt_past
-                ibnoa = self.ib_noa_pst
+                ibnoa = self.ib_noa
             self.LoopIbNoa.calculate(
                 reset=reset,
                 rp=rp,
@@ -1166,14 +1164,14 @@ class BatteryMonitor(Battery, EKF1x1):
                 freeze=False,
             )
         if ib_amp is not None:
-            if rp.modeling_ib or SN.run_type == "HistSim":
+            if rp.modeling_vb or rp.modeling_ib or SN.run_type == "HistSim":
                 self.ib_amp = ib_amp
                 self.ib_amp_pst = ib_amp_pst
                 ibamp = self.ib_amp
             else:
                 self.ib_amp = ib_amp
                 self.ib_amp_pst = ib_amp_pst
-                ibamp = self.ib_amp_pst
+                ibamp = self.ib_amp
             self.ib_amp_hi = self.ib_amp >= Battery.HDWE_IB_HI_LO_AMP_HI
             self.ib_amp_lo = self.ib_amp <= Battery.HDWE_IB_HI_LO_AMP_LO
             self.ib_noa_hi = self.ib_noa >= Battery.HDWE_IB_HI_LO_NOA_HI
@@ -1801,10 +1799,7 @@ class Looparound:
         self.reset = reset
         self.dt = dt
         self.ib = ib
-        if rp.modeling_vb:
-            self.vb = self.Mon.vb_past
-        else:
-            self.vb = self.Mon.vb_past
+        self.vb = self.Mon.vb_past
         self.voc_soc = self.Mon.voc_soc
         if rp.modeling_vb or rp.modeling_ib:
             dt_into_ct = self.dt
@@ -1814,7 +1809,7 @@ class Looparound:
             dt_into_ct = self.dt
             dt_into_wrap = self.dt
             ib_into_ct = self.ib
- 
+
         self.ib_dyn = self.ChargeTransfer.calculate_tau_seeded(
             ib_into_ct, ib_dyn_init, self.reset, dt_into_ct, self.chem.tau_ct, text=self.name
         )

@@ -423,12 +423,12 @@ def main():  # Example usage.  ok on 20260217
         8:  vb_wrap
         9:  dyn_n
     """
-    data_file = '/home/daveg/.local/SOC_Particle/plink/dataReduction/g20260524a/startfixagain_soc4p2_hi_lo_bb.csv'
-    unit_key = 'g20260524a_soc4p2_hi_lo_bb'
-    time_end = None
+    data_file = '/home/daveg/gdrive/GitHubArchive/SOC_Particle/dataReduction/g20260612a/flatSit_soc3p2_hi_lo_bb.csv'
+    unit_key = 'g20260612a_soc3p2_hi_lo_bb'
+    time_end = 7
     compare_run_ver = True
-    shift_soc_s = False
-    plots = True
+    shift_soc_s = True
+    plots = False
     use_mon_soc_ = False
     verbose = False
     scale_batt = 1.0

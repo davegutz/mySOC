@@ -241,7 +241,7 @@ def replicate(OPT: UserOptions):
         reset = None
         if OPT.run_type == "RunSim":
             # Must call Battery logic at least twice with reset=True to initialized seeded transfer functions correctly
-            reset = bool(G.i < 3 or (t[G.i] <= OPT.init_time) or (t[G.i] < 0.0 and t[0] > OPT.init_time))
+            reset = bool(G.i < 2 or (t[G.i] <= OPT.init_time) or (t[G.i] < 0.0 and t[0] > OPT.init_time))
             if OPT.mon_run.reset is not None:
                 reset = reset or bool(OPT.mon_run.reset[G.i] > 0.0) or bool(OPT.mon_run.reset_all_faults[G.i] > 0.0)
         elif OPT.run_type == "HistSim":

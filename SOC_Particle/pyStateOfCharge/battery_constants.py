@@ -71,7 +71,7 @@ class BatteryConstants:
     IMAX_NUM = 100
     KF_Q_STD = 0.0003
     KF_R_STD = 0.1
-    MAX_TRIM_RATE = 1.0
+    MAX_TRIM_RATE = 0.005
     MAX_WRAP_ERR_FILT = 10.0
     MAX_Y_FILT = 1.0
     MIN_Y_FILT = 0.0
