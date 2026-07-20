@@ -102,6 +102,7 @@ class BatteryConstants:
     TB_HDWE_MAX = 150.0
     TB_HDWE_MIN = -20.0
     TCHARGE_DISPLAY_DEADBAND = 0.1
+    TEMP_DELAY = 0.6
     TMAX_FILT = 1.0
     VB_DC_DC = 12.0
     VB_MAX = 17.0

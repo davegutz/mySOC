@@ -677,7 +677,7 @@ class BatteryMonitor(Battery, EKF1x1):
             self.reset_temp = True
         else:
             elapsed_reset = SN.mon_run.time[G.i] - getattr(self, "start_reset_time", SN.mon_run.time[0])
-            self.reset_temp = (elapsed_reset < 20.0)
+            self.reset_temp = (elapsed_reset < Battery.TEMP_DELAY)
         self.Tb = Tb
         self.Tb_f = Tb_f
         self.vb = vb
