@@ -249,12 +249,12 @@ off_r = (
 lookup = {
     "satInit": (
         22,
-        "Y;RS;RV;" + quiet + "cc;Dh;Dr;*W;*vv0;*XS;*Ca1;BZ;Ff0;DP1;<HR;<Rf;<XK;",
+        "Y;RS;RV;" + quiet + "cc;Dh;Dr;*W;*vv0;*XS;*Ca1;BZ;Ff0;DP1;<HR;<Rf;" + "Pv;Pr;<XK;",
         ("",),
     ),
     "initMid": (
         22,
-        "Y;RS;RV;" + quiet + "cc;Dh1800000;*W;*vv0;*XS;*Ca.5;BZ;Ff0;<HR;<Rf;<XK;",
+        "Y;RS;RV;" + quiet + "cc;Dh1800000;*W;*vv0;*XS;*Ca.5;BZ;Ff0;<HR;<Rf;" + "Pv;Pr;<XK;",
         ("",),
     ),
     "saveAdjusts": (

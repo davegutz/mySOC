@@ -118,7 +118,7 @@ void print_battery_header() {
       "ap_dc_dc_on, ap_disab_ib_fa, ap_disab_tb_fa, ap_disab_vb_fa_lt,");
   Serial.printf(
       "ap_ds_voc_soc, ap_dv_voc_soc, ap_eframe_mult, ap_ewhi_slr, ap_ewlo_slr, "
-      "ap_hys_scale, ap_ib_diff_slr, ap_ib_quiet_slr,");
+      "ap_hys_scale, ap_ib_diff_slr, ap_ib_quiet_slr, ap_nP, ap_nS,");
   Serial.printf(
       "cp_ts, CHEM, DF2, EKF_CONV, EKF_NOM_DT, EKF_Q_SD_NORM, EKF_R_SD_NORM,");
   Serial.printf(
@@ -162,13 +162,14 @@ void print_battery_serial() {
           ap.ds_voc_soc(), ap.dv_voc_soc());
   Serial.printf("%s", pr.buff);
 
-  sprintf(pr.buff, "%d,%10.7f,%10.7f,%10.7f,%10.7f,%10.7f,%10.7f,%d,%10.7f,",
+  sprintf(pr.buff, "%d,%10.7f,%10.7f,%10.7f,%10.7f,%10.7f,%10.7f,%10.7f,%10.7f,",
           ap.eframe_mult(), ap.ewhi_slr(), ap.ewlo_slr(), ap.hys_scale(),
-          ap.ib_diff_slr(), ap.ib_quiet_slr(), cp.ts, CHEM, DF2);
+          ap.ib_diff_slr(), ap.ib_quiet_slr(), ap.nP(), ap.nS(), cp.ts);
   Serial.printf("%s", pr.buff);
 
-  sprintf(pr.buff, "%10.7f,%10.7f,%10.7f,%10.7f,%10.7f,%10.7f,", EKF_CONV,
-          EKF_NOM_DT, EKF_Q_SD_NORM, EKF_R_SD_NORM, EKF_T_CONV, EKF_T_RES);
+  sprintf(pr.buff, "%d,%10.7f,%10.7f,%10.7f,%10.7f,%10.7f,%10.7f,%10.7f,",
+          CHEM, DF2, EKF_CONV, EKF_NOM_DT, EKF_Q_SD_NORM, EKF_R_SD_NORM,
+          EKF_T_CONV, EKF_T_RES);
   Serial.printf("%s", pr.buff);
 
   sprintf(pr.buff, "%10.7f,%10.7f,%10.7f,%10.7f,%10.7f,%10.7f,%10.7f,%10.7f,",

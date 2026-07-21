@@ -386,6 +386,7 @@ def replicate(OPT: UserOptions):
         )
         ib_charge = mon.ib_charge
 
+
         if OPT.use_sat_mon:
             sat = OPT.mon_run.sat[G.i]
             saturated = OPT.mon_run.saturated[G.i]

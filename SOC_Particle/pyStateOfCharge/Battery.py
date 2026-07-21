@@ -1172,10 +1172,10 @@ class BatteryMonitor(Battery, EKF1x1):
                 self.ib_amp = ib_amp
                 self.ib_amp_pst = ib_amp_pst
                 ibamp = self.ib_amp
-            self.ib_amp_hi = self.ib_amp >= Battery.HDWE_IB_HI_LO_AMP_HI
-            self.ib_amp_lo = self.ib_amp <= Battery.HDWE_IB_HI_LO_AMP_LO
-            self.ib_noa_hi = self.ib_noa >= Battery.HDWE_IB_HI_LO_NOA_HI
-            self.ib_noa_lo = self.ib_noa <= Battery.HDWE_IB_HI_LO_NOA_LO
+            self.ib_amp_hi = self.ib_amp >= Battery.HDWE_IB_HI_LO_AMP_HI / Battery.ap_nP
+            self.ib_amp_lo = self.ib_amp <= Battery.HDWE_IB_HI_LO_AMP_LO / Battery.ap_nP
+            self.ib_noa_hi = self.ib_noa >= Battery.HDWE_IB_HI_LO_NOA_HI / Battery.ap_nP
+            self.ib_noa_lo = self.ib_noa <= Battery.HDWE_IB_HI_LO_NOA_LO / Battery.ap_nP
             self.ib_lo_limited_lo = self.IbLoLimitedLo.calculate(
                 self.ib_amp_lo,
                 Battery.IB_LO_ACTIVE_SET * Battery.cp_ts,
@@ -1687,7 +1687,7 @@ class Diff:
         self.ib_amp = ib_amp
         self.ib_noa = ib_noa
 
-        self.ib_amp_hi = self.ib_amp >= Battery.HDWE_IB_HI_LO_AMP_HI
+        self.ib_amp_hi = self.ib_amp >= Battery.HDWE_IB_HI_LO_AMP_HI / Battery.NP
         self.ib_lo_limited_hi = self.LoHi.calculate(
             in_=self.ib_amp_hi,
             t_true=Battery.IB_LO_ACTIVE_SET * Battery.cp_ts,
@@ -1695,7 +1695,7 @@ class Diff:
             dt=self.dt,
             reset=self.reset,
         )  # non-latching
-        self.ib_amp_lo = self.ib_amp <= Battery.HDWE_IB_HI_LO_AMP_LO
+        self.ib_amp_lo = self.ib_amp <= Battery.HDWE_IB_HI_LO_AMP_LO / Battery.NP
         self.ib_lo_limited_lo = self.LoLo.calculate(
             in_=self.ib_amp_lo,
             t_true=Battery.IB_LO_ACTIVE_SET * Battery.cp_ts,
@@ -1705,8 +1705,8 @@ class Diff:
         )  # non-latching
 
         # Match C++ Fault::ib_logic(): disable when both sensors simultaneously at same limit
-        self.ib_noa_hi = self.ib_noa >= Battery.HDWE_IB_HI_LO_NOA_HI
-        self.ib_noa_lo = self.ib_noa <= Battery.HDWE_IB_HI_LO_NOA_LO
+        self.ib_noa_hi = self.ib_noa >= Battery.HDWE_IB_HI_LO_NOA_HI / Battery.NP
+        self.ib_noa_lo = self.ib_noa <= Battery.HDWE_IB_HI_LO_NOA_LO / Battery.NP
         self.disable_amp_fault = (self.ib_amp_hi and self.ib_noa_hi) or (self.ib_amp_lo and self.ib_noa_lo)
 
         self.ib_diff = self.ib_amp - self.ib_noa
@@ -1860,7 +1860,7 @@ class Looparound:
             in_=self.hi_fault,
             t_true=Battery.WRAP_HI_SET,
             t_false=Battery.WRAP_HI_RES,
-            dt=self.dt,
+            dt=dt_into_wrap,
             reset=self.reset,
         )  # non-latching
         self.lo_fault = self.e_wrap_filt <= self.ewlo_thr
@@ -1868,7 +1868,7 @@ class Looparound:
             in_=self.lo_fault,
             t_true=Battery.WRAP_LO_SET,
             t_false=Battery.WRAP_LO_RES,
-            dt=self.dt,
+            dt=dt_into_wrap,
             reset=self.reset,
         )  # non-latching
         self.ib_past2 = self.ib_past
