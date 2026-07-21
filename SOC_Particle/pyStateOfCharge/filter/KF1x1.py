@@ -232,10 +232,11 @@ class KF1x1VarDtxx:
         self.K = np.array([[0.0], [0.0]])  # Kalman gain
         self.hx = 0.0  # Output of observation function h(x)
         self.u_kf = 0.0  # Control input
-        self.x = np.array([initial_position, initial_velocity])  # Kalman state vector [position, velocity]
+        pos = initial_position if initial_position is not None else 0.0
+        vel = initial_velocity if initial_velocity is not None else 0.0
+        self.x = np.array([[pos], [vel]])  # Kalman state vector [position, velocity]
         self.x_prior = self.x.copy()
         self.y_kf = 0.0  # Residual z-hx
-        self.x = np.array([[0.0], [0.0]])
         self.reset = bool(False)
 
     def __str__(self, prefix=""):

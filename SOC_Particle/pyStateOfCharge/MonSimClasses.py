@@ -109,25 +109,33 @@ class Sensors:
             )
             self.Battery = Battery
             if hasattr(self.mon_run, "vovcm"):
+                pos_m_init = self.mon_run.vovcmkf[0] if hasattr(self.mon_run, "vovcmkf") else self.mon_run.vovcm[0]
                 self.KfShuntAmp = KF1x1VarDtxx(
-                    initial_position=self.mon_run.vovcm[0],
+                    initial_position=pos_m_init,
                     initial_velocity=self.mon_run.kf_v_m[0],
                     dt=0.1,
                     proc_noise_std=Battery.KF_Q_STD,
                     meas_noise_std=Battery.KF_R_STD,
                 )
+                if hasattr(self.mon_run, "P00m"):
+                    self.KfShuntAmp.P = np.array([[self.mon_run.P00m[0], self.mon_run.P01m[0]], [self.mon_run.P10m[0], self.mon_run.P11m[0]]])
+                    self.KfShuntAmp.P_prior = self.KfShuntAmp.P.copy()
             if hasattr(self.mon_run, "vovcn") and self.mon_run.vovcn is not None:
                 # print(f"input:   KF_Q_STD {self.Battery.KF_Q_STD}  KF_R_STD {self.Battery.KF_R_STD}")
                 self.Battery.KF_Q_STD /= 1.0
                 self.Battery.KF_R_STD /= 1.0
                 # print(f"using:   KF_Q_STD {self.Battery.KF_Q_STD}  KF_R_STD {self.Battery.KF_R_STD}")
+                pos_n_init = self.mon_run.vovcnkf[0] if hasattr(self.mon_run, "vovcnkf") else self.mon_run.vovcn[0]
                 self.KfShuntNoa = KF1x1VarDtxx(
-                    initial_position=self.mon_run.vovcn[0],
+                    initial_position=pos_n_init,
                     initial_velocity=self.mon_run.kf_v_n[0],
                     dt=0.1,
                     proc_noise_std=self.Battery.KF_Q_STD,
                     meas_noise_std=self.Battery.KF_R_STD,
                 )
+                if hasattr(self.mon_run, "P00n"):
+                    self.KfShuntNoa.P = np.array([[self.mon_run.P00n[0], self.mon_run.P01n[0]], [self.mon_run.P10n[0], self.mon_run.P11n[0]]])
+                    self.KfShuntNoa.P_prior = self.KfShuntNoa.P.copy()
 
             self.ib_amp = 0.0
             self.ib_noa = 0.0
@@ -505,12 +513,14 @@ class Sensors:
             self.reset_kf = bool(self.mon_run.kfres[i])
             if hasattr(self.mon_run, "vovcm"):
                 self.VoVcm = self.mon_run.vovcm[i]
-                self.KfShuntAmp.calculate(reset=self.reset_kf, dt=self.mon_run.ib_dyn_T_m[i], in_=self.VoVcm)
+                dt_m = self.mon_run.dtm[i] if hasattr(self.mon_run, "dtm") else self.mon_run.ib_dyn_T_m[i]
+                self.KfShuntAmp.calculate(reset=self.reset_kf, dt=dt_m, in_=self.VoVcm)
                 self.VoVcm_f, self.kf_v_m = self.KfShuntAmp.get_state()
                 self.VoVcm_f = float(self.VoVcm_f)
                 self.kf_v_m = float(self.kf_v_m)
             self.VoVcn = self.mon_run.vovcn[i]
-            self.KfShuntNoa.calculate(reset=self.reset_kf, dt=self.mon_run.ib_dyn_T_n[i], in_=self.VoVcn)
+            dt_n = self.mon_run.dtn[i] if hasattr(self.mon_run, "dtn") else self.mon_run.ib_dyn_T_n[i]
+            self.KfShuntNoa.calculate(reset=self.reset_kf, dt=dt_n, in_=self.VoVcn)
             self.VoVcn_f, self.kf_v_n = self.KfShuntNoa.get_state()
             self.VoVcn_f = float(self.VoVcn_f)
             self.kf_v_n = float(self.kf_v_n)
