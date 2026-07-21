@@ -6,11 +6,12 @@
 #include "version.h"
 // deviceOS@6.2.1
 // Features config           94:94:4A:04:C0:95
-#define HDWE_UNIT \
-  "soc4p2_hi_lo"  // https://console.particle.io/soc-particle-28171/
-                  // devices/0a10aced202194944a04c094
-#define SOFT_SBAUD \
-  460800  // Default Serial baud when able (don't think this does anything)
+
+#define HDWE_UNIT "soc4p2_hi_lo"
+      // https://console.particle.io/soc-particle-28171/
+      // devices/0a10aced202194944a04c094
+#define SOFT_SBAUD 460800  // Default Serial baud when able
+                           // (don't think this does anything)
 // #define SOFT_DEBUG_QUEUE
 // #define DEBUG_INIT                    // Use this to debug initialization
 // using 'vv-1;' #define LOGHANDLE
@@ -38,8 +39,8 @@
         // SHUNT_GAIN * SHUNT_AMP_R1 / SHUNT_AMP_R2 *1.05) but saw -11.48 A (12)
 #define IB_ABS_MAX_NOA       100.0 // Hard range limit of sensor electrically impossible (=1.65 *
          // SHUNT_GAIN * SHUNT_NOA_R1 / SHUNT_NOA_R2 *1.05) A (78.5)
-#define HDWE_IB_HI_LO_NOA_LO -11. // Fully NOA bank discharge transition, A (-11)
-#define HDWE_IB_HI_LO_AMP_LO -10. // Fully AMP bank discharge transition, A (-10)
+#define HDWE_IB_HI_LO_NOA_LO -11. // Fully NOA bank disch transition, A (-11)
+#define HDWE_IB_HI_LO_AMP_LO -10. // Fully AMP bank disch transition, A (-10)
 #define HDWE_IB_HI_LO_AMP_HI  10. // Fully AMP bank charge transition, A (10)
 #define HDWE_IB_HI_LO_NOA_HI  11. // Fully NOA bank charge transition, A (11)
 
@@ -61,12 +62,10 @@
          // = amp
 #define CHEM_NOM_VSAT 13.85  // Nominal saturation voltage at 25C, V (13.35)
 #define HYS_SCALE 1.0        // Scalar on hysteresis (1.0)
-#define NS \
-  1.0  // Number of series batteries in bank.  Fractions scale and remember
-       // NOM_UNIT_CAP (* 'BS')
-#define NP \
-  1.0  // Number of parallel batteries in bank.  Fractions scale and remember
-       // NOM_UNIT_CAP (* 'BP')
+#define NS 1.0  // Number of series batteries in bank. Fractions scale(* 'BS')
+                // and remember NOM_UNIT_CAP 
+#define NP 1.0  // Number of parallel batteries in bank. Fractions scale(* 'BP')
+                // and remember NOM_UNIT_CAP 
 
 // Faults
 #define FAKE_FAULTS \

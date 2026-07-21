@@ -25,38 +25,6 @@ all
 */
 #pragma once
 
-// Hardware configuration
-#undef HDWE_UNIT
-#undef HDWE_BARE
-#undef SOFT_SBAUD
-#undef HDWE_2WIRE
-#undef HDWE_IB_HI_LO_NOA_LO
-#undef HDWE_IB_HI_LO_AMP_LO
-#undef HDWE_IB_HI_LO_AMP_HI
-#undef HDWE_IB_HI_LO_NOA_HI
-#undef CURR_BIAS_AMP
-#undef CURR_SCALE_AMP
-#undef CURR_BIAS_NOA
-#undef CURR_SCALE_NOA
-#undef CURR_SCALE_DISCH
-#undef SHUNT_GAIN
-#undef SHUNT_AMP_R1
-#undef SHUNT_AMP_R2
-#undef VB_SENSE_R_LO
-#undef VB_SENSE_R_HI
-#undef VB_SCALE
-#undef VTAB_BIAS
-#undef VOLT_BIAS
-#undef CURR_BIAS_ALL
-#undef TEMP_BIAS
-#undef CHEM_NOM_VSAT
-#undef VOC_STAT_FILT
-
-// Software configuration
-#undef SOFT_DEBUG_QUEUE
-#undef IB_FORCE
-// #undef PLATFORM_ID
-
 // Setup
 #include "local_config.h"
 #if !defined(IB_FORCE)
@@ -126,8 +94,8 @@ const float T_DESAT = 20;  // De-saturation time, sec
 #define TAU_ERR_FILT       5.  // Current sensor difference filter time constant, s (5.)
 #define IB_LO_ACTIVE_SET   0.2 // Ib low range sensor is in-range persistence, s (0.2)
 #define IB_LO_ACTIVE_RES   0.4 // Ib low range sensor is in-range reset persistence, s (0.4)
-#define VB_MAX \
-  17.  // Signal selection hard fault threshold, V (17. < VB_CONV_GAIN*4095)
+#define VB_MAX 17.  // Signal selection hard fault threshold, V
+                    // (17. < VB_CONV_GAIN*4095)
 #define VB_MIN \
   2.  // Signal selection hard fault threshold, V (0.  < 2. < 10 bms shutoff,
       // reads ~3 without power when off)

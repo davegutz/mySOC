@@ -1165,10 +1165,10 @@ def print_volt_RunSim(SN, i_temp, i_ekf, t, mon, sim, calc_temp, calc_ekf):
         "    dt                vb                          ib_charge                   ib"
         "_sel         ib                          ib_amp_hdwe                 ib_amp_mode"
         "l                ib_amp                      ib_noa_hdwe                 ib_noa_"
-        "model               ib_noa           disable_amp_fault     ib_diff"
-        "                        ib_diff_flt   ib_lo_active    ib_lo_limited_hi  ib_lo_limited_lo"
-        "   ibh                         ib_s                 ib_amp_lo    ib_amp_hi"
-        "   ib_noa_lo   ib_noa_hi dis_amp_flt     dt                  ib_amp              "
+        "model                ib_noa           disable_amp_fault     ib_diff"
+        "                       ib_diff_flt   ib_lo_active    ib_lo_limited_hi  ib_lo_limited_lo"
+        "   ibh                         ib_s                      ib_amp_model               ib_amp_lo    ib_amp_hi"
+        "   ib_noa_lo   ib_noa_hi dis_amp_flt dt                  ib_amp              "
         "     ib_dyn_T_m           ib_dyn_rstate_m               ib_dyn_lstate_m         "
         "            ib_dyn_m                  vb                    vb_model            "
         "  vb_hdwe               vb_hdwe_f              dv_dyn_m               e_wrap_m_T "
@@ -1255,6 +1255,8 @@ def print_volt_RunSim(SN, i_temp, i_ekf, t, mon, sim, calc_temp, calc_ekf):
         "{:12.6f}".format(mon.ib_hdwe),
         "{:14.6f}".format(SN.mon_run.ib_s[G.i]),
         "{:12.6f}".format(sim.ib),
+        "{:12.6f}".format(mon.ib_amp_model),
+        "{:14.6f}".format(SN.mon_run.ib_amp[G.i]),
         "{:7d}".format(bool(SN.mon_run.ib_amp_lo[G.i])),
         "{:2d}".format(bool(mon.ib_amp_lo)),
         "{:7d}".format(bool(SN.mon_run.ib_amp_hi[G.i])),
@@ -1427,9 +1429,9 @@ def print_vb_wrap_RunSim(SN, i_temp, i_ekf, t, mon, sim, calc_temp, calc_ekf):
         "                        ib_amp                      vb_m                      vo"
         "c_m                   voc_soc_m                 voc_soc                   e_wrap"
         "_m                  e_wrap_trim          e_wrap_trimmed         e_wrap_m_filt   "
-        "   ib_diff    wrap_m_and_n_fa    wrap_lo_m_fa       wrap_lo_n_fa       wrap_lo_f"
-        "a         wrap_hi_m_fa       wrap_hi_n_fa       wrap_hi_fa         ib_is_functio"
-        "nal   wrap_vb_faj        ib_quiet          ib_really_quiet"
+        "    ib_diff_fa   wrap_m_and_n_fa  wrap_lo_m_flt    wrap_lo_m_fa     wrap_lo_n_fa        wrap_lo_f"
+        "a      wrap_hi_m_fa       wrap_hi_n_fa        wrap_hi_fa         ib_is_functio"
+        "nal   wrap_vb_faj        ib_quiet           ib_really_quiet"
     )
     if (calc_temp or calc_ekf) and count_since_last_header > HDR_SPREAD:
         print(hdr)
@@ -1468,7 +1470,7 @@ def print_vb_wrap_RunSim(SN, i_temp, i_ekf, t, mon, sim, calc_temp, calc_ekf):
         "{:4d}".format(bool(sim.bms_off)),
         "{:7d}".format(bool(SN.sim_run.voltage_low_s[G.i])),
         "{:4d}".format(bool(sim.voltage_low)),
-        "{:9.4f}".format(SN.mon_run.dt[G.i]),
+        "{:10.4f}".format(SN.mon_run.dt[G.i]),
         "{:7.4f}".format(mon.dt),
         "{:13.7f}".format(SN.mon_run.vb[G.i]),
         "{:11.7f}".format(mon.vb),
@@ -1491,13 +1493,21 @@ def print_vb_wrap_RunSim(SN, i_temp, i_ekf, t, mon, sim, calc_temp, calc_ekf):
         "{:11.5f}".format(SN.mon_run.e_wrap_m_filt[G.i]),
         "{:8.5f}".format(mon.e_wrap_m_filt),
         "{:4d}".format(SN.mon_run.ib_diff_fa[G.i]),
-        "{:10d}".format(SN.mon_run.wrap_m_and_n_fa[G.i]),
-        "{:18d}".format(SN.mon_run.wrap_lo_m_fa[G.i]),
-        "{:18d}".format(SN.mon_run.wrap_lo_n_fa[G.i]),
-        "{:18d}".format(SN.mon_run.wrap_lo_fa[G.i]),
-        "{:18d}".format(SN.mon_run.wrap_hi_m_fa[G.i]),
-        "{:18d}".format(SN.mon_run.wrap_hi_n_fa[G.i]),
-        "{:18d}".format(SN.mon_run.wrap_hi_fa[G.i]),
+        # "{:4d}".format(mon.ib_diff_fa),
+        "{:12d}".format(SN.mon_run.wrap_m_and_n_fa[G.i]),
+        "{:16d}".format(SN.mon_run.wrap_lo_m_flt[G.i]),
+        "{:4d}".format(mon.wrap_lo_m_flt),
+        "{:11d}".format(SN.mon_run.wrap_lo_m_fa[G.i]),
+        "{:4d}".format(mon.wrap_lo_m_fa),
+        "{:11d}".format(SN.mon_run.wrap_lo_n_fa[G.i]),
+        "{:4d}".format(mon.wrap_lo_n_fa),
+        "{:14d}".format(SN.mon_run.wrap_lo_fa[G.i]),
+        # "{:4d}".format(mon.wrap_lo_fa),
+        "{:14d}".format(SN.mon_run.wrap_hi_m_fa[G.i]),
+        "{:4d}".format(mon.wrap_hi_m_fa),
+        "{:14d}".format(SN.mon_run.wrap_hi_n_fa[G.i]),
+        "{:4d}".format(mon.wrap_hi_n_fa),
+        "{:14d}".format(SN.mon_run.wrap_hi_fa[G.i]),
         "{:18d}".format(SN.mon_run.ib_is_functional[G.i]),
         "{:18d}".format(SN.mon_run.wv_fa[G.i]),
         "{:18d}".format(bool(SN.mon_run.ib_quiet[G.i])),
