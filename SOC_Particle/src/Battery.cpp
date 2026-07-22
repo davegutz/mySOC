@@ -327,7 +327,7 @@ float BatteryMonitor::calculate(Sensors* Sen, const bool reset_temp,
     dt_ekf_ = float(now_ekf_ - ekf_now_past) / 1e3;
     ekf_now_past = now_ekf_;
     if (ddq_dt > 0. && !sp.tweak_test()) ddq_dt *= coul_eff_;
-    voc_stat_f_ = VocStatFilt->calculate(voc_stat_, reset_temp,
+    voc_stat_f_ = VocStatFilt->calculate(voc_stat_, reset_ekf || reset_temp,
                                          ap.voc_stat_filt(), dt_ekf_);
 
     // ddq_dt -= chem_.dqdt * q_capacity_ * T_rate;  // noisy

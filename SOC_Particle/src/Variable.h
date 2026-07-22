@@ -76,7 +76,7 @@ class Variable {
   virtual bool print_adjust(const String& str) { return false; };
   bool print_nominalize() {
     set_nominal();
-    sendTxBuf(" Nominalizing:  ", true, IN_SERVICE);
+    sendTxBuf(" Nominalizing:  ", true, true);
     return true;
   }
   virtual void set_nominal(){};
@@ -136,7 +136,7 @@ class BooleanV : public Variable {
     if (corrupt)
       sendTxBuf(String::format("\n%s %s corrupt", code_.c_str(),
                                description_.c_str()),
-                true, IN_SERVICE);
+                true, true);
     return corrupt;
   }
 
@@ -151,7 +151,7 @@ class BooleanV : public Variable {
 
   void print() {
     print_str();
-    sendTxBuf(String::format("%s\n", pr.buff), true, IN_SERVICE);
+    sendTxBuf(String::format("%s\n", pr.buff), true, true);
   }
 
   void print_help_str() {
@@ -162,7 +162,7 @@ class BooleanV : public Variable {
 
   void print_help() {
     print_help_str();
-    sendTxBuf(String::format("%s\n", pr.buff), true, IN_SERVICE);
+    sendTxBuf(String::format("%s\n", pr.buff), true, true);
   }
 
   virtual bool print_adjust(const String& str) {
@@ -237,7 +237,7 @@ class DoubleV : public Variable {
     if (corrupt)
       sendTxBuf(String::format("\n%s %s corrupt", code_.c_str(),
                                description_.c_str()),
-                true, IN_SERVICE);
+                true, true);
     return corrupt;
   }
 
@@ -253,7 +253,7 @@ class DoubleV : public Variable {
 
   void print() {
     print_str();
-    sendTxBuf(String::format("%s\n", pr.buff), true, IN_SERVICE);
+    sendTxBuf(String::format("%s\n", pr.buff), true, true);
   }
 
   void print_help_str() {
@@ -264,7 +264,7 @@ class DoubleV : public Variable {
 
   void print_help() {
     print_help_str();
-    sendTxBuf(String::format("%s\n", pr.buff), true, IN_SERVICE);
+    sendTxBuf(String::format("%s\n", pr.buff), true, true);
   }
 
   virtual bool print_adjust(const String& str) {
@@ -339,7 +339,7 @@ class FloatV : public Variable {
     if (corrupt)
       sendTxBuf(String::format("\n%s %s corrupt", code_.c_str(),
                                description_.c_str()),
-                true, IN_SERVICE);
+                true, true);
     return corrupt;
   }
 
@@ -355,7 +355,7 @@ class FloatV : public Variable {
 
   void print() {
     print_str();
-    sendTxBuf(String::format("%s\n", pr.buff), true, IN_SERVICE);
+    sendTxBuf(String::format("%s\n", pr.buff), true, true);
   }
 
   void print_help_str() {
@@ -366,7 +366,7 @@ class FloatV : public Variable {
 
   void print_help() {
     print_help_str();
-    sendTxBuf(String::format("%s\n", pr.buff), true, IN_SERVICE);
+    sendTxBuf(String::format("%s\n", pr.buff), true, true);
   }
 
   virtual bool print_adjust(const String& str) {
@@ -441,7 +441,7 @@ class IntV : public Variable {
     if (corrupt)
       sendTxBuf(String::format("\n%s %s corrupt", code_.c_str(),
                                description_.c_str()),
-                true, IN_SERVICE);
+                true, true);
     return corrupt;
   }
 
@@ -455,7 +455,7 @@ class IntV : public Variable {
   }
   void print() {
     print_str();
-    sendTxBuf(String::format("%s\n", pr.buff), true, IN_SERVICE);
+    sendTxBuf(String::format("%s\n", pr.buff), true, true);
   }
 
   void print_help_str() {
@@ -466,7 +466,7 @@ class IntV : public Variable {
 
   void print_help() {
     print_help_str();
-    sendTxBuf(String::format("%s\n", pr.buff), true, IN_SERVICE);
+    sendTxBuf(String::format("%s\n", pr.buff), true, true);
   }
 
   virtual bool print_adjust(const String& str) {
@@ -541,7 +541,7 @@ class Int8tV : public Variable {
     if (corrupt)
       sendTxBuf(String::format("\n%s %s corrupt", code_.c_str(),
                                description_.c_str()),
-                true, IN_SERVICE);
+                true, true);
     return corrupt;
   }
 
@@ -556,7 +556,7 @@ class Int8tV : public Variable {
 
   void print() {
     print_str();
-    sendTxBuf(String::format("%s\n", pr.buff), true, IN_SERVICE);
+    sendTxBuf(String::format("%s\n", pr.buff), true, true);
   }
 
   void print_help_str() {
@@ -567,7 +567,7 @@ class Int8tV : public Variable {
 
   void print_help() {
     print_help_str();
-    sendTxBuf(String::format("%s\n", pr.buff), true, IN_SERVICE);
+    sendTxBuf(String::format("%s\n", pr.buff), true, true);
   }
 
   virtual bool print_adjust(const String& str) {
@@ -626,13 +626,15 @@ class Uint16tV : public Variable {
       return false;
     } else {
       *val_ = val;
-      if (is_eeram_) rP_->write(addr_.a16, *val_);
+      if (is_eeram_) rP_->put(addr_.a16, *val_);
       return true;
     }
   }
 
   virtual void get() {
-    if (is_eeram_) *val_ = rP_->read(addr_.a16);
+    if (is_eeram_) {
+      rP_->get(addr_.a16, *val_);
+    }
   }
 
   virtual bool is_corrupt() {
@@ -688,7 +690,7 @@ class Uint16tV : public Variable {
 
   virtual void set_nominal() {
     *val_ = default_;
-    if (is_eeram_) rP_->write(addr_.a16, *val_);
+    if (is_eeram_) rP_->put(addr_.a16, *val_);
   }
 
  protected:
@@ -739,7 +741,7 @@ class Uint8tV : public Variable {
     if (corrupt)
       sendTxBuf(String::format("\n%s %s corrupt", code_.c_str(),
                                description_.c_str()),
-                true, IN_SERVICE);
+                true, true);
     return corrupt;
   }
 
@@ -754,7 +756,7 @@ class Uint8tV : public Variable {
 
   void print() {
     print_str();
-    sendTxBuf(String::format("%s\n", pr.buff), true, IN_SERVICE);
+    sendTxBuf(String::format("%s\n", pr.buff), true, true);
   }
 
   void print_help_str() {
@@ -765,7 +767,7 @@ class Uint8tV : public Variable {
 
   void print_help() {
     print_help_str();
-    sendTxBuf(String::format("%s\n", pr.buff), true, IN_SERVICE);
+    sendTxBuf(String::format("%s\n", pr.buff), true, true);
   }
 
   virtual bool print_adjust(const String& str) {
@@ -840,7 +842,7 @@ class ULongV : public Variable {
     if (corrupt)
       sendTxBuf(String::format("\n%s %s corrupt", code_.c_str(),
                                description_.c_str()),
-                true, IN_SERVICE);
+                true, true);
     return corrupt;
   }
 
@@ -856,7 +858,7 @@ class ULongV : public Variable {
 
   void print() {
     print_str();
-    sendTxBuf(String::format("%s\n", pr.buff), true, IN_SERVICE);
+    sendTxBuf(String::format("%s\n", pr.buff), true, true);
   }
 
   void print_help_str() {
@@ -867,7 +869,7 @@ class ULongV : public Variable {
 
   void print_help() {
     print_help_str();
-    sendTxBuf(String::format("%s\n", pr.buff), true, IN_SERVICE);
+    sendTxBuf(String::format("%s\n", pr.buff), true, true);
   }
 
   virtual bool print_adjust(const String& str) {

@@ -821,7 +821,7 @@ class BatteryMonitor(Battery, EKF1x1):
             self.voc_stat_f = self.voc_stat_filt.calculate_tau_seeded(
                 self.voc_stat_ekf,
                 SN.mon_run.voc_stat_f_lstate[i_ekf],
-                self.reset_ekf,
+                self.reset_ekf or self.reset_temp,
                 self.dt_eframe,
                 self.VOC_STAT_FILT,
             )
