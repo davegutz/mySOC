@@ -42,7 +42,7 @@ class Coulombs {
   void apply_delta_q(const double delta_q);
   void apply_delta_q_t(const bool reset);
   void apply_delta_q_t(const double delta_q, const double tb_f);
-  void apply_soc(const double soc, const double tb_f);
+  virtual void apply_soc(const double soc, const double tb_f);
   double calculate_capacity(const double tb_f);
   Chemistry* chem() { return &chem_; };
   void chem_pretty_print() { chem_.pretty_print(); };

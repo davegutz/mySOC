@@ -61,6 +61,17 @@ Battery::~Battery() {}
 // operators
 // functions
 
+void Battery::apply_soc(const double soc, const double tb_f) {
+  Coulombs::apply_soc(soc, tb_f);
+  double dv_dsoc;
+  voc_stat_ = calc_soc_voc(soc_, Tb_f_, &dv_dsoc);
+  voc_ = voc_stat_;
+  voc_soc_ = voc_stat_;
+  vb_ = voc_stat_;
+  dv_dyn_ = 0.0;
+  dv_hys_ = 0.0;
+}
+
 // Placeholder; not used
 float Battery::calculate(const double Tb_f, const double soc_frac,
                          float curr_in, const double dt, const bool dc_dc_on) {

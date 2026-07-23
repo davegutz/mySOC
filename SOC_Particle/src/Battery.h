@@ -96,6 +96,7 @@ class Battery : public Coulombs {
   Battery(double* sp_delta_q, const float d_voc_soc, const float dx_voc,
           const float dy_voc, const float dz_voc);
   ~Battery();
+  void apply_soc(const double soc, const double tb_f) override;
   virtual double calc_soc_voc(const double soc, const double Tb_f,
                               double* dv_dsoc);
   double calc_soc_voc_slope(double soc, double Tb_f);

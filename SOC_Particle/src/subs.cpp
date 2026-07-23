@@ -106,6 +106,9 @@ void initialize_all(BatteryMonitor* Mon, Sensors* Sen, const float soc_in,
   }
 #endif
 
+  // Reset all faults at entry so latched faults (e.g. VB_FA_LT) do not force voc_stat=17V during solver
+  Sen->Flt->reset_all_faults();
+
   // Gather and apply inputs
   if (sp.mod_ib())
     Sen->Ib_model_in(sp.inj_bias() + sp.ib_bias_all());
@@ -242,7 +245,7 @@ void initialize_all(BatteryMonitor* Mon, Sensors* Sen, const float soc_in,
   // Call calculate/count_coulombs twice because sat_ is a
   // used-before-calculated (UBC) Simple 'call twice' method because sat_ is
   // discrete not analog which would require iteration
-  Mon->calculate(Sen, true, true);
+  Mon->calculate(Sen, true, use_soc_in);
 #ifdef DEBUG_INIT
   if (sp.debug() == -1) {
     Serial.printf("M.calc1:  ");
@@ -256,7 +259,7 @@ void initialize_all(BatteryMonitor* Mon, Sensors* Sen, const float soc_in,
     debug_m1(Mon, Sen);
   }
 #endif
-  Mon->calculate(Sen, true, true);  // Call again because sat is a UBC
+  Mon->calculate(Sen, true, false);  // Call again because sat is a UBC
 #ifdef DEBUG_INIT
   if (sp.debug() == -1) {
     Serial.printf("M.calc2:  ");

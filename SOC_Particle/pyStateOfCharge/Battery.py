@@ -249,6 +249,15 @@ class Battery(BatteryConstants, Coulombs):
     def assign_tb_f(self, tb_f):
         self.Tb_f = tb_f
 
+    def apply_soc(self, soc, tb_f, delta_q=0.0):
+        super().apply_soc(soc, tb_f, delta_q)
+        self.voc_stat, self.dv_dsoc = self.calc_soc_voc(self.soc, self.Tb_f)
+        self.voc = self.voc_stat
+        self.voc_soc = self.voc_stat
+        self.vb = self.voc_stat
+        self.dv_dyn = 0.0
+        self.dv_hys = 0.0
+
     def calc_h_jacobian(self, soc_lim, tb_f):
         if soc_lim > 0.5:
             dv_dsoc = (
