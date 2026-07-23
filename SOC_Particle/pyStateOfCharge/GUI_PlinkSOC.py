@@ -59,11 +59,126 @@ import platform
 from Colors import Colors
 from test_soc_util import run_shell_cmd
 
+_initial_dependency_mtimes = {}
+
+
+def get_dependency_mtimes():
+    """Return dict of filepath -> st_mtime for Python dependencies in project directory."""
+    mtimes = {}
+    base_dir = Path(__file__).resolve().parent
+    # 1. Modules loaded in sys.modules pointing into base_dir
+    for mod in list(sys.modules.values()):
+        f = getattr(mod, "__file__", None)
+        if f and isinstance(f, str):
+            p = Path(f).resolve()
+            p_str = str(p)
+            if p.is_relative_to(base_dir) and p.suffix == ".py":
+                if not any(part.startswith(".") or part in ("venv", "__pycache__") for part in p.parts):
+                    try:
+                        mtimes[p_str] = p.stat().st_mtime
+                    except Exception:
+                        pass
+    # 2. Local .py files under base_dir
+    for p in base_dir.rglob("*.py"):
+        p_res = p.resolve()
+        p_str = str(p_res)
+        if not any(part.startswith(".") or part in ("venv", "__pycache__") for part in p_res.parts):
+            if p_str not in mtimes:
+                try:
+                    mtimes[p_str] = p_res.stat().st_mtime
+                except Exception:
+                    pass
+    return mtimes
+
+
+def check_dependencies_and_warn():
+    """Check if any local Python dependency has changed since startup.
+    If changed, display a warning dialog with OK button.
+    """
+    global _initial_dependency_mtimes
+    if not _initial_dependency_mtimes:
+        _initial_dependency_mtimes = get_dependency_mtimes()
+        return
+
+    current_mtimes = get_dependency_mtimes()
+    changed_files = []
+    for filepath, init_mtime in _initial_dependency_mtimes.items():
+        curr_mtime = current_mtimes.get(filepath)
+        if curr_mtime is not None and curr_mtime > init_mtime:
+            changed_files.append((os.path.basename(filepath), filepath))
+
+    if changed_files:
+        file_list_str = "\n".join([f"• {name}" for name, _ in changed_files])
+        msg = (
+            f"Warning: One or more dependencies of GUI_PlinkSOC have changed on disk:\n\n"
+            f"{file_list_str}\n\n"
+            f"Please restart GUI_PlinkSOC if you want to run with updated code."
+        )
+        try:
+            tkinter.messagebox.showwarning("GUI_PlinkSOC Dependency Warning", msg)
+        except Exception:
+            pass
+        # Update recorded mtimes so warning isn't continuously repeated until modified again
+        for _, filepath in changed_files:
+            _initial_dependency_mtimes[filepath] = current_mtimes[filepath]
+
+
+def _is_close_plots(text_str):
+    if not text_str:
+        return False
+    t = str(text_str).lower().strip()
+    return "close plot" in t or "close plots" in t
+
+
 if platform.system() == "Darwin":
     # noinspection PyUnresolvedReferences
-    from ttwidgets import TTButton as myButton  # Need this for  macOS - ignore warnings
+    from ttwidgets import TTButton as _BaseButton  # Need this for  macOS - ignore warnings
 else:
-    from tkinter import Button as myButton
+    from tkinter import Button as _BaseButton
+
+
+class myButton(_BaseButton):
+    """Button subclass that checks for dependency file changes on any button activity (except CLOSE PLOTS)."""
+
+    def __init__(self, *args, **kwargs):
+        original_command = kwargs.get("command", None)
+        button_text = kwargs.get("text", "")
+        if original_command:
+
+            def wrapped_command(*c_args, **c_kwargs):
+                current_text = ""
+                try:
+                    if hasattr(self, "cget"):
+                        current_text = str(self.cget("text"))
+                except Exception:
+                    pass
+                if not _is_close_plots(current_text or button_text):
+                    check_dependencies_and_warn()
+                return original_command(*c_args, **c_kwargs)
+
+            kwargs["command"] = wrapped_command
+        super().__init__(*args, **kwargs)
+
+    def config(self, cnf=None, **kw):
+        if "command" in kw and kw["command"]:
+            orig_cmd = kw["command"]
+
+            def wrapped_cmd(*c_args, **c_kwargs):
+                current_text = ""
+                try:
+                    if hasattr(self, "cget"):
+                        current_text = str(self.cget("text"))
+                except Exception:
+                    pass
+                if not _is_close_plots(current_text or kw.get("text", "")):
+                    check_dependencies_and_warn()
+                return orig_cmd(*c_args, **c_kwargs)
+
+            kw["command"] = wrapped_cmd
+        super().config(cnf, **kw)
+
+    def configure(self, cnf=None, **kw):
+        self.config(cnf, **kw)
 bg_color = "lightgray"
 if sys.version_info.major == 3 and sys.version_info.minor < 12:
     # noinspection PyUnusedImports
@@ -2233,6 +2348,22 @@ if __name__ == "__main__":  # Example usage.  Ran ok 20260217
     print("creating master")
     master = tk.Tk(className="GUI_PlinkSOC")
     print("master created")
+    def _on_master_button_click(event):
+        widget = getattr(event, "widget", None)
+        if widget is not None:
+            try:
+                w_text = ""
+                if hasattr(widget, "cget"):
+                    w_text = widget.cget("text")
+                elif hasattr(widget, "itemcget"):
+                    w_text = widget.itemcget("text")
+                if _is_close_plots(w_text):
+                    return
+            except Exception:
+                pass
+        check_dependencies_and_warn()
+
+    master.bind_all("<Button-1>", _on_master_button_click, add="+")
     master.title("State of Charge (Plink)")
     master.wm_minsize(width=min_width, height=main_height)
     timer = None
