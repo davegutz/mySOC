@@ -243,18 +243,23 @@ off_r = (
     "DB-0.1;SD-0.1;si2;if22;ih23;Xb-0.1;is24,Xm5;X?6;Dt-0.1;UT2222222222222;"
     "Xt7;Dc-0.1;DS-0.1;"
 )
+restore_r = (
+    "Xa;Bb;Sk;vv;qs;qm;Dw;Xf;DI;DA;"
+    "DB;SD;si;if;ih;Xb;is,Xm;X?;Dt;UT;"
+    "Xt;Dc;DS;"
+)
 
 # Note:  Photon 2 is throughput limited on the Serial buses.  The *tweak* transients are sensitive to differences
 # caused by over-runs and slip and set Dr400 before Xp* then resets to Dr100 (nominal).
 lookup = {
     "satInit": (
         22,
-        "Y;RS;RV;" + quiet + "cc;Dh;Dr;*W;*vv0;*XS;*Ca1;BZ;Ff0;DP1;<HR;<Rf;" + "Pv;Pr;<XK;",
+        "Y;RS;RV;" + quiet + "cc;Dh;Dr;*W;*vv0;*XS;*Ca1;BZ;Ff0;ED;DP1;<HR;<Rf;" + "Pv;Pr;<XK;",
         ("",),
     ),
     "initMid": (
         22,
-        "Y;RS;RV;" + quiet + "cc;Dh1800000;*W;*vv0;*XS;*Ca.5;BZ;Ff0;<HR;<Rf;" + "Pv;Pr;<XK;",
+        "Y;RS;RV;" + quiet + "cc;Dh1800000;*W;*vv0;*XS;*Ca.5;BZ;Ff0;ED;<HR;<Rf;" + "Pv;Pr;<XK;",
         ("",),
     ),
     "saveAdjusts": (
@@ -504,7 +509,7 @@ lookup = {
     ),
     "noaLoFullFail": (
         155,
-        modFullInit + "DS-0.30" + tranPrep + dm50 + "XQ50000;" + c00 + quiet + cleanup + "<XD;",
+        modFullInit + "DS-0.30" + tranPrep + dm50 + "XQ50000;" + c00 + quiet + cleanup + "DS;<XD;",
         (
             "Race with artificially low SAT logic to detect and switch amp current failure.",
             "Start looking at 'Ult 1'. Fault record (frozen). Will see 'diff' flashing on display.",
@@ -802,7 +807,7 @@ lookup = {
             "To evaluate plots, start looking at 'Ult 1'. Fault record (frozen).",
         ),
     ),
-    "nvm": (10, off_r, ("Adjst all and cycle power", "To evaluate type PR")),
+    "nvm": (25, off_r + "W5" + restore_r, ("Adjst all and cycle power", "To evaluate type PR")),
 }
 
 # Lookup keys for which compare_run_sim should be called with shift_soc_s=False

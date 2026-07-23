@@ -211,15 +211,27 @@ def compare_pair(run_path, ver_path, tol, rtol=1e-3, ed=None):
         dt_med = 0.0
     ekf_skip_until = (ed * dt_med) if (ed and ed > 1) else 0.0
 
-    # Build a boolean mask for rows where reset_temp is active (True/1), used to suppress Tb checks.
-    reset_temp_mask = None
+    # Build boolean masks for reset conditions (True/non-zero)
+    reset_mask = pd.Series(False, index=df_run.index)
+    for _r_col in ("reset", "reset_all", "soft_reset"):
+        if _r_col in df_run.columns:
+            reset_mask = reset_mask | (df_run[_r_col].astype(float) != 0)
+        if _r_col in df_ver.columns:
+            reset_mask = reset_mask | (df_ver[_r_col].astype(float) != 0)
+
+    reset_temp_mask = pd.Series(False, index=df_run.index)
     for _rt_col in ("reset_temp", "rt"):
         if _rt_col in df_run.columns:
-            reset_temp_mask = df_run[_rt_col].astype(float).astype(bool)
-            break
+            reset_temp_mask = reset_temp_mask | (df_run[_rt_col].astype(float) != 0)
         if _rt_col in df_ver.columns:
-            reset_temp_mask = df_ver[_rt_col].astype(float).astype(bool)
-            break
+            reset_temp_mask = reset_temp_mask | (df_ver[_rt_col].astype(float) != 0)
+
+    reset_ekf_mask = pd.Series(False, index=df_run.index)
+    for _rk_col in ("reset_ekf", "ekf_reset", "reset_kf", "kf_reset", "rk"):
+        if _rk_col in df_run.columns:
+            reset_ekf_mask = reset_ekf_mask | (df_run[_rk_col].astype(float) != 0)
+        if _rk_col in df_ver.columns:
+            reset_ekf_mask = reset_ekf_mask | (df_ver[_rk_col].astype(float) != 0)
 
     # Check if we should skip the first 2 updates when not modeling ib (mib is False)
     skip_first_2 = False
@@ -255,11 +267,12 @@ def compare_pair(run_path, ver_path, tol, rtol=1e-3, ed=None):
         delta = (df_run[col] - df_ver[col]).abs()
         if ekf_skip_until > 0.0 and _is_ekf_column(col):
             delta = delta.where(df_run["time"] >= ekf_skip_until, 0.0)
-        if reset_temp_mask is not None and _is_tb_column(col):
-            delta = delta.where(~reset_temp_mask, 0.0)
-        if "reset" in df_ver.columns:
-            reset_mask = df_ver["reset"].astype(float).astype(bool) if df_ver["reset"].dtype in (int, float) else df_ver["reset"].astype(bool)
+        if reset_mask.any():
             delta = delta.where(~reset_mask, 0.0)
+        if reset_temp_mask.any() and _is_tb_column(col):
+            delta = delta.where(~reset_temp_mask, 0.0)
+        if reset_ekf_mask.any() and _is_ekf_column(col):
+            delta = delta.where(~reset_ekf_mask, 0.0)
         if skip_first_2:
             # Skip until the column has changed at least twice in df_run (its first two updates)
             # Default to index 2 if there are fewer than 2 changes.
@@ -373,7 +386,7 @@ def plot_diffs(results, data_file=None, save_plots=True, terse=False, hardcopy=T
         ver_file = r.get("ver_file", run_file.replace("_run.csv", "_ver.csv"))
         diffs = r["diffs"]
         n_figs = math.ceil(len(diffs) / PER_FIG)
-        version = version_from_data_file(data_file)
+        version = version_from_data_file(data_file) if data_file else read_ini(ini_path())[0]
         _, save_pdf_path, _ = local_paths(version)
 
         for fig_idx in range(n_figs):
