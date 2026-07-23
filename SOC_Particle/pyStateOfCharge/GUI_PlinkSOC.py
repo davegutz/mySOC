@@ -112,15 +112,13 @@ def check_dependencies_and_warn():
         msg = (
             f"Warning: One or more dependencies of GUI_PlinkSOC have changed on disk:\n\n"
             f"{file_list_str}\n\n"
-            f"Please restart GUI_PlinkSOC if you want to run with updated code."
+            f"Click OK to exit GUI_PlinkSOC."
         )
         try:
             tkinter.messagebox.showwarning("GUI_PlinkSOC Dependency Warning", msg)
         except Exception:
             pass
-        # Update recorded mtimes so warning isn't continuously repeated until modified again
-        for _, filepath in changed_files:
-            _initial_dependency_mtimes[filepath] = current_mtimes[filepath]
+        sys.exit(0)
 
 
 def _is_close_plots(text_str):

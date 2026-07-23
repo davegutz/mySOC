@@ -1552,6 +1552,7 @@ def save_clean_file(mon_ver, csv_file, unit_key):
             s += "{:7.3f},".format(mon_ver.vsat[i])
             s += "{:7.3f},".format(mon_ver.dv_dyn[i])
             s += "{:7.3f},".format(mon_ver.voc_stat[i])
+            s += "{:7.3f},".format(getattr(mon_ver, "voc_stat_f", mon_ver.voc_stat)[i])
             s += "{:7.3f},".format(mon_ver.voc_ekf[i])
             s += "{:7.3f},".format(mon_ver.y[i])
             s += "{:7.3f},".format(mon_ver.soc_s[i])

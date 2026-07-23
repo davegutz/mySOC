@@ -800,7 +800,7 @@ lookup = {
         ),
     ),
     "vcFlat": (
-        130,
+        140,
         modFlatInitHi + tranPrepKf + "D30.6;" + "XQ25000;" + "Pf;W2;D3;Rf;W50;" + quiet + cleanup + "<XD;",
         (
             "Inject 0.6V into sensed Vc (normally 1.65).  Should fail both currents.",

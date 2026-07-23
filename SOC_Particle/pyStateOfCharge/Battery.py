@@ -847,10 +847,14 @@ class BatteryMonitor(Battery, EKF1x1):
             self.y_ekf = self.y
             self.q_ekf = self.soc_ekf * self.q_capacity
             in_val = self.y_ekf
-            if self.reset_temp and OPT is not None and getattr(OPT, "mon_run", None) is not None:
+            if self.reset_temp and OPT is not None and getattr(OPT, "mon_run", None) is not None and getattr(OPT.mon_run, "y_ekf", None) is not None:
                 in_val = OPT.mon_run.y_ekf[G.i]
+            out_init = in_val
+            if OPT is not None and getattr(OPT, "mon_run", None) is not None and getattr(OPT.mon_run, "y_ekf_f", None) is not None:
+                if len(OPT.mon_run.y_ekf_f) > G.i and np.any(OPT.mon_run.y_ekf_f != 0.0):
+                    out_init = OPT.mon_run.y_ekf_f[G.i]
             self.y_ekf_f = self.y_ekf_filt_lag.calculate_seeded(
-                in_=in_val, _out_init=OPT.mon_run.y_ekf_f[G.i], dt=self.dt_eframe, reset=self.reset_temp
+                in_=in_val, _out_init=out_init, dt=self.dt_eframe, reset=self.reset_temp
             )
             self.y_ekf_f_T = self.y_ekf_filt_lag.dt
             self.y_ekf_f_tau = self.y_ekf_filt_lag.tau
@@ -933,10 +937,10 @@ class BatteryMonitor(Battery, EKF1x1):
         if mr is None:
             return
         self.soc_ekf = mr.soc_ekf[i]
-        if hasattr(mr, "y"):
-            self.y_ekf = mr.y[i_ekf]
-        else:
+        if hasattr(mr, "y_ekf"):
             self.y_ekf = mr.y_ekf[i_ekf]
+        elif hasattr(mr, "y"):
+            self.y_ekf = mr.y[i_ekf]
         self.init_ekf(mr.soc_ekf[i], 0.0)
         self.q_ekf = self.soc * self.q_capacity
         self.P = mr.P[i_ekf]
@@ -1077,7 +1081,9 @@ class BatteryMonitor(Battery, EKF1x1):
         self.ib_wrp_state_n = self.LoopIbNoa.WrapErrFilt.state
         self.ib_wrp_rate_n = self.LoopIbNoa.e_wrap_rate
         self.e_wrap_n_trimmed = self.LoopIbNoa.e_wrap_trimmed
-        self.y_ekf = self.y
+        self.y_ekf = self.y_ekf
+        self.y_ekf_f = self.y_ekf_f
+        self.ib_lag = self.ib_lag
         self.qcap = self.q_capacity
         self.qcrs = self.q_cap_rated_scaled
         if rp is not None and not rp.modeling_ib:

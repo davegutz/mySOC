@@ -375,7 +375,7 @@ class SavedData:
 
         if IbLag is not None:
             for i in range(n):
-                if self.time[i] <= self.init_time:
+                if i == 0 or self.time[i] <= self.init_time:
                     lag_reset = True
                     if i < n - 1:
                         T_lag = self.cTime[i + 1] - self.cTime[i]

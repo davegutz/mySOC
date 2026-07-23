@@ -121,20 +121,14 @@ class EKF1x1:
             S   1x1 system uncertainty
             SI  1x1 system uncertainty inverse
         """
-        if not self.reset:
-            # self.x = OPT.mon_run.x[i_ekf]
-            self.hx, self.H, self.tb_f_for_hx, self.x_for_hx = self.ekf_update()
-            # self.hx = OPT.mon_run.hx[i_ekf]
-            # self.H = OPT.mon_run.H[i_ekf]
-            # self.tb_f_for_hx = OPT.mon_run.tb_f_for_hx[i_ekf]
-            # z = OPT.mon_run.z[i_ekf]
+        self.hx, self.H, self.tb_f_for_hx, self.x_for_hx = self.ekf_update()
         self.z = z
         if not self.reset:
             pht = self.P * self.H
             self.S = self.H * pht + self.R
             if abs(self.S) > 1e-12:
                 self.K = pht / self.S  # using last-good-value if S=0
-            self.y = self.z - self.hx
+        self.y = self.z - self.hx
         if not self.reset and not self.freeze:
             self.x = max(min(self.x + self.K * self.y, x_max), x_min)
         i_kh = 1.0 - self.K * self.H
