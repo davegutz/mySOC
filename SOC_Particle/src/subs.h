@@ -73,7 +73,7 @@ struct Pins {
 void check_and_fix_corruption();
 void handle_boot_sequence();
 void handle_soft_reset(bool* reset, bool* reset_temp, bool* reset_kf,
-                       bool* reset_ekf, uint64_t* start_reset, const bool read);
+                       uint64_t* start_reset, const bool read);
 void harvest_temp_change(const double tb_f, BatteryMonitor* Mon,
                          BatterySim* Sim, const float rate, const float dt);
 void initialize_all(BatteryMonitor* Mon, Sensors* Sen, const float soc_in,

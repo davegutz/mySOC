@@ -8,8 +8,11 @@
   23-Nov-2016   Dave Gutz   LeadLagExp
  ****************************************************/
 #include "iterate.h"
+#include "command.h"
 
 #include "math.h"
+
+extern CommandPars cp;   // Various parameters shared at system level
 
 // class Iterator
 // constructors
@@ -42,10 +45,10 @@ double Iterator::iterate(const bool verbose, const uint16_t success_count,
   des_ = sgn(de_) * max(abs(de_), 1e-16);
   dx_ = x_ - xp_;
   if (verbose) {
-    Serial.printf(
-        "%s(%d): xmin%12.8f x%12.8f xmax%12.8f e%12.8f  des%12.8f dx%12.8f "
-        "de%12.8f\n",
-        desc_.c_str(), count_, xmin_, x_, xmax_, e_, des_, dx_, de_);
+    Serial.printf("%s(%d): cp.ekf_reset%2d | %12.8f<  x%12.8f <%12.8f| e%14.10f"
+                  "  sgn(del e)%12.8f dx%12.8f de%12.8f\n",
+      desc_.c_str(), count_, cp.ekf_reset, xmin_, x_, xmax_, e_,
+      des_, dx_, de_);
   }
 
   // Check min max sign change

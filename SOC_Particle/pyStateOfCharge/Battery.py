@@ -849,7 +849,7 @@ class BatteryMonitor(Battery, EKF1x1):
             in_val = self.y_ekf
             if self.reset_temp and OPT is not None and getattr(OPT, "mon_run", None) is not None and getattr(OPT.mon_run, "y_ekf", None) is not None:
                 in_val = OPT.mon_run.y_ekf[G.i]
-            out_init = in_val
+            out_init = 0.0 if self.reset_temp else in_val
             if OPT is not None and getattr(OPT, "mon_run", None) is not None and getattr(OPT.mon_run, "y_ekf_f", None) is not None:
                 if len(OPT.mon_run.y_ekf_f) > G.i and np.any(OPT.mon_run.y_ekf_f != 0.0):
                     out_init = OPT.mon_run.y_ekf_f[G.i]

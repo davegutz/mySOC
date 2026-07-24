@@ -127,6 +127,9 @@ void talkH(BatteryMonitor* Mon, Sensors* Sen) {
   ap.disab_ib_fa_p->print_help();   // FI
   ap.disab_tb_fa_p->print_help();   // FT
   ap.dis_vb_fa_lt_p->print_help();  // FV
+  ap.solv_err_p->print_help();        // Se
+  ap.solv_max_counts_p->print_help(); // Sx
+  ap.solv_succ_counts_p->print_help();// Su
 
   sendTxBuf("\nH<?>   Manage history\n", true, IN_SERVICE);
   sendTxBuf("  Hd= ", true, IN_SERVICE);

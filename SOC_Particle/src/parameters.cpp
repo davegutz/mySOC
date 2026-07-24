@@ -103,7 +103,7 @@ VolatilePars::VolatilePars() : Parameters() {
 VolatilePars::~VolatilePars() {}
 
 void VolatilePars::initialize() {
-#define NVOL 58
+#define NVOL 61
   V_ = new Variable*[NVOL];
   V_[n_++] = (bare_slr_p = new FloatV("  ", "SZ", NULL, "Slr debounce", "float", 0, 1000, &bare_slr_, 1));                          // SZ
   V_[n_++] = (cc_diff_slr_p = new FloatV("  ", "SC", NULL, "Slr cc_diff", "float", 0, 1000, &cc_diff_slr_, 1));                     // SC
@@ -163,6 +163,9 @@ void VolatilePars::initialize() {
   V_[n_++] = (s_cap_mon_p = new FloatV("  ", "SQ", NULL, "Scalar cap Mon","slr", 0, 1000, &s_cap_mon_, 1.));                        // SQ
   V_[n_++] = (s_cap_sim_p = new FloatV("  ", "Sq", NULL, "Scalar cap Sim", "slr", 0, 1000, &s_cap_sim_, 1.));                       // Sq
   V_[n_++] = (Vb_scale_p = new FloatV("  ", "SV", NULL, "Scale Vb sensor", "v", -1e5, 1e5, &Vb_scale_, VB_SCALE));                  // SV
+  V_[n_++] = (solv_err_p = new FloatV("  ", "Se", NULL, "EKF soc solve err", "frac", 0, 1, &solv_err_, SOLV_ERR));                               // Se
+  V_[n_++] = (solv_max_counts_p = new Uint8tV("  ", "Sx", NULL, "EKF soc solve cnts", "uint", 0, UINT8_MAX, &solv_max_counts_, SOLV_MAX_COUNTS));     // Sx
+  V_[n_++] = (solv_succ_counts_p = new Uint8tV("  ", "Su", NULL, "EKF soc solve trans", "uint", 0, UINT8_MAX, &solv_succ_counts_, SOLV_SUCC_COUNTS)); // Su
 }
 
 void VolatilePars::pretty_print(const bool all) {
@@ -238,69 +241,30 @@ SavedPars::~SavedPars() {}
 void SavedPars::initialize() {
 #define NSAV 24
   V_ = new Variable*[NSAV];
-  V_[n_++] = (amp_p = new FloatV("* ", "Xa", rP_, "Inj amp", "Amps pk", -1e6,
-                                 1e6, &amp_, 0));  // Xa
-  V_[n_++] = (booted_p = new BooleanV("  ", "Bb", rP_, "Clean boot", "T=clean",
-                                      0, 1, &booted_, false));  // Bb
-  V_[n_++] = (cutback_gain_slr_p =
-                  new FloatV("* ", "Sk", rP_, "Cutback gain scalar", "slr",
-                             -1e6, 1e6, &cutback_gain_slr_, 1));  // Sk
-  V_[n_++] = (debug_p = new IntV("* ", "vv", rP_, "Verbosity", "int", -128, 128,
-                                 &debug_, VV));  // vv
-  V_[n_++] = (delta_q_model_p =
-                  new DoubleV("* ", "qs", rP_, "Charge chg Sim", "C", -1e8, 1e5,
-                              &delta_q_model_, 0, false));  // qs
-  V_[n_++] = (delta_q_p = new DoubleV("* ", "qm", rP_, "Charge chg", "C", -1e8,
-                                      1e5, &delta_q_, 0, false));  // qm
-  V_[n_++] = (Dw_p = new FloatV("* ", "Dw", rP_, "Tab mon adj", "v", -1e2, 1e2,
-                                &Dw_, VTAB_BIAS));  // Dw
-  V_[n_++] = (freq_p = new FloatV("* ", "Xf", rP_, "Inj freq", "Hz", 0, 2,
-                                  &freq_, 0));  // Xf
-  V_[n_++] =
-      (ib_bias_all_p = new FloatV("* ", "DI", rP_, "Del all", "A", -1e5, 1e5,
-                                  &ib_bias_all_, CURR_BIAS_ALL));  // DI
-  V_[n_++] =
-      (ib_bias_amp_p = new FloatV("* ", "DA", rP_, "Add amp", "A", -1e5, 1e5,
-                                  &ib_bias_amp_, CURR_BIAS_AMP));  // DA
-  V_[n_++] =
-      (ib_bias_noa_p = new FloatV("* ", "DB", rP_, "Add noa", "A", -1e5, 1e5,
-                                  &ib_bias_noa_, CURR_BIAS_NOA));  // DB
-  V_[n_++] = (ib_disch_slr_p =
-                  new FloatV("* ", "SD", rP_, "Slr disch", "slr", -1e5, 1e5,
-                             &ib_disch_slr_, CURR_SCALE_DISCH));  // SD
-  V_[n_++] =
-      (ib_force_p = new Int8tV("* ", "si", rP_, "curr sel mode", "(-1, 0, 1)",
-                               -1, 1, &ib_force_, int8_t(IB_FORCE)));  // si
-  V_[n_++] =
-      (iflt_p = new Uint16tV("* ", "if", rP_, "Fault buffer indx", "uint", 0,
-                             nflt_ + 1, &iflt_, nflt_, false));  // if
-  V_[n_++] = (ihis_p = new Uint16tV("* ", "ih", rP_, "Hist buffer indx", "uint",
-                                    0, nhis_ + 1, &ihis_, nhis_, false));  // ih
-  V_[n_++] = (inj_bias_p = new FloatV("* ", "Xb", rP_, "Injection bias", "A",
-                                      -1e5, 1e5, &inj_bias_, 0.));  // Xb
-  V_[n_++] = (isum_p = new Uint16tV("* ", "is", rP_, "Summ buffer indx", "uint",
-                                    0, NSUM + 1, &isum_, NSUM, false));  // is
-  V_[n_++] =
-      (modeling_p = new Uint8tV("* ", "Xm", rP_, "Modeling bitmap", "[0x]", 0,
-                                255, &modeling_, MODELING));  // Xm
-  V_[n_++] = (preserving_p =
-                  new Uint8tV("* ", "X?", rP_, "Preserving fault", "T=Preserve",
-                              0, 1, &preserving_, 0, false));  // X?
-  V_[n_++] = (Tb_bias_hdwe_p =
-                  new FloatV("* ", "Dt", rP_, "Bias Tb sensor", "dg C", -500,
-                             500, &Tb_bias_hdwe_, TEMP_BIAS));  // Dt
-  V_[n_++] = (Time_now_p = new ULongV("* ", "UT", rP_, "UNIX time epoch", "sec",
-                                      0UL, 2100000000UL, &Time_now_,
-                                      1669801880UL, false));  // UT
-  V_[n_++] = (Type_p = new Uint8tV("* ", "Xt", rP_, "Inj type",
-                                   "1sn 2sq 3tr 4 1C, 5 -1C, 8cs", 0, 10,
-                                   &type_, 0));  // Xt
-  V_[n_++] =
-      (Vb_bias_hdwe_p = new FloatV("* ", "Dc", rP_, "Bias Vb sensor", "v", -10,
-                                   70, &Vb_bias_hdwe_, VOLT_BIAS));  // Dc
-  V_[n_++] =
-      (vsat_add_p = new FloatV("* ", "DS", rP_, "Bias on nominal vsat", "v",
-                               -2., 2., &vsat_add_, VSAT_ADD));  // DS
+  V_[n_++] = (amp_p = new FloatV("* ", "Xa", rP_, "Inj amp", "Amps pk", -1e6, 1e6, &amp_, 0));  // Xa
+  V_[n_++] = (booted_p = new BooleanV("  ", "Bb", rP_, "Clean boot", "T=clean", 0, 1, &booted_, false));  // Bb
+  V_[n_++] = (cutback_gain_slr_p = new FloatV("* ", "Sk", rP_, "Cutback gain scalar", "slr", -1e6, 1e6, &cutback_gain_slr_, 1));  // Sk
+  V_[n_++] = (debug_p = new IntV("* ", "vv", rP_, "Verbosity", "int", -128, 128, &debug_, VV));  // vv
+  V_[n_++] = (delta_q_model_p = new DoubleV("* ", "qs", rP_, "Charge chg Sim", "C", -1e8, 1e5, &delta_q_model_, 0, false));  // qs
+  V_[n_++] = (delta_q_p = new DoubleV("* ", "qm", rP_, "Charge chg", "C", -1e8, 1e5, &delta_q_, 0, false));  // qm
+  V_[n_++] = (Dw_p = new FloatV("* ", "Dw", rP_, "Tab mon adj", "v", -1e2, 1e2, &Dw_, VTAB_BIAS));  // Dw
+  V_[n_++] = (freq_p = new FloatV("* ", "Xf", rP_, "Inj freq", "Hz", 0, 2, &freq_, 0));  // Xf
+  V_[n_++] = (ib_bias_all_p = new FloatV("* ", "DI", rP_, "Del all", "A", -1e5, 1e5, &ib_bias_all_, CURR_BIAS_ALL));  // DI
+  V_[n_++] = (ib_bias_amp_p = new FloatV("* ", "DA", rP_, "Add amp", "A", -1e5, 1e5, &ib_bias_amp_, CURR_BIAS_AMP));  // DA
+  V_[n_++] = (ib_bias_noa_p = new FloatV("* ", "DB", rP_, "Add noa", "A", -1e5, 1e5, &ib_bias_noa_, CURR_BIAS_NOA));  // DB
+  V_[n_++] = (ib_disch_slr_p = new FloatV("* ", "SD", rP_, "Slr disch", "slr", -1e5, 1e5, &ib_disch_slr_, CURR_SCALE_DISCH));  // SD
+  V_[n_++] = (ib_force_p = new Int8tV("* ", "si", rP_, "curr sel mode", "(-1, 0, 1)", -1, 1, &ib_force_, int8_t(IB_FORCE)));  // si
+  V_[n_++] = (iflt_p = new Uint16tV("* ", "if", rP_, "Fault buffer indx", "uint", 0, nflt_ + 1, &iflt_, nflt_, false));  // if
+  V_[n_++] = (ihis_p = new Uint16tV("* ", "ih", rP_, "Hist buffer indx", "uint", 0, nhis_ + 1, &ihis_, nhis_, false));  // ih
+  V_[n_++] = (inj_bias_p = new FloatV("* ", "Xb", rP_, "Injection bias", "A", -1e5, 1e5, &inj_bias_, 0.));  // Xb
+  V_[n_++] = (isum_p = new Uint16tV("* ", "is", rP_, "Summ buffer indx", "uint", 0, NSUM + 1, &isum_, NSUM, false));  // is
+  V_[n_++] = (modeling_p = new Uint8tV("* ", "Xm", rP_, "Modeling bitmap", "[0x]", 0, 255, &modeling_, MODELING));  // Xm
+  V_[n_++] = (preserving_p = new Uint8tV("* ", "X?", rP_, "Preserving fault", "T=Preserve", 0, 1, &preserving_, 0, false));  // X?
+  V_[n_++] = (Tb_bias_hdwe_p = new FloatV("* ", "Dt", rP_, "Bias Tb sensor", "dg C", -500, 500, &Tb_bias_hdwe_, TEMP_BIAS));  // Dt
+  V_[n_++] = (Time_now_p = new ULongV("* ", "UT", rP_, "UNIX time epoch", "sec", 0UL, 2100000000UL, &Time_now_, 1669801880UL, false));  // UT
+  V_[n_++] = (Type_p = new Uint8tV("* ", "Xt", rP_, "Inj type", "1sn 2sq 3tr 4 1C, 5 -1C, 8cs", 0, 10, &type_, 0));  // Xt
+  V_[n_++] = (Vb_bias_hdwe_p = new FloatV("* ", "Dc", rP_, "Bias Vb sensor", "v", -10, 70, &Vb_bias_hdwe_, VOLT_BIAS));  // Dc
+  V_[n_++] = (vsat_add_p = new FloatV("* ", "DS", rP_, "Bias on nominal vsat", "v", -2., 2., &vsat_add_, VSAT_ADD));  // DS
 }
 
 // Number of differences between nominal EERAM and actual (don't count integator

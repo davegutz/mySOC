@@ -435,8 +435,8 @@ lookup = {
         ),
     ),
     "offLowSoc": (
-        160,
-        modEmptInitGen + tranPrep + vm12 + "XQ55000;" + dv0 + quiet + cleanup + "<XD;",
+        170,
+        modEmptInitGen + tranPrep + "W25" + vm12 + "XQ55000;" + dv0 + quiet + cleanup + "<XD;",
         ("Test for clean faults on shutoff.",),
     ),
     "offSitBmsBB": (

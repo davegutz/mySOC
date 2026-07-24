@@ -181,9 +181,7 @@ BatteryMonitor::BatteryMonitor(const float dx_voc, const float dy_voc,
   this->Q_ = EKF_Q_SD_NORM * EKF_Q_SD_NORM;
   this->R_ = EKF_R_SD_NORM * EKF_R_SD_NORM;
   SdVb_ = new SlidingDeadband(HDB_VB);  // Noise filter
-  EKF_converged =
-      new TFDelay(false, EKF_T_CONV, EKF_T_RES,
-                  EKF_NOM_DT);  // Convergence test debounce.  Initializes false
+  EKF_converged = new TFDelay(false, EKF_T_CONV, EKF_T_RES, EKF_NOM_DT);
   ice_ = new Iterator("EKF solver");
 }
 BatteryMonitor::~BatteryMonitor() {}
@@ -344,7 +342,8 @@ float BatteryMonitor::calculate(Sensors* Sen, const bool reset_temp,
     // ddq_dt -= chem_.dqdt * q_capacity_ * T_rate;  // noisy
     if (reset_ekf) {
       solve_ekf(reset_ekf, reset_temp, Sen);
-    } else {
+    } 
+    else {
       predict_ekf(ddq_dt, freeze);         // u = d(dq)/dt
       update_ekf(voc_stat_f_, 0., MXEPS);  // z = _f, estimated = voc_filtered =
                                            // hx, predicted = est past
@@ -358,9 +357,7 @@ float BatteryMonitor::calculate(Sensors* Sen, const bool reset_temp,
     y_ekf_f_T_ = Yfilt->T();
     y_ekf_f_tau_ = Yfilt->tau();
     y_ekf_f_lstate_ = Yfilt->lstate();
-    // EKF convergence.  Audio industry found that detection of quietness
-    // requires no more than second order filter of the signal.   Anything more
-    // is 'gilding the lily'
+    // EKF convergence
     bool conv = abs(y_ekf_f_) < ap.ekf_conv() && !cp.soft_reset &&
                 !cp.ekf_reset;  // Initialize false
     ekf_conv_ = EKF_converged->calculate(conv, EKF_T_CONV, EKF_T_RES,
@@ -376,7 +373,9 @@ float BatteryMonitor::calculate(Sensors* Sen, const bool reset_temp,
                          K_, y_ekf_, soc_, soc_ekf_, y_ekf_f_, converged_ekf()),
           true, IN_SERVICE);
 
-    if (sp.debug() == 3 || sp.debug() == 4 || sp.debug() == 6)
+    if (sp.debug() == -2 && cp.ekf_reset) print_ekf_header();
+    if (sp.debug() == 3 || sp.debug() == 4 || sp.debug() == 6 ||
+        sp.debug() == -2)
       EKF_1x1::print_ekf_serial(this, freeze);  // print EKF in Read frame
   }
   eframe_++;
@@ -392,10 +391,10 @@ float BatteryMonitor::calculate(Sensors* Sen, const bool reset_temp,
         "dyn,vb,   u,Fx,Bu,P,   z_,S_,K_,y_ekf,soc_ekf, y_ekf_f, soc, conv,  "
         "%12.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,     "
         "%7.3f,%7.3f,%7.4f,%7.4f,       %7.3f,%7.4f,%10.7f,%7.4f,%7.4f,%7.4f, "
-        "%7.4f,  %d,\n",
+        "%7.4f,  %d, %d,\n",
         ctime_, dt_, ib_, voc_soc_, voc_stat_f_, voc_, voc_dead_, dv_dyn_, vb_,
         u_, Fx_, Bu_, P_, z_, S_, K_, y_ekf_, soc_ekf_, y_ekf_f_, soc_,
-        converged_ekf());
+        converged_ekf(), cp.ekf_reset);
   if (sp.debug() == -24)
     Serial.printf(
         "Mon:  ib%7.3f soc%8.4f reset_temp%d tau_ct%9.5f r_ct%7.3f r_0%7.3f "
@@ -481,19 +480,18 @@ void BatteryMonitor::ekf_predict(double* Fx_, double* Bu_) {
 }
 
 // EKF model for update
-void BatteryMonitor::ekf_update(double* hx, double* H, double* x, double* tb) {
-  // Measurement function hx(x), x=soc ideal capacitor
-  float x_lim = max(min(x_, MXEPS), 0.0);
-  *hx = Battery::calc_soc_voc(x_lim, Tb_f_, &dv_dsoc_);
-  if (sp.debug() == 93)
-    Serial.printf(
-        "BatteryMonitor::ekf_update: x_ %15.12f Tb_f_ %9.5g hx "
-        "%19.15f********\n*******\n*******\n*****************\n",
-        x_, Tb_f_, *hx);
-  // Jacodian of measurement function
-  *H = dv_dsoc_;
-  *x = x_lim;
+void BatteryMonitor::ekf_update(double* hx, double* H, double* x_for_hx,
+                                double* tb) {
   *tb = Tb_f_;
+  *x_for_hx = max(min(x_, MXEPS), 0.0);
+  // Measurement function hx(x), x=soc ideal capacitor
+  *hx = Battery::calc_soc_voc(*x_for_hx, Tb_f_, &dv_dsoc_);
+  *H = dv_dsoc_;  // Jacodian of measurement function
+
+  if (sp.debug() == 93 || sp.debug() == -2)
+    Serial.printf(
+        "BatteryMonitor::ekf_update: x_%15.12f x_for_hx%15.12f Tb_f_%9.5g hx"
+        "%19.15f\n",  x_, *x_for_hx, Tb_f_, *hx);
 }
 
 // Initialize
@@ -628,32 +626,33 @@ bool BatteryMonitor::solve_ekf(const bool reset, const bool reset_temp,
   static double soc_solved = 1.;
   double dv_dsoc;
   double voc_solved = calc_soc_voc(soc_solved, Tb_avg, &dv_dsoc);
-  ice_->init(1., soc_ekf_min_, 2 * SOLV_ERR);
-  while (abs(ice_->e()) > SOLV_ERR && ice_->count() < SOLV_MAX_COUNTS &&
-         abs(ice_->dx()) > 0.) {
+  ice_->init(1., soc_ekf_min_, 2 * ap.solv_err());
+  while (abs(ice_->e()) > ap.solv_err() &&
+       ice_->count() < ap.solv_max_counts() &&
+       abs(ice_->dx()) > 0.) {
     ice_->increment();
     soc_solved = ice_->x();
     voc_solved = calc_soc_voc(soc_solved, Tb_avg, &dv_dsoc);
     ice_->e(voc_solved - voc_stat_f_);
-    ice_->iterate(sp.debug() == -1 && reset_temp, SOLV_SUCC_COUNTS, false);
+    ice_->iterate((sp.debug() == -1 || sp.debug() == -2) && reset_temp,
+                   ap.solv_succ_counts(), false);
   }
-  if (sp.debug() == 35 || sp.debug() == 37)
-    Serial.printf(
-        "EKF init cnt tb_avg soc_solved voc_stat "
-        "voc_solved%2d%8.4f%11.7f%13.9f%13.9f ice_->e %13.9f \n",
-        ice_->count(), Tb_avg, soc_solved, voc_stat_f_, voc_solved, ice_->e());
+  if (sp.debug() == 35 || sp.debug() == 37 || sp.debug() == -2)
+    Serial.printf("EKF init ekf_reset%2d cnt%3d tb_avg%8.4f "
+        "soc_solvedf%11.7f voc_statf%13.9f voc_solved%13.9f ice_->e%13.9f \n",
+        cp.ekf_reset, ice_->count(), Tb_avg, soc_solved, voc_stat_f_,
+        voc_solved, ice_->e());
   init_soc_ekf(soc_solved);
 
 #ifdef DEBUG_INIT
-  if (sp.debug() == -1 && reset_temp)
-    Serial.printf(
-        "sek: Vb%7.3f Vba%7.3f voc_soc%7.3f voc_stat%7.3f voc_sol%7.3f cnt %d "
-        "dx%8.4f e%10.6f soc_sol%8.4f\n",
-        Sen->Vb(), Vb_avg, voc_soc_, voc_stat_, voc_solved, ice_->count(),
-        ice_->dx(), ice_->e(), soc_solved);
+  if ((sp.debug() == -1 || sp.debug() == -2) && reset_temp)
+    Serial.printf("sek: cp.ekf_reset%2d Vb%7.3f Vba%7.3f voc_soc%7.3f "
+        "voc_stat%7.3f voc_sol%7.3f cnt %d dx%8.4f e%13.9f soc_sol%8.4f\n",
+        cp.ekf_reset, Sen->Vb(), Vb_avg, voc_soc_, voc_stat_, voc_solved,
+        ice_->count(), ice_->dx(), ice_->e(), soc_solved);
 #endif
 
-  return ice_->count() < SOLV_MAX_COUNTS;
+  return ice_->count() < ap.solv_max_counts();
 }
 
 ////////////////////////////////////////////////////////////////////////////////

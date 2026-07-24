@@ -97,7 +97,7 @@ class CommandPars {
     queue_str = "";
     soon_str = "";
     asap_str = "";
-    ekf_reset = false;
+    ekf_reset = true;
     ekf_reset_print = false;
     kf_reset = false;
     kf_reset_print = false;

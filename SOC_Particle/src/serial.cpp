@@ -238,7 +238,7 @@ void print_ekf_header() {
       "x_for_hx_,");
   Serial.printf(
       "  voc_stat_f_T, voc_stat_f_tau, voc_stat_f_rstate, voc_stat_f_lstate,");
-  Serial.printf("y_ekf_f_T, y_ekf_f_tau, y_ekf_f_lstate,");
+  Serial.printf("y_ekf_f_T, y_ekf_f_tau, y_ekf_f_lstate, cp_ekf_reset,");
   Serial.printf("\n");
 }
 
@@ -261,8 +261,8 @@ void EKF_1x1::print_ekf_serial(BatteryMonitor* Mon, const bool freeze) {
                 Mon->vocStatFilt_tau(), Mon->vocStatFilt_rstate(),
                 Mon->vocStatFilt_lstate());
 
-  Serial.printf("%9.6f,%9.6f,%9.6f,", Mon->y_ekf_f_T(), Mon->y_ekf_f_tau(),
-                Mon->y_ekf_f_lstate());
+  Serial.printf("%9.6f,%9.6f,%9.6f,%2d,", Mon->y_ekf_f_T(), Mon->y_ekf_f_tau(),
+                Mon->y_ekf_f_lstate(), cp.ekf_reset);
 
   Serial.printf("\n");
 }

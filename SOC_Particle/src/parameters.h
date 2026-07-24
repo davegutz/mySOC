@@ -118,6 +118,10 @@ class VolatilePars : public Parameters {
   FloatV* s_cap_mon_p;
   FloatV* s_cap_sim_p;
   FloatV* Vb_scale_p;
+  FloatV* solv_err_p;
+  Uint8tV* solv_max_counts_p;
+  Uint8tV* solv_succ_counts_p;
+
 
   // accessors
   float bare_slr() { return bare_slr_; }
@@ -238,6 +242,11 @@ class VolatilePars : public Parameters {
   void voc_stat_filt(const float input) { voc_stat_filt_ = input; }
   uint32_t wait_inj() { return wait_inj_; }
   void wait_inj(const uint32_t input) { wait_inj_ = input; }
+  float solv_err() {return solv_err_; }
+  uint8_t solv_max_counts() {return solv_max_counts_; };
+  uint8_t solv_succ_counts() {return solv_succ_counts_; };
+
+
 
   // Put into RAM and check for validity
   void put_ib_scale_amp(const float input) {
@@ -312,6 +321,9 @@ class VolatilePars : public Parameters {
   float vc_add_;            // Shunt Vc/Vr Fault injection bias, V
   float voc_stat_filt_;     // VocStatFilt time constant, s
   uint32_t wait_inj_;       // Wait before start injection, ms
+  float solv_err_;  // Max EKF soc solve error, frac
+  uint8_t solv_max_counts_;  // Max EKF soc solve iters, int
+  uint8_t solv_succ_counts_;  // Max EKF soc succession iters, int
 };
 
 // Definition of structure to be saved, either EERAM or retained backup SRAM.

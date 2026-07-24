@@ -224,7 +224,6 @@ void loop() {
   uint64_t elapsed = 0;
   uint64_t elapsed_reset = 0;
   static bool reset = true;
-  static bool reset_ekf = true;
   static bool reset_kf = true;
   static bool reset_temp = true;
   static uint64_t start = millis();
@@ -298,7 +297,7 @@ void loop() {
     // Inputs:  sp.mon_chm, Sen->Ib, Sen->Vb, Sen->Tb_f
     // States:  Mon.soc
     // Outputs: tcharge_wt, tcharge_ekf
-    monitor(reset, reset_temp, reset_ekf, now, Is_sat_delay, Mon, Sen);
+    monitor(reset, reset_temp, cp.ekf_reset, now, Is_sat_delay, Mon, Sen);
 
     // Re-init Coulomb Counter to EKF if it is different than EKF or if never
     // saturated
@@ -367,7 +366,7 @@ void loop() {
 
   // Initialize complete once sensors and models started and summary written
   if (read) {
-    reset = reset_ekf = reset_kf = cp.ekf_reset_print = cp.kf_reset_print =
+    reset = reset_kf = cp.ekf_reset = cp.ekf_reset_print = cp.kf_reset_print =
         false;
     if (reset_temp) sendTxBuf("*", true, IN_SERVICE);
   }
@@ -377,7 +376,7 @@ void loop() {
   }
 
   // Soft reset
-  handle_soft_reset(&reset, &reset_temp, &reset_kf, &reset_ekf, &start_reset,
+  handle_soft_reset(&reset, &reset_temp, &reset_kf, &start_reset,
                     read);
 
 }  // loop

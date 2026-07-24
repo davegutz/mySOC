@@ -106,7 +106,8 @@ void initialize_all(BatteryMonitor* Mon, Sensors* Sen, const float soc_in,
   }
 #endif
 
-  // Reset all faults at entry so latched faults (e.g. VB_FA_LT) do not force voc_stat=17V during solver
+  // Reset all faults at entry so latched faults (e.g. VB_FA_LT) do not force
+  // voc_stat=17V during solver
   Sen->Flt->reset_all_faults();
 
   // Gather and apply inputs
@@ -268,15 +269,8 @@ void initialize_all(BatteryMonitor* Mon, Sensors* Sen, const float soc_in,
 #endif
   Mon->count_coulombs(Sen, true, 0., Mon->is_sat(true),
                       Mon->is_sat(true));  // Call again because sat is a UBC
-#ifdef DEBUG_INIT
-  if (sp.debug() == -1) {
-    Serial.printf("M.c_c2:  ");
-    debug_m1(Mon, Sen);
-  }
-#endif
 
-// // Solve EKF
-#ifdef DEBUG_INIT
+                      #ifdef DEBUG_INIT
   if (sp.debug() == -1) {
     Serial.printf("end:  ");
     debug_m1(Mon, Sen);
@@ -758,19 +752,18 @@ void manage_summaries(const bool boot_wait, const bool summarizing,
 
 // Apply pending soft/ekf/kf reset command-par flags to loop state variables
 void handle_soft_reset(bool* reset, bool* reset_temp, bool* reset_kf,
-                       bool* reset_ekf, uint64_t* start_reset,
-                       const bool read) {
+                       uint64_t* start_reset, const bool read) {
   if (read) cp.soft_sim_hold = false;
   cp.soft_reset_print = cp.soft_reset;
   cp.soft_reset_sim_print = cp.soft_reset_sim;
   if (cp.soft_reset || cp.soft_reset_sim) {
-    *reset = *reset_temp = *reset_kf = true;
+    *reset = *reset_temp = *reset_kf = cp.ekf_reset = true;
     *start_reset = millis();
     if (cp.soft_reset_sim) cp.cmd_soft_sim_hold();
   }
-  if (cp.ekf_reset) cp.ekf_reset_print = *reset_ekf = true;
+  if (cp.ekf_reset) cp.ekf_reset_print = true;
   if (cp.kf_reset) cp.kf_reset_print = *reset_kf = true;
-  cp.soft_reset = cp.soft_reset_sim = cp.ekf_reset = cp.kf_reset = false;
+  cp.soft_reset = cp.soft_reset_sim = cp.kf_reset = false;
 }
 
 // For summary prints

@@ -237,7 +237,7 @@ class BatteryMonitor : public Battery, public EKF_1x1 {
   double y_ekf_;  // EKF y value, V
   float y_ekf_f_;  // Filtered EKF y value, V
   void ekf_predict(double* Fx_, double* Bu_);
-  void ekf_update(double* hx, double* H, double* x, double* Tb_f);
+  void ekf_update(double* hx, double* H, double* x_for_hx, double* Tb_f);
   float y_ekf_f_T_;  // EKF filter
   float y_ekf_f_tau_;  // EKF filter
   float y_ekf_f_lstate_;  // EKF filter

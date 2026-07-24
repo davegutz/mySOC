@@ -115,10 +115,10 @@ void debug_q(BatteryMonitor* Mon, Sensors* Sen) {
   debug_qf(Mon, Sen);
 
   txBuf = String::format(
-      "ib_amp_fail %d\nib_noa_fail %d\nvb_fail %d\nTb%7.3f\nvb%7.3f\nvoc%7.3f\n"
-      "voc_filt%7.3f\nvoc_stat%7.3f\nvoc_stat_f%7.3f\nvoc_soc%7.3f\n"
-      "vsat%7.3f\nVc%7.3f\nib%7.3f\nsoc_m%8.4f\n"
-      "soc_ekf%8.4f\nsoc%8.4f\nsoc_min%8.4f\nsoc_inf%8.4f\n"
+      "ib_amp_fail %d\nib_noa_fail %d\nvb_fail %d\nTb%10.6f\nvb%13.9f\nvoc%13.9f\n"
+      "voc_filt%13.9f\nvoc_stat%13.9f\nvoc_stat_f%13.9f\nvoc_soc%13.9f\n"
+      "vsat%7.3f\nVc%7.3f\nib%10.6f\nsoc_m%9.5f\n"
+      "soc_ekf%9.5f\nsoc%9.5f\nsoc_min%8.4f\nsoc_inf%8.4f\n"
       "modeling %d\n",
       Sen->Flt->ib_amp_fa(), Sen->Flt->ib_noa_fa(), Sen->Flt->vb_fail(),
       Sen->Tb_f(), Mon->vb(), Mon->voc(), Mon->voc_dead(), Mon->voc_stat(),
