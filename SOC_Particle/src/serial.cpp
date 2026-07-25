@@ -231,14 +231,14 @@ void print_battery_serial() {
 // print ekf for data collection
 void print_ekf_header() {
   Serial.printf(
-      "unit_e,c_time_e,dt_ekf,freeze,Fx_, Bu_, Q_, R_, P_, S_, K_, u_, x_, y_, "
-      "z_,");
+      "unit_e,c_time_e,dt_ekf,cp_ekf_reset,freeze,Fx_, Bu_, Q_, R_, P_, S_, "
+      "K_, u_, x_, y_, z_,");
   Serial.printf(
       "x_prior_, P_prior_, x_post_, P_post_, hx_, H_, frz_, tb_f_hx_, "
       "x_for_hx_,");
   Serial.printf(
       "  voc_stat_f_T, voc_stat_f_tau, voc_stat_f_rstate, voc_stat_f_lstate,");
-  Serial.printf("y_ekf_f_T, y_ekf_f_tau, y_ekf_f_lstate, cp_ekf_reset,");
+  Serial.printf("y_ekf_f_T, y_ekf_f_tau, y_ekf_f_lstate,");
   Serial.printf("\n");
 }
 
@@ -249,28 +249,32 @@ void EKF_1x1::print_ekf_serial(BatteryMonitor* Mon, const bool freeze) {
   last_eTime = eTime;
 
   Serial.printf(
-      "unit_ekf,%13.4f,%8.4f,%2d,%13.10f,%13.10f,%10.7g,%10.7g,%10.7g,%10.7g,%"
-      "10.7g,%10.7g,%11.9g,%10.7g,%10.7g,",
-      eTime, dt_ekf_, freeze, Fx_, Bu_, Q_, R_, P_, S_, K_, u_, x_, y_, z_);
+      "unit_ekf,%13.4f,%8.4f,%2d,%2d,%13.10f,%13.10f,%10.7g,%10.7g,%10.7g,"
+      "%10.7g,% 10.7g,%10.7g,%11.9g,%10.7g,%12.9g,",
+    eTime, dt_ekf_, cp.ekf_reset, freeze, Fx_, Bu_, Q_, R_, P_, S_, K_, u_,
+    x_, y_, z_);
 
-  Serial.printf("%11.9g,%10.7g,%11.9g,%10.7g,%10.7g,%10.7g,%d,%11.8f,%11.9f,",
+  Serial.printf("%11.9g,%10.7g,%11.9g,%10.7g,%12.9g,%10.7g,%d,%11.8f,%11.9f,",
                 x_prior_, P_prior_, x_post_, P_post_, hx_, H_, freeze_,
                 Tb_f_for_hx_, x_for_hx_);
 
-  Serial.printf("%9.6f,%9.6f,%9.6f,%9.6f,", Mon->vocStatFilt_T(),
+  Serial.printf("%9.6f,%9.6f,%12.9f,%12.9f,", Mon->vocStatFilt_T(),
                 Mon->vocStatFilt_tau(), Mon->vocStatFilt_rstate(),
                 Mon->vocStatFilt_lstate());
 
-  Serial.printf("%9.6f,%9.6f,%9.6f,%2d,", Mon->y_ekf_f_T(), Mon->y_ekf_f_tau(),
-                Mon->y_ekf_f_lstate(), cp.ekf_reset);
+  Serial.printf("%9.6f,%12.9f,%12.9f,", Mon->y_ekf_f_T(), Mon->y_ekf_f_tau(),
+                Mon->y_ekf_f_lstate());
 
   Serial.printf("\n");
 }
 
 void print_rapid_data(const bool reset, Sensors* Sen, BatteryMonitor* Mon,
                       const bool reset_temp) {
-  static uint8_t last_read_debug = 0;
+  static int16_t last_read_debug = 0;
   static double last_cTime = 0.;
+  if (sp.debug() == -2 && (reset || last_read_debug != sp.debug())) {
+    print_ekf_header();
+  }
   if ((sp.debug() == 1 || sp.debug() == 2 || sp.debug() == 3 ||
        sp.debug() == 4 || sp.debug() == 6)) {
     if (reset || (last_read_debug != sp.debug())) {

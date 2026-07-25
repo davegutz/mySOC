@@ -377,6 +377,8 @@ float BatteryMonitor::calculate(Sensors* Sen, const bool reset_temp,
     if (sp.debug() == 3 || sp.debug() == 4 || sp.debug() == 6 ||
         sp.debug() == -2)
       EKF_1x1::print_ekf_serial(this, freeze);  // print EKF in Read frame
+
+    if (reset_ekf) cp.ekf_reset = false;
   }
   eframe_++;
   if (reset_temp || reset_ekf || cp.soft_reset || eframe_ >= ap.eframe_mult())
@@ -523,6 +525,10 @@ void BatteryMonitor::init_soc_ekf(const double soc) {
   init_ekf(soc_ekf_, 0.0);
   q_ekf_ = soc_ekf_ * q_capacity_;
   delta_q_ekf_ = q_ekf_ - q_capacity_;
+  double dv_dsoc;
+  hx_ = z_ = calc_soc_voc(soc_ekf_, Tb_f_, &dv_dsoc);
+  y_ekf_ = 0.;
+  y_ekf_f_ = 0.;
 }
 
 /* is_sat:  Calculate saturation status

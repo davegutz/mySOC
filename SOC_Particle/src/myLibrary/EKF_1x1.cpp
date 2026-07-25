@@ -117,8 +117,9 @@ void EKF_1x1::update_ekf(const double z, double x_min, double x_max) {
 
 // Initialize
 void EKF_1x1::init_ekf(double soc, double Pinit) {
-  x_ = soc;
-  P_ = Pinit;
+  x_ = x_prior_ = x_post_ = soc;
+  P_ = P_prior_ = P_post_ = Pinit;
+  y_ = 0.;
 }
 
 // Pretty Print

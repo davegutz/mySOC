@@ -246,6 +246,7 @@ void initialize_all(BatteryMonitor* Mon, Sensors* Sen, const float soc_in,
   // Call calculate/count_coulombs twice because sat_ is a
   // used-before-calculated (UBC) Simple 'call twice' method because sat_ is
   // discrete not analog which would require iteration
+  if (use_soc_in) cp.ekf_reset = true;
   Mon->calculate(Sen, true, use_soc_in);
 #ifdef DEBUG_INIT
   if (sp.debug() == -1) {

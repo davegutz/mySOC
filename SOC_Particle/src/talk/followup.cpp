@@ -43,6 +43,7 @@ bool followup(const char letter_0, const char letter_1, BatteryMonitor* Mon,
         case ('a'):  // Ca<>:  assign charge state in fraction to all versions
                      // including model
           if (ap.init_all_soc_p->success()) {
+            cp.ekf_reset = true;
             initialize_all(Mon, Sen, ap.init_all_soc(), true);
 #ifdef DEBUG_INIT
             if (sp.debug() == -1) {
@@ -50,13 +51,7 @@ bool followup(const char letter_0, const char letter_1, BatteryMonitor* Mon,
               debug_m1(Mon, Sen);
             }
 #endif
-            if (sp.modeling()) {
-              cp.cmd_reset();
-              chit("W3;", SOON);  // Wait 10 passes of Control
-            } else {
-              cp.cmd_reset();
-              chit("W3;", SOON);  // Wait 10 passes of Control
-            }
+            chit("W3;", SOON);  // Wait 10 passes of Control
           } else
             Serial.printf("skipping %s\n", cp.cmd_str.c_str());
           break;
