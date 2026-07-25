@@ -440,13 +440,13 @@ lookup = {
         ("Test for clean faults on shutoff.",),
     ),
     "offSitBmsBB": (
-        670,
+        695,
         modEmptInitBB
         + (slowTwitchDef + "Xa-162;" + tranPrep + twitch + "XQ568000;" + "Pf;W2;Xa0;" + quiet + cleanup + "Sh1;<XD;"),
         ("for CompareRunRun.py Argon vs Photon builds. This is the only test for that.",),
     ),
     "offSitBmsCHG": (
-        670,
+        695,
         modEmptInitCHG
         + (slowTwitchDef + "Xa-324;" + tranPrep + twitch + "XQ568000;" + "Pf;W2;Xa0;" + quiet + cleanup + "Sh1;<XD;"),
         ("for CompareRunRun.py Argon vs Photon builds. This is the only test for that.",),

@@ -231,8 +231,8 @@ void print_battery_serial() {
 // print ekf for data collection
 void print_ekf_header() {
   Serial.printf(
-      "unit_e,c_time_e,dt_ekf,cp_ekf_reset,freeze,Fx_, Bu_, Q_, R_, P_, S_, "
-      "K_, u_, x_, y_, z_,");
+      "unit_e,c_time_e,dt_ekf,cp_ekf_reset,freeze,voc_stat_f,Fx_, Bu_, Q_, R_,"
+      "P_, S_, K_, u_, x_, y_, z_,");
   Serial.printf(
       "x_prior_, P_prior_, x_post_, P_post_, hx_, H_, frz_, tb_f_hx_, "
       "x_for_hx_,");
@@ -249,10 +249,10 @@ void EKF_1x1::print_ekf_serial(BatteryMonitor* Mon, const bool freeze) {
   last_eTime = eTime;
 
   Serial.printf(
-      "unit_ekf,%13.4f,%8.4f,%2d,%2d,%13.10f,%13.10f,%10.7g,%10.7g,%10.7g,"
-      "%10.7g,% 10.7g,%10.7g,%11.9g,%10.7g,%12.9g,",
-    eTime, dt_ekf_, cp.ekf_reset, freeze, Fx_, Bu_, Q_, R_, P_, S_, K_, u_,
-    x_, y_, z_);
+      "unit_ekf,%13.4f,%8.4f,%2d,%2d,%13.10f,%13.10f,%13.10f,%10.7g,%10.7g,"
+      "%10.7g,%10.7g,% 10.7g,%10.7g,%11.9g,%10.7g,%12.9g,",
+    eTime, dt_ekf_, cp.ekf_reset, freeze, Mon->voc_stat_f(), Fx_, Bu_, Q_, R_,
+    P_, S_, K_, u_, x_, y_, z_);
 
   Serial.printf("%11.9g,%10.7g,%11.9g,%10.7g,%12.9g,%10.7g,%d,%11.8f,%11.9f,",
                 x_prior_, P_prior_, x_post_, P_post_, hx_, H_, freeze_,

@@ -338,11 +338,11 @@ class SavedData:
         if hasattr(self, "y_ekf_f") and self.y_ekf_f is None:
             self.y_ekf_f = np.copy(self.voc_stat) * 0.0
         if self.z is None:
-            self.z = np.copy(self.voc_stat)
+            self.z = np.copy(self.voc_stat_f)
         if self.H is None:
-            self.H = np.copy(self.voc_stat)
+            self.H = np.copy(self.voc_stat_f)
         if self.hx is None:
-            self.hx = np.copy(self.voc_stat)
+            self.hx = np.copy(self.voc_stat_f)
         if self.K is None:
             self.K = np.copy(self.x) * 0.0
         if self.P is None:
