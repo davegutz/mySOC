@@ -29,6 +29,69 @@ vv_warning_printed = False
 HDR_SPREAD = 10
 
 
+active_color = Colors.reset
+
+
+def set_color(color):
+    global active_color
+    active_color = color
+    print(color, end="")
+
+
+# noinspection PyPep8Naming
+def print_pair(val1=None, val2=None, total_digits=None, sig_digits=None, name=None, print_name=None, end="", color=None):
+    """
+    Prints the numerical values of the first and second arguments or the name argument.
+
+    Args:
+        val1: First numerical value.
+        val2: Second numerical value.
+        total_digits (int): Total number of digits (field width for each formatted number).
+        sig_digits (int): Number of significant / decimal digits.
+        name (str): Name string to print when print_name is True.
+        print_name (bool): If True, prints the fifth argument `name` formatted to total length.
+                           If False, prints the formatted numerical values separated by one space.
+        end (str): Trailing character for print (default "").
+        color (str): Optional color to set and remember before printing.
+
+    Returns:
+        str: The printed string.
+    """
+    global active_color
+    if color is not None:
+        set_color(color)
+
+    if val2 is None:
+        total_len = total_digits
+    else:
+        total_len = 2 * total_digits
+
+    if print_name:
+        out_str = Colors.reset + f"{name:<{total_len}}"
+        if active_color:
+            out_str += active_color
+    else:
+        def _fmt(val):
+            if val is None:
+                return " " * total_digits
+            try:
+                return f"{val:<{total_digits}.{sig_digits}f}"
+            except (ValueError, TypeError):
+                return f"{str(val):<{total_digits}}"
+
+        s1 = _fmt(val1)
+        if val2 is None:
+            out_str = s1
+        else:
+            s2 = _fmt(val2)
+            out_str = f"{s1}{s2}"
+
+    if not end:
+        out_str += "    "
+
+    print(out_str, end=end)
+    return out_str
+
 # noinspection PyPep8Naming
 def prn_soc_debug(OPT, leader="", time=None, i_temp=None, mon=None, sim=None):
     execute = False
@@ -444,22 +507,30 @@ def print_ekf_RunSim(SN, i_temp, i_ekf, t, mon, sim, calc_ekf, calc_temp):
         "voc_stat_f_lstate               voc_stat_f_T                  voc_stat_f"
     )
     i_ekf = max(i_ekf, 0)
+    print_hdr = (calc_temp or calc_ekf) and count_since_last_header > HDR_SPREAD
     if (calc_temp or calc_ekf) and count_since_last_header > HDR_SPREAD:
         print(hdr)
         count_since_last_header = 0
     if G.i > 0:
         count_since_last_header += 1
     if mon.reset_ekf:
-        print(Colors.fg.red, end="")
+        set_color(Colors.fg.red)
     elif mon.u_ekf == 0.0:
-        print(Colors.fg.yellow, end="")
+        set_color(Colors.fg.yellow)
     elif calc_ekf:
-        print(Colors.fg.green, end="")
+        set_color(Colors.fg.green)
     elif mon.reset_ekf:
-        print(Colors.fg.lightblue, end="")
+        set_color(Colors.fg.lightblue)
     elif mon.reset:
-        print(Colors.fg.red, end="")
+        set_color(Colors.fg.red)
 
+    for i_hdr in range(int(print_hdr), -1, -1):
+        print_pair(G.i, None, 4, 0, 'i', i_hdr==1)
+        print_pair(t[G.i], None, 4, 3, 'time', i_hdr==1)
+        print_pair(mon.reset, None, 2, 0, 'r', i_hdr==1)
+        print_pair(mon.reset_temp, None, 2, 0, 'r_t', i_hdr==1)
+        print_pair(SN.mon_run.dt[G.i], mon.dt, 6, 3, 'dt', i_hdr==1)
+        print_pair(SN.mon_run.voc_stat_f[i_ekf], mon.voc_stat_f, 16, 9, 'voc_stat_f', i_hdr == 1, end="\n")
     print(
         "{:4d}".format(G.i),
         "{:7.3f}".format(t[G.i]),
@@ -564,8 +635,8 @@ def print_ekf_RunSim(SN, i_temp, i_ekf, t, mon, sim, calc_ekf, calc_temp):
         "{:13.9f}".format(mon.voc_stat_f_lstate),
         "{:16.9f}".format(SN.mon_run.voc_stat_f_T[i_ekf]),
         "{:13.9f}".format(mon.voc_stat_f_T),
-        "{:16.9f}".format(mon.voc_stat_f),
         "{:13.9f}".format(SN.mon_run.voc_stat_f[i_ekf]),
+        "{:16.9f}".format(mon.voc_stat_f),
     )
     print(Colors.reset, end="")
     return hdr
