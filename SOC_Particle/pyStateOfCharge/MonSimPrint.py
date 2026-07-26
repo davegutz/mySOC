@@ -689,18 +689,12 @@ def print_kf_RunSim(SN, i_temp, i_ekf, t, mon, sim, calc_temp, calc_ekf):
     print(Colors.reset, end="")
     return hdr
 
+# 2
 # noinspection PyPep8Naming,PyUnusedLocal
-def print_soc_RunSim(SN, i_temp, t, mon, sim, calc_temp, i_ekf, calc_ekf):
+def print_soc_RunSim(SN, i_temp, t, mon, sim, calc_temp, i_ekf, calc_ekf, df=False):
     global count_since_last_header
-    hdr = (
-        "  i  time     r       rt   rk   it   ct      re   ie  ce    sa     ib_charge    "
-        "        soc                    dt                  i * dt * coul_eff     d_delq "
-        "                     delq                         Tb_f                        dd"
-        "q                       delq                        qcrs                        "
-        "  q_capacity                  Tb                       Tb_f_rate"
-    )
+    print_hdr = calc_temp and count_since_last_header > HDR_SPREAD
     if calc_temp and count_since_last_header > HDR_SPREAD:
-        print(hdr)
         count_since_last_header = 0
     if G.i > 0:
         d_dq = SN.mon_run.delta_q[G.i] - SN.mon_run.delta_q[G.i - 1]
@@ -713,49 +707,41 @@ def print_soc_RunSim(SN, i_temp, t, mon, sim, calc_temp, i_ekf, calc_ekf):
         i_dt_old *= mon.chemistry.coul_eff
         i_dt_new *= mon.chemistry.coul_eff
     if mon.reset:
-        print(Colors.fg.red, end="")
-    print(
-        "{:4d}".format(G.i),
-        "{:7.3f}".format(t[G.i]),
-        "{:2.0f}".format(mon.reset),
-        "{:7d}".format(mon.reset_temp),
-        "{:4d}".format(mon.reset_kf),
-        "{:4d}".format(i_temp),
-        "{:4d}".format(calc_temp),
-        "{:7d}".format(mon.reset_ekf),
-        "{:4d}".format(i_ekf),
-        "{:4d}".format(calc_ekf),
-        "{:4.0f}".format(SN.mon_run.sat[G.i]),
-        "{:2.0f}".format(mon.sat),
-        "{:10.5f}".format(SN.mon_run.ib_charge[G.i]),
-        "{:9.5f}".format(mon.ib_charge),
-        "{:11.7f}".format(SN.mon_run.soc[G.i]),
-        "{:8.7f}".format(mon.soc),
-        "{:9.4f}".format(SN.mon_run.dt[G.i]),
-        "{:5.4f}".format(mon.dt),
-        "{:12.4f}".format(i_dt_old),
-        "{:9.4f}".format(i_dt_new),
-        "{:14.7f}".format(SN.mon_run.d_delta_q[G.i]),
-        "{:11.7f}".format(mon.d_delta_q),
-        "{:16.3f}".format(SN.mon_run.delta_q[G.i]),
-        "{:13.3f}".format(mon.delta_q),
-        "{:14.7f}".format(SN.mon_run.Tb_f[G.i]),
-        "{:10.7f}".format(mon.Tb_f),
-        "{:12.3f}".format(d_dq),
-        "{:11.3f}".format(mon.d_delta_q),
-        "{:16.2f}".format(SN.mon_run.delta_q[G.i]),
-        "{:11.2f}".format(mon.delta_q),
-        "{:15.2f}".format(SN.mon_run.qcrs[G.i]),
-        "{:13.2f}".format(mon.q_cap_rated_scaled),
-        "{:15.2f}".format(SN.mon_run.q_capacity[G.i]),
-        "{:13.2f}".format(mon.q_capacity),
-        "{:14.7f}".format(SN.mon_run.Tb[G.i]),
-        "{:10.7f}".format(mon.Tb),
-        "{:12.7f}".format(SN.mon_run.Tb_f_rate[G.i]),
-        "{:10.7f}".format(mon.Tb_f_rate),
-    )
+        set_color(Colors.fg.red)
+    elif mon.reset_temp:
+        set_color(Colors.fg.orange)
+    else:
+        set_color(Colors.reset)
+
+    for i_hdr in range(int(print_hdr), -1, -1):
+        h = (i_hdr == 1)
+        print_pair(G.i, None, 4, 0, 'i', h, df)
+        print_pair(t[G.i], None, 7, 3, 'time', h, df)
+        print_pair(mon.reset, None, 2, 0, 'r', h, df)
+        print_pair(mon.reset_temp, None, 7, 0, 'rt', h, df)
+        print_pair(mon.reset_kf, None, 4, 0, 'rk', h, df)
+        print_pair(i_temp, None, 4, 0, 'it', h, df)
+        print_pair(calc_temp, None, 4, 0, 'ct', h, df)
+        print_pair(mon.reset_ekf, None, 7, 0, 're', h, df)
+        print_pair(i_ekf, None, 4, 0, 'ie', h, df)
+        print_pair(calc_ekf, None, 4, 0, 'ce', h, df)
+        print_pair(SN.mon_run.sat[G.i], mon.sat, 4, 0, 'sa', h, df)
+        print_pair(SN.mon_run.ib_charge[G.i], mon.ib_charge, 12, 4, 'ib_charge', h, df)
+        print_pair(SN.mon_run.soc[G.i], mon.soc, 11, 7, 'soc', h, df)
+        print_pair(SN.mon_run.dt[G.i], mon.dt, 9, 4, 'dt', h, df)
+        print_pair(i_dt_old, i_dt_new, 12, 4, 'i * dt * coul_eff', h, df)
+        print_pair(SN.mon_run.d_delta_q[G.i], mon.d_delta_q, 15, 7, 'd_delq', h, df)
+        print_pair(SN.mon_run.delta_q[G.i], mon.delta_q, 16, 3, 'delq', h, df)
+        print_pair(SN.mon_run.Tb_f[G.i], mon.Tb_f, 14, 7, 'Tb_f', h, df)
+        print_pair(d_dq, mon.d_delta_q, 12, 3, 'ddq', h, df)
+        print_pair(SN.mon_run.delta_q[G.i], mon.delta_q, 16, 2, 'delq', h, df)
+        print_pair(SN.mon_run.qcrs[G.i], mon.q_cap_rated_scaled, 15, 2, 'qcrs', h, df)
+        print_pair(SN.mon_run.q_capacity[G.i], mon.q_capacity, 15, 2, 'q_capacity', h, df)
+        print_pair(SN.mon_run.Tb[G.i], mon.Tb, 14, 7, 'Tb', h, df)
+        print_pair(SN.mon_run.Tb_f_rate[G.i], mon.Tb_f_rate, 12, 7, 'Tb_f_rate', h, df, end="\n")
+
     print(Colors.reset, end="")
-    return hdr
+    return 'header'
 
 
 # 3
