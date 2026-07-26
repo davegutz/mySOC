@@ -39,7 +39,8 @@ def set_color(color):
 
 
 # noinspection PyPep8Naming
-def print_pair(val1=None, val2=None, total_digits=None, sig_digits=None, name=None, print_name=None, end="", color=None):
+def print_pair(val1=None, val2=None, total_digits=None, sig_digits=None, name=None, print_name=None,
+               df=False, end="", color=None, tol=1e-3, rtol=1e-3):
     """
     Prints the numerical values of the first and second arguments or the name argument.
 
@@ -51,8 +52,11 @@ def print_pair(val1=None, val2=None, total_digits=None, sig_digits=None, name=No
         name (str): Name string to print when print_name is True.
         print_name (bool): If True, prints the fifth argument `name` formatted to total length.
                            If False, prints the formatted numerical values separated by one space.
+        diff: Optional argument before end. If not None, exercises difference logic coloring when truthy.
         end (str): Trailing character for print (default "").
         color (str): Optional color to set and remember before printing.
+        tol (float): Absolute difference tolerance for monver criteria (default 1e-3).
+        rtol (float): Relative difference tolerance for monver criteria (default 1e-3).
 
     Returns:
         str: The printed string.
@@ -85,6 +89,21 @@ def print_pair(val1=None, val2=None, total_digits=None, sig_digits=None, name=No
         else:
             s2 = _fmt(val2)
             out_str = f"{s1}{s2}"
+            if df and val1 is not None and val2 is not None:
+                is_different = False
+                try:
+                    v1, v2 = float(val1), float(val2)
+                    peak = max(abs(v1), abs(v2))
+                    threshold = tol + rtol * peak
+                    if abs(v1 - v2) > threshold:
+                        is_different = True
+                except (ValueError, TypeError):
+                    if val1 != val2:
+                        is_different = True
+                if is_different:
+                    out_str = Colors.fg.red + out_str
+                    if active_color:
+                        out_str += active_color
 
     if not end:
         out_str += "    "
@@ -159,7 +178,7 @@ def prn_soc_debug(OPT, leader="", time=None, i_temp=None, mon=None, sim=None):
 
 
 # noinspection PyPep8Naming
-def print_hist(OPT, SN, i_temp, i_ekf, t, mon, calc_temp, calc_ekf, sim):
+def print_hist(OPT, SN, i_temp, i_ekf, t, mon, calc_temp, calc_ekf, sim, df=True):
     hdr = None
     match OPT.run_type:
         case "RunSim":
@@ -167,7 +186,7 @@ def print_hist(OPT, SN, i_temp, i_ekf, t, mon, calc_temp, calc_ekf, sim):
                 case 0:
                     hdr = ""
                 case 1:  # request_history for ekf
-                    hdr = print_ekf_RunSim(SN, i_temp, i_ekf, t, mon, sim, calc_ekf, calc_temp)
+                    hdr = print_ekf_RunSim(SN, i_temp, i_ekf, t, mon, sim, calc_ekf, calc_temp, df=df)
                 case 2:  # request_history for soc
                     hdr = print_soc_RunSim(SN, i_temp, t, mon, sim, calc_temp, i_ekf, calc_ekf)
                 case 3:  # request_history for soc_s
@@ -474,7 +493,7 @@ def print_dyn_n_RunSim(SN, i_temp, i_ekf, t, mon, sim, calc_temp, calc_ekf):
 
 # 1
 # noinspection PyPep8Naming,PyUnusedLocal
-def print_ekf_RunSim(SN, i_temp, i_ekf, t, mon, sim, calc_ekf, calc_temp):
+def print_ekf_RunSim(SN, i_temp, i_ekf, t, mon, sim, calc_ekf, calc_temp, df=False):
     global count_since_last_header, vv_warning_printed
     if (not hasattr(SN.mon_run, "voltage_low") or SN.mon_run.voltage_low is None) or (
         not hasattr(SN.mon_run, "frz") or SN.mon_run.frz is None
@@ -525,12 +544,14 @@ def print_ekf_RunSim(SN, i_temp, i_ekf, t, mon, sim, calc_ekf, calc_temp):
         set_color(Colors.fg.red)
 
     for i_hdr in range(int(print_hdr), -1, -1):
-        print_pair(G.i, None, 4, 0, 'i', i_hdr==1)
-        print_pair(t[G.i], None, 4, 3, 'time', i_hdr==1)
-        print_pair(mon.reset, None, 2, 0, 'r', i_hdr==1)
-        print_pair(mon.reset_temp, None, 2, 0, 'r_t', i_hdr==1)
-        print_pair(SN.mon_run.dt[G.i], mon.dt, 6, 3, 'dt', i_hdr==1)
-        print_pair(SN.mon_run.voc_stat_f[i_ekf], mon.voc_stat_f, 16, 9, 'voc_stat_f', i_hdr == 1, end="\n")
+        h = i_hdr == 1
+        print_pair(G.i, None, 4, 0, 'i', h, df=df)
+        print_pair(t[G.i], None, 4, 3, 'time', h, df=df)
+        print_pair(mon.reset, None, 2, 0, 'r', h, df=df)
+        print_pair(mon.reset_temp, None, 2, 0, 'r_t', h, df=df)
+        print_pair(SN.mon_run.dt[G.i], mon.dt, 6, 3, 'dt', h, df=df)
+        print_pair(SN.mon_run.voc_stat_f[i_ekf], mon.voc_stat_f, 16, 9, 'voc_stat_f', h, df=df,
+                   end="\n")
     print(
         "{:4d}".format(G.i),
         "{:7.3f}".format(t[G.i]),
