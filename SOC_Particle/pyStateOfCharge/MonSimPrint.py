@@ -39,8 +39,7 @@ def set_color(color):
 
 
 # noinspection PyPep8Naming
-def print_pair(val1=None, val2=None, total_digits=None, sig_digits=None, name=None, print_name=None,
-               df=False, end="", color=None, tol=1e-3, rtol=1e-3):
+def print_pair(val1, val2, total_digits, sig_digits, name, print_name, df=False, end="", color=None, tol=1e-3, rtol=1e-3):
     """
     Prints the numerical values of the first and second arguments or the name argument.
 
@@ -101,7 +100,7 @@ def print_pair(val1=None, val2=None, total_digits=None, sig_digits=None, name=No
                     if val1 != val2:
                         is_different = True
                 if is_different:
-                    out_str = Colors.fg.red + out_str
+                    out_str = Colors.fg.pink + out_str
                     if active_color:
                         out_str += active_color
 
@@ -507,28 +506,9 @@ def print_ekf_RunSim(SN, i_temp, i_ekf, t, mon, sim, calc_ekf, calc_temp, df=Fal
             vv_warning_printed = True
             print(Colors.reset, end="")
         return None
-    hdr = (
-        "  i  time     r r_t    dt             i_e  r_e  c_e   dt_ekf         sa        v"
-        "oc_stat              voc_stat_past       bms_off_past  volt_low       bms_off   "
-        "  frz     ib_charge                   soc                    soc_ekf            "
-        "     x_ekf                    y                          y_ekf_f                "
-        "    y_ekf_f_T                  y_ekf_f_tau                y_ekf_f_state         "
-        "     z                               hx                            voc_ekf                "
-        "      Tb_f                     x_prior                  x                        x_for"
-        "_hx                     x_post                    Tb_f                      tb_f"
-        "_for_hx                hx                        u_ekf                     voc_"
-        "stat_f                       voc_soc                "
-        "z                            P         "
-        "                     P_post                       P_prior                       "
-        "Fx                       Bu                                 H                       "
-        "R                      S                    K                         Q          "
-        "               R                           voc_stat                       voc_stat_f_rstate              "
-        "voc_stat_f_lstate               voc_stat_f_T                  voc_stat_f"
-    )
     i_ekf = max(i_ekf, 0)
     print_hdr = (calc_temp or calc_ekf) and count_since_last_header > HDR_SPREAD
     if (calc_temp or calc_ekf) and count_since_last_header > HDR_SPREAD:
-        print(hdr)
         count_since_last_header = 0
     if G.i > 0:
         count_since_last_header += 1
@@ -544,9 +524,9 @@ def print_ekf_RunSim(SN, i_temp, i_ekf, t, mon, sim, calc_ekf, calc_temp, df=Fal
         set_color(Colors.fg.red)
 
     for i_hdr in range(int(print_hdr), -1, -1):
-        h = i_hdr == 1
+        h = (i_hdr == 1)
         print_pair(G.i, None, 4, 0, 'i', h, df)
-        print_pair(t[G.i], None, 4, 3, 'time', h, df)
+        print_pair(t[G.i], None, 7, 3, 'time', h, df)
         print_pair(mon.reset, None, 2, 0, 'r', h, df)
         print_pair(mon.reset_temp, None, 2, 0, 'r_t', h, df)
         print_pair(SN.mon_run.dt[G.i], mon.dt, 6, 3, 'dt', h, df)
@@ -600,117 +580,8 @@ def print_ekf_RunSim(SN, i_temp, i_ekf, t, mon, sim, calc_ekf, calc_temp, df=Fal
         print_pair(SN.mon_run.voc_stat_f_lstate[i_ekf], mon.voc_stat_f_lstate, 16, 9, 'voc_stat_f_lstate', h, df)
         print_pair(SN.mon_run.voc_stat_f_T[i_ekf], mon.voc_stat_f_T, 16, 9, 'voc_stat_f_T', h, df)
         print_pair(SN.mon_run.voc_stat_f[i_ekf], mon.voc_stat_f, 16, 9, 'voc_stat_f', h, df, end="\n")
-    print(
-        "{:4d}".format(G.i),
-        "{:7.3f}".format(t[G.i]),
-        "{:2.0f}".format(mon.reset),
-        "{:2.0f}".format(mon.reset_temp),
-        "{:9.3f}".format(SN.mon_run.dt[G.i]),
-        "{:6.3f}".format(mon.dt),
-        "{:4d}".format(i_ekf),
-        "{:4d}".format(mon.reset_ekf),
-        "{:4d}".format(calc_ekf),
-        "{:9.3f}".format(SN.mon_run.dt_ekf[i_ekf]),
-        "{:6.3f}".format(mon.dt_eframe),
-        "{:4.0f}".format(SN.mon_run.sat[G.i]),
-        "{:2.0f}".format(mon.sat),
-        "{:11.5f}".format(SN.mon_run.voc_stat[G.i]),
-        "{:9.5f}".format(mon.voc_stat),
-        "{:11.5f}".format(SN.mon_run.voc_stat[G.i - 1]),
-        "{:9.5f}".format(mon.voc_stat_past),
-        "{:7d}".format(bool(SN.mon_run.bms_off[G.i - 1])),
-        "{:3d}".format(bool(mon.bms_off_past)),
-        "{:7d}".format(bool(SN.mon_run.voltage_low[G.i])),
-        "{:3d}".format(bool(mon.voltage_low)),
-        "{:7d}".format(bool(SN.mon_run.bms_off[G.i])),
-        "{:3d}".format(bool(mon.bms_off)),
-        "{:7.0f}".format(SN.mon_run.frz[i_ekf]),
-        "{:3.0f}".format(mon.frz),
-        "{:13.6f}".format(SN.mon_run.ib_charge[G.i]),
-        "{:12.6f}".format(mon.ib_charge),
-        "{:13.8f}".format(SN.mon_run.soc[G.i]),
-        "{:10.8f}".format(mon.soc),
-        "{:11.8f}".format(SN.mon_run.soc_ekf[G.i]),
-        "{:9.8f}".format(mon.soc_ekf),
-        "{:12.8f}".format(SN.mon_run.soc_ekf[G.i]),
-        "{:10.8f}".format(mon.x),
-        "{:13.8f}".format(SN.mon_run.y_ekf[G.i]),
-        "{:12.8f}".format(mon.y_ekf),
-        "{:13.8f}".format(SN.mon_run.y_ekf_f[G.i]),
-        "{:12.8f}".format(mon.y_ekf_f),
-        "{:13.8f}".format(SN.mon_run.y_ekf_f_T[i_ekf]),
-        "{:12.8f}".format(mon.y_ekf_f_T),
-        "{:13.8f}".format(SN.mon_run.y_ekf_f_tau[i_ekf]),
-        "{:12.8f}".format(mon.y_ekf_f_tau),
-        "{:13.8f}".format(SN.mon_run.y_ekf_f_lstate[i_ekf]),
-        "{:12.8f}".format(mon.y_ekf_f_state),
-        "{:15.9f}".format(SN.mon_run.z[i_ekf]),
-        "{:14.9f}".format(mon.z),
-        "{:16.9f}".format(SN.mon_run.hx[i_ekf]),
-        "{:13.9f}".format(mon.hx),
-        "{:14.9f}".format(SN.mon_run.voc_ekf[G.i]),
-        "{:12.9f}".format(mon.voc_ekf),
-        "{:14.7f}".format(SN.mon_run.Tb_f[G.i]),
-        "{:10.7f}".format(mon.Tb_f),
-        "{:13.8f}".format(SN.mon_run.x_prior[i_ekf]),
-        "{:10.8f}".format(mon.x_prior),
-        "{:13.8f}".format(SN.mon_run.x[i_ekf]),
-        "{:10.8f}".format(mon.x),
-        "{:15.10f}".format(SN.mon_run.x_for_hx[i_ekf]),
-        "{:12.10f}".format(mon.x_for_hx),
-        "{:13.8f}".format(SN.mon_run.x_post[i_ekf]),
-        "{:10.8f}".format(mon.x_post),
-        "{:14.7f}".format(SN.mon_run.Tb_f[G.i]),
-        "{:10.7f}".format(mon.Tb_f),
-        "{:14.7f}".format(SN.mon_run.tb_f_for_hx[i_ekf]),
-        "{:10.7f}".format(mon.tb_f_for_hx),
-        "{:14.6f}".format(SN.mon_run.hx[i_ekf]),
-        "{:9.6f}".format(mon.hx),
-        "{:14.6f}".format(SN.mon_run.u[i_ekf]),
-        "{:12.6f}".format(mon.u_ekf),
-        "{:16.9f}".format(SN.mon_run.voc_stat_f[i_ekf]),
-        "{:14.12f}".format(mon.voc_stat_f),
-        "{:13.6f}".format(SN.mon_run.voc_soc[G.i]),
-        "{:9.6f}".format(mon.voc_soc),
-        "{:15.9f}".format(SN.mon_run.z[i_ekf]),
-        "{:12.9f}".format(mon.z),
-        "{:16.11f}".format(SN.mon_run.P[i_ekf]),
-        "{:12.11f}".format(mon.P),
-        "{:16.11f}".format(SN.mon_run.P_post[i_ekf]),
-        "{:12.11f}".format(mon.P_post),
-        "{:14.11f}".format(SN.mon_run.P_prior[i_ekf]),
-        "{:12.11f}".format(mon.P_prior),
-        "{:13.9f}".format(SN.mon_run.Fx[i_ekf]),
-        "{:11.9f}".format(mon.Fx),
-        "{:15.12f}".format(SN.mon_run.Bu[i_ekf]),
-        "{:14.12f}".format(mon.Bu),
-        "{:14.7f}".format(SN.mon_run.H[i_ekf]),
-        "{:11.7f}".format(mon.H),
-        "{:11.6f}".format(SN.mon_run.R[i_ekf]),
-        "{:9.6f}".format(mon.R),
-        "{:11.6f}".format(SN.mon_run.S[i_ekf]),
-        "{:9.6f}".format(mon.S),
-        "{:13.9f}".format(SN.mon_run.K[i_ekf]),
-        "{:10.9f}".format(mon.K),
-        "{:13.9f}".format(SN.mon_run.Q[i_ekf]),
-        "{:10.9f}".format(mon.Q),
-        "{:13.9f}".format(SN.mon_run.R[i_ekf]),
-        "{:10.9f}".format(mon.R),
-        "{:16.9f}".format(SN.mon_run.voc_stat[G.i]),
-        "{:13.9f}".format(mon.voc_stat),
-        "{:16.9f}".format(SN.mon_run.voc_stat_f_rstate[i_ekf]),
-        "{:13.9f}".format(mon.voc_stat_f_rstate),
-
-
-        "{:16.9f}".format(SN.mon_run.voc_stat_f_lstate[i_ekf]),
-        "{:13.9f}".format(mon.voc_stat_f_lstate),
-        "{:16.9f}".format(SN.mon_run.voc_stat_f_T[i_ekf]),
-        "{:13.9f}".format(mon.voc_stat_f_T),
-        "{:13.9f}".format(SN.mon_run.voc_stat_f[i_ekf]),
-        "{:16.9f}".format(mon.voc_stat_f),
-    )
     print(Colors.reset, end="")
-    return hdr
+    return 'header'
 
 
 # 6
