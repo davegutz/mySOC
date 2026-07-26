@@ -211,11 +211,11 @@ def print_hist(OPT, SN, i_temp, i_ekf, t, mon, calc_temp, calc_ekf, sim, df=True
                 # case 2:
                 #     hdr = print_soc_HistSim(SN, i_temp, t, mon, sim, calc_temp, i_ekf, calc_ekf)
                 case 3:
-                    hdr = print_soc_s_HistSim(SN, i_temp, t, mon, sim, calc_temp, i_ekf, calc_ekf)
+                    hdr = print_soc_s_HistSim(SN, i_temp, t, mon, sim, calc_temp, i_ekf, calc_ekf, df=df)
                 # case 4:
                 #     hdr = print_temp_HistSim(SN, i_temp, t, mon, sim, calc_temp, i_ekf, calc_ekf)
                 case 5:
-                    hdr = print_volt_HistSim(SN, i_temp, i_ekf, t, mon, calc_temp, calc_ekf)
+                    hdr = print_volt_HistSim(SN, i_temp, i_ekf, t, mon, calc_temp, calc_ekf, df=df)
     return hdr
 
 
@@ -614,82 +614,55 @@ def print_soc_RunSim(SN, i_temp, t, mon, sim, calc_temp, i_ekf, calc_ekf, df=Fal
 
 # 3
 # noinspection PyPep8Naming
-def print_soc_s_HistSim(SN, i_temp, t, mon, sim, calc_temp, i_ekf, calc_ekf):
+def print_soc_s_HistSim(SN, i_temp, t, mon, sim, calc_temp, i_ekf, calc_ekf, df=False):
     global count_since_last_header
-    hdr = (
-        "  i  time     r       rt   rk   it   ct      re   ie  ce    sa       sa_s       "
-        "dt                    dt_s                  ib_in_s                     ib_dyn  "
-        "                   dv_hys_s            soc                    delq              "
-        "              soc_s                delta_q_s                       qcrs         "
-        "           Tb_f                     vb                    voc_stat              "
-        " voc_stat_s            dv_hys_s              dv_dyn_s             vsat          "
-        "         bms_off_s"
-    )
+    print_hdr = calc_temp and count_since_last_header > HDR_SPREAD
     if calc_temp and count_since_last_header > HDR_SPREAD:
-        print(hdr)
         count_since_last_header = 0
     if G.i > 0:
         count_since_last_header += 1
     if mon.reset:
-        print(Colors.fg.red, end="")
+        set_color(Colors.fg.red)
     elif mon.reset_temp:
-        print(Colors.fg.orange, end="")
-    print(
-        "{:4d}".format(G.i),
-        "{:7.3f}".format(t[G.i]),
-        "{:2.0f}".format(mon.reset),
-        "{:7d}".format(mon.reset_temp),
-        "{:4d}".format(mon.reset_kf),
-        "{:4d}".format(i_temp),
-        "{:4d}".format(calc_temp),
-        "{:7d}".format(mon.reset_ekf),
-        "{:4d}".format(i_ekf),
-        "{:4d}".format(calc_ekf),
-        "{:4.0f}".format(SN.mon_run.sat[G.i]),
-        "{:2.0f}".format(mon.sat),
-        "{:5.0f}".format(SN.sim_run.sat_s[G.i]),
-        "{:2.0f}".format(sim.sat),
-        "{:12.4f}".format(SN.mon_run.dt[G.i]),
-        "{:8.4f}".format(mon.dt),
-        "{:12.4f}".format(SN.sim_run.dt_s[G.i]),
-        "{:8.4f}".format(sim.dt),
-        "{:14.5f}".format(SN.sim_run.ib_in_s[G.i]),
-        "{:12.5f}".format(sim.ib_in),
-        "{:14.5f}".format(SN.mon_run.ib_dyn[G.i]),
-        "{:12.5f}".format(mon.ib_dyn),
-        "{:12.5f}".format(SN.sim_run.dv_hys_s[G.i]),
-        "{:9.5f}".format(sim.dv_hys),
-        "{:11.7f}".format(SN.mon_run.soc[G.i]),
-        "{:8.7f}".format(mon.soc),
-        "{:16.6f}".format(SN.mon_run.delta_q[G.i]),
-        "{:13.6f}".format(mon.delta_q),
-        "{:11.6f}".format(SN.mon_run.soc_s[G.i]),
-        "{:9.6f}".format(sim.soc),
-        "{:15.6f}".format(SN.sim_run.delta_q_s[G.i]),
-        "{:13.6f}".format(sim.delta_q),
-        "{:12.2f}".format(SN.mon_run.qcrs[G.i]),
-        "{:9.2f}".format(mon.q_cap_rated_scaled),
-        "{:14.7f}".format(SN.mon_run.Tb_f[G.i]),
-        "{:10.7f}".format(mon.Tb_f),
-        "{:11.5f}".format(SN.mon_run.vb_f[G.i]),
-        "{:9.5f}".format(mon.vb),
-        "{:11.5f}".format(SN.mon_run.voc_stat_f[G.i]),
-        "{:9.5f}".format(mon.voc_stat),
-        "{:11.5f}".format(SN.sim_run.voc_stat_s[G.i]),
-        "{:9.5f}".format(sim.voc_stat),
-        "{:11.5f}".format(SN.sim_run.dv_hys_s[G.i]),
-        "{:9.5f}".format(sim.dv_hys),
-        "{:11.5f}".format(SN.sim_run.dv_dyn_s[G.i]),
-        "{:9.5f}".format(sim.dv_dyn),
-        "{:11.5f}".format(SN.mon_run.vsat[G.i]),
-        "{:9.5f}".format(mon.vsat),
-        "{:7d}".format(bool(SN.sim_run.bms_off_s[G.i])),
-        "{:4d}".format(sim.bms_off),
-    )
-    if G.i == 2:
-        pass
+        set_color(Colors.fg.orange)
+    else:
+        set_color(Colors.reset)
+
+    for i_hdr in range(int(print_hdr), -1, -1):
+        h = (i_hdr == 1)
+        print_pair(G.i, None, 4, 0, 'i', h, df)
+        print_pair(t[G.i], None, 7, 3, 'time', h, df)
+        print_pair(mon.reset, None, 2, 0, 'r', h, df)
+        print_pair(mon.reset_temp, None, 7, 0, 'rt', h, df)
+        print_pair(mon.reset_kf, None, 4, 0, 'rk', h, df)
+        print_pair(i_temp, None, 4, 0, 'it', h, df)
+        print_pair(calc_temp, None, 4, 0, 'ct', h, df)
+        print_pair(mon.reset_ekf, None, 7, 0, 're', h, df)
+        print_pair(i_ekf, None, 4, 0, 'ie', h, df)
+        print_pair(calc_ekf, None, 4, 0, 'ce', h, df)
+        print_pair(SN.mon_run.sat[G.i], mon.sat, 4, 0, 'sa', h, df)
+        print_pair(SN.sim_run.sat_s[G.i], sim.sat, 5, 0, 'sa_s', h, df)
+        print_pair(SN.mon_run.dt[G.i], mon.dt, 12, 4, 'dt', h, df)
+        print_pair(SN.sim_run.dt_s[G.i], sim.dt, 12, 4, 'dt_s', h, df)
+        print_pair(SN.sim_run.ib_in_s[G.i], sim.ib_in, 14, 5, 'ib_in_s', h, df)
+        print_pair(SN.mon_run.ib_dyn[G.i], mon.ib_dyn, 14, 5, 'ib_dyn', h, df)
+        print_pair(SN.sim_run.dv_hys_s[G.i], sim.dv_hys, 12, 5, 'dv_hys_s', h, df)
+        print_pair(SN.mon_run.soc[G.i], mon.soc, 11, 7, 'soc', h, df)
+        print_pair(SN.mon_run.delta_q[G.i], mon.delta_q, 16, 6, 'delq', h, df)
+        print_pair(SN.mon_run.soc_s[G.i], sim.soc, 11, 6, 'soc_s', h, df)
+        print_pair(SN.sim_run.delta_q_s[G.i], sim.delta_q, 15, 6, 'delta_q_s', h, df)
+        print_pair(SN.mon_run.qcrs[G.i], mon.q_cap_rated_scaled, 12, 2, 'qcrs', h, df)
+        print_pair(SN.mon_run.Tb_f[G.i], mon.Tb_f, 14, 7, 'Tb_f', h, df)
+        print_pair(SN.mon_run.vb_f[G.i], mon.vb, 11, 5, 'vb', h, df)
+        print_pair(SN.mon_run.voc_stat_f[G.i], mon.voc_stat, 11, 5, 'voc_stat', h, df)
+        print_pair(SN.sim_run.voc_stat_s[G.i], sim.voc_stat, 11, 5, 'voc_stat_s', h, df)
+        print_pair(SN.sim_run.dv_hys_s[G.i], sim.dv_hys, 11, 5, 'dv_hys_s', h, df)
+        print_pair(SN.sim_run.dv_dyn_s[G.i], sim.dv_dyn, 11, 5, 'dv_dyn_s', h, df)
+        print_pair(SN.mon_run.vsat[G.i], mon.vsat, 11, 5, 'vsat', h, df)
+        print_pair(bool(SN.sim_run.bms_off_s[G.i]), sim.bms_off, 7, 0, 'bms_off_s', h, df, end="\n")
+
     print(Colors.reset, end="")
-    return hdr
+    return 'header'
 
 
 # 3
@@ -854,82 +827,57 @@ def print_temp_RunSim(SN, i_temp, t, mon, sim, calc_temp, i_ekf, calc_ekf, df=Fa
 
 # 5
 # noinspection PyPep8Naming
-def print_volt_HistSim(SN, i_temp, i_ekf, t, mon, calc_temp, calc_ekf):
+def print_volt_HistSim(SN, i_temp, i_ekf, t, mon, calc_temp, calc_ekf, df=False):
     global count_since_last_header
-    hdr = (
-        "  i   time r    rt it   ct   rk   re ie     ce   sa       Tb_f                  "
-        "    vb_f                   ib_f                  ib_nh_f               ib_mh_f  "
-        "             ib_dyn_m              e_wrap_n_filt        e_wrap_m_filt        e_w"
-        "rap_m_trim       ib_hn                 ib_dyn_n               e_wrap_n_filt     "
-        "   e_wrap_filt          soc                        dt                 Tb_f      "
-        "               vb_f                  ib_dyn                voc_f     voc        "
-        " voc_stat_f             soc_ekf"
-    )
-    if count_since_last_header > HDR_SPREAD:
-        print(hdr)
+    print_hdr = (calc_temp or calc_ekf) and count_since_last_header > HDR_SPREAD
+    if (calc_temp or calc_ekf) and count_since_last_header > HDR_SPREAD:
         count_since_last_header = 0
     if G.i > 0:
         count_since_last_header += 1
     if mon.reset:
-        print(Colors.fg.yellow, end="")
-    print(
-        "{:4d}".format(G.i),
-        "{:4.0f}".format(t[G.i]),
-        "{:2.0f}".format(mon.reset),
-        "{:4d}".format(mon.reset_temp),
-        "{:4d}".format(i_temp),
-        "{:4d}".format(calc_temp),
-        "{:4d}".format(mon.reset_kf),
-        "{:4d}".format(mon.reset_ekf),
-        "{:4d}".format(i_ekf),
-        "{:4d}".format(calc_ekf),
-        "{:4.0f}".format(SN.mon_run.sat[G.i]),
-        "{:2.0f}".format(mon.sat),
-        "{:14.7f}".format(SN.mon_run.Tb_f[G.i]),
-        "{:11.7f}".format(mon.Tb_f),
-        "{:11.5f}".format(SN.mon_run.vb_f[G.i]),
-        "{:9.5f}".format(mon.vb),
-        "{:11.5f}".format(SN.mon_run.ib_f[G.i]),
-        "{:9.5f}".format(mon.ib),
-        "{:11.5f}".format(SN.mon_run.ib_noa_hdwe_f[G.i]),
-        "{:9.5f}".format(mon.LoopIbNoa.ib),
-        "{:11.5f}".format(SN.mon_run.ib_amp_hdwe_f[G.i]),
-        "{:9.5f}".format(mon.LoopIbAmp.ib),
-        "{:11.5f}".format(SN.mon_run.ib_dyn_m[G.i]),
-        "{:9.5f}".format(mon.LoopIbAmp.ib_dyn),
-        "{:11.5f}".format(SN.mon_run.e_wrap_n_filt[G.i]),
-        "{:8.5f}".format(mon.e_wrap_n_filt),
-        "{:11.5f}".format(SN.mon_run.e_wrap_m_filt[G.i]),
-        "{:8.5f}".format(mon.e_wrap_m_filt),
-        "{:11.5f}".format(SN.mon_run.e_wrap_m_trim[G.i]),
-        "{:8.5f}".format(mon.e_wrap_m_trim),
-        "{:11.5f}".format(SN.mon_run.ib_noa_hdwe_f[G.i]),
-        "{:9.5f}".format(mon.LoopIbNoa.ib),
-        "{:11.5f}".format(SN.mon_run.ib_dyn_n[G.i]),
-        "{:9.5f}".format(mon.LoopIbNoa.ib_dyn),
-        "{:11.5f}".format(SN.mon_run.e_wrap_n_filt[G.i]),
-        "{:8.5f}".format(mon.e_wrap_n_filt),
-        "{:11.5f}".format(SN.mon_run.e_wrap_filt[G.i]),
-        "{:8.5f}".format(mon.e_wrap_filt),
-        "{:13.7f}".format(SN.mon_run.soc[G.i]),
-        "{:10.7f}".format(mon.soc),
-        "{:11.4f}".format(SN.mon_run.dt[G.i]),
-        "{:8.4f}".format(mon.dt),
-        "{:14.7f}".format(SN.mon_run.Tb_f[G.i]),
-        "{:10.7f}".format(mon.Tb_f),
-        "{:11.5f}".format(SN.mon_run.vb_f[G.i]),
-        "{:9.5f}".format(mon.vb),
-        "{:11.5f}".format(SN.mon_run.ib_dyn[G.i]),
-        "{:9.5f}".format(mon.ib_dyn),
-        "{:11.7f}".format(SN.mon_run.voc_f[G.i]),
-        "{:10.7f}".format(mon.voc),
-        "{:11.7f}".format(SN.mon_run.voc_stat_f[i_ekf]),
-        "{:10.7f}".format(mon.voc_stat_f),
-        "{:11.5f}".format(SN.mon_run.soc_ekf[G.i]),
-        "{:9.5f}".format(mon.soc_ekf),
-    )
+        set_color(Colors.fg.red)
+    elif mon.reset_temp:
+        set_color(Colors.fg.orange)
+    else:
+        set_color(Colors.reset)
+
+    for i_hdr in range(int(print_hdr), -1, -1):
+        h = (i_hdr == 1)
+        print_pair(G.i, None, 4, 0, 'i', h, df)
+        print_pair(t[G.i], None, 4, 0, 'time', h, df)
+        print_pair(mon.reset, None, 2, 0, 'r', h, df)
+        print_pair(mon.reset_temp, None, 4, 0, 'rt', h, df)
+        print_pair(i_temp, None, 4, 0, 'it', h, df)
+        print_pair(calc_temp, None, 4, 0, 'ct', h, df)
+        print_pair(mon.reset_kf, None, 4, 0, 'rk', h, df)
+        print_pair(mon.reset_ekf, None, 4, 0, 're', h, df)
+        print_pair(i_ekf, None, 4, 0, 'ie', h, df)
+        print_pair(calc_ekf, None, 4, 0, 'ce', h, df)
+        print_pair(SN.mon_run.sat[G.i], mon.sat, 4, 0, 'sa', h, df)
+        print_pair(SN.mon_run.Tb_f[G.i], mon.Tb_f, 14, 7, 'Tb_f', h, df)
+        print_pair(SN.mon_run.vb_f[G.i], mon.vb, 11, 5, 'vb_f', h, df)
+        print_pair(SN.mon_run.ib_f[G.i], mon.ib, 11, 5, 'ib_f', h, df)
+        print_pair(SN.mon_run.ib_noa_hdwe_f[G.i], mon.LoopIbNoa.ib, 11, 5, 'ib_nh_f', h, df)
+        print_pair(SN.mon_run.ib_amp_hdwe_f[G.i], mon.LoopIbAmp.ib, 11, 5, 'ib_mh_f', h, df)
+        print_pair(SN.mon_run.ib_dyn_m[G.i], mon.LoopIbAmp.ib_dyn, 11, 5, 'ib_dyn_m', h, df)
+        print_pair(SN.mon_run.e_wrap_n_filt[G.i], mon.e_wrap_n_filt, 11, 5, 'e_wrap_n_filt', h, df)
+        print_pair(SN.mon_run.e_wrap_m_filt[G.i], mon.e_wrap_m_filt, 11, 5, 'e_wrap_m_filt', h, df)
+        print_pair(SN.mon_run.e_wrap_m_trim[G.i], mon.e_wrap_m_trim, 11, 5, 'e_wrap_m_trim', h, df)
+        print_pair(SN.mon_run.ib_noa_hdwe_f[G.i], mon.LoopIbNoa.ib, 11, 5, 'ib_hn', h, df)
+        print_pair(SN.mon_run.ib_dyn_n[G.i], mon.LoopIbNoa.ib_dyn, 11, 5, 'ib_dyn_n', h, df)
+        print_pair(SN.mon_run.e_wrap_n_filt[G.i], mon.e_wrap_n_filt, 11, 5, 'e_wrap_n_filt', h, df)
+        print_pair(SN.mon_run.e_wrap_filt[G.i], mon.e_wrap_filt, 11, 5, 'e_wrap_filt', h, df)
+        print_pair(SN.mon_run.soc[G.i], mon.soc, 13, 7, 'soc', h, df)
+        print_pair(SN.mon_run.dt[G.i], mon.dt, 11, 4, 'dt', h, df)
+        print_pair(SN.mon_run.Tb_f[G.i], mon.Tb_f, 14, 7, 'Tb_f', h, df)
+        print_pair(SN.mon_run.vb_f[G.i], mon.vb, 11, 5, 'vb_f', h, df)
+        print_pair(SN.mon_run.ib_dyn[G.i], mon.ib_dyn, 11, 5, 'ib_dyn', h, df)
+        print_pair(SN.mon_run.voc_f[G.i], mon.voc, 11, 7, 'voc_f', h, df)
+        print_pair(SN.mon_run.voc_stat_f[i_ekf], mon.voc_stat_f, 11, 7, 'voc_stat_f', h, df)
+        print_pair(SN.mon_run.soc_ekf[G.i], mon.soc_ekf, 11, 5, 'soc_ekf', h, df, end="\n")
+
     print(Colors.reset, end="")
-    return hdr
+    return 'header'
 
 
 # 5
