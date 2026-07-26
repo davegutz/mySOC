@@ -917,8 +917,9 @@ def print_soc_s_RunSim(SN, i_temp, t, mon, sim, calc_temp, i_ekf, calc_ekf, df=F
 
 
 # 4
+# 4
 # noinspection PyPep8Naming
-def print_temp_RunSim(SN, i_temp, t, mon, sim, calc_temp, i_ekf, calc_ekf):
+def print_temp_RunSim(SN, i_temp, t, mon, sim, calc_temp, i_ekf, calc_ekf, df=False):
     global count_since_last_header, vv_warning_printed
     if not hasattr(SN.sim_run, "Tb_f_s") or SN.sim_run.Tb_f_s is None:
         if not vv_warning_printed:
@@ -930,89 +931,57 @@ def print_temp_RunSim(SN, i_temp, t, mon, sim, calc_temp, i_ekf, calc_ekf):
             vv_warning_printed = True
             print(Colors.reset, end="")
         return None
-    hdr = (
-        "  i  time     r  rt rk  mtb     re  ie   ce    Tb_hdwe                       Tb_"
-        "flt        Tb_fa      Tb                         Tb_hdwe_f                  Tb_m"
-        "odel                   Tb_model_f                 Tb_f                       Tb_"
-        "s                       Tb_f_s                      Tb_model_f_rate            T"
-        "b_hdwe_f_rate           Tb_hdwe                    Tb_hdwe_f                   T"
-        "b_hdwe_f_dt             Tb_hdwe_f_tau               Tb_hdwe_f_rstate           T"
-        "b_hdwe_f_lstate            Tb_f_rate                 Tb_hdwe_f                  "
-        " Tb_model_f_dt             Tb_model_f_rstate          Tb_model_f_lstate         "
-        "  Tb_f_rate                 Tb_f_for_hx"
-    )
+    print_hdr = calc_temp and count_since_last_header > HDR_SPREAD
     if calc_temp and count_since_last_header > HDR_SPREAD:
-        print(hdr)
         count_since_last_header = 0
     if G.i > 0:
         count_since_last_header += 1
     if mon.reset:
-        print(Colors.fg.red, end="")
+        set_color(Colors.fg.red)
     elif mon.reset_temp:
-        print(Colors.fg.orange, end="")
-    print(
-        "{:4d}".format(G.i),
-        "{:7.3f}".format(t[G.i]),
-        "{:2.0f}".format(mon.reset),
-        "{:3d}".format(mon.reset_temp),
-        "{:2d}".format(mon.reset_kf),
-        "{:2d}".format(mon.mtb),
-        "{:7d}".format(mon.reset_ekf),
-        "{:4d}".format(i_ekf),
-        "{:4d}".format(calc_ekf),
-        "{:13.7f}".format(SN.mon_run.Tb_hdwe[G.i]),
-        "{:11.7f}".format(mon.Tb_hdwe),
-        "{:8d}".format(bool(SN.mon_run.Tb_flt[G.i])),
-        "{:4d}".format(mon.Tb_flt),
-        "{:8d}".format(bool(SN.mon_run.Tb_fa[G.i])),
-        "{:4d}".format(mon.Tb_fa),
-        "{:14.7f}".format(SN.mon_run.Tb[G.i]),
-        "{:11.7f}".format(mon.Tb),
-        "{:14.7f}".format(SN.mon_run.Tb_hdwe_f[G.i]),
-        "{:11.7f}".format(mon.Tb_hdwe_f),
-        "{:14.7f}".format(SN.mon_run.Tb_model[G.i]),
-        "{:11.7f}".format(mon.Tb_model),
-        "{:14.7f}".format(SN.mon_run.Tb_model_f[G.i]),
-        "{:11.7f}".format(mon.Tb_model_f),
-        "{:14.7f}".format(SN.mon_run.Tb_f[G.i]),
-        "{:11.7f}".format(mon.Tb_f),
-        "{:14.7f}".format(SN.sim_run.Tb_s[G.i]),
-        "{:11.7f}".format(sim.Tb_s),
-        "{:14.7f}".format(SN.sim_run.Tb_f_s[G.i]),
-        "{:11.7f}".format(sim.Tb_f),
-        "{:14.7f}".format(SN.mon_run.Tb_model_f_rate[G.i]),
-        "{:11.7f}".format(mon.Tb_model_f_rate),
-        "{:14.7f}".format(SN.mon_run.Tb_hdwe_f_rate[G.i]),
-        "{:11.7f}".format(mon.Tb_hdwe_f_rate),
-        "{:13.7f}".format(SN.mon_run.Tb_hdwe[G.i]),
-        "{:11.7f}".format(mon.Tb_hdwe),
-        "{:14.7f}".format(SN.mon_run.Tb_hdwe_f[G.i]),
-        "{:11.7f}".format(mon.Tb_hdwe_f),
-        "{:14.7f}".format(SN.mon_run.dt_sel[G.i]),
-        "{:11.7f}".format(mon.Tb_hdwe_f_dt),
-        "{:14.7f}".format(SN.mon_run.Tb_hdwe_f_tau[G.i]),
-        "{:11.7f}".format(mon.Tb_hdwe_f_tau),
-        "{:14.7f}".format(SN.mon_run.Tb_hdwe_f_rstate[G.i]),
-        "{:11.7f}".format(mon.Tb_hdwe_f_rstate),
-        "{:14.7f}".format(SN.mon_run.Tb_hdwe_f_lstate[G.i]),
-        "{:11.7f}".format(mon.Tb_hdwe_f_lstate),
-        "{:14.7f}".format(SN.mon_run.Tb_f_rate[G.i]),
-        "{:11.7f}".format(mon.Tb_f_rate),
-        "{:14.7f}".format(SN.mon_run.Tb_hdwe_f[G.i]),
-        "{:11.7f}".format(mon.Tb_hdwe_f),
-        "{:14.7f}".format(SN.mon_run.dt_sel[G.i]),
-        "{:11.7f}".format(mon.Tb_model_f_dt),
-        "{:14.7f}".format(SN.mon_run.Tb_model_f_rstate[G.i]),
-        "{:11.7f}".format(mon.Tb_model_f_rstate),
-        "{:14.7f}".format(SN.mon_run.Tb_model_f_lstate[G.i]),
-        "{:11.7f}".format(mon.Tb_model_f_lstate),
-        "{:14.7f}".format(SN.mon_run.Tb_f_rate[G.i]),
-        "{:11.7f}".format(mon.Tb_f_rate),
-        "{:14.7f}".format(SN.mon_run.tb_f_for_hx[i_ekf]),
-        "{:10.7f}".format(mon.tb_f_for_hx),
-    )
+        set_color(Colors.fg.orange)
+    else:
+        set_color(Colors.reset)
+
+    for i_hdr in range(int(print_hdr), -1, -1):
+        h = (i_hdr == 1)
+        print_pair(G.i, None, 4, 0, 'i', h, df)
+        print_pair(t[G.i], None, 7, 3, 'time', h, df)
+        print_pair(mon.reset, None, 2, 0, 'r', h, df)
+        print_pair(mon.reset_temp, None, 3, 0, 'rt', h, df)
+        print_pair(mon.reset_kf, None, 2, 0, 'rk', h, df)
+        print_pair(mon.mtb, None, 2, 0, 'mtb', h, df)
+        print_pair(mon.reset_ekf, None, 7, 0, 're', h, df)
+        print_pair(i_ekf, None, 4, 0, 'ie', h, df)
+        print_pair(calc_ekf, None, 4, 0, 'ce', h, df)
+        print_pair(SN.mon_run.Tb_hdwe[G.i], mon.Tb_hdwe, 13, 7, 'Tb_hdwe', h, df)
+        print_pair(bool(SN.mon_run.Tb_flt[G.i]), mon.Tb_flt, 8, 0, 'Tb_flt', h, df)
+        print_pair(bool(SN.mon_run.Tb_fa[G.i]), mon.Tb_fa, 8, 0, 'Tb_fa', h, df)
+        print_pair(SN.mon_run.Tb[G.i], mon.Tb, 14, 7, 'Tb', h, df)
+        print_pair(SN.mon_run.Tb_hdwe_f[G.i], mon.Tb_hdwe_f, 14, 7, 'Tb_hdwe_f', h, df)
+        print_pair(SN.mon_run.Tb_model[G.i], mon.Tb_model, 14, 7, 'Tb_model', h, df)
+        print_pair(SN.mon_run.Tb_model_f[G.i], mon.Tb_model_f, 14, 7, 'Tb_model_f', h, df)
+        print_pair(SN.mon_run.Tb_f[G.i], mon.Tb_f, 14, 7, 'Tb_f', h, df)
+        print_pair(SN.sim_run.Tb_s[G.i], sim.Tb_s, 14, 7, 'Tb_s', h, df)
+        print_pair(SN.sim_run.Tb_f_s[G.i], sim.Tb_f, 14, 7, 'Tb_f_s', h, df)
+        print_pair(SN.mon_run.Tb_model_f_rate[G.i], mon.Tb_model_f_rate, 14, 7, 'Tb_model_f_rate', h, df)
+        print_pair(SN.mon_run.Tb_hdwe_f_rate[G.i], mon.Tb_hdwe_f_rate, 14, 7, 'Tb_hdwe_f_rate', h, df)
+        print_pair(SN.mon_run.Tb_hdwe[G.i], mon.Tb_hdwe, 13, 7, 'Tb_hdwe', h, df)
+        print_pair(SN.mon_run.Tb_hdwe_f[G.i], mon.Tb_hdwe_f, 14, 7, 'Tb_hdwe_f', h, df)
+        print_pair(SN.mon_run.dt_sel[G.i], mon.Tb_hdwe_f_dt, 14, 7, 'Tb_hdwe_f_dt', h, df)
+        print_pair(SN.mon_run.Tb_hdwe_f_tau[G.i], mon.Tb_hdwe_f_tau, 14, 7, 'Tb_hdwe_f_tau', h, df)
+        print_pair(SN.mon_run.Tb_hdwe_f_rstate[G.i], mon.Tb_hdwe_f_rstate, 14, 7, 'Tb_hdwe_f_rstate', h, df)
+        print_pair(SN.mon_run.Tb_hdwe_f_lstate[G.i], mon.Tb_hdwe_f_lstate, 14, 7, 'Tb_hdwe_f_lstate', h, df)
+        print_pair(SN.mon_run.Tb_f_rate[G.i], mon.Tb_f_rate, 14, 7, 'Tb_f_rate', h, df)
+        print_pair(SN.mon_run.Tb_hdwe_f[G.i], mon.Tb_hdwe_f, 14, 7, 'Tb_hdwe_f', h, df)
+        print_pair(SN.mon_run.dt_sel[G.i], mon.Tb_model_f_dt, 14, 7, 'Tb_model_f_dt', h, df)
+        print_pair(SN.mon_run.Tb_model_f_rstate[G.i], mon.Tb_model_f_rstate, 14, 7, 'Tb_model_f_rstate', h, df)
+        print_pair(SN.mon_run.Tb_model_f_lstate[G.i], mon.Tb_model_f_lstate, 14, 7, 'Tb_model_f_lstate', h, df)
+        print_pair(SN.mon_run.Tb_f_rate[G.i], mon.Tb_f_rate, 14, 7, 'Tb_f_rate', h, df)
+        print_pair(SN.mon_run.tb_f_for_hx[i_ekf], mon.tb_f_for_hx, 14, 7, 'Tb_f_for_hx', h, df, end="\n")
+
     print(Colors.reset, end="")
-    return hdr
+    return 'header'
 
 
 # 5
