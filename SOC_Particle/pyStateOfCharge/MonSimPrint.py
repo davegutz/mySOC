@@ -586,7 +586,7 @@ def print_ekf_RunSim(SN, i_temp, i_ekf, t, mon, sim, calc_ekf, calc_temp, df=Fal
 
 # 6
 # noinspection PyPep8Naming,PyUnusedLocal
-def print_kf_RunSim(SN, i_temp, i_ekf, t, mon, sim, calc_temp, calc_ekf):
+def print_kf_RunSim(SN, i_temp, i_ekf, t, mon, sim, calc_temp, calc_ekf, df=False):
     global count_since_last_header, vv_warning_printed
     if not hasattr(SN.mon_run, "dtm"):
         if not vv_warning_printed:
@@ -598,96 +598,57 @@ def print_kf_RunSim(SN, i_temp, i_ekf, t, mon, sim, calc_temp, calc_ekf):
             vv_warning_printed = True
             print(Colors.reset, end="")
         return None
-    hdr = (
-        "  i   time     r       rt   rk   dt               dtm              dtn          "
-        "    VoVcn                    VoVcnf                 x0                     ib_sh"
-        "unt_noa            [Fxn                                      ]    [Qn           "
-        "                                                                                "
-        "                     ]  [Xpn                                      ]     [Ppn    "
-        "                                                                                "
-        "                           ]   S                         [K                     "
-        "                                      ]   y                     [x              "
-        "                           ]    [Pn                                             "
-        "                                                                   ]"
-    )
+    print_hdr = (calc_temp or calc_ekf) and count_since_last_header > HDR_SPREAD
     if (calc_temp or calc_ekf) and count_since_last_header > HDR_SPREAD:
-        print(hdr)
         count_since_last_header = 0
     if G.i > 0:
         count_since_last_header += 1
     if mon.reset:
-        print(Colors.fg.red, end="")
-    print(
-        "{:4d}".format(G.i),
-        "{:8.3f}".format(t[G.i]),
-        "{:2.0f}".format(mon.reset),
-        "{:7d}".format(mon.reset_temp),
-        "{:4d}".format(mon.reset_kf),
-        "{:9.4f}".format(SN.mon_run.dt[G.i]),
-        "{:5.4f}".format(mon.dt),
-        "{:9.4f}".format(SN.mon_run.dtm[G.i]),
-        "{:5.4f}".format(SN.KfShuntAmp.dt),
-        "{:9.4f}".format(SN.mon_run.dtn[G.i]),
-        "{:5.4f}".format(SN.KfShuntNoa.dt),
-        "{:12.7f}".format(SN.mon_run.vovcn[G.i]),
-        "{:11.7f}".format(SN.VoVcn),
-        "{:11.6f}".format(SN.mon_run.vovcnkf[G.i]),
-        "{:10.6f}".format(SN.VoVcn_f),
-        "{:11.6f}".format(SN.mon_run.x0n[G.i]),
-        "{:10.6f}".format(SN.KfShuntNoa.x[0][0]),
-        "{:11.6f}".format(SN.mon_run.iscn[G.i]),
-        "{:10.6f}".format(SN.iscn),
-        "{:8.1f}".format(SN.mon_run.Fx00n[G.i]),
-        "{:3.1f}".format(SN.KfShuntNoa.Fx[0][0]),
-        "{:7.3f}".format(SN.mon_run.Fx01n[G.i]),
-        "{:5.3f}".format(SN.KfShuntNoa.Fx[0][1]),
-        "{:5.1f}".format(SN.mon_run.Fx10n[G.i]),
-        "{:3.1f}".format(SN.KfShuntNoa.Fx[1][0]),
-        "{:5.1f}".format(SN.mon_run.Fx11n[G.i]),
-        "{:3.1f}".format(SN.KfShuntNoa.Fx[1][1]),
-        "{:18.7e}".format(SN.mon_run.Q00n[G.i]),
-        "{:12.7e}".format(SN.KfShuntNoa.Q[0][0]),
-        "{:14.7e}".format(SN.mon_run.Q01n[G.i]),
-        "{:12.7e}".format(SN.KfShuntNoa.Q[0][1]),
-        "{:14.7e}".format(SN.mon_run.Q10n[G.i]),
-        "{:12.7e}".format(SN.KfShuntNoa.Q[1][0]),
-        "{:14.7e}".format(SN.mon_run.Q11n[G.i]),
-        "{:12.7e}".format(SN.KfShuntNoa.Q[1][1]),
-        "{:11.6f}".format(SN.mon_run.xp0n[G.i]),
-        "{:10.6f}".format(float(SN.KfShuntNoa.x_prior[0, 0])),
-        "{:11.6f}".format(SN.mon_run.xp1n[G.i]),
-        "{:10.6f}".format(float(SN.KfShuntNoa.x_prior[1, 0])),
-        "{:18.7e}".format(SN.mon_run.Pp00n[G.i]),
-        "{:12.7e}".format(SN.KfShuntNoa.P_prior[0, 0]),
-        "{:14.7e}".format(SN.mon_run.Pp01n[G.i]),
-        "{:12.7e}".format(SN.KfShuntNoa.P_prior[0, 1]),
-        "{:14.7e}".format(SN.mon_run.Pp10n[G.i]),
-        "{:12.7e}".format(SN.KfShuntNoa.P_prior[1, 0]),
-        "{:14.7e}".format(SN.mon_run.Pp11n[G.i]),
-        "{:12.7e}".format(SN.KfShuntNoa.P_prior[1, 1]),
-        "{:13.8f}".format(SN.mon_run.Sn[G.i]),
-        "{:10.8f}".format(SN.KfShuntNoa.S),
-        "{:18.7e}".format(SN.mon_run.K0n[G.i]),
-        "{:12.7e}".format(SN.KfShuntNoa.K[0, 0]),
-        "{:18.7e}".format(SN.mon_run.K1n[G.i]),
-        "{:12.7e}".format(SN.KfShuntNoa.K[1, 0]),
-        "{:11.6f}".format(SN.mon_run.yn[G.i]),
-        "{:10.6f}".format(SN.KfShuntNoa.y_kf),
-        "{:11.6f}".format(SN.mon_run.x0n[G.i]),
-        "{:10.6f}".format(SN.KfShuntNoa.x[0][0]),
-        "{:11.6f}".format(SN.mon_run.kf_v_n[G.i]),
-        "{:10.6f}".format(SN.KfShuntNoa.x[1][0]),
-        "{:18.7e}".format(SN.mon_run.P00n[G.i]),
-        "{:12.7e}".format(SN.KfShuntNoa.P[0][0]),
-        "{:14.7e}".format(SN.mon_run.P01n[G.i]),
-        "{:12.7e}".format(SN.KfShuntNoa.P[0][1]),
-        "{:14.7e}".format(SN.mon_run.P10n[G.i]),
-        "{:12.7e}".format(SN.KfShuntNoa.P[1][0]),
-        "{:14.7e}".format(SN.mon_run.P11n[G.i]),
-        "{:12.7e}".format(SN.KfShuntNoa.P[1][1]),
-    )
+        set_color(Colors.fg.red)
+    else:
+        set_color(Colors.reset)
+
+    for i_hdr in range(int(print_hdr), -1, -1):
+        h = (i_hdr == 1)
+        print_pair(G.i, None, 4, 0, 'i', h, df)
+        print_pair(t[G.i], None, 8, 3, 'time', h, df)
+        print_pair(mon.reset, None, 2, 0, 'r', h, df)
+        print_pair(mon.reset_temp, None, 7, 0, 'rt', h, df)
+        print_pair(mon.reset_kf, None, 4, 0, 'rk', h, df)
+        print_pair(SN.mon_run.dt[G.i], mon.dt, 9, 4, 'dt', h, df)
+        print_pair(SN.mon_run.dtm[G.i], SN.KfShuntAmp.dt, 9, 4, 'dtm', h, df)
+        print_pair(SN.mon_run.dtn[G.i], SN.KfShuntNoa.dt, 9, 4, 'dtn', h, df)
+        print_pair(SN.mon_run.vovcn[G.i], SN.VoVcn, 12, 7, 'VoVcn', h, df)
+        print_pair(SN.mon_run.vovcnkf[G.i], SN.VoVcn_f, 11, 6, 'VoVcnf', h, df)
+        print_pair(SN.mon_run.x0n[G.i], SN.KfShuntNoa.x[0][0], 11, 6, 'x0', h, df)
+        print_pair(SN.mon_run.iscn[G.i], SN.iscn, 11, 6, 'ib_shunt_noa', h, df)
+        print_pair(SN.mon_run.Fx00n[G.i], SN.KfShuntNoa.Fx[0][0], 8, 1, 'Fx00n', h, df)
+        print_pair(SN.mon_run.Fx01n[G.i], SN.KfShuntNoa.Fx[0][1], 7, 3, 'Fx01n', h, df)
+        print_pair(SN.mon_run.Fx10n[G.i], SN.KfShuntNoa.Fx[1][0], 5, 1, 'Fx10n', h, df)
+        print_pair(SN.mon_run.Fx11n[G.i], SN.KfShuntNoa.Fx[1][1], 5, 1, 'Fx11n', h, df)
+        print_pair(SN.mon_run.Q00n[G.i], SN.KfShuntNoa.Q[0][0], 18, 7, 'Q00n', h, df)
+        print_pair(SN.mon_run.Q01n[G.i], SN.KfShuntNoa.Q[0][1], 14, 7, 'Q01n', h, df)
+        print_pair(SN.mon_run.Q10n[G.i], SN.KfShuntNoa.Q[1][0], 14, 7, 'Q10n', h, df)
+        print_pair(SN.mon_run.Q11n[G.i], SN.KfShuntNoa.Q[1][1], 14, 7, 'Q11n', h, df)
+        print_pair(SN.mon_run.xp0n[G.i], float(SN.KfShuntNoa.x_prior[0, 0]), 11, 6, 'xp0n', h, df)
+        print_pair(SN.mon_run.xp1n[G.i], float(SN.KfShuntNoa.x_prior[1, 0]), 11, 6, 'xp1n', h, df)
+        print_pair(SN.mon_run.Pp00n[G.i], SN.KfShuntNoa.P_prior[0, 0], 18, 7, 'Pp00n', h, df)
+        print_pair(SN.mon_run.Pp01n[G.i], SN.KfShuntNoa.P_prior[0, 1], 14, 7, 'Pp01n', h, df)
+        print_pair(SN.mon_run.Pp10n[G.i], SN.KfShuntNoa.P_prior[1, 0], 14, 7, 'Pp10n', h, df)
+        print_pair(SN.mon_run.Pp11n[G.i], SN.KfShuntNoa.P_prior[1, 1], 14, 7, 'Pp11n', h, df)
+        print_pair(SN.mon_run.Sn[G.i], SN.KfShuntNoa.S, 13, 8, 'S', h, df)
+        print_pair(SN.mon_run.K0n[G.i], SN.KfShuntNoa.K[0, 0], 18, 7, 'K0n', h, df)
+        print_pair(SN.mon_run.K1n[G.i], SN.KfShuntNoa.K[1, 0], 18, 7, 'K1n', h, df)
+        print_pair(SN.mon_run.yn[G.i], SN.KfShuntNoa.y_kf, 11, 6, 'y', h, df)
+        print_pair(SN.mon_run.x0n[G.i], SN.KfShuntNoa.x[0][0], 11, 6, 'x0', h, df)
+        print_pair(SN.mon_run.kf_v_n[G.i], SN.KfShuntNoa.x[1][0], 11, 6, 'kf_v_n', h, df)
+        print_pair(SN.mon_run.P00n[G.i], SN.KfShuntNoa.P[0][0], 18, 7, 'P00n', h, df)
+        print_pair(SN.mon_run.P01n[G.i], SN.KfShuntNoa.P[0][1], 14, 7, 'P01n', h, df)
+        print_pair(SN.mon_run.P10n[G.i], SN.KfShuntNoa.P[1][0], 14, 7, 'P10n', h, df)
+        print_pair(SN.mon_run.P11n[G.i], SN.KfShuntNoa.P[1][1], 14, 7, 'P11n', h, df, end="\n")
+
     print(Colors.reset, end="")
-    return hdr
+    return 'header'
 
 # 2
 # noinspection PyPep8Naming,PyUnusedLocal
