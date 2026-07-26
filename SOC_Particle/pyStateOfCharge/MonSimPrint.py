@@ -314,7 +314,7 @@ def print_dyn_m_RunSim(SN, i_temp, i_ekf, t, mon, sim, calc_temp, calc_ekf, df=F
 
 # 9
 # noinspection PyPep8Naming,PyUnusedLocal
-def print_dyn_n_RunSim(SN, i_temp, i_ekf, t, mon, sim, calc_temp, calc_ekf):
+def print_dyn_n_RunSim(SN, i_temp, i_ekf, t, mon, sim, calc_temp, calc_ekf, df=False):
     global count_since_last_header, vv_warning_printed
     if not hasattr(SN.mon_run, "ib_noa_lo") or SN.mon_run.ib_noa_lo is None:
         if not vv_warning_printed:
@@ -326,116 +326,75 @@ def print_dyn_n_RunSim(SN, i_temp, i_ekf, t, mon, sim, calc_temp, calc_ekf):
             vv_warning_printed = True
             print(Colors.reset, end="")
         return None
-    hdr = (
-        "  i   time     r       rt   rk   it   ct      re   ie  ce    reset  reset_temp  "
-        "   reset_all_faults   soft_reset  soft_reset_sim  init_mon     init_sim     sa  "
-        "    dt                 vb                            ibmh                       "
-        "  ibmm                    ib_noa_lo    ib_noa_hi      dt                    ib_n"
-        "oa                    ib_dyn_T_n          ib_dyn_rstate_n                ib_dyn_"
-        "lstate_n                      ib_dyn_n                 vb                      d"
-        "v_dyn_n                vb_n                       voc_n                      voc"
-        "_soc                   voc_soc_n                    e_wrap_n                  e_"
-        "wrap_n_trim        e_wrap_trimmed_n         e_wrap_n_T           e_wrap_n_rate  "
-        "          e_wrap_n_reset       e_wrap_n_state          e_wrap_n_filt          ew"
-        "mhi_thr              ewmlo_thr          e_wrap_n_flt   e_wrap_n_fa    ib_noa_lo "
-        "  fltw   falw  e_wrap_n_filt"
-    )
+    print_hdr = (calc_temp or calc_ekf) and count_since_last_header > HDR_SPREAD
     if (calc_temp or calc_ekf) and count_since_last_header > HDR_SPREAD:
-        print(hdr)
         count_since_last_header = 0
     if G.i > 0:
         count_since_last_header += 1
     if mon.reset:
-        print(Colors.fg.red, end="")
+        set_color(Colors.fg.red)
     elif mon.reset_temp:
-        print(Colors.fg.orange, end="")
-    print(
-        "{:4d}".format(G.i),
-        "{:8.3f}".format(t[G.i]),
-        "{:2.0f}".format(mon.reset),
-        "{:7d}".format(mon.reset_temp),
-        "{:4d}".format(mon.reset_kf),
-        "{:4d}".format(i_temp),
-        "{:4d}".format(calc_temp),
-        "{:7d}".format(mon.reset_ekf),
-        "{:4d}".format(i_ekf),
-        "{:4d}".format(calc_ekf),
-        "{:7d}".format(bool(SN.mon_run.reset[G.i])),
-        "{:7d}".format(bool(SN.mon_run.reset_temp[G.i])),
-        "{:14d}".format(bool(SN.mon_run.reset_all_faults[G.i])),
-        "{:15d}".format(bool(SN.mon_run.soft_reset[G.i])),
-        "{:15d}".format(bool(SN.mon_run.soft_reset_sim[G.i])),
-        "{:15d}".format(bool(SN.mon_run.init_mon[G.i])),
-        "{:15d}".format(bool(SN.mon_run.init_sim[G.i])),
-        "{:4.0f}".format(SN.mon_run.sat[G.i]),
-        "{:2.0f}".format(mon.sat),
-        "{:9.4f}".format(SN.mon_run.dt[G.i]),
-        "{:7.4f}".format(mon.dt),
-        "{:14.7f}".format(SN.mon_run.vb[G.i]),
-        "{:12.7f}".format(mon.vb),
-        "{:15.5f}".format(SN.mon_run.ib_noa_hdwe[G.i]),
-        "{:13.5f}".format(mon.ib_noa_hdwe),
-        "{:15.5f}".format(SN.mon_run.ib_noa_model[G.i]),
-        "{:13.5f}".format(mon.ib_noa_model),
-        "{:7d}".format(bool(SN.mon_run.ib_noa_lo[G.i])),
-        "{:2d}".format(bool(mon.ib_noa_lo)),
-        "{:7d}".format(bool(SN.mon_run.ib_noa_hi[G.i])),
-        "{:2d}".format(bool(mon.ib_noa_hi)),
-        "{:11.4f}".format(SN.mon_run.dt[G.i]),
-        "{:7.4f}".format(mon.dt),
-        "{:15.6f}".format(SN.mon_run.ib_noa[G.i]),
-        "{:13.6f}".format(mon.ib_noa),
-        "{:9.4f}".format(SN.mon_run.ib_dyn_T_n[G.i]),
-        "{:5.4f}".format(mon.LoopIbNoa.ChargeTransfer.dt),
-        "{:15.6f}".format(SN.mon_run.ib_dyn_rstate_n[G.i]),
-        "{:13.6f}".format(mon.LoopIbNoa.ChargeTransfer.rstate),
-        "{:15.6f}".format(SN.mon_run.ib_dyn_lstate_n[G.i]),
-        "{:13.6f}".format(mon.LoopIbNoa.ChargeTransfer.state),
-        "{:21.5f}".format(SN.mon_run.ib_dyn_n[G.i]),
-        "{:12.5f}".format(mon.LoopIbNoa.ib_dyn),
-        "{:12.5f}".format(SN.mon_run.vb[G.i]),
-        "{:10.5f}".format(mon.vb),
-        "{:12.5f}".format(SN.mon_run.dv_dyn_n[G.i]),
-        "{:10.5f}".format(mon.LoopIbNoa.dv_dyn),
-        "{:13.6f}".format(SN.mon_run.vb_model[G.i]),
-        "{:12.6f}".format(mon.LoopIbNoa.vb),
-        "{:13.6f}".format(SN.mon_run.voc_n[G.i]),
-        "{:12.6f}".format(mon.LoopIbNoa.voc),
-        "{:13.6f}".format(SN.mon_run.voc_soc[G.i]),
-        "{:12.6f}".format(mon.voc_soc),
-        "{:12.6f}".format(SN.mon_run.voc_soc_n[G.i]),
-        "{:12.6f}".format(mon.LoopIbNoa.voc_soc),
-        "{:13.5f}".format(SN.mon_run.e_wrap_n[G.i]),
-        "{:8.5f}".format(mon.e_wrap_n),
-        "{:16.5f}".format(SN.mon_run.e_wrap_n_trim[G.i]),
-        "{:8.5f}".format(mon.e_wrap_n_trim),
-        "{:12.6f}".format(SN.mon_run.e_wrap_n_trimmed[G.i]),
-        "{:9.6f}".format(mon.LoopIbNoa.e_wrap_trimmed),
-        "{:12.4f}".format(SN.mon_run.ib_wrp_T_n[G.i]),
-        "{:9.4f}".format(mon.LoopIbNoa.WrapErrFilt.dt),
-        "{:12.6f}".format(SN.mon_run.ib_wrp_rate_n[G.i]),
-        "{:9.6f}".format(mon.LoopIbNoa.WrapErrFilt.rate),
-        "{:12d}".format(bool(SN.mon_run.ib_wrp_reset_n[G.i])),
-        "{:9d}".format(bool(mon.LoopIbNoa.WrapErrFilt.reset)),
-        "{:12.6f}".format(SN.mon_run.ib_wrp_state_n[G.i]),
-        "{:9.6f}".format(mon.LoopIbNoa.WrapErrFilt.state),
-        "{:12.5f}".format(SN.mon_run.e_wrap_n_filt[G.i]),
-        "{:9.5f}".format(mon.e_wrap_n_filt),
-        "{:12.5f}".format(SN.mon_run.ewmhi_thr[G.i]),
-        "{:9.5f}".format(mon.ewmhi_thr),
-        "{:12.5f}".format(SN.mon_run.ewmlo_thr[G.i]),
-        "{:9.5f}".format(mon.ewmlo_thr),
-        "{:8d}".format(SN.mon_run.wrap_hi_n_flt[G.i]),
-        "{:4d}".format(mon.wrap_hi_n_flt),
-        "{:8d}".format(SN.mon_run.wrap_hi_n_fa[G.i]),
-        "{:4d}".format(mon.wrap_hi_n_fa),
-        "{:18d}".format(SN.mon_run.fltw[G.i]),
-        "{:4d}".format(SN.mon_run.falw[G.i]),
-        "{:11.5f}".format(SN.mon_run.e_wrap_n_filt[G.i]),
-        "{:8.5f}".format(mon.e_wrap_n_filt),
-    )
+        set_color(Colors.fg.orange)
+    else:
+        set_color(Colors.reset)
+
+    for i_hdr in range(int(print_hdr), -1, -1):
+        h = (i_hdr == 1)
+        print_pair(G.i, None, 4, 0, 'i', h, df)
+        print_pair(t[G.i], None, 8, 3, 'time', h, df)
+        print_pair(mon.reset, None, 2, 0, 'r', h, df)
+        print_pair(mon.reset_temp, None, 7, 0, 'rt', h, df)
+        print_pair(mon.reset_kf, None, 4, 0, 'rk', h, df)
+        print_pair(i_temp, None, 4, 0, 'it', h, df)
+        print_pair(calc_temp, None, 4, 0, 'ct', h, df)
+        print_pair(mon.reset_ekf, None, 7, 0, 're', h, df)
+        print_pair(i_ekf, None, 4, 0, 'ie', h, df)
+        print_pair(calc_ekf, None, 4, 0, 'ce', h, df)
+        print_pair(bool(SN.mon_run.reset[G.i]), None, 7, 0, 'reset', h, df)
+        print_pair(bool(SN.mon_run.reset_temp[G.i]), None, 7, 0, 'reset_temp', h, df)
+        print_pair(bool(SN.mon_run.reset_all_faults[G.i]), None, 14, 0, 'reset_all_faults', h, df)
+        print_pair(bool(SN.mon_run.soft_reset[G.i]), None, 15, 0, 'soft_reset', h, df)
+        print_pair(bool(SN.mon_run.soft_reset_sim[G.i]), None, 15, 0, 'soft_reset_sim', h, df)
+        print_pair(bool(SN.mon_run.init_mon[G.i]), None, 15, 0, 'init_mon', h, df)
+        print_pair(bool(SN.mon_run.init_sim[G.i]), None, 15, 0, 'init_sim', h, df)
+        print_pair(SN.mon_run.sat[G.i], mon.sat, 4, 0, 'sa', h, df)
+        print_pair(SN.mon_run.dt[G.i], mon.dt, 9, 4, 'dt', h, df)
+        print_pair(SN.mon_run.vb[G.i], mon.vb, 14, 7, 'vb', h, df)
+        print_pair(SN.mon_run.ib_noa_hdwe[G.i], mon.ib_noa_hdwe, 15, 5, 'ibmh', h, df)
+        print_pair(SN.mon_run.ib_noa_model[G.i], mon.ib_noa_model, 15, 5, 'ibmm', h, df)
+        print_pair(bool(SN.mon_run.ib_noa_lo[G.i]), bool(mon.ib_noa_lo), 7, 0, 'ib_noa_lo', h, df)
+        print_pair(bool(SN.mon_run.ib_noa_hi[G.i]), bool(mon.ib_noa_hi), 7, 0, 'ib_noa_hi', h, df)
+        print_pair(SN.mon_run.dt[G.i], mon.dt, 11, 4, 'dt', h, df)
+        print_pair(SN.mon_run.ib_noa[G.i], mon.ib_noa, 15, 6, 'ib_noa', h, df)
+        print_pair(SN.mon_run.ib_dyn_T_n[G.i], mon.LoopIbNoa.ChargeTransfer.dt, 9, 4, 'ib_dyn_T_n', h, df)
+        print_pair(SN.mon_run.ib_dyn_rstate_n[G.i], mon.LoopIbNoa.ChargeTransfer.rstate, 15, 6, 'ib_dyn_rstate_n', h, df)
+        print_pair(SN.mon_run.ib_dyn_lstate_n[G.i], mon.LoopIbNoa.ChargeTransfer.state, 15, 6, 'ib_dyn_lstate_n', h, df)
+        print_pair(SN.mon_run.ib_dyn_n[G.i], mon.LoopIbNoa.ib_dyn, 21, 5, 'ib_dyn_n', h, df)
+        print_pair(SN.mon_run.vb[G.i], mon.vb, 12, 5, 'vb', h, df)
+        print_pair(SN.mon_run.dv_dyn_n[G.i], mon.LoopIbNoa.dv_dyn, 12, 5, 'dv_dyn_n', h, df)
+        print_pair(SN.mon_run.vb_model[G.i], mon.LoopIbNoa.vb, 13, 6, 'vb_n', h, df)
+        print_pair(SN.mon_run.voc_n[G.i], mon.LoopIbNoa.voc, 13, 6, 'voc_n', h, df)
+        print_pair(SN.mon_run.voc_soc[G.i], mon.voc_soc, 13, 6, 'voc_soc', h, df)
+        print_pair(SN.mon_run.voc_soc_n[G.i], mon.LoopIbNoa.voc_soc, 12, 6, 'voc_soc_n', h, df)
+        print_pair(SN.mon_run.e_wrap_n[G.i], mon.e_wrap_n, 13, 5, 'e_wrap_n', h, df)
+        print_pair(SN.mon_run.e_wrap_n_trim[G.i], mon.e_wrap_n_trim, 16, 5, 'e_wrap_n_trim', h, df)
+        print_pair(SN.mon_run.e_wrap_n_trimmed[G.i], mon.LoopIbNoa.e_wrap_trimmed, 12, 6, 'e_wrap_trimmed_n', h, df)
+        print_pair(SN.mon_run.ib_wrp_T_n[G.i], mon.LoopIbNoa.WrapErrFilt.dt, 12, 4, 'e_wrap_n_T', h, df)
+        print_pair(SN.mon_run.ib_wrp_rate_n[G.i], mon.LoopIbNoa.WrapErrFilt.rate, 12, 6, 'e_wrap_n_rate', h, df)
+        print_pair(bool(SN.mon_run.ib_wrp_reset_n[G.i]), bool(mon.LoopIbNoa.WrapErrFilt.reset), 12, 0, 'e_wrap_n_reset', h, df)
+        print_pair(SN.mon_run.ib_wrp_state_n[G.i], mon.LoopIbNoa.WrapErrFilt.state, 12, 6, 'e_wrap_n_state', h, df)
+        print_pair(SN.mon_run.e_wrap_n_filt[G.i], mon.e_wrap_n_filt, 12, 5, 'e_wrap_n_filt', h, df)
+        print_pair(SN.mon_run.ewmhi_thr[G.i], mon.ewmhi_thr, 12, 5, 'ewmhi_thr', h, df)
+        print_pair(SN.mon_run.ewmlo_thr[G.i], mon.ewmlo_thr, 12, 5, 'ewmlo_thr', h, df)
+        print_pair(SN.mon_run.wrap_hi_n_flt[G.i], mon.wrap_hi_n_flt, 8, 0, 'e_wrap_n_flt', h, df)
+        print_pair(SN.mon_run.wrap_hi_n_fa[G.i], mon.wrap_hi_n_fa, 8, 0, 'e_wrap_n_fa', h, df)
+        print_pair(bool(SN.mon_run.ib_noa_lo[G.i]), None, 7, 0, 'ib_noa_lo', h, df)
+        print_pair(SN.mon_run.fltw[G.i], None, 18, 0, 'fltw', h, df)
+        print_pair(SN.mon_run.falw[G.i], None, 4, 0, 'falw', h, df)
+        print_pair(SN.mon_run.e_wrap_n_filt[G.i], mon.e_wrap_n_filt, 11, 5, 'e_wrap_n_filt', h, df, end="\n")
+
     print(Colors.reset, end="")
-    return hdr
+    return 'header'
 
 
 # 1
@@ -1116,7 +1075,6 @@ def print_volt_RunSim(SN, i_temp, i_ekf, t, mon, sim, calc_temp, calc_ekf, df=Fa
     return 'header'
 
 
-# 8
 # 8
 # noinspection PyPep8Naming
 def print_vb_wrap_RunSim(SN, i_temp, i_ekf, t, mon, sim, calc_temp, calc_ekf, df=False):
