@@ -253,6 +253,24 @@ def find_executable(name: str) -> Optional[str]:
     return None
 
 
+def should_skip_battery_case(battery: str, case_name: str) -> bool:
+    """Returns True if case_name contains a battery tag ('BB', 'CHG', 'CH') that conflicts with battery."""
+    if not battery or not case_name:
+        return False
+    b_norm = battery.lower().strip()
+    c_name = case_name.upper()
+
+    if ("CHG" in c_name or "CH" in c_name) and b_norm not in ("ch", "chg"):
+        return True
+
+    if "BB" in c_name and b_norm != "bb":
+        return True
+
+    return False
+
+
+
+
 # Executive class to control the global variables
 class Exec:
     def __init__(self, cf_=None, ind=None, level=None, path_disp_len_=25):
@@ -778,9 +796,16 @@ def compare_run_ver_batch():
 
         for config in data_rows:
             version = config.get("version", Test.version)
+            battery = config.get("battery", Test.battery)
             macro_val = config.get("macro", "")
             option_val = macro_val if macro_val in lookup else ""
             case_desc = f"version={version!r}, macro={macro_val!r}"
+
+            if should_skip_battery_case(battery, macro_val):
+                reason = f"battery upcase {battery.upper()!r} contained in case name {macro_val!r}"
+                print(f"\033[91mRunVer SKIP  {case_desc}: {reason}\033[0m")
+                problem_cases.append((case_desc, reason))
+                continue
 
             temp_dir = temp_folder(version)
             if not Path(temp_dir).is_dir():
@@ -883,6 +908,12 @@ def run_sim_all_batch():
             macro_ = config.get("macro", "")
             case_desc = f"version={version!r}, macro={macro_!r}"
 
+            if should_skip_battery_case(battery, macro_):
+                reason = f"battery upcase {battery.upper()!r} contained in case name {macro_!r}"
+                print(f"\033[91mRunSimAll SKIP  {case_desc}: {reason}\033[0m")
+                problem_cases.append((case_desc, reason))
+                continue
+
             version_path = str(PurePosixPath(folder) / version)
             file_txt = create_file_txt(macro_, Test.unit, battery)
             file_path = str(PurePosixPath(version_path) / file_txt)
@@ -964,6 +995,15 @@ def grab_macro():
 
 def grab_init(command_to_append="", force_if_ready=False, force_kill=False, fg_color="#ffffff"):
     register_last_task(grab_init)
+    if not auto_running and not force_if_ready:
+        current_case = macro_option.get() or option.get()
+        if should_skip_battery_case(Test.battery, current_case) or should_skip_battery_case(Ref.battery, current_case):
+            print(f"Aborting init: case '{current_case}' conflicts with Battery '{Test.battery}'")
+            tkinter.messagebox.showwarning(
+                title="Battery Mismatch",
+                message=f"Case '{current_case}' conflicts with Battery '{Test.battery}' and will be skipped.",
+            )
+            return False
     # Grab command to update time in EEPROM
     try:
         current_ut = "UT" + str(int(time.time())) + ";"
@@ -1044,6 +1084,15 @@ def monitor_plink_done():
 
 def grab_start():
     global run_start_time
+    if not auto_running:
+        current_case = macro_option.get() or option.get()
+        if should_skip_battery_case(Test.battery, current_case) or should_skip_battery_case(Ref.battery, current_case):
+            print(f"Aborting run: case '{current_case}' conflicts with Battery '{Test.battery}'")
+            tkinter.messagebox.showwarning(
+                title="Battery Mismatch",
+                message=f"Case '{current_case}' conflicts with Battery '{Test.battery}' and cannot be run.",
+            )
+            return
     run_start_time = time.time()
     register_last_task(grab_start)
     start_command = start.get()
@@ -1117,6 +1166,13 @@ def handle_macro(*_args):
 
     # Check if this is what you want to do (skipped in AUTO)
     if not auto_running:
+        if should_skip_battery_case(Test.battery, macro_option_) or should_skip_battery_case(Ref.battery, macro_option_):
+            print(f"Skipping macro '{macro_option_}': battery upcase contained in case name")
+            tkinter.messagebox.showwarning(
+                message=f"Skipping macro '{macro_option_}' because battery upcase is contained in case name."
+            )
+            option.set("try again")
+            return
         if macro_option_.__contains__("CH"):
             if Test.battery == "bb" or Ref.battery == "bb":
                 confirmation = tk.messagebox.askyesno("query sensical", 'Test/Ref are "bb." Continue?')
@@ -1146,6 +1202,13 @@ def handle_option(*_args):
 
     # Check if this is what you want to do (skipped in AUTO)
     if not auto_running:
+        if should_skip_battery_case(Test.battery, option_) or should_skip_battery_case(Ref.battery, option_):
+            print(f"Skipping option '{option_}': battery upcase contained in case name")
+            tkinter.messagebox.showwarning(
+                message=f"Skipping option '{option_}' because battery upcase is contained in case name."
+            )
+            option.set("try again")
+            return
         if option_.__contains__("CH"):
             if Test.battery == "bb" or Ref.battery == "bb":
                 confirmation = tk.messagebox.askyesno("query sensical", 'Test/Ref are "bb." Continue?')
@@ -1746,6 +1809,16 @@ def grab_auto():
                 return
 
             config = data_rows[index]
+
+            battery = config.get("battery", Test.battery)
+            macro_val = config.get("macro", "")
+            if should_skip_battery_case(battery, macro_val):
+                print(
+                    f"\033[91mAUTO SKIP case {index + 1}/{len(data_rows)}: "
+                    f"battery upcase {battery.upper()!r} contained in case name {macro_val!r}\033[0m"
+                )
+                process_next_config(index + 1)
+                return
 
             print(f"Processing configuration {index + 1}/{len(data_rows)}: {config}")
 
