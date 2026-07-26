@@ -545,13 +545,61 @@ def print_ekf_RunSim(SN, i_temp, i_ekf, t, mon, sim, calc_ekf, calc_temp, df=Fal
 
     for i_hdr in range(int(print_hdr), -1, -1):
         h = i_hdr == 1
-        print_pair(G.i, None, 4, 0, 'i', h, df=df)
-        print_pair(t[G.i], None, 4, 3, 'time', h, df=df)
-        print_pair(mon.reset, None, 2, 0, 'r', h, df=df)
-        print_pair(mon.reset_temp, None, 2, 0, 'r_t', h, df=df)
-        print_pair(SN.mon_run.dt[G.i], mon.dt, 6, 3, 'dt', h, df=df)
-        print_pair(SN.mon_run.voc_stat_f[i_ekf], mon.voc_stat_f, 16, 9, 'voc_stat_f', h, df=df,
-                   end="\n")
+        print_pair(G.i, None, 4, 0, 'i', h, df)
+        print_pair(t[G.i], None, 4, 3, 'time', h, df)
+        print_pair(mon.reset, None, 2, 0, 'r', h, df)
+        print_pair(mon.reset_temp, None, 2, 0, 'r_t', h, df)
+        print_pair(SN.mon_run.dt[G.i], mon.dt, 6, 3, 'dt', h, df)
+        print_pair(i_ekf, None, 4, 0, 'i_ekf', h, df)
+        print_pair(mon.reset_ekf, None, 4, 0, 'reset_ekf', h, df)
+        print_pair(calc_ekf, None, 4, 0, 'calc_ekf', h, df)
+        print_pair(SN.mon_run.sat[G.i], mon.sat, 4, 0, 'sat', h, df)
+        print_pair(SN.mon_run.voc_stat[G.i], mon.voc_stat, 11, 5, 'voc_stat', h, df)
+        print_pair(SN.mon_run.voc_stat[G.i - 1], mon.voc_stat_past, 11, 5, '', h, df)
+        print_pair(bool(SN.mon_run.bms_off[G.i - 1]), bool(mon.bms_off_past), 7, 0, 'bms_off_past', h, df)
+        print_pair(bool(SN.mon_run.voltage_low[G.i]), bool(mon.voltage_low), 7, 0, 'voltage_low', h, df)
+        print_pair(bool(SN.mon_run.bms_off[G.i]), bool(mon.bms_off), 7, 0, 'bms_off', h, df)
+        print_pair(SN.mon_run.frz[i_ekf], mon.frz, 7, 0, 'frz', h, df)
+        print_pair(SN.mon_run.ib_charge[G.i], mon.ib_charge, 13, 6, 'ib_charge', h, df)
+        print_pair(SN.mon_run.soc[G.i], mon.soc, 13, 8, 'soc', h, df)
+        print_pair(SN.mon_run.soc_ekf[G.i], mon.soc_ekf, 11, 8, 'soc_ekf', h, df)
+        print_pair(mon.x, None, 12, 8, 'mon.x', h, df)
+        print_pair(SN.mon_run.y_ekf[G.i], mon.y_ekf, 12, 8, 'y_ekf', h, df)
+        print_pair(SN.mon_run.y_ekf_f[G.i], mon.y_ekf_f, 12, 8, 'y_ekf_f', h, df)
+        print_pair(SN.mon_run.y_ekf_f_T[i_ekf], mon.y_ekf_f_T, 12, 8, 'y_ekf_f_T', h, df)
+        print_pair(SN.mon_run.y_ekf_f_tau[i_ekf], mon.y_ekf_f_tau, 12, 8, 'y_ekf_f_tau', h, df)
+        print_pair(SN.mon_run.y_ekf_f_lstate[i_ekf], mon.y_ekf_f_state, 12, 9, 'y_ekf_f_state', h, df)
+        print_pair(SN.mon_run.z[i_ekf], mon.z, 13, 9, 'z', h, df)
+        print_pair(SN.mon_run.hx[i_ekf], mon.hx, 15, 9, 'hx', h, df)
+        print_pair(SN.mon_run.voc_ekf[G.i], mon.voc_ekf, 12, 9, 'mon.voc_ekf', h, df)
+        print_pair(SN.mon_run.Tb_f[G.i], mon.Tb_f, 12, 8, 'Tb_f', h, df)
+        print_pair(SN.mon_run.x_prior[i_ekf], mon.x_prior, 12, 8, 'x_prior', h, df)
+        print_pair(SN.mon_run.x[i_ekf], mon.x, 13, 8, 'x', h, df)
+        print_pair(SN.mon_run.x_for_hx[i_ekf], mon.x_for_hx, 15, 10, 'x_for_hx', h, df)
+        print_pair(SN.mon_run.x_post[i_ekf], mon.x_post, 13, 8, 'x_post', h, df)
+        print_pair(SN.mon_run.Tb_f[G.i], mon.Tb_f, 14, 7, 'Tb_f', h, df)
+        print_pair(SN.mon_run.tb_f_for_hx[i_ekf], mon.tb_f_for_hx, 14, 7, 'tb_f_for_hx', h, df)
+        print_pair(SN.mon_run.hx[i_ekf], mon.hx, 14, 6, 'hx', h, df)
+        print_pair(SN.mon_run.u[i_ekf], mon.u_ekf, 12, 6, 'u_ekf', h, df)
+        print_pair(SN.mon_run.voc_stat_f[i_ekf], mon.voc_stat_f, 14, 12, 'voc_stat_f', h, df)
+        print_pair(SN.mon_run.voc_soc[G.i], mon.voc_soc, 13, 6, 'voc_soc', h, df)
+        print_pair(SN.mon_run.z[i_ekf], mon.z, 15, 9, 'z', h, df)
+        print_pair(SN.mon_run.P[i_ekf], mon.P, 12, 11, 'P', h, df)
+        print_pair(SN.mon_run.P_post[i_ekf], mon.P_post, 12, 11, 'P_post', h, df)
+        print_pair(SN.mon_run.P_prior[i_ekf], mon.P_prior, 12, 11, 'P_prior', h, df)
+        print_pair(SN.mon_run.Fx[i_ekf], mon.Fx, 13, 9, 'Fx', h, df)
+        print_pair(SN.mon_run.Bu[i_ekf], mon.Bu, 15, 12, 'Bu', h, df)
+        print_pair(SN.mon_run.H[i_ekf], mon.H, 14, 7, 'H', h, df)
+        print_pair(SN.mon_run.R[i_ekf], mon.R, 12, 6, 'R', h, df)
+        print_pair(SN.mon_run.S[i_ekf], mon.S, 11, 6, 'S', h, df)
+        print_pair(SN.mon_run.K[i_ekf], mon.K, 13, 9, 'K', h, df)
+        print_pair(SN.mon_run.Q[i_ekf], mon.Q, 13, 9, 'Q', h, df)
+        print_pair(SN.mon_run.R[i_ekf], mon.R, 13, 9, 'R', h, df)
+        print_pair(SN.mon_run.voc_stat[G.i], mon.voc_stat, 16, 9, 'voc_stat', h, df=df)
+        print_pair(SN.mon_run.voc_stat_f_rstate[i_ekf], mon.voc_stat_f_rstate, 16, 9, 'voc_stat_f_rstate', h, df=df)
+        print_pair(SN.mon_run.voc_stat_f_lstate[i_ekf], mon.voc_stat_f_lstate, 16, 9, 'voc_stat_f_lstate', h, df)
+        print_pair(SN.mon_run.voc_stat_f_T[i_ekf], mon.voc_stat_f_T, 16, 9, 'voc_stat_f_T', h, df)
+        print_pair(SN.mon_run.voc_stat_f[i_ekf], mon.voc_stat_f, 16, 9, 'voc_stat_f', h, df, end="\n")
     print(
         "{:4d}".format(G.i),
         "{:7.3f}".format(t[G.i]),
@@ -652,6 +700,8 @@ def print_ekf_RunSim(SN, i_temp, i_ekf, t, mon, sim, calc_ekf, calc_temp, df=Fal
         "{:13.9f}".format(mon.voc_stat),
         "{:16.9f}".format(SN.mon_run.voc_stat_f_rstate[i_ekf]),
         "{:13.9f}".format(mon.voc_stat_f_rstate),
+
+
         "{:16.9f}".format(SN.mon_run.voc_stat_f_lstate[i_ekf]),
         "{:13.9f}".format(mon.voc_stat_f_lstate),
         "{:16.9f}".format(SN.mon_run.voc_stat_f_T[i_ekf]),
