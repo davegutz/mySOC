@@ -1066,7 +1066,7 @@ def print_volt_HistSim(SN, i_temp, i_ekf, t, mon, calc_temp, calc_ekf):
 
 # 5
 # noinspection PyPep8Naming
-def print_volt_RunSim(SN, i_temp, i_ekf, t, mon, sim, calc_temp, calc_ekf):
+def print_volt_RunSim(SN, i_temp, i_ekf, t, mon, sim, calc_temp, calc_ekf, df=False):
     global count_since_last_header, vv_warning_printed
     if not hasattr(SN.mon_run, "ib_amp_lo") or SN.mon_run.ib_amp_lo is None:
         if not vv_warning_printed:
@@ -1077,253 +1077,134 @@ def print_volt_RunSim(SN, i_temp, i_ekf, t, mon, sim, calc_temp, calc_ekf):
             vv_warning_printed = True
             print(Colors.reset, end="")
         return None
-    hdr = (
-        "  i   time     r       rt   rk   it   ct      re   ie  ce    reset  reset_temp  "
-        "   reset_all_faults   soft_reset  soft_reset_sim  init_mon     init_sim     sa  "
-        "    dt                vb                          ib_charge                   ib"
-        "_sel         ib                          ib_amp_hdwe                 ib_amp_mode"
-        "l                ib_amp                      ib_noa_hdwe                 ib_noa_"
-        "model                ib_noa           disable_amp_fault     ib_diff"
-        "                       ib_diff_flt   ib_lo_active    ib_lo_limited_hi  ib_lo_limited_lo"
-        "   ibh                         ib_s                      ib_amp_model               ib_amp_lo    ib_amp_hi"
-        "   ib_noa_lo   ib_noa_hi dis_amp_flt dt                  ib_amp              "
-        "     ib_dyn_T_m           ib_dyn_rstate_m               ib_dyn_lstate_m         "
-        "            ib_dyn_m                  vb                    vb_model            "
-        "  vb_hdwe               vb_hdwe_f              dv_dyn_m               e_wrap_m_T "
-        "            e_wrap_m_tau         e_wrap_m_rate          e_wrap_m_reset          e_"
-        "wrap_m_state        voc                   voc_soc                e_wrap_m       "
-        "      e_wrap_m_filt   disable_amp_fault ib_amp_lo  ib_noa_lo  e_wrap_m_reset  e_"
-        "wrap_m_trim         ib_dyn_n                 ib_dyn_T_n        dv_dyn_n         "
-        "      e_wrap_n             e_wrap_n_filt         ib_dyn_n                    ib_"
-        "dyn                   ib_dyn_T_n           ib_dyn_rstate_n               ib_dyn_"
-        "lstate_n             dv_dyn_n                e_wrap_n_T             e_wrap_n_tau"
-        "         e_wrap_n_rate          e_wrap_n_state              e_wrap_n_trim       "
-        " e_wrap_n_trimmed       e_wrap_n             e_wrap_n_filt         ib           "
-        "              e_wrap               e_wrap_filt          ib_dyn_r     ib_dyn_in  "
-        "                   ib_dyn_T                     ib_dyn_rstate                 ib"
-        "_dyn_lstate                 ib_dyn                       dv_dyn                 "
-        " dv_hys                  soc                     dt                Tb_f         "
-        "            voc_soc               voc                   voc_stat              vo"
-        "c_stat_s            voc_stat_f             soc_ekf               y_ekf          "
-        "       y_ekf_f                fltw falw    soc_min"
-    )
+    print_hdr = (calc_temp or calc_ekf) and count_since_last_header > HDR_SPREAD
     if (calc_temp or calc_ekf) and count_since_last_header > HDR_SPREAD:
-        print(hdr)
         count_since_last_header = 0
     if G.i > 0:
         count_since_last_header += 1
     if mon.reset:
-        print(Colors.fg.red, end="")
-    if t[max(G.i, 0)] > 14.7:
-        pass
-    print(
-        "{:4d}".format(G.i),
-        "{:8.3f}".format(t[G.i]),
-        "{:2.0f}".format(mon.reset),
-        "{:7d}".format(mon.reset_temp),
-        "{:4d}".format(mon.reset_kf),
-        "{:4d}".format(i_temp),
-        "{:4d}".format(calc_temp),
-        "{:7d}".format(mon.reset_ekf),
-        "{:4d}".format(i_ekf),
-        "{:4d}".format(calc_ekf),
-        "{:7d}".format(bool(SN.mon_run.reset[G.i])),
-        "{:7d}".format(bool(SN.mon_run.reset_temp[G.i])),
-        "{:14d}".format(bool(SN.mon_run.reset_all_faults[G.i])),
-        "{:15d}".format(bool(SN.mon_run.soft_reset[G.i])),
-        "{:15d}".format(bool(SN.mon_run.soft_reset_sim[G.i])),
-        "{:15d}".format(bool(SN.mon_run.init_mon[G.i])),
-        "{:15d}".format(bool(SN.mon_run.init_sim[G.i])),
-        "{:4.0f}".format(SN.mon_run.sat[G.i]),
-        "{:2.0f}".format(mon.sat),
-        "{:9.4f}".format(SN.mon_run.dt[G.i]),
-        "{:7.4f}".format(mon.dt),
-        "{:13.7f}".format(SN.mon_run.vb[G.i]),
-        "{:11.7f}".format(mon.vb),
-        "{:14.6f}".format(SN.mon_run.ib_charge[G.i]),
-        "{:12.6f}".format(mon.ib_charge),
-        "{:14.6f}".format(SN.mon_run.ib_sel[G.i]),
-        "{:14.6f}".format(SN.mon_run.ib[G.i]),
-        "{:12.6f}".format(mon.ib),
-        "{:14.6f}".format(SN.mon_run.ib_amp_hdwe[G.i]),
-        "{:12.6f}".format(mon.ib_amp_hdwe),
-        "{:14.6f}".format(SN.mon_run.ib_amp_model[G.i]),
-        "{:12.6f}".format(mon.ib_amp_model),
-        "{:14.6f}".format(SN.mon_run.ib_amp[G.i]),
-        "{:12.6f}".format(mon.ib_amp),
-        "{:14.6f}".format(SN.mon_run.ib_noa_hdwe[G.i]),
-        "{:12.6f}".format(mon.ib_noa_hdwe),
-        "{:14.6f}".format(SN.mon_run.ib_noa_model[G.i]),
-        "{:12.6f}".format(mon.ib_noa_model),
-        "{:14.6f}".format(SN.mon_run.ib_noa[G.i]),
-        "{:12.6f}".format(mon.ib_noa),
-        "{:7d}".format(bool(SN.mon_run.disable_amp_fault[G.i])),
-        "{:2d}".format(bool(mon.disable_amp_fault)),
-        "{:14.6f}".format(SN.mon_run.ib_diff[G.i]),
-        "{:12.6f}".format(mon.ib_diff),
-        "{:8d}".format(SN.mon_run.ib_diff_flt[G.i]),
-        "{:4d}".format(mon.Diff.ib_diff_hi_flt or mon.Diff.ib_diff_lo_flt),
-        "{:8d}".format(bool(SN.mon_run.ib_lo_active[G.i])),
-        "{:4d}".format(mon.ib_lo_active),
-        "         x  ",
-        "{:4d}".format(mon.Diff.ib_lo_limited_hi),
-        "         x  ",
-        "{:4d}".format(mon.Diff.ib_lo_limited_lo),
-        "{:20.6f}".format(SN.mon_run.ib_h[G.i]),
-        "{:12.6f}".format(mon.ib_hdwe),
-        "{:14.6f}".format(SN.mon_run.ib_s[G.i]),
-        "{:12.6f}".format(sim.ib),
-        "{:12.6f}".format(mon.ib_amp_model),
-        "{:14.6f}".format(SN.mon_run.ib_amp[G.i]),
-        "{:7d}".format(bool(SN.mon_run.ib_amp_lo[G.i])),
-        "{:2d}".format(bool(mon.ib_amp_lo)),
-        "{:7d}".format(bool(SN.mon_run.ib_amp_hi[G.i])),
-        "{:2d}".format(bool(mon.ib_amp_hi)),
-        "{:7d}".format(bool(SN.mon_run.ib_noa_lo[G.i])),
-        "{:2d}".format(bool(mon.ib_noa_lo)),
-        "{:7d}".format(bool(SN.mon_run.ib_noa_hi[G.i])),
-        "{:2d}".format(bool(mon.ib_noa_hi)),
-        "{:7d}".format(bool(SN.mon_run.disable_amp_fault[G.i])),
-        "{:2d}".format(bool(mon.disable_amp_fault)),
-        "{:11.4f}".format(SN.mon_run.dt[G.i]),
-        "{:7.4f}".format(mon.dt),
-        "{:14.6f}".format(SN.mon_run.ib_amp[G.i]),
-        "{:12.6f}".format(mon.ib_amp),
-        "{:9.4f}".format(SN.mon_run.ib_dyn_T_m[G.i]),
-        "{:5.4f}".format(mon.LoopIbAmp.ChargeTransfer.dt),
-        "{:15.6f}".format(SN.mon_run.ib_dyn_rstate_m[G.i]),
-        "{:13.6f}".format(mon.LoopIbAmp.ChargeTransfer.rstate),
-        "{:15.6f}".format(SN.mon_run.ib_dyn_lstate_m[G.i]),
-        "{:13.6f}".format(mon.LoopIbAmp.ChargeTransfer.state),
-        "{:21.6f}".format(SN.mon_run.ib_dyn_m[G.i]),
-        "{:12.6f}".format(mon.LoopIbAmp.ib_dyn),
-        "{:11.5f}".format(SN.mon_run.vb[G.i]),
-        "{:9.5f}".format(mon.vb),
-        "{:11.5f}".format(SN.mon_run.vb_model[G.i]),
-        "{:9.5f}".format(mon.vb_model),
-        "{:11.5f}".format(SN.mon_run.vb_hdwe[G.i]),
-        "{:9.5f}".format(mon.vb_hdwe),
-        "{:11.5f}".format(SN.mon_run.vb_hdwe_f[G.i]),
-        "{:9.5f}".format(mon.vb_hdwe_f),
-        "{:11.5f}".format(SN.mon_run.dv_dyn_m[G.i]),
-        "{:8.5f}".format(mon.LoopIbAmp.dv_dyn),
-        "{:12.4f}".format(SN.mon_run.ib_wrp_T_m[G.i]),
-        "{:9.4f}".format(mon.LoopIbAmp.WrapErrFilt.dt),
-        "{:12.4f}".format(SN.mon_run.ib_wrp_tau_m[G.i]),
-        "{:9.4f}".format(mon.LoopIbAmp.WrapErrFilt.tau),
-        "{:12.6f}".format(SN.mon_run.ib_wrp_rate_m[G.i]),
-        "{:9.6f}".format(mon.LoopIbAmp.WrapErrFilt.rate),
-        "{:12d}".format(bool(SN.mon_run.ib_wrp_reset_m[G.i])),
-        "{:9d}".format(bool(mon.LoopIbAmp.WrapErrFilt.reset)),
-        "{:12.6f}".format(SN.mon_run.ib_wrp_state_m[G.i]),
-        "{:9.6f}".format(mon.LoopIbAmp.WrapErrFilt.state),
-        "{:11.5f}".format(SN.mon_run.voc[G.i]),
-        "{:9.5f}".format(mon.voc),
-        "{:11.5f}".format(SN.mon_run.voc_soc[G.i]),
-        "{:9.5f}".format(mon.voc_soc),
-        "{:11.5f}".format(SN.mon_run.e_wrap_m[G.i]),
-        "{:8.5f}".format(mon.e_wrap_m),
-        "{:11.5f}".format(SN.mon_run.e_wrap_m_filt[G.i]),
-        "{:8.5f}".format(mon.e_wrap_m_filt),
-        "{:5.0f}".format(SN.mon_run.disable_amp_fault[G.i]),
-        "{:2.0f}".format(mon.disable_amp_fault),
-        "{:2.0f}".format(mon.ib_amp_lo),
-        "{:2.0f}".format(mon.ib_noa_lo),
-        "{:26.0f}".format(SN.mon_run.e_wrap_m_reset[G.i]),
-        "{:2d}".format(mon.e_wrap_m_reset),
-        # "{:11.5f}".format(SN.mon_run.e_wrap_m_filt[G.i]), "{:8.5f}".format(mon.e_wrap_m_filt), "{:8.5f}".f
-        # ormat(SN.e_wrap_m_filt_init),
-        "{:16.5f}".format(SN.mon_run.e_wrap_m_trim[G.i]),
-        "{:8.5f}".format(mon.e_wrap_m_trim),
-        "{:14.6f}".format(SN.mon_run.ib_dyn_n[G.i]),
-        "{:12.6f}".format(mon.LoopIbNoa.ib_dyn),
-        "{:9.4f}".format(SN.mon_run.ib_dyn_T_n[G.i]),
-        "{:5.4f}".format(mon.LoopIbNoa.ChargeTransfer.dt),
-        "{:11.6f}".format(SN.mon_run.dv_dyn_n[G.i]),
-        "{:9.6f}".format(mon.LoopIbNoa.dv_dyn),
-        "{:11.5f}".format(SN.mon_run.e_wrap_n[G.i]),
-        "{:8.5f}".format(mon.e_wrap_n),
-        "{:11.5f}".format(SN.mon_run.e_wrap_n_filt[G.i]),
-        "{:8.5f}".format(mon.e_wrap_n_filt),
-        "{:14.6f}".format(SN.mon_run.ib_dyn_n[G.i]),
-        "{:12.6f}".format(mon.LoopIbNoa.ib_dyn),
-        "{:14.6f}".format(SN.mon_run.ib_dyn[G.i]),
-        "{:12.6f}".format(mon.ib_dyn),
-        "{:9.4f}".format(SN.mon_run.ib_dyn_T_n[G.i]),
-        "{:5.4f}".format(mon.LoopIbNoa.ChargeTransfer.dt),
-        "{:15.6f}".format(SN.mon_run.ib_dyn_rstate_n[G.i]),
-        "{:13.6f}".format(mon.LoopIbNoa.ChargeTransfer.rstate),
-        "{:15.6f}".format(SN.mon_run.ib_dyn_lstate_n[G.i]),
-        "{:13.6f}".format(mon.LoopIbNoa.ChargeTransfer.state),
-        "{:11.5f}".format(SN.mon_run.dv_dyn_n[G.i]),
-        "{:9.5f}".format(mon.LoopIbNoa.dv_dyn),
-        "{:12.4f}".format(SN.mon_run.ib_wrp_T_n[G.i]),
-        "{:9.4f}".format(mon.LoopIbNoa.WrapErrFilt.dt),
-        "{:12.4f}".format(SN.mon_run.ib_wrp_tau_n[G.i]),
-        "{:9.4f}".format(mon.LoopIbNoa.WrapErrFilt.tau),
-        "{:12.6f}".format(SN.mon_run.ib_wrp_rate_n[G.i]),
-        "{:9.6f}".format(mon.LoopIbNoa.WrapErrFilt.rate),
-        "{:12.6f}".format(SN.mon_run.ib_wrp_state_n[G.i]),
-        "{:9.6f}".format(mon.LoopIbNoa.WrapErrFilt.state),
-        "{:16.5f}".format(SN.mon_run.e_wrap_n_trim[G.i]),
-        "{:8.5f}".format(mon.e_wrap_n_trim),
-        "{:12.6f}".format(SN.mon_run.e_wrap_n_trimmed[G.i]),
-        "{:9.6f}".format(mon.LoopIbNoa.e_wrap_trimmed),
-        "{:11.5f}".format(SN.mon_run.e_wrap_n[G.i]),
-        "{:8.5f}".format(mon.e_wrap_n),
-        "{:11.5f}".format(SN.mon_run.e_wrap_n_filt[G.i]),
-        "{:8.5f}".format(mon.e_wrap_n_filt),
-        "{:14.6f}".format(SN.mon_run.ib[G.i]),
-        "{:12.6f}".format(mon.ib),
-        "{:11.5f}".format(SN.mon_run.e_wrap[G.i]),
-        "{:8.5f}".format(mon.e_wrap),
-        "{:11.5f}".format(SN.mon_run.e_wrap_filt[G.i]),
-        "{:8.5f}".format(mon.e_wrap_filt),
-        "{:6d}".format(bool(SN.mon_run.ib_dyn_r[G.i])),
-        "{:2d}".format(mon.ib_dyn_r),
-        "{:15.6f}".format(SN.mon_run.ib_dyn_rstate[G.i]),
-        "{:13.6f}".format(mon.ib_dyn_in),
-        "{:15.6f}".format(SN.mon_run.ib_dyn_T[G.i]),
-        "{:13.6f}".format(mon.ib_dyn_T),
-        "{:15.6f}".format(SN.mon_run.ib_dyn_rstate[G.i]),
-        "{:13.6f}".format(mon.ib_dyn_rstate),
-        "{:15.6f}".format(SN.mon_run.ib_dyn_lstate[G.i]),
-        "{:13.6f}".format(mon.ib_dyn_lstate),
-        "{:15.6f}".format(SN.mon_run.ib_dyn[G.i]),
-        "{:12.6f}".format(mon.ib_dyn),
-        "{:14.6f}".format(SN.mon_run.dv_dyn[G.i]),
-        "{:10.6f}".format(mon.dv_dyn),
-        "{:12.6f}".format(SN.mon_run.dv_hys[G.i]),
-        "{:10.6f}".format(mon.dv_hys),
-        "{:13.7f}".format(SN.mon_run.soc[G.i]),
-        "{:10.7f}".format(mon.soc),
-        "{:9.4f}".format(SN.mon_run.dt[G.i]),
-        "{:5.4f}".format(mon.dt),
-        "{:14.7f}".format(SN.mon_run.Tb_f[G.i]),
-        "{:10.7f}".format(mon.Tb_f),
-        "{:11.5f}".format(SN.mon_run.voc_soc[G.i]),
-        "{:9.5f}".format(mon.voc_soc),
-        "{:11.5f}".format(SN.mon_run.voc[G.i]),
-        "{:9.5f}".format(mon.voc),
-        "{:11.5f}".format(SN.mon_run.voc_stat[G.i]),
-        "{:9.5f}".format(mon.voc_stat),
-        "{:11.5f}".format(SN.sim_run.voc_stat_s[G.i]),
-        "{:9.5f}".format(sim.voc_stat),
-        "{:11.5f}".format(SN.mon_run.voc_stat_f[i_ekf]),
-        "{:9.5f}".format(mon.voc_stat_f),
-        "{:11.5f}".format(SN.mon_run.soc_ekf[G.i]),
-        "{:9.5f}".format(mon.soc_ekf),
-        "{:11.5f}".format(SN.mon_run.y_ekf[G.i]),
-        "{:9.5f}".format(mon.y_ekf),
-        "{:11.5f}".format(SN.mon_run.y_ekf_f[G.i]),
-        "{:9.5f}".format(mon.y_ekf_f),
-        "{:8d}".format(SN.mon_run.fltw[G.i]),
-        "{:4d}".format(SN.mon_run.falw[G.i]),
-        "{:11.5f}".format(SN.mon_run.soc_min[G.i]),
-        "{:9.5f}".format(mon.soc_min),
-    )
+        set_color(Colors.fg.red)
+    else:
+        set_color(Colors.reset)
+
+    for i_hdr in range(int(print_hdr), -1, -1):
+        h = (i_hdr == 1)
+        print_pair(G.i, None, 4, 0, 'i', h, df)
+        print_pair(t[G.i], None, 8, 3, 'time', h, df)
+        print_pair(mon.reset, None, 2, 0, 'r', h, df)
+        print_pair(mon.reset_temp, None, 7, 0, 'rt', h, df)
+        print_pair(mon.reset_kf, None, 4, 0, 'rk', h, df)
+        print_pair(i_temp, None, 4, 0, 'it', h, df)
+        print_pair(calc_temp, None, 4, 0, 'ct', h, df)
+        print_pair(mon.reset_ekf, None, 7, 0, 're', h, df)
+        print_pair(i_ekf, None, 4, 0, 'ie', h, df)
+        print_pair(calc_ekf, None, 4, 0, 'ce', h, df)
+        print_pair(bool(SN.mon_run.reset[G.i]), None, 7, 0, 'reset', h, df)
+        print_pair(bool(SN.mon_run.reset_temp[G.i]), None, 7, 0, 'reset_temp', h, df)
+        print_pair(bool(SN.mon_run.reset_all_faults[G.i]), None, 14, 0, 'reset_all_faults', h, df)
+        print_pair(bool(SN.mon_run.soft_reset[G.i]), None, 15, 0, 'soft_reset', h, df)
+        print_pair(bool(SN.mon_run.soft_reset_sim[G.i]), None, 15, 0, 'soft_reset_sim', h, df)
+        print_pair(bool(SN.mon_run.init_mon[G.i]), None, 15, 0, 'init_mon', h, df)
+        print_pair(bool(SN.mon_run.init_sim[G.i]), None, 15, 0, 'init_sim', h, df)
+        print_pair(SN.mon_run.sat[G.i], mon.sat, 4, 0, 'sa', h, df)
+        print_pair(SN.mon_run.dt[G.i], mon.dt, 9, 4, 'dt', h, df)
+        print_pair(SN.mon_run.vb[G.i], mon.vb, 13, 7, 'vb', h, df)
+        print_pair(SN.mon_run.ib_charge[G.i], mon.ib_charge, 14, 6, 'ib_charge', h, df)
+        print_pair(SN.mon_run.ib_sel[G.i], None, 14, 6, 'ib_sel', h, df)
+        print_pair(SN.mon_run.ib[G.i], mon.ib, 14, 6, 'ib', h, df)
+        print_pair(SN.mon_run.ib_amp_hdwe[G.i], mon.ib_amp_hdwe, 14, 6, 'ib_amp_hdwe', h, df)
+        print_pair(SN.mon_run.ib_amp_model[G.i], mon.ib_amp_model, 14, 6, 'ib_amp_model', h, df)
+        print_pair(SN.mon_run.ib_amp[G.i], mon.ib_amp, 14, 6, 'ib_amp', h, df)
+        print_pair(SN.mon_run.ib_noa_hdwe[G.i], mon.ib_noa_hdwe, 14, 6, 'ib_noa_hdwe', h, df)
+        print_pair(SN.mon_run.ib_noa_model[G.i], mon.ib_noa_model, 14, 6, 'ib_noa_model', h, df)
+        print_pair(SN.mon_run.ib_noa[G.i], mon.ib_noa, 14, 6, 'ib_noa', h, df)
+        print_pair(bool(SN.mon_run.disable_amp_fault[G.i]), bool(mon.disable_amp_fault), 7, 0, 'disable_amp_fault', h, df)
+        print_pair(SN.mon_run.ib_diff[G.i], mon.ib_diff, 14, 6, 'ib_diff', h, df)
+        print_pair(SN.mon_run.ib_diff_flt[G.i], mon.Diff.ib_diff_hi_flt or mon.Diff.ib_diff_lo_flt, 8, 0, 'ib_diff_flt', h, df)
+        print_pair(bool(SN.mon_run.ib_lo_active[G.i]), mon.ib_lo_active, 8, 0, 'ib_lo_active', h, df)
+        print_pair("x", mon.Diff.ib_lo_limited_hi, 10, 0, 'ib_lo_limited_hi', h, df)
+        print_pair("x", mon.Diff.ib_lo_limited_lo, 10, 0, 'ib_lo_limited_lo', h, df)
+        print_pair(SN.mon_run.ib_h[G.i], mon.ib_hdwe, 20, 6, 'ibh', h, df)
+        print_pair(SN.mon_run.ib_s[G.i], sim.ib, 14, 6, 'ib_s', h, df)
+        print_pair(mon.ib_amp_model, None, 12, 6, 'ib_amp_model', h, df)
+        print_pair(SN.mon_run.ib_amp[G.i], None, 14, 6, 'ib_amp', h, df)
+        print_pair(bool(SN.mon_run.ib_amp_lo[G.i]), bool(mon.ib_amp_lo), 7, 0, 'ib_amp_lo', h, df)
+        print_pair(bool(SN.mon_run.ib_amp_hi[G.i]), bool(mon.ib_amp_hi), 7, 0, 'ib_amp_hi', h, df)
+        print_pair(bool(SN.mon_run.ib_noa_lo[G.i]), bool(mon.ib_noa_lo), 7, 0, 'ib_noa_lo', h, df)
+        print_pair(bool(SN.mon_run.ib_noa_hi[G.i]), bool(mon.ib_noa_hi), 7, 0, 'ib_noa_hi', h, df)
+        print_pair(bool(SN.mon_run.disable_amp_fault[G.i]), bool(mon.disable_amp_fault), 7, 0, 'dis_amp_flt', h, df)
+        print_pair(SN.mon_run.dt[G.i], mon.dt, 11, 4, 'dt', h, df)
+        print_pair(SN.mon_run.ib_amp[G.i], mon.ib_amp, 14, 6, 'ib_amp', h, df)
+        print_pair(SN.mon_run.ib_dyn_T_m[G.i], mon.LoopIbAmp.ChargeTransfer.dt, 9, 4, 'ib_dyn_T_m', h, df)
+        print_pair(SN.mon_run.ib_dyn_rstate_m[G.i], mon.LoopIbAmp.ChargeTransfer.rstate, 15, 6, 'ib_dyn_rstate_m', h, df)
+        print_pair(SN.mon_run.ib_dyn_lstate_m[G.i], mon.LoopIbAmp.ChargeTransfer.state, 15, 6, 'ib_dyn_lstate_m', h, df)
+        print_pair(SN.mon_run.ib_dyn_m[G.i], mon.LoopIbAmp.ib_dyn, 21, 6, 'ib_dyn_m', h, df)
+        print_pair(SN.mon_run.vb[G.i], mon.vb, 11, 5, 'vb', h, df)
+        print_pair(SN.mon_run.vb_model[G.i], mon.vb_model, 11, 5, 'vb_model', h, df)
+        print_pair(SN.mon_run.vb_hdwe[G.i], mon.vb_hdwe, 11, 5, 'vb_hdwe', h, df)
+        print_pair(SN.mon_run.vb_hdwe_f[G.i], mon.vb_hdwe_f, 11, 5, 'vb_hdwe_f', h, df)
+        print_pair(SN.mon_run.dv_dyn_m[G.i], mon.LoopIbAmp.dv_dyn, 11, 5, 'dv_dyn_m', h, df)
+        print_pair(SN.mon_run.ib_wrp_T_m[G.i], mon.LoopIbAmp.WrapErrFilt.dt, 12, 4, 'e_wrap_m_T', h, df)
+        print_pair(SN.mon_run.ib_wrp_tau_m[G.i], mon.LoopIbAmp.WrapErrFilt.tau, 12, 4, 'e_wrap_m_tau', h, df)
+        print_pair(SN.mon_run.ib_wrp_rate_m[G.i], mon.LoopIbAmp.WrapErrFilt.rate, 12, 6, 'e_wrap_m_rate', h, df)
+        print_pair(bool(SN.mon_run.ib_wrp_reset_m[G.i]), bool(mon.LoopIbAmp.WrapErrFilt.reset), 12, 0, 'e_wrap_m_reset', h, df)
+        print_pair(SN.mon_run.ib_wrp_state_m[G.i], mon.LoopIbAmp.WrapErrFilt.state, 12, 6, 'e_wrap_m_state', h, df)
+        print_pair(SN.mon_run.voc[G.i], mon.voc, 11, 5, 'voc', h, df)
+        print_pair(SN.mon_run.voc_soc[G.i], mon.voc_soc, 11, 5, 'voc_soc', h, df)
+        print_pair(SN.mon_run.e_wrap_m[G.i], mon.e_wrap_m, 11, 5, 'e_wrap_m', h, df)
+        print_pair(SN.mon_run.e_wrap_m_filt[G.i], mon.e_wrap_m_filt, 11, 5, 'e_wrap_m_filt', h, df)
+        print_pair(SN.mon_run.disable_amp_fault[G.i], mon.disable_amp_fault, 5, 0, 'disable_amp_fault', h, df)
+        print_pair(mon.ib_amp_lo, None, 2, 0, 'ib_amp_lo', h, df)
+        print_pair(mon.ib_noa_lo, None, 2, 0, 'ib_noa_lo', h, df)
+        print_pair(SN.mon_run.e_wrap_m_reset[G.i], mon.e_wrap_m_reset, 26, 0, 'e_wrap_m_reset', h, df)
+        print_pair(SN.mon_run.e_wrap_m_trim[G.i], mon.e_wrap_m_trim, 16, 5, 'e_wrap_m_trim', h, df)
+        print_pair(SN.mon_run.ib_dyn_n[G.i], mon.LoopIbNoa.ib_dyn, 14, 6, 'ib_dyn_n', h, df)
+        print_pair(SN.mon_run.ib_dyn_T_n[G.i], mon.LoopIbNoa.ChargeTransfer.dt, 9, 4, 'ib_dyn_T_n', h, df)
+        print_pair(SN.mon_run.dv_dyn_n[G.i], mon.LoopIbNoa.dv_dyn, 11, 6, 'dv_dyn_n', h, df)
+        print_pair(SN.mon_run.e_wrap_n[G.i], mon.e_wrap_n, 11, 5, 'e_wrap_n', h, df)
+        print_pair(SN.mon_run.e_wrap_n_filt[G.i], mon.e_wrap_n_filt, 11, 5, 'e_wrap_n_filt', h, df)
+        print_pair(SN.mon_run.ib_dyn_n[G.i], mon.LoopIbNoa.ib_dyn, 14, 6, 'ib_dyn_n', h, df)
+        print_pair(SN.mon_run.ib_dyn[G.i], mon.ib_dyn, 14, 6, 'ib_dyn', h, df)
+        print_pair(SN.mon_run.ib_dyn_T_n[G.i], mon.LoopIbNoa.ChargeTransfer.dt, 9, 4, 'ib_dyn_T_n', h, df)
+        print_pair(SN.mon_run.ib_dyn_rstate_n[G.i], mon.LoopIbNoa.ChargeTransfer.rstate, 15, 6, 'ib_dyn_rstate_n', h, df)
+        print_pair(SN.mon_run.ib_dyn_lstate_n[G.i], mon.LoopIbNoa.ChargeTransfer.state, 15, 6, 'ib_dyn_lstate_n', h, df)
+        print_pair(SN.mon_run.dv_dyn_n[G.i], mon.LoopIbNoa.dv_dyn, 11, 5, 'dv_dyn_n', h, df)
+        print_pair(SN.mon_run.ib_wrp_T_n[G.i], mon.LoopIbNoa.WrapErrFilt.dt, 12, 4, 'e_wrap_n_T', h, df)
+        print_pair(SN.mon_run.ib_wrp_tau_n[G.i], mon.LoopIbNoa.WrapErrFilt.tau, 12, 4, 'e_wrap_n_tau', h, df)
+        print_pair(SN.mon_run.ib_wrp_rate_n[G.i], mon.LoopIbNoa.WrapErrFilt.rate, 12, 6, 'e_wrap_n_rate', h, df)
+        print_pair(SN.mon_run.ib_wrp_state_n[G.i], mon.LoopIbNoa.WrapErrFilt.state, 12, 6, 'e_wrap_n_state', h, df)
+        print_pair(SN.mon_run.e_wrap_n_trim[G.i], mon.e_wrap_n_trim, 16, 5, 'e_wrap_n_trim', h, df)
+        print_pair(SN.mon_run.e_wrap_n_trimmed[G.i], mon.LoopIbNoa.e_wrap_trimmed, 12, 6, 'e_wrap_n_trimmed', h, df)
+        print_pair(SN.mon_run.e_wrap_n[G.i], mon.e_wrap_n, 11, 5, 'e_wrap_n', h, df)
+        print_pair(SN.mon_run.e_wrap_n_filt[G.i], mon.e_wrap_n_filt, 11, 5, 'e_wrap_n_filt', h, df)
+        print_pair(SN.mon_run.ib[G.i], mon.ib, 14, 6, 'ib', h, df)
+        print_pair(SN.mon_run.e_wrap[G.i], mon.e_wrap, 11, 5, 'e_wrap', h, df)
+        print_pair(SN.mon_run.e_wrap_filt[G.i], mon.e_wrap_filt, 11, 5, 'e_wrap_filt', h, df)
+        print_pair(bool(SN.mon_run.ib_dyn_r[G.i]), mon.ib_dyn_r, 6, 0, 'ib_dyn_r', h, df)
+        print_pair(SN.mon_run.ib_dyn_rstate[G.i], mon.ib_dyn_in, 15, 6, 'ib_dyn_in', h, df)
+        print_pair(SN.mon_run.ib_dyn_T[G.i], mon.ib_dyn_T, 15, 6, 'ib_dyn_T', h, df)
+        print_pair(SN.mon_run.ib_dyn_rstate[G.i], mon.ib_dyn_rstate, 15, 6, 'ib_dyn_rstate', h, df)
+        print_pair(SN.mon_run.ib_dyn_lstate[G.i], mon.ib_dyn_lstate, 15, 6, 'ib_dyn_lstate', h, df)
+        print_pair(SN.mon_run.ib_dyn[G.i], mon.ib_dyn, 15, 6, 'ib_dyn', h, df)
+        print_pair(SN.mon_run.dv_dyn[G.i], mon.dv_dyn, 14, 6, 'dv_dyn', h, df)
+        print_pair(SN.mon_run.dv_hys[G.i], mon.dv_hys, 12, 6, 'dv_hys', h, df)
+        print_pair(SN.mon_run.soc[G.i], mon.soc, 13, 7, 'soc', h, df)
+        print_pair(SN.mon_run.dt[G.i], mon.dt, 9, 4, 'dt', h, df)
+        print_pair(SN.mon_run.Tb_f[G.i], mon.Tb_f, 14, 7, 'Tb_f', h, df)
+        print_pair(SN.mon_run.voc_soc[G.i], mon.voc_soc, 11, 5, 'voc_soc', h, df)
+        print_pair(SN.mon_run.voc[G.i], mon.voc, 11, 5, 'voc', h, df)
+        print_pair(SN.mon_run.voc_stat[G.i], mon.voc_stat, 11, 5, 'voc_stat', h, df)
+        print_pair(SN.sim_run.voc_stat_s[G.i], sim.voc_stat, 11, 5, 'voc_stat_s', h, df)
+        print_pair(SN.mon_run.voc_stat_f[i_ekf], mon.voc_stat_f, 11, 5, 'voc_stat_f', h, df)
+        print_pair(SN.mon_run.soc_ekf[G.i], mon.soc_ekf, 11, 5, 'soc_ekf', h, df)
+        print_pair(SN.mon_run.y_ekf[G.i], mon.y_ekf, 11, 5, 'y_ekf', h, df)
+        print_pair(SN.mon_run.y_ekf_f[G.i], mon.y_ekf_f, 11, 5, 'y_ekf_f', h, df)
+        print_pair(SN.mon_run.fltw[G.i], None, 8, 0, 'fltw', h, df)
+        print_pair(SN.mon_run.falw[G.i], None, 4, 0, 'falw', h, df)
+        print_pair(SN.mon_run.soc_min[G.i], mon.soc_min, 11, 5, 'soc_min', h, df, end="\n")
+
     print(Colors.reset, end="")
-    return hdr
+    return 'header'
 
 
 # 8
