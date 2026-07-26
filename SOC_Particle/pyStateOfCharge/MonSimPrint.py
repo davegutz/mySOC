@@ -826,7 +826,7 @@ def print_soc_s_HistSim(SN, i_temp, t, mon, sim, calc_temp, i_ekf, calc_ekf):
 
 # 3
 # noinspection PyPep8Naming
-def print_soc_s_RunSim(SN, i_temp, t, mon, sim, calc_temp, i_ekf, calc_ekf):
+def print_soc_s_RunSim(SN, i_temp, t, mon, sim, calc_temp, i_ekf, calc_ekf, df=False):
     global count_since_last_header, vv_warning_printed
     if not hasattr(SN.sim_run, "ib_charge_s") or SN.sim_run.ib_charge_s is None:
         if not vv_warning_printed:
@@ -838,24 +838,8 @@ def print_soc_s_RunSim(SN, i_temp, t, mon, sim, calc_temp, i_ekf, calc_ekf):
             vv_warning_printed = True
             print(Colors.reset, end="")
         return None
-    hdr = (
-        "  i  time     r       rt   rtps rk   it   ct      re   ie  ce    sa       sa_s  "
-        "     dt                    dt_s                  ib                         ib_i"
-        "n_s                       ib_s                          ib_charge_s             "
-        "   ib_dyn_rstate_s                ib_dyn_lstate_s              ib_dyn_T_s       "
-        "      ib_dyn_s                    ib_dyn                      dv_hys_s          "
-        "       ib_charge_s                 ioc_s                  soc                   "
-        "   d_delq                   delq                             i * dt_s * coul_eff"
-        "       soc_s                 Tb_model_f     Tb_hdwe_f      Tb_f_s               "
-        "          d_delta_q_s              delta_q_s                       qcrs         "
-        "          q_cap                  q_cap_s                 Tb_f_s                 "
-        "   Tb_f                      Tb_f                     Tb_f_rate               vb"
-        "                    vb_s                  voc_stat              voc_stat_s      "
-        "      voc_s                  dv_hys_s              dv_dyn_s             vsat    "
-        "            bms_off_s    voltage_low_s"
-    )
+    print_hdr = calc_temp and count_since_last_header > HDR_SPREAD
     if calc_temp and count_since_last_header > HDR_SPREAD:
-        print(hdr)
         count_since_last_header = 0
     if G.i > 0:
         count_since_last_header += 1
@@ -865,110 +849,71 @@ def print_soc_s_RunSim(SN, i_temp, t, mon, sim, calc_temp, i_ekf, calc_ekf):
         i_dt_old *= sim.chemistry.coul_eff
         i_dt_new *= sim.chemistry.coul_eff
     if mon.reset:
-        print(Colors.fg.red, end="")
-    if sim.reset_temp_past:
-        print(Colors.fg.orange, end="")
-    print(
-        "{:4d}".format(G.i),
-        "{:7.3f}".format(t[G.i]),
-        "{:2.0f}".format(mon.reset),
-        "{:7d}".format(mon.reset_temp),
-        "{:4d}".format(sim.reset_temp_past),
-        "{:4d}".format(mon.reset_kf),
-        "{:4d}".format(i_temp),
-        "{:4d}".format(calc_temp),
-        "{:7d}".format(mon.reset_ekf),
-        "{:4d}".format(i_ekf),
-        "{:4d}".format(calc_ekf),
-        "{:4.0f}".format(SN.mon_run.sat[G.i]),
-        "{:2.0f}".format(mon.sat),
-        "{:5.0f}".format(SN.sim_run.sat_s[G.i]),
-        "{:2.0f}".format(sim.sat),
-        "{:12.4f}".format(SN.mon_run.dt[G.i]),
-        "{:8.4f}".format(mon.dt),
-        "{:12.4f}".format(SN.sim_run.dt_s[G.i]),
-        "{:8.4f}".format(sim.dt),
-        "{:14.5f}".format(SN.mon_run.ib[G.i]),
-        "{:12.5f}".format(mon.ib),
-        "{:14.5f}".format(SN.sim_run.ib_in_s[G.i]),
-        "{:12.5f}".format(sim.ib_in),
-        "{:15.6f}".format(SN.sim_run.ib_s[G.i]),
-        "{:13.6f}".format(sim.ib),
-        "{:15.6f}".format(SN.sim_run.ib_charge_s[G.i]),
-        "{:13.6f}".format(sim.ib_charge),
-        "{:15.6f}".format(SN.sim_run.ib_dyn_rstate_s[G.i]),
-        "{:13.6f}".format(sim.ChargeTransfer.rstate),
-        "{:15.6f}".format(SN.sim_run.ib_dyn_lstate_s[G.i]),
-        "{:13.6f}".format(sim.ChargeTransfer.state),
-        "{:12.4f}".format(SN.sim_run.ib_dyn_T_s[G.i]),
-        "{:8.4f}".format(sim.ChargeTransfer.dt),
-        "{:14.5f}".format(SN.sim_run.ib_dyn_s[G.i]),
-        "{:12.5f}".format(sim.ib_dyn),
-        "{:14.5f}".format(SN.mon_run.ib_dyn[G.i]),
-        "{:12.5f}".format(mon.ib_dyn),
-        "{:12.5f}".format(SN.sim_run.dv_hys_s[G.i]),
-        "{:9.5f}".format(sim.dv_hys),
-        "{:14.5f}".format(SN.sim_run.ib_charge_s[G.i]),
-        "{:12.5f}".format(sim.ib_charge),
-        "{:14.5f}".format(SN.sim_run.ioc_s[G.i]),
-        "{:12.5f}".format(sim.ioc),
-        "{:11.7f}".format(SN.mon_run.soc[G.i]),
-        "{:8.7f}".format(mon.soc),
-        "{:14.7f}".format(SN.mon_run.d_delta_q[G.i]),
-        "{:11.7f}".format(mon.d_delta_q),
-        "{:16.6f}".format(SN.mon_run.delta_q[G.i]),
-        "{:13.6f}".format(mon.delta_q),
-        "{:14.5f}".format(i_dt_old),
-        "{:11.5f}".format(i_dt_new),
-        "{:11.7f}".format(SN.mon_run.soc_s[G.i]),
-        "{:8.7f}".format(sim.soc),
-        "{:14.8f}".format(SN.mon_run.Tb_model_f[G.i]),
-        "{:14.8f}".format(SN.mon_run.Tb_hdwe_f[G.i]),
-        "{:14.8f}".format(SN.sim_run.Tb_f_s[G.i]),
-        "{:11.8f}".format(sim.Tb_f),
-        "{:15.6f}".format(SN.sim_run.d_delta_q_s[G.i]),
-        "{:13.6f}".format(sim.d_delta_q),
-        "{:15.6f}".format(SN.sim_run.delta_q_s[G.i]),
-        "{:13.6f}".format(sim.delta_q),
-        "{:12.2f}".format(SN.mon_run.qcrs[G.i]),
-        "{:9.2f}".format(mon.q_cap_rated_scaled),
-        "{:12.2f}".format(SN.mon_run.q_capacity[G.i]),
-        "{:9.2f}".format(mon.q_capacity),
-        "{:12.2f}".format(SN.sim_run.qcap_s[G.i]),
-        "{:9.2f}".format(sim.q_capacity),
-        "{:14.7f}".format(SN.sim_run.Tb_f_s[G.i]),
-        "{:10.7f}".format(sim.Tb_f),
-        "{:14.7f}".format(SN.mon_run.Tb_f[G.i]),
-        "{:10.7f}".format(mon.Tb_f),
-        "{:14.7f}".format(SN.mon_run.Tb_f[G.i]),
-        "{:10.7f}".format(mon.Tb_f),
-        "{:12.7f}".format(SN.mon_run.Tb_f_rate[G.i]),
-        "{:10.7f}".format(mon.Tb_f_rate),
-        "{:11.5f}".format(SN.mon_run.vb[G.i]),
-        "{:9.5f}".format(mon.vb),
-        "{:11.5f}".format(SN.sim_run.vb_s[G.i]),
-        "{:9.5f}".format(sim.vb),
-        "{:11.5f}".format(SN.mon_run.voc_stat[G.i]),
-        "{:9.5f}".format(mon.voc_stat),
-        "{:11.5f}".format(SN.sim_run.voc_stat_s[G.i]),
-        "{:9.5f}".format(sim.voc_stat),
-        "{:11.5f}".format(SN.sim_run.voc_s[G.i]),
-        "{:9.5f}".format(sim.voc),
-        "{:11.5f}".format(SN.sim_run.dv_hys_s[G.i]),
-        "{:9.5f}".format(sim.dv_hys),
-        "{:11.5f}".format(SN.sim_run.dv_dyn_s[G.i]),
-        "{:9.5f}".format(sim.dv_dyn),
-        "{:11.5f}".format(SN.mon_run.vsat[G.i]),
-        "{:9.5f}".format(mon.vsat),
-        "{:7d}".format(bool(SN.sim_run.bms_off_s[G.i])),
-        "{:4d}".format(sim.bms_off),
-        "{:7d}".format(bool(SN.sim_run.voltage_low_s[G.i])),
-        "{:4d}".format(sim.voltage_low),
-    )
-    if G.i == 2:
-        pass
+        set_color(Colors.fg.red)
+    elif sim.reset_temp_past:
+        set_color(Colors.fg.orange)
+    else:
+        set_color(Colors.reset)
+
+    for i_hdr in range(int(print_hdr), -1, -1):
+        h = (i_hdr == 1)
+        print_pair(G.i, None, 4, 0, 'i', h, df)
+        print_pair(t[G.i], None, 7, 3, 'time', h, df)
+        print_pair(mon.reset, None, 2, 0, 'r', h, df)
+        print_pair(mon.reset_temp, None, 7, 0, 'rt', h, df)
+        print_pair(sim.reset_temp_past, None, 4, 0, 'rtps', h, df)
+        print_pair(mon.reset_kf, None, 4, 0, 'rk', h, df)
+        print_pair(i_temp, None, 4, 0, 'it', h, df)
+        print_pair(calc_temp, None, 4, 0, 'ct', h, df)
+        print_pair(mon.reset_ekf, None, 7, 0, 're', h, df)
+        print_pair(i_ekf, None, 4, 0, 'ie', h, df)
+        print_pair(calc_ekf, None, 4, 0, 'ce', h, df)
+        print_pair(SN.mon_run.sat[G.i], mon.sat, 4, 0, 'sa', h, df)
+        print_pair(SN.sim_run.sat_s[G.i], sim.sat, 5, 0, 'sa_s', h, df)
+        print_pair(SN.mon_run.dt[G.i], mon.dt, 12, 4, 'dt', h, df)
+        print_pair(SN.sim_run.dt_s[G.i], sim.dt, 12, 4, 'dt_s', h, df)
+        print_pair(SN.mon_run.ib[G.i], mon.ib, 14, 5, 'ib', h, df)
+        print_pair(SN.sim_run.ib_in_s[G.i], sim.ib_in, 14, 5, 'ib_in_s', h, df)
+        print_pair(SN.sim_run.ib_s[G.i], sim.ib, 15, 6, 'ib_s', h, df)
+        print_pair(SN.sim_run.ib_charge_s[G.i], sim.ib_charge, 15, 6, 'ib_charge_s', h, df)
+        print_pair(SN.sim_run.ib_dyn_rstate_s[G.i], sim.ChargeTransfer.rstate, 15, 6, 'ib_dyn_rstate_s', h, df)
+        print_pair(SN.sim_run.ib_dyn_lstate_s[G.i], sim.ChargeTransfer.state, 15, 6, 'ib_dyn_lstate_s', h, df)
+        print_pair(SN.sim_run.ib_dyn_T_s[G.i], sim.ChargeTransfer.dt, 12, 4, 'ib_dyn_T_s', h, df)
+        print_pair(SN.sim_run.ib_dyn_s[G.i], sim.ib_dyn, 14, 5, 'ib_dyn_s', h, df)
+        print_pair(SN.mon_run.ib_dyn[G.i], mon.ib_dyn, 14, 5, 'ib_dyn', h, df)
+        print_pair(SN.sim_run.dv_hys_s[G.i], sim.dv_hys, 12, 5, 'dv_hys_s', h, df)
+        print_pair(SN.sim_run.ib_charge_s[G.i], sim.ib_charge, 14, 5, 'ib_charge_s', h, df)
+        print_pair(SN.sim_run.ioc_s[G.i], sim.ioc, 14, 5, 'ioc_s', h, df)
+        print_pair(SN.mon_run.soc[G.i], mon.soc, 11, 7, 'soc', h, df)
+        print_pair(SN.mon_run.d_delta_q[G.i], mon.d_delta_q, 14, 7, 'd_delq', h, df)
+        print_pair(SN.mon_run.delta_q[G.i], mon.delta_q, 16, 6, 'delq', h, df)
+        print_pair(i_dt_old, i_dt_new, 14, 5, 'i * dt_s * coul_eff', h, df)
+        print_pair(SN.mon_run.soc_s[G.i], sim.soc, 11, 7, 'soc_s', h, df)
+        print_pair(SN.mon_run.Tb_model_f[G.i], None, 14, 8, 'Tb_model_f', h, df)
+        print_pair(SN.mon_run.Tb_hdwe_f[G.i], None, 14, 8, 'Tb_hdwe_f', h, df)
+        print_pair(SN.sim_run.Tb_f_s[G.i], sim.Tb_f, 14, 8, 'Tb_f_s', h, df)
+        print_pair(SN.sim_run.d_delta_q_s[G.i], sim.d_delta_q, 15, 6, 'd_delta_q_s', h, df)
+        print_pair(SN.sim_run.delta_q_s[G.i], sim.delta_q, 15, 6, 'delta_q_s', h, df)
+        print_pair(SN.mon_run.qcrs[G.i], mon.q_cap_rated_scaled, 12, 2, 'qcrs', h, df)
+        print_pair(SN.mon_run.q_capacity[G.i], mon.q_capacity, 12, 2, 'q_cap', h, df)
+        print_pair(SN.sim_run.qcap_s[G.i], sim.q_capacity, 12, 2, 'q_cap_s', h, df)
+        print_pair(SN.sim_run.Tb_f_s[G.i], sim.Tb_f, 14, 7, 'Tb_f_s', h, df)
+        print_pair(SN.mon_run.Tb_f[G.i], mon.Tb_f, 14, 7, 'Tb_f', h, df)
+        print_pair(SN.mon_run.Tb_f[G.i], mon.Tb_f, 14, 7, 'Tb_f', h, df)
+        print_pair(SN.mon_run.Tb_f_rate[G.i], mon.Tb_f_rate, 12, 7, 'Tb_f_rate', h, df)
+        print_pair(SN.mon_run.vb[G.i], mon.vb, 11, 5, 'vb', h, df)
+        print_pair(SN.sim_run.vb_s[G.i], sim.vb, 11, 5, 'vb_s', h, df)
+        print_pair(SN.mon_run.voc_stat[G.i], mon.voc_stat, 11, 5, 'voc_stat', h, df)
+        print_pair(SN.sim_run.voc_stat_s[G.i], sim.voc_stat, 11, 5, 'voc_stat_s', h, df)
+        print_pair(SN.sim_run.voc_s[G.i], sim.voc, 11, 5, 'voc_s', h, df)
+        print_pair(SN.sim_run.dv_hys_s[G.i], sim.dv_hys, 11, 5, 'dv_hys_s', h, df)
+        print_pair(SN.sim_run.dv_dyn_s[G.i], sim.dv_dyn, 11, 5, 'dv_dyn_s', h, df)
+        print_pair(SN.mon_run.vsat[G.i], mon.vsat, 11, 5, 'vsat', h, df)
+        print_pair(bool(SN.sim_run.bms_off_s[G.i]), sim.bms_off, 7, 0, 'bms_off_s', h, df)
+        print_pair(bool(SN.sim_run.voltage_low_s[G.i]), sim.voltage_low, 7, 0, 'voltage_low_s', h, df, end="\n")
+
     print(Colors.reset, end="")
-    return hdr
+    return 'header'
 
 
 # 4
