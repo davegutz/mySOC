@@ -423,9 +423,9 @@ def main():  # Example usage.  ok on 20260217
         8:  vb_wrap
         9:  dyn_n
     """
-    data_file = '/home/daveg/gdrive/GitHubArchive/SOC_Particle/dataReduction/g20260612a/flatSit_soc3p2_hi_lo_bb.csv'
+    data_file = '/home/daveg/gdrive/GitHubArchive/SOC_Particle/dataReduction/g20260612a/rapidTweakRegression_soc3p2_hi_lo_bb.csv'
     unit_key = 'g20260612a_soc3p2_hi_lo_bb'
-    time_end = 128
+    time_end = 5
     compare_run_ver = True
     shift_soc_s = True
     plots = False
@@ -433,7 +433,7 @@ def main():  # Example usage.  ok on 20260217
     verbose = False
     scale_batt = 1.0
     slr_hys_sim = 1.0
-    request_history = 5
+    request_history = 3
     init_time = None
     time_shift = None
     strict_overplot = True

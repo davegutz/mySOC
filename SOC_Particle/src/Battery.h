@@ -258,6 +258,9 @@ class BatterySim : public Battery {
   bool cutback() { return model_cutback_; };
   double delta_q() { return *sp_delta_q_; };
   double d_delta_q_s() { return d_delta_q_s_; };
+  uint32_t dt_fut_ms() { return dt_fut_ms_; };
+  double dt_fut() { return dt_fut_; };
+  double dt_in() { return dt_in_; };
   uint32_t dt_long() { return sample_time_ - sample_time_z_; };
   float hys_state() { return hys_->dv_hys(); };
   void hys_state(const float st) { hys_->dv_hys(st); };
@@ -281,6 +284,10 @@ class BatterySim : public Battery {
   CosInj* Cos_inj_;  // Class to create cosine waves
   uint32_t duty_;  // Used in Test Mode to inject Fake shunt current (0 - 255)
   double d_delta_q_s_;  // Charge rate, C/s
+  uint32_t dt_in_ms_;   // Input elapsed time of model sample, ms
+  uint32_t dt_fut_ms_;  // Future delta update of model sample, ms
+  double dt_in_;        // Input update time of model sample, s
+  double dt_fut_;       // Future update time of model sample, s
   float ib_charge_;  // Current input avaiable for charging, A
   float ib_fut_;  // Future value of limited current, A
   float ib_in_;  // Saved value of current input, A

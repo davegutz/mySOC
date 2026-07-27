@@ -157,6 +157,7 @@ class Sensors:
             self.dv_dyn_s = self.sim_run.dv_dyn_s
             self.dt_s = self.sim_run.dt_s
             self.d_delta_q_s_init = 0.0
+            self.delta_q_s_init = self.sim_run.delta_q_s[0] if hasattr(self.sim_run, "delta_q_s") and len(self.sim_run.delta_q_s) > 0 else 0.0
             self.Tb_model_f_fut = self.mon_run.Tb_model_f[1]
             self.Tb_model_f_rate_fut = self.mon_run.Tb_model_f_rate[1]
             self.e_wrap_init = self.mon_run.e_wrap[0]

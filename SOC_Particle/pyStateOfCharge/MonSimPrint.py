@@ -185,37 +185,37 @@ def print_hist(OPT, SN, i_temp, i_ekf, t, mon, calc_temp, calc_ekf, sim, df=True
                 case 0:
                     hdr = ""
                 case 1:  # request_history for ekf
-                    hdr = print_ekf_RunSim(SN, i_temp, i_ekf, t, mon, sim, calc_ekf, calc_temp, df=df)
+                    hdr = print_ekf_RunSim(SN, i_temp, i_ekf, t, mon, sim, calc_ekf, calc_temp, df)
                 case 2:  # request_history for soc
-                    hdr = print_soc_RunSim(SN, i_temp, t, mon, sim, calc_temp, i_ekf, calc_ekf)
+                    hdr = print_soc_RunSim(SN, i_temp, t, mon, sim, calc_temp, i_ekf, calc_ekf, df)
                 case 3:  # request_history for soc_s
-                    hdr = print_soc_s_RunSim(SN, i_temp, t, mon, sim, calc_temp, i_ekf, calc_ekf)
+                    hdr = print_soc_s_RunSim(SN, i_temp, t, mon, sim, calc_temp, i_ekf, calc_ekf, df)
                 case 4:  # request_history for temp
-                    hdr = print_temp_RunSim(SN, i_temp, t, mon, sim, calc_temp, i_ekf, calc_ekf)
+                    hdr = print_temp_RunSim(SN, i_temp, t, mon, sim, calc_temp, i_ekf, calc_ekf, df)
                 case 5:  # request_history for volt all
-                    hdr = print_volt_RunSim(SN, i_temp, i_ekf, t, mon, sim, calc_temp, calc_ekf)
+                    hdr = print_volt_RunSim(SN, i_temp, i_ekf, t, mon, sim, calc_temp, calc_ekf, df)
                 case 6:  # request_history for kf
-                    hdr = print_kf_RunSim(SN, i_temp, i_ekf, t, mon, sim, calc_temp, calc_ekf)
+                    hdr = print_kf_RunSim(SN, i_temp, i_ekf, t, mon, sim, calc_temp, calc_ekf, df)
                 case 7:  # request_history for dyn_m
-                    hdr = print_dyn_m_RunSim(SN, i_temp, i_ekf, t, mon, sim, calc_temp, calc_ekf)
+                    hdr = print_dyn_m_RunSim(SN, i_temp, i_ekf, t, mon, sim, calc_temp, calc_ekf, df)
                 case 8:  # request_history for vb_wrap
-                    hdr = print_vb_wrap_RunSim(SN, i_temp, i_ekf, t, mon, sim, calc_temp, calc_ekf)
+                    hdr = print_vb_wrap_RunSim(SN, i_temp, i_ekf, t, mon, sim, calc_temp, calc_ekf, df)
                 case 9:  # request_history for dyn_n
-                    hdr = print_dyn_n_RunSim(SN, i_temp, i_ekf, t, mon, sim, calc_temp, calc_ekf)
+                    hdr = print_dyn_n_RunSim(SN, i_temp, i_ekf, t, mon, sim, calc_temp, calc_ekf, df)
         case "HistSim":
             match OPT.request_history:
                 case 0:
                     hdr = ""
                 # case 1:
-                #     hdr = print_ekf_HistSim(SN, i_temp, t, mon, sim, calc_temp, i_ekf, calc_ekf)
+                #     hdr = print_ekf_HistSim(SN, i_temp, t, mon, sim, calc_temp, i_ekf, calc_ekf, df)
                 # case 2:
-                #     hdr = print_soc_HistSim(SN, i_temp, t, mon, sim, calc_temp, i_ekf, calc_ekf)
+                #     hdr = print_soc_HistSim(SN, i_temp, t, mon, sim, calc_temp, i_ekf, calc_ekf, df)
                 case 3:
-                    hdr = print_soc_s_HistSim(SN, i_temp, t, mon, sim, calc_temp, i_ekf, calc_ekf, df=df)
+                    hdr = print_soc_s_HistSim(SN, i_temp, t, mon, sim, calc_temp, i_ekf, calc_ekf, df)
                 # case 4:
-                #     hdr = print_temp_HistSim(SN, i_temp, t, mon, sim, calc_temp, i_ekf, calc_ekf)
+                #     hdr = print_temp_HistSim(SN, i_temp, t, mon, sim, calc_temp, i_ekf, calc_ekf, df)
                 case 5:
-                    hdr = print_volt_HistSim(SN, i_temp, i_ekf, t, mon, calc_temp, calc_ekf, df=df)
+                    hdr = print_volt_HistSim(SN, i_temp, i_ekf, t, mon, calc_temp, calc_ekf, df)
     return hdr
 
 
@@ -687,11 +687,16 @@ def print_soc_s_RunSim(SN, i_temp, t, mon, sim, calc_temp, i_ekf, calc_ekf, df=F
         count_since_last_header = 0
     if G.i > 0:
         count_since_last_header += 1
-    i_dt_old = SN.sim_run.dt_s[G.i] * SN.sim_run.ib_charge_s[G.i]
-    i_dt_new = sim.dt * sim.ib_charge
+    i_dt_old = SN.mon_run.dt[G.i] * SN.mon_run.ib_charge[G.i]
+    i_dt_new = mon.dt * mon.ib_charge
+    if mon.ib_charge > 0:
+        i_dt_old *= mon.chemistry.coul_eff
+        i_dt_new *= mon.chemistry.coul_eff
+    i_dt_old_s = SN.sim_run.dt_s[G.i] * SN.sim_run.ib_charge_s[G.i]
+    i_dt_new_s = sim.dt * sim.ib_charge
     if sim.ib_charge > 0:
-        i_dt_old *= sim.chemistry.coul_eff
-        i_dt_new *= sim.chemistry.coul_eff
+        i_dt_old_s *= sim.chemistry.coul_eff
+        i_dt_new_s *= sim.chemistry.coul_eff
     if mon.reset:
         set_color(Colors.fg.red)
     elif sim.reset_temp_past:
@@ -717,22 +722,31 @@ def print_soc_s_RunSim(SN, i_temp, t, mon, sim, calc_temp, i_ekf, calc_ekf, df=F
         print_pair(SN.mon_run.dt[G.i], mon.dt, 12, 4, 'dt', h, df)
         print_pair(SN.sim_run.dt_s[G.i], sim.dt, 12, 4, 'dt_s', h, df)
         print_pair(SN.mon_run.ib[G.i], mon.ib, 14, 5, 'ib', h, df)
+        print_pair(SN.mon_run.ib_charge[G.i], mon.ib_charge, 15, 6, 'ib_charge', h, df)
+        print_pair(SN.mon_run.ib_dyn_rstate[G.i], mon.ChargeTransfer.rstate, 15, 6, 'ib_dyn_rstate', h, df)
+        print_pair(SN.mon_run.ib_dyn_lstate[G.i], mon.ChargeTransfer.state, 15, 6, 'ib_dyn_lstate', h, df)
+        print_pair(SN.mon_run.ib_dyn_T[G.i], mon.ChargeTransfer.dt, 12, 4, 'ib_dyn_T', h, df)
+        print_pair(SN.mon_run.ib_dyn[G.i], mon.ib_dyn, 15, 7, 'ib_dyn', h, df)
         print_pair(SN.sim_run.ib_in_s[G.i], sim.ib_in, 14, 5, 'ib_in_s', h, df)
         print_pair(SN.sim_run.ib_s[G.i], sim.ib, 15, 6, 'ib_s', h, df)
         print_pair(SN.sim_run.ib_charge_s[G.i], sim.ib_charge, 15, 6, 'ib_charge_s', h, df)
         print_pair(SN.sim_run.ib_dyn_rstate_s[G.i], sim.ChargeTransfer.rstate, 15, 6, 'ib_dyn_rstate_s', h, df)
         print_pair(SN.sim_run.ib_dyn_lstate_s[G.i], sim.ChargeTransfer.state, 15, 6, 'ib_dyn_lstate_s', h, df)
         print_pair(SN.sim_run.ib_dyn_T_s[G.i], sim.ChargeTransfer.dt, 12, 4, 'ib_dyn_T_s', h, df)
-        print_pair(SN.sim_run.ib_dyn_s[G.i], sim.ib_dyn, 14, 5, 'ib_dyn_s', h, df)
-        print_pair(SN.mon_run.ib_dyn[G.i], mon.ib_dyn, 14, 5, 'ib_dyn', h, df)
+        print_pair(SN.sim_run.ib_dyn_s[G.i], sim.ib_dyn, 15, 7, 'ib_dyn_s', h, df)
+        print_pair(SN.mon_run.ib_dyn[G.i], mon.ib_dyn, 15, 7, 'ib_dyn', h, df)
         print_pair(SN.sim_run.dv_hys_s[G.i], sim.dv_hys, 12, 5, 'dv_hys_s', h, df)
-        print_pair(SN.sim_run.ib_charge_s[G.i], sim.ib_charge, 14, 5, 'ib_charge_s', h, df)
+        print_pair(SN.mon_run.ib_charge[G.i], mon.ib_charge, 16, 7, 'ib_charge', h, df)
+        print_pair(SN.sim_run.ib_charge_s[G.i], sim.ib_charge, 16, 7, 'ib_charge_s', h, df)
         print_pair(SN.sim_run.ioc_s[G.i], sim.ioc, 14, 5, 'ioc_s', h, df)
-        print_pair(SN.mon_run.soc[G.i], mon.soc, 11, 7, 'soc', h, df)
         print_pair(SN.mon_run.d_delta_q[G.i], mon.d_delta_q, 14, 7, 'd_delq', h, df)
+        print_pair(i_dt_old, i_dt_new, 14, 7, 'i * dt * coul_eff', h, df)
         print_pair(SN.mon_run.delta_q[G.i], mon.delta_q, 16, 6, 'delq', h, df)
-        print_pair(i_dt_old, i_dt_new, 14, 5, 'i * dt_s * coul_eff', h, df)
-        print_pair(SN.mon_run.soc_s[G.i], sim.soc, 11, 7, 'soc_s', h, df)
+        print_pair(SN.mon_run.soc[G.i], mon.soc, 13, 9, 'soc', h, df)
+        print_pair(i_dt_old_s, i_dt_new_s, 14, 7, 'i * dt_s * coul_eff', h, df)
+        print_pair(SN.sim_run.d_delta_q_s[G.i], sim.d_delta_q_s, 14, 7, 'd_delq_s', h, df)
+        print_pair(SN.sim_run.delta_q_s[G.i], sim.delta_q_s, 16, 6, 'delq_s', h, df)
+        print_pair(SN.sim_run.soc_s[G.i], sim.soc, 13, 9, 'soc_s', h, df)
         print_pair(SN.mon_run.Tb_model_f[G.i], None, 14, 8, 'Tb_model_f', h, df)
         print_pair(SN.mon_run.Tb_hdwe_f[G.i], None, 14, 8, 'Tb_hdwe_f', h, df)
         print_pair(SN.sim_run.Tb_f_s[G.i], sim.Tb_f, 14, 8, 'Tb_f_s', h, df)

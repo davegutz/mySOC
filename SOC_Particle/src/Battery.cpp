@@ -667,7 +667,8 @@ BatterySim::BatterySim(const float dx_voc, const float dy_voc,
                        const float dz_voc)
     : Battery(sp.delta_q_model_ptr(), VS, dx_voc, dy_voc, dz_voc),
       Sin_inj_(nullptr), Sq_inj_(nullptr), Tri_inj_(nullptr), Cos_inj_(nullptr),
-      duty_(0UL), d_delta_q_s_(0.), ib_charge_(0.), ib_fut_(0.), ib_in_(0.),
+      duty_(0UL), d_delta_q_s_(0.), dt_in_ms_(0UL), dt_fut_ms_(0UL),
+      dt_in_(0.), dt_fut_(0.), ib_charge_(0.), ib_fut_(0.), ib_in_(0.),
       ib_sat_(0.5), model_cutback_(true), model_saturated_(false),
       q_(NOM_UNIT_CAP * 3600.), sample_time_(0UL), sample_time_z_(0UL),
       sat_cutback_gain_(1000.), sat_ib_max_(0.), sat_ib_null_(0.),
@@ -749,9 +750,15 @@ float BatterySim::calculate(Sensors* Sen, const bool dc_dc_on,
   Tb_f_ = Sen->Tb_f();
 
   ctime_ = Sen->cTime();
-  dt_ = Sen->T();
+  dt_in_ms_ = dt_long();
+  dt_in_ = double(dt_in_ms_) / 1000.;
   ib_in_ = Sen->Ib_model_in() / ap.nP();
-  if (reset) ib_fut_ = ib_in_;
+  if (reset || sp.mod_ib()) {
+    dt_fut_ms_ = dt_in_ms_;
+    dt_fut_ = dt_in_;
+    ib_fut_ = ib_in_;
+  }
+  dt_ = max((float)dt_fut_, 1e-4f);
   ib_ = max(min(ib_fut_, IMAX_NUM),
             -IMAX_NUM);  //  Past value ib_.  Overflow protection when ib_ past
                          //  value used
@@ -816,6 +823,8 @@ float BatterySim::calculate(Sensors* Sen, const bool dc_dc_on,
   // ib_charge_ = ib_charge_fut;  // Same time plane as volt calcs, added past
   // value.  (This prevents sat logic from working)
   ib_charge_ = ib_fut_;  // Same time plane as volt calcs, added past value
+  dt_fut_ms_ = dt_in_ms_;
+  dt_fut_ = dt_in_;
 
   // if ( (q_ <= 0.) && (ib_charge_ < 0.) && sp.mod_ib() ) ib_charge_ = 0.;
   // empty  **** don't know why this was here.  cannot bms_off_ with it
@@ -987,6 +996,10 @@ void BatterySim::init_battery_sim(const bool reset, Sensors* Sen) {
   if (isnan(ib_)) ib_ = 0.;     // reset overflow
   dv_dyn_ = vb_ - voc_;
   ib_fut_ = ib_;
+  dt_fut_ms_ = dt_long();
+  dt_fut_ = double(dt_fut_ms_) / 1000.;
+  dt_in_ms_ = dt_fut_ms_;
+  dt_in_ = dt_fut_;
   init_hys(0.0);
   ibs_ = hys_->ibs();
 #ifdef DEBUG_INIT
