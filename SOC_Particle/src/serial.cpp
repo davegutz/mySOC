@@ -206,9 +206,10 @@ void print_battery_serial() {
           TB_HDWE_MIN);
   Serial.printf("%s", pr.buff);
 
-  sprintf(pr.buff, "%10.7f,%ld,%10.7f,%10.7f,%10.7f,%10.7f,%10.7f,%10.7f,%10.7f,",
-          TCHARGE_DISPLAY_DEADBAND, TEMP_DELAY, TMAX_FILT, T_RLIM, VB_DC_DC, VB_MAX, VB_MIN,
-          VOC_STAT_FILT, WN_Y_FILT);
+  sprintf(pr.buff, "%10.7f,%ld,%10.7f,%10.7f,%10.7f,%10.7f,%10.7f,%10.7f,\
+  %10.7f,",
+          TCHARGE_DISPLAY_DEADBAND, TEMP_DELAY, TMAX_FILT, T_RLIM, VB_DC_DC,
+          VB_MAX, VB_MIN, VOC_STAT_FILT, WN_Y_FILT);
   Serial.printf("%s", pr.buff);
 
   sprintf(pr.buff, "%10.7f,%10.7f,%10.7f,%10.7f,%10.7f,%10.7f,%10.7f,%10.7f,",
@@ -424,7 +425,7 @@ void print_shunt_serial(const bool reset, Sensors* Sen) {
 // print_signal_select for data collection
 void print_signal_sel_header() {
   Serial.printf(
-      "unit_s, c_time_sel, dt_sel, dt_psss, resaf, user_sel, cc_dif, "
+      "unit_s, c_time_sel, dt_sel, dt_pst_s, resaf, user_sel, cc_dif, "
       "ib_amp_hdwe, ib_noa_hdwe, ib_amp_model, ib_noa_model, ib_model, kfres, "
       "vovcm, vovcn, ib_amp_hdwe_kf, ib_noa_hdwe_kf, ib_diff, ib_diff_f, ");
   Serial.printf(
@@ -471,22 +472,23 @@ void print_signal_sel_serial(const bool reset, Sensors* Sen,
   static double last_cTime_sel = 0.;
   if ((sp.debug() == 2 || sp.debug() == 4 || sp.debug() == 61 ||
    sp.debug() == 6) && cp.publishS) {
-    static uint64_t psss_now_past = Sen->now();
+    static uint64_t pst_s_now_past = Sen->now();
     if (!reset && Sen->cTime() <= last_cTime_sel + 0.00005) return;
     last_cTime_sel = Sen->cTime();
-    uint64_t now_psss = Sen->now();
-    double dt_psss = double(now_psss - psss_now_past) / 1e3;
-    psss_now_past = now_psss;
+    uint64_t now_pst_s = Sen->now();
+    double dt_pst_s = double(now_pst_s - pst_s_now_past) / 1e3;
+    pst_s_now_past = now_pst_s;
     sprintf(pr.buff,
             "unit_sel,%13.4f, %8.4f, %8.4f, %d, %d, %10.7f, "
             "%8.6f,%8.6f,%8.6f,%8.6f,%8.6f,   %d,%8.6f,%8.6f,%8.6f,%8.6f,   "
             "%8.6f,%8.6f, ",
-            Sen->cTime(), Sen->T(), dt_psss, Sen->Flt->reset_all_faults_print(),
-            sp.ib_force(), Sen->Flt->cc_diff(), Sen->ib_amp_hdwe(),
-            Sen->ib_noa_hdwe(), Sen->ib_amp_model(), Sen->ib_noa_model(),
-            Sen->ib_model(), cp.kf_reset_print, Sen->ib_amp_vo_vc(),
-            Sen->ib_noa_vo_vc(), Sen->ib_amp_hdwe_kf(), Sen->ib_noa_hdwe_kf(),
-            Sen->Flt->ib_diff(), Sen->Flt->ib_diff_f());
+            Sen->cTime(), Sen->T(), dt_pst_s,
+            Sen->Flt->reset_all_faults_print(), sp.ib_force(),
+            Sen->Flt->cc_diff(), Sen->ib_amp_hdwe(), Sen->ib_noa_hdwe(),
+            Sen->ib_amp_model(), Sen->ib_noa_model(), Sen->ib_model(),
+            cp.kf_reset_print, Sen->ib_amp_vo_vc(), Sen->ib_noa_vo_vc(),
+            Sen->ib_amp_hdwe_kf(), Sen->ib_noa_hdwe_kf(), Sen->Flt->ib_diff(),
+            Sen->Flt->ib_diff_f());
     Serial.printf("%s", pr.buff);
 
     sprintf(pr.buff,
@@ -591,7 +593,7 @@ void print_signal_sel_serial(const bool reset, Sensors* Sen,
 // print sim for data collection
 void print_sim_header() {
   Serial.printf(
-      "unit_m,  c_time_sim,  dt_pss,  dt_s, chm_s, qcrs_s, bms_off_s, Tb_s, "
+      "unit_m,  c_time_sim,  dt_pst,  dt_s, chm_s, qcrs_s, bms_off_s, Tb_s, "
       "Tb_f_s, vsat_s, voc_stat_s, ");
   Serial.printf(
       "dv_dyn_s, vb_s, ib_s, ib_dyn_s, dv_hys_s, ib_in_s, ib_charge_s, "
@@ -612,22 +614,22 @@ void print_sim_serial(const bool initializing_all, const bool reset_temp,
     static uint64_t pss_now_past = Sen->now();
     last_cTime_sim = Sim->cTime();
     uint64_t now_pss = Sen->now();
-    double dt_pss = double(now_pss - pss_now_past) / 1e3;
+    double dt_pst = double(now_pss - pss_now_past) / 1e3;
     pss_now_past = now_pss;
     sprintf(pr.buff,
             "unit_sim, %13.4f, %8.4f, %8.4f, %d, %10.4f, %d, %11.8f, %11.8f, "
             "%7.6f,%7.6f, ",
-            Sim->cTime(), dt_pss, Sim->dt(), CHEM, Sim->q_cap_rated_scaled(),
+            Sim->cTime(), dt_pst, Sim->dt(), CHEM, Sim->q_cap_rated_scaled(),
             Sim->bms_off(), Sim->Tb(), Sim->Tb_f(), Sim->vsat(),
             Sim->voc_stat());
     Serial.printf("%s", pr.buff);
 
-    sprintf(pr.buff, "%7.6f,%8.6f, %7.6f,%7.6f,%7.6f,%7.6f,%7.6f,%7.6f, ",
+    sprintf(pr.buff, "%11.9f,%11.9f,%11.9f,%11.9f,%11.9f,%11.9f,%11.9f,%11.9f,",
             Sim->dv_dyn(), Sim->vb(), Sim->ib_s(), Sim->ib_dyn(), Sim->dv_hys(),
             Sim->ib_in(), Sim->ib_charge(), Sim->ioc());
     Serial.printf("%s", pr.buff);
 
-    sprintf(pr.buff, " %d,  %9.4f, %10.4f,  %11.9f, %d, %7.6f,",
+    sprintf(pr.buff, " %d,  %11.9f, %11.9f,  %11.9f, %d, %11.9f,",
             Sim->saturated(), Sim->delta_q(), Sim->q_capacity(), Sim->soc(),
             reset_temp, Sim->d_delta_q_s());
     Serial.printf("%s", pr.buff);
