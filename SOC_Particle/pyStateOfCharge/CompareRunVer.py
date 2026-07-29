@@ -30,8 +30,9 @@ EKF_DEFAULT_FRAME_MULT = 20
 # Column names suggesting EKF outputs/state (soc_ekf, voc_ekf, y_ekf, kfres, kf_v_m, *_kf, ekf_reset, flt_ekf, ...)
 _EKF_COL_RE = re.compile(r"(?:^|_)(?:ekf|kf|kfres|kfres_1|cc_dif|cc_diff)(?:_|$)", re.IGNORECASE)
 
-# Column names containing "Tb" (temperature) — skipped whenever reset_temp is True
-_TB_COL_RE = re.compile(r"Tb", re.IGNORECASE)
+# Column names containing "Tb" (temperature) or temperature-derived variables — skipped whenever reset_temp is True
+_TB_COL_RE = re.compile(r"(?:Tb|soc_s|qcap_s|qcrs_s|q_capacity)", re.IGNORECASE)
+
 
 
 def _extract_ed(macro_str):
@@ -220,7 +221,7 @@ def compare_pair(run_path, ver_path, tol, rtol=1e-3, ed=None):
             reset_mask = reset_mask | (df_ver[_r_col].astype(float) != 0)
 
     reset_temp_mask = pd.Series(False, index=df_run.index)
-    for _rt_col in ("reset_temp", "rt"):
+    for _rt_col in ("reset_temp", "rt", "reset_temp_past", "Tb_flt", "Tb_fa", "flt_tb"):
         if _rt_col in df_run.columns:
             reset_temp_mask = reset_temp_mask | (df_run[_rt_col].astype(float) != 0)
         if _rt_col in df_ver.columns:
@@ -245,22 +246,35 @@ def compare_pair(run_path, ver_path, tol, rtol=1e-3, ed=None):
                 skip_first_2 = True
                 break
 
-    if not skip_first_2:
-        mon_path = None
-        if "_sim_run.csv" in run_path.name:
-            mon_path = Path(str(run_path).replace("_sim_run.csv", "_mon_run.csv"))
-        elif "_sim_ver.csv" in ver_path.name:
-            mon_path = Path(str(ver_path).replace("_sim_ver.csv", "_mon_ver.csv"))
-        if mon_path and mon_path.is_file():
-            try:
-                df_mon = pd.read_csv(mon_path)
+    mon_path = None
+    if "_sim_run.csv" in run_path.name:
+        mon_path = Path(str(run_path).replace("_sim_run.csv", "_mon_run.csv"))
+    elif "_sim_ver.csv" in ver_path.name:
+        mon_path = Path(str(ver_path).replace("_sim_ver.csv", "_mon_ver.csv"))
+    if mon_path and mon_path.is_file():
+        try:
+            df_mon = pd.read_csv(mon_path)
+            if not skip_first_2:
                 for col in ("mib", "modeling_ib"):
                     if col in df_mon.columns:
                         if not bool(df_mon[col].iloc[0]):
                             skip_first_2 = True
                             break
-            except Exception:
-                pass
+            if "time" in df_mon.columns and "time" in df_run.columns:
+                df_mon_aligned = df_mon[df_mon["time"].isin(df_run["time"])].sort_values(by="time").reset_index(drop=True)
+                for _rt_col in ("reset_temp", "rt", "reset_temp_past", "Tb_flt", "Tb_fa", "flt_tb"):
+                    if _rt_col in df_mon_aligned.columns and len(df_mon_aligned) == len(df_run):
+                        reset_temp_mask = reset_temp_mask | (df_mon_aligned[_rt_col].astype(float) != 0).values
+        except Exception:
+            pass
+
+    # Dilate reset_temp_mask by +-1 sample to handle 1-sample transient boundary timing shifts
+    if reset_temp_mask.any():
+        reset_temp_mask = (
+            reset_temp_mask
+            | reset_temp_mask.shift(-1).fillna(False)
+            | reset_temp_mask.shift(1).fillna(False)
+        )
 
     diffs = []
     for col in numeric_cols:

@@ -932,7 +932,7 @@ class BatteryMonitor(Battery, EKF1x1):
         self.tb_f_for_hx = self.Tb_f
         self.hx, self.dv_dsoc = self.calc_soc_voc(x_lim, tb_f=self.tb_f_for_hx, printit=False)
         # Jacobian of measurement function
-        self.H = self.dv_dsoc
+        self.H = min(self.dv_dsoc, Battery.H_MAX)
         return self.hx, self.H, self.tb_f_for_hx, self.x_for_hx
 
     def init_soc_ekf(self, mr, i, i_ekf):

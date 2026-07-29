@@ -488,7 +488,7 @@ void BatteryMonitor::ekf_update(double* hx, double* H, double* x_for_hx,
   *x_for_hx = max(min(x_, MXEPS), 0.0);
   // Measurement function hx(x), x=soc ideal capacitor
   *hx = Battery::calc_soc_voc(*x_for_hx, Tb_f_, &dv_dsoc_);
-  *H = dv_dsoc_;  // Jacodian of measurement function
+  *H = min(dv_dsoc_, H_MAX);  // Jacodian of measurement function
 
   if (sp.debug() == 93 || sp.debug() == -2)
     Serial.printf(

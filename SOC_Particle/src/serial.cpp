@@ -123,7 +123,7 @@ void print_battery_header() {
       "cp_ts, CHEM, DF2, EKF_CONV, EKF_NOM_DT, EKF_Q_SD_NORM, EKF_R_SD_NORM,");
   Serial.printf(
       "EKF_T_CONV, EKF_T_RES, EWHI_TRM_SLR, EWLO_TRM_SLR, F_MAX_T_WRAP, "
-      "HDB_VB, HDWE_IB_HI_LO_AMP_HI, HDWE_IB_HI_LO_AMP_LO,");
+      "H_MAX, HDB_VB, HDWE_IB_HI_LO_AMP_HI, HDWE_IB_HI_LO_AMP_LO,");
   Serial.printf(
       "HDWE_IB_HI_LO_NOA_HI, HDWE_IB_HI_LO_NOA_LO, HYS_IB_THR, "
       "HYS_SOC_MIN_MARG, IB_ABS_MAX_AMP, IB_ABS_MAX_NOA, IB_LO_ACTIVE_SET,");
@@ -172,8 +172,9 @@ void print_battery_serial() {
           EKF_T_CONV, EKF_T_RES);
   Serial.printf("%s", pr.buff);
 
-  sprintf(pr.buff, "%10.7f,%10.7f,%10.7f,%10.7f,%10.7f,%10.7f,%10.7f,%10.7f,",
-          EWHI_TRM_SLR, EWLO_TRM_SLR, F_MAX_T_WRAP, HDB_VB,
+  sprintf(pr.buff, "%10.7f,%10.7f,%10.7f,%10.7f,%10.7f,%10.7f,%10.7f,%10.7f,"
+          "%10.7f,",
+          EWHI_TRM_SLR, EWLO_TRM_SLR, F_MAX_T_WRAP, H_MAX, HDB_VB,
           HDWE_IB_HI_LO_AMP_HI, HDWE_IB_HI_LO_AMP_LO, HDWE_IB_HI_LO_NOA_HI,
           HDWE_IB_HI_LO_NOA_LO);
   Serial.printf("%s", pr.buff);
