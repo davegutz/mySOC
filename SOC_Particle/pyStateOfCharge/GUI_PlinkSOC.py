@@ -60,6 +60,7 @@ from Colors import Colors
 from test_soc_util import run_shell_cmd
 
 _initial_dependency_mtimes = {}
+_is_checking_dependencies = False
 
 
 def get_dependency_mtimes():
@@ -73,7 +74,7 @@ def get_dependency_mtimes():
             p = Path(f).resolve()
             p_str = str(p)
             if p.is_relative_to(base_dir) and p.suffix == ".py":
-                if not any(part.startswith(".") or part in ("venv", "__pycache__") for part in p.parts):
+                if p_str not in mtimes:
                     try:
                         mtimes[p_str] = p.stat().st_mtime
                     except Exception:
@@ -91,34 +92,47 @@ def get_dependency_mtimes():
     return mtimes
 
 
-def check_dependencies_and_warn():
+def check_dependencies_and_warn(master=None):
     """Check if any local Python dependency has changed since startup.
     If changed, display a warning dialog with OK button.
     """
-    global _initial_dependency_mtimes
-    if not _initial_dependency_mtimes:
-        _initial_dependency_mtimes = get_dependency_mtimes()
+    global _initial_dependency_mtimes, _is_checking_dependencies
+    if _is_checking_dependencies:
         return
 
-    current_mtimes = get_dependency_mtimes()
-    changed_files = []
-    for filepath, init_mtime in _initial_dependency_mtimes.items():
-        curr_mtime = current_mtimes.get(filepath)
-        if curr_mtime is not None and curr_mtime > init_mtime:
-            changed_files.append((os.path.basename(filepath), filepath))
+    _is_checking_dependencies = True
+    try:
+        if not _initial_dependency_mtimes:
+            _initial_dependency_mtimes = get_dependency_mtimes()
+            return
 
-    if changed_files:
-        file_list_str = "\n".join([f"• {name}" for name, _ in changed_files])
-        msg = (
-            f"Warning: One or more dependencies of GUI_PlinkSOC have changed on disk:\n\n"
-            f"{file_list_str}\n\n"
-            f"Click OK to exit GUI_PlinkSOC."
-        )
-        try:
-            tkinter.messagebox.showwarning("GUI_PlinkSOC Dependency Warning", msg)
-        except Exception:
-            pass
-        sys.exit(0)
+        current_mtimes = get_dependency_mtimes()
+        changed_files = []
+        for filepath, init_mtime in _initial_dependency_mtimes.items():
+            curr_mtime = current_mtimes.get(filepath)
+            if curr_mtime is not None and curr_mtime > init_mtime:
+                changed_files.append((os.path.basename(filepath), filepath, init_mtime, curr_mtime))
+
+        if changed_files:
+            file_list_str = "\n".join([f"• {name}" for name, _, _, _ in changed_files])
+            msg = (
+                f"Warning: One or more dependencies of GUI_PlinkSOC have changed on disk:\n\n"
+                f"{file_list_str}\n\n"
+                f"Click OK to exit GUI_PlinkSOC."
+            )
+            try:
+                tkinter.messagebox.showwarning("GUI_PlinkSOC Dependency Warning", msg)
+            except Exception:
+                pass
+            try:
+                root = master or getattr(tkinter, "_default_root", None)
+                if root:
+                    root.destroy()
+            except Exception:
+                pass
+            os._exit(0)
+    finally:
+        _is_checking_dependencies = False
 
 
 def _is_close_plots(text_str):
@@ -626,7 +640,7 @@ def compare_run(show_killer_=True):
         tkinter.messagebox.showwarning(message="Test Key '" + Test.key + "' does not exist in " + Test.file_txt)
         return None
     update_data_buttons()
-    if modeling.get():
+    if auto_running or modeling.get():
         print("compare_run_sim.  save_pdf_path", str(PurePosixPath(Test.version_path) / "figures"))
         return compare_run_sim(
             data_file=Test.file_path,
@@ -1633,6 +1647,11 @@ def _get_putty_serial_line(session_name):
 
 def grab_auto():
     global auto_running, auto_fig_list, auto_case_index, auto_case_total
+
+    tkinter.messagebox.showwarning(
+        title="Stay Awake Warning",
+        message="Have you enabled caffeine or equivalent 'stay awake' application?",
+    )
 
     # Pre-flight checks before starting AUTO
     errors = []

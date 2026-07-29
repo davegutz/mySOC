@@ -194,7 +194,18 @@ def compare_run_sim(
 
     # Folder operations
     version = version_from_data_file(data_file)
-    _, save_pdf_path, _ = local_paths(version)
+    path_to_temp, save_pdf_path, _ = local_paths(version)
+
+    # Remove all existing temp files for this case in .local/SOC_Particle/<version>/temp
+    case_stem = Path(data_file).stem
+    temp_dir = Path(path_to_temp)
+    if temp_dir.is_dir() and case_stem:
+        for old_file in temp_dir.glob(f"{case_stem}*"):
+            try:
+                if old_file.is_file():
+                    old_file.unlink()
+            except Exception as e:
+                print(f"CompareRunSim: Error removing old temp file {old_file.name}: {e}")
 
     # # Load mon v4 (old)
     mon_run, sim_run, f, data_file_clean, temp_flt_file_clean, _ = load_data(
@@ -262,9 +273,8 @@ def compare_run_sim(
             # Shift time in sim_ver; soc_s is computed at G.i but save_s() records at t[G.i-1]
             sim_ver = shift_time(sim_ver, 1)
             # if shift_soc_s:
+
             #     sim_ver = shift_time(sim_ver, 1, fields=("dt_charge_s", "dt_fut_s",))
-            # if shift_soc_s:
-            #     sim_ver = shift_time(sim_ver, -1, fields=("dt_charge_s", "dt_fut_s",))
             for obj, struct_name in (
                 (mon_run, "mon_run"),
                 (mon_ver, "mon_ver"),
@@ -272,6 +282,8 @@ def compare_run_sim(
                 (sim_ver, "sim_ver"),
             ):
                 save_struct_to_csv(obj, filename_root + "_" + struct_name + ".csv")
+
+
 
     # Plots
     if plots:
