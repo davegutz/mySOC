@@ -667,7 +667,8 @@ BatterySim::BatterySim(const float dx_voc, const float dy_voc,
                        const float dz_voc)
     : Battery(sp.delta_q_model_ptr(), VS, dx_voc, dy_voc, dz_voc),
       Sin_inj_(nullptr), Sq_inj_(nullptr), Tri_inj_(nullptr), Cos_inj_(nullptr),
-      duty_(0UL), d_delta_q_s_(0.), dt_in_ms_(0UL), dt_fut_ms_(0UL),
+      duty_(0UL), d_delta_q_s_(0.), dt_charge_(0.), dt_in_ms_(0UL),
+      dt_fut_ms_(0UL),
       dt_in_(0.), dt_fut_(0.), ib_charge_(0.), ib_fut_(0.), ib_in_(0.),
       ib_sat_(0.5), model_cutback_(true), model_saturated_(false),
       q_(NOM_UNIT_CAP * 3600.), sample_time_(0UL), sample_time_z_(0UL),
@@ -753,7 +754,7 @@ float BatterySim::calculate(Sensors* Sen, const bool dc_dc_on,
   dt_in_ms_ = dt_long();
   dt_in_ = double(dt_in_ms_) / 1000.;
   ib_in_ = Sen->Ib_model_in() / ap.nP();
-  if (reset || sp.mod_ib()) {
+  if (reset ) {
     dt_fut_ms_ = dt_in_ms_;
     dt_fut_ = dt_in_;
     ib_fut_ = ib_in_;
@@ -822,9 +823,10 @@ float BatterySim::calculate(Sensors* Sen, const bool dc_dc_on,
   ib_fut_ = min(ib_charge_fut, sat_ib_max_);  // the feedback of ib_
   // ib_charge_ = ib_charge_fut;  // Same time plane as volt calcs, added past
   // value.  (This prevents sat logic from working)
-  ib_charge_ = ib_fut_;  // Same time plane as volt calcs, added past value
   dt_fut_ms_ = dt_in_ms_;
   dt_fut_ = dt_in_;
+  dt_charge_ = dt_fut_;
+  ib_charge_ = ib_fut_;  // Same time plane as volt calcs, added past value
 
   // if ( (q_ <= 0.) && (ib_charge_ < 0.) && sp.mod_ib() ) ib_charge_ = 0.;
   // empty  **** don't know why this was here.  cannot bms_off_ with it
@@ -919,7 +921,7 @@ at temperature, C resetting_      Sticky flag for initialization, T=reset
 double BatterySim::count_coulombs(Sensors* Sen, const bool reset_temp,
                                   BatteryMonitor* Mon,
                                   const bool initializing_all) {
-  d_delta_q_s_ = ib_charge_ * dt_;
+  d_delta_q_s_ = ib_charge_ * dt_charge_;
   if (ib_charge_ > 0.) d_delta_q_s_ *= coul_eff_;
 
   // Rate limit temperature.  When modeling, initialize to no change

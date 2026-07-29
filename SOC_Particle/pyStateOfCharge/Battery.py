@@ -285,6 +285,7 @@ class Battery(BatteryConstants, Coulombs):
         vb,
         ib,
         dt,
+        dt_charge,
         reset,
         calc_ekf,
         dt_ekf,
@@ -666,6 +667,7 @@ class BatteryMonitor(Battery, EKF1x1):
         vb,
         ib,
         dt,
+        dt_charge,
         reset,
         calc_ekf,
         dt_ekf,
@@ -1090,6 +1092,8 @@ class BatteryMonitor(Battery, EKF1x1):
             self.cc_dif = self.cc_dif_prev
         else:
             self.cc_dif = self.soc_ekf - self.soc
+        self.dt_charge_s = sim.dt_charge
+        self.dt_fut_s = sim.dt_fut
         self.dt_s = sim.dt
         self.chm_s = sim.chm
         self.qcrs_s = sim.q_cap_rated_scaled
@@ -1303,11 +1307,15 @@ class BatterySim(Battery):
             min_=-Battery.NOM_UNIT_CAP * scale,
         )
         self.d_delta_q = 0.0  # Charging rate, Coulombs/sec
+        self.dt_charge = 0.0  # Update time at charge current time frame, s
+        self.dt_fut = 0.0  # Update time at charge current time frame, s
         self.ib_charge = 0.0  # Charge current, A
         self.saved_s = SavedS("ver_s")  # for plots and prints
         self.ib_fut = 0.0  # Future value of limited current, A
         self.reset_temp_past = self.model_saturated
         self.dt_past = 0.0
+        self.dt_charge_s = 0.0
+        self.dt_fut_s = 0.0
         self.dt_s = 0.0
         self.chm_s = 0.0
         self.qcrs_s = 0.0
@@ -1404,6 +1412,7 @@ class BatterySim(Battery):
         vb,
         ib,
         dt,
+        dt_charge,
         reset,
         calc_ekf,
         dt_ekf,
@@ -1425,6 +1434,7 @@ class BatterySim(Battery):
         self.Tb = Tb
         self.dt_past = self.dt
         self.dt = dt
+        self.dt_charge = dt_charge
         self.ib_in = ib
         if self.reset and SN.sim_run.bms_off_s[0]:
             self.ib_fut = 0.0
@@ -1505,6 +1515,8 @@ class BatterySim(Battery):
         self.ib_fut = min(ib_charge_fut, self.sat_ib_max)  # the feedback of self.ib
         # self.ib_charge = ib_charge_fut# same time plane as volt calcs.  (This prevents sat logic from working)
         self.ib_charge = self.ib_fut  # same time plane as volt calcs
+        self.dt_fut = dt_charge
+
         # empty  **** don't know why this was here.  cannot bms_off_ empty because that causes weird interaction with
         # bms logic and also doesn't make sense to have a different empty cutoff when modeling.  If there is a need for
         # an empty cutoff, should be based on voltage not current.  So removing for now.  Can revisit if needed.
@@ -1525,7 +1537,7 @@ class BatterySim(Battery):
         """Coulomb counter based on true=actual capacity
         Internal resistance of battery is a loss
         Inputs:
-            dt              Integration step, s
+            dt_charge       Integration step, s
             tb_f            Battery temperature, deg C  (filtered usually to reduce electrical noise artifacts)
             charge_curr     Charge, A
             sat             Indicator that battery is saturated (VOC>threshold(temp)), T/F
@@ -1539,7 +1551,7 @@ class BatterySim(Battery):
             self.chm = chem
         self.ib_charge = charge_curr
         self.Tb_f = tb_f
-        self.d_delta_q = self.ib_charge * self.dt
+        self.d_delta_q = self.ib_charge * self.dt_charge
         if self.ib_charge > 0.0:
             self.d_delta_q *= self.chemistry.coul_eff
 
@@ -1584,6 +1596,8 @@ class BatterySim(Battery):
     def save_s(self, time):
         self.time = time
         self.dt_s = self.dt
+        self.dt_charge_s = self.dt_charge
+        self.dt_fut_s = self.dt_fut
         self.chm_s = self.chm
         self.qcrs_s = self.q_cap_rated_scaled
         self.qcap_s = self.q_capacity
@@ -2074,6 +2088,8 @@ class SavedS:
         self.ib_in_s = []
         self.d_delta_q_s = []
         self.ib_charge_s = []
+        self.dt_charge_s = []
+        self.dt_fut_s = []
         self.ib_fut_s = []
         self.sat_s = []
         self.ddq_s = []

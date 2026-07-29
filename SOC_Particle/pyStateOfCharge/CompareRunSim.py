@@ -260,9 +260,11 @@ def compare_run_sim(
             print("save_struct_to_csv: no filename available, skipping CSV export")
         else:
             # Shift time in sim_ver; soc_s is computed at G.i but save_s() records at t[G.i-1]
-            sim_ver = shift_time(sim_ver, 1)
-            if shift_soc_s:
-                sim_ver = shift_time(sim_ver, 1, fields=("soc_s",))
+            # sim_ver = shift_time(sim_ver, 1)
+            # if shift_soc_s:
+            #     sim_ver = shift_time(sim_ver, 1, fields=("dt_charge_s", "dt_fut_s",))
+            # if shift_soc_s:
+            #     sim_ver = shift_time(sim_ver, -1, fields=("dt_charge_s", "dt_fut_s",))
             for obj, struct_name in (
                 (mon_run, "mon_run"),
                 (mon_ver, "mon_ver"),
@@ -425,15 +427,15 @@ def main():  # Example usage.  ok on 20260217
     """
     data_file = '/home/daveg/gdrive/GitHubArchive/SOC_Particle/dataReduction/g20260612a/rapidTweakRegression_soc3p2_hi_lo_bb.csv'
     unit_key = 'g20260612a_soc3p2_hi_lo_bb'
-    time_end = 5
+    time_end = 10
     compare_run_ver = True
     shift_soc_s = True
-    plots = False
+    plots = True
     use_mon_soc_ = False
     verbose = False
     scale_batt = 1.0
     slr_hys_sim = 1.0
-    request_history = 3
+    request_history = 1
     init_time = None
     time_shift = None
     strict_overplot = True

@@ -692,8 +692,8 @@ def print_soc_s_RunSim(SN, i_temp, t, mon, sim, calc_temp, i_ekf, calc_ekf, df=F
     if mon.ib_charge > 0:
         i_dt_old *= mon.chemistry.coul_eff
         i_dt_new *= mon.chemistry.coul_eff
-    i_dt_old_s = SN.sim_run.dt_s[G.i] * SN.sim_run.ib_charge_s[G.i]
-    i_dt_new_s = sim.dt * sim.ib_charge
+    i_dt_old_s = SN.sim_run.dt_charge_s[G.i] * SN.sim_run.ib_charge_s[G.i]
+    i_dt_new_s = sim.dt_charge * sim.ib_charge
     if sim.ib_charge > 0:
         i_dt_old_s *= sim.chemistry.coul_eff
         i_dt_new_s *= sim.chemistry.coul_eff
@@ -720,8 +720,13 @@ def print_soc_s_RunSim(SN, i_temp, t, mon, sim, calc_temp, i_ekf, calc_ekf, df=F
         print_pair(SN.mon_run.sat[G.i], mon.sat, 4, 0, 'sa', h, df)
         print_pair(SN.sim_run.sat_s[G.i], sim.sat, 5, 0, 'sa_s', h, df)
         print_pair(SN.mon_run.dt[G.i], mon.dt, 12, 4, 'dt', h, df)
+        print_pair(SN.sim_run.dt_fut_s[G.i], sim.dt_fut, 12, 4, 'dt_fut_s', h, df)
+        print_pair(SN.sim_run.dt_charge_s[G.i], sim.dt_charge, 12, 4, 'dt_charge_s', h, df)
         print_pair(SN.sim_run.dt_s[G.i], sim.dt, 12, 4, 'dt_s', h, df)
         print_pair(SN.mon_run.ib[G.i], mon.ib, 14, 5, 'ib', h, df)
+        print_pair(SN.sim_run.ib_s[G.i], mon.ib_s, 14, 5, 'ib_s', h, df)
+        print_pair(SN.sim_run.ib_in_s[G.i], mon.ib_in_s, 16, 7, 'ib_in_s', h, df)
+        print_pair(SN.sim_run.ib_fut_s[G.i], mon.ib_fut_s, 16, 7, 'ib_fut_s', h, df)
         print_pair(SN.mon_run.ib_charge[G.i], mon.ib_charge, 15, 6, 'ib_charge', h, df)
         print_pair(SN.mon_run.ib_dyn_rstate[G.i], mon.ChargeTransfer.rstate, 15, 6, 'ib_dyn_rstate', h, df)
         print_pair(SN.mon_run.ib_dyn_lstate[G.i], mon.ChargeTransfer.state, 15, 6, 'ib_dyn_lstate', h, df)
@@ -737,6 +742,7 @@ def print_soc_s_RunSim(SN, i_temp, t, mon, sim, calc_temp, i_ekf, calc_ekf, df=F
         print_pair(SN.mon_run.ib_dyn[G.i], mon.ib_dyn, 15, 7, 'ib_dyn', h, df)
         print_pair(SN.sim_run.dv_hys_s[G.i], sim.dv_hys, 12, 5, 'dv_hys_s', h, df)
         print_pair(SN.mon_run.ib_charge[G.i], mon.ib_charge, 16, 7, 'ib_charge', h, df)
+        print_pair(SN.sim_run.ib_fut_s[G.i], mon.ib_fut_s, 16, 7, 'ib_fut_s', h, df)
         print_pair(SN.sim_run.ib_charge_s[G.i], sim.ib_charge, 16, 7, 'ib_charge_s', h, df)
         print_pair(SN.sim_run.ioc_s[G.i], sim.ioc, 14, 5, 'ioc_s', h, df)
         print_pair(SN.mon_run.d_delta_q[G.i], mon.d_delta_q, 14, 7, 'd_delq', h, df)
