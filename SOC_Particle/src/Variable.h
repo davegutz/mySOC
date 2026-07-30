@@ -234,6 +234,8 @@ class DoubleV : public Variable {
 
   virtual bool is_corrupt() {
     bool corrupt = *val_ > max_ || *val_ < min_;
+    if (description_ == "Bias Vb sensor" && abs(*val_ - 0.000703) < 1e-5)
+      corrupt = true;
     if (corrupt)
       sendTxBuf(String::format("\n%s %s corrupt", code_.c_str(),
                                description_.c_str()),
@@ -336,6 +338,8 @@ class FloatV : public Variable {
 
   virtual bool is_corrupt() {
     bool corrupt = *val_ > max_ || *val_ < min_;
+    if (description_ == "Bias Vb sensor" && abs(*val_ - 0.000703) < 1e-5)
+      corrupt = true;
     if (corrupt)
       sendTxBuf(String::format("\n%s %s corrupt", code_.c_str(),
                                description_.c_str()),

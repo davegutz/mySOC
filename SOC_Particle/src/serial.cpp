@@ -85,33 +85,6 @@ bool is_finished(const char in_char) {
   return in_char == '\n' || in_char == '\0' || in_char == ';' || in_char == ',';
 }
 
-// Print consolidation
-void print_all_header(Sensors* Sen) {
-  print_battery_header();
-  print_battery_serial();
-  print_rapid_header();
-  if (sp.debug() == 2) {
-    print_sim_header();
-    print_signal_sel_header();
-    print_shunt_header(Sen);
-  }
-  if (sp.debug() == 3) {
-    print_sim_header();
-    print_ekf_header();
-  }
-  if (sp.debug() == 4) {
-    print_sim_header();
-    print_signal_sel_header();
-    print_ekf_header();
-  }
-  if (sp.debug() == 6) {
-    print_sim_header();
-    print_signal_sel_header();
-    print_ekf_header();
-    print_shunt_header(Sen);
-  }
-}
-
 // print battery parameter header
 void print_battery_header() {
   Serial.printf(
@@ -246,17 +219,17 @@ void print_ekf_header() {
 }
 
 void EKF_1x1::print_ekf_serial(BatteryMonitor* Mon, const bool freeze) {
-  static double last_eTime = 0.;
-  double eTime = double(now_ekf_) / 1000.;
-  if (eTime <= last_eTime + 0.00005) return;
-  last_eTime = eTime;
+  static double last_c_time_e = 0.;
+  double c_time_e = double(now_ekf_) / 1000.;
+  if (c_time_e <= last_c_time_e + 0.00005) return;
+  last_c_time_e = c_time_e;
 
   if (sp.debug() == 3 || sp.debug() == 4 || sp.debug() == 6 ||
       sp.debug() == -2){
     Serial.printf(
         "unit_ekf,%13.4f,%8.4f,%2d,%2d,%13.10f,%13.10f,%13.10f,%10.7g,%10.7g,"
         "%10.7g,%10.7g,% 10.7g,%10.7g,%11.9g,%10.7g,%12.9g,",
-      eTime, dt_ekf_, cp.ekf_reset, freeze, Mon->voc_stat_f(), Fx_, Bu_, Q_, R_,
+      c_time_e, dt_ekf_, cp.ekf_reset, freeze, Mon->voc_stat_f(), Fx_, Bu_, Q_, R_,
       P_, S_, K_, u_, x_, y_, z_);
 
     Serial.printf("%11.9g,%10.7g,%11.9g,%10.7g,%12.9g,%10.7g,%d,%11.8f,%11.9f,",
@@ -274,9 +247,8 @@ void EKF_1x1::print_ekf_serial(BatteryMonitor* Mon, const bool freeze) {
   }
 }
 
-void print_rapid_serial(const bool reset, Sensors* Sen, BatteryMonitor* Mon,
-                      const bool reset_temp) {
-  static double last_cTime = 0.;
+void print_headers(const bool reset, Sensors* Sen, BatteryMonitor* Mon) {
+  static double last_c_time = 0.;
   if (sp.debug() == -2 && (reset || cp.last_read_debug != sp.debug())) {
     print_ekf_header();
   }
@@ -284,24 +256,70 @@ void print_rapid_serial(const bool reset, Sensors* Sen, BatteryMonitor* Mon,
        sp.debug() == 4 || sp.debug() == 6)) {
     if (reset || (cp.last_read_debug != sp.debug())) {
       cp.num_v_print = 0UL;
-      print_all_header(Sen);
+
+      print_battery_header();
+      print_battery_serial();
+
+      if (sp.debug() == 2) {
+        print_sim_header();
+        print_shunt_header(Sen);
+        print_signal_sel_header();
+        print_rapid_header();
+      }
+
+      if (sp.debug() == 3) {
+        print_sim_header();
+        print_rapid_header();
+        print_ekf_header();
+      }
+
+      if (sp.debug() == 4) {
+        print_sim_header();
+        print_signal_sel_header();
+        print_rapid_header();
+        print_ekf_header();
+      }
+
+      if (sp.debug() == 6) {
+        print_sim_header();
+        print_shunt_header(Sen);
+        print_signal_sel_header();
+        print_rapid_header();
+        print_ekf_header();
+      }
+
     }
     if (sp.tweak_test()) {
       cp.num_v_print++;
     }
-    if (cp.publishS && (reset || Mon->cTime() > last_cTime + 0.00005)) {
-      print_rapid_serial(reset, &pp.pubList, Sen, Mon);
+    if (cp.publishS && (reset || Mon->c_time() > last_c_time + 0.00005)) {
       cp.num_v_print++;
-      last_cTime = Mon->cTime();
+      last_c_time = Mon->c_time();
     }
   }
   cp.last_read_debug = sp.debug();
 }
 
+void print_rapid_serial(const bool reset, Sensors* Sen, BatteryMonitor* Mon,
+                      const bool reset_temp) {
+  static double last_c_time = 0.;
+  if ((sp.debug() == 1 || sp.debug() == 2 || sp.debug() == 3 ||
+       sp.debug() == 4 || sp.debug() == 6)) {
+    if (sp.tweak_test()) {
+      cp.num_v_print++;
+    }
+    if (cp.publishS && (reset || Mon->c_time() > last_c_time + 0.00005)) {
+      print_rapid_serial(reset, &pp.pubList, Sen, Mon);
+      cp.num_v_print++;
+      last_c_time = Mon->c_time();
+    }
+  }
+}
+
 // Print primary data
 void print_rapid_header() {
   Serial.printf(
-      "unit_rap, cTime, dt, dt_prs, hm, reset, reset_temp, soft_reset, "
+      "unit_rap, c_time, dt, dt_prs, hm, reset, reset_temp, soft_reset, "
       "soft_reset_sim, reset_all_faults, ekf_reset, kf_reset, init_mon, "
       "init_sim,   ");
   Serial.printf("chm, qcrs, qcap, sat, saturated, sel, mod, bmso,  ");
@@ -323,7 +341,7 @@ void print_rapid_serial(const bool reset, Publish* pubList, Sensors* Sen,
   prs_now_past = now_prs;
   sprintf(pr.buff,
           "%s,%13.4f,%8.4f,%8.4f,%s,   %2d,%2d,%2d,%2d,%2d,%2d,%2d,%2d,%2d,   ",
-          pubList->unit.c_str(), Mon->cTime(), Mon->dt(), dt_prs,
+          pubList->unit.c_str(), Mon->c_time(), Mon->dt(), dt_prs,
           pubList->hm_string.c_str(), reset, Sen->reset_temp(),
           cp.soft_reset_print, cp.soft_reset_sim_print,
           Sen->Flt->reset_all_faults_print(), cp.ekf_reset_print,
@@ -405,16 +423,16 @@ void print_shunt_header(Sensors* Sen) {
 }
 
 void print_shunt_serial(const bool reset, Sensors* Sen) {
-  static double last_cTime_sh = 0.;
+  static double last_c_time_sh = 0.;
   if ((sp.debug() == 2 || sp.debug() == 6) && cp.publishS) {
-    double cTime = double(Sen->now()) / 1000.;
-    if (!reset && cTime <= last_cTime_sh + 0.00005) return;
-    last_cTime_sh = cTime;
+    double c_time = double(Sen->now()) / 1000.;
+    if (!reset && c_time <= last_c_time_sh + 0.00005) return;
+    last_c_time_sh = c_time;
 
     sprintf(pr.buff,
             "shunt_unit,%13.4f, %d, %d,  "
             "%11.6f,%11.6f,%11.6f,%11.6f,%11.6f,%11.6f,%11.6f,%11.6f,  ",
-            cTime, reset, cp.kf_reset_print, Sen->ib_amp_vo_vc(),
+            c_time, reset, cp.kf_reset_print, Sen->ib_amp_vo_vc(),
             Sen->ib_amp_vo_vc_kf(), Sen->ib_noa_vo_vc(), Sen->ib_noa_vo_vc_kf(),
             Sen->ShuntAmp->ishunt_cal(), Sen->ib_amp_hdwe_kf(),
             Sen->ShuntNoAmp->ishunt_cal(), Sen->ib_noa_hdwe_kf());
@@ -473,12 +491,12 @@ void print_signal_sel_header() {
 
 void print_signal_sel_serial(const bool reset, Sensors* Sen,
                              BatteryMonitor* Mon, BatterySim* Sim) {
-  static double last_cTime_sel = 0.;
+  static double last_c_time_sel = 0.;
   if ((sp.debug() == 2 || sp.debug() == 4 || sp.debug() == 61 ||
    sp.debug() == 6) && cp.publishS) {
     static uint64_t pst_s_now_past = Sen->now();
-    if (!reset && Sen->cTime() <= last_cTime_sel + 0.00005) return;
-    last_cTime_sel = Sen->cTime();
+    if (!reset && Sen->c_time() <= last_c_time_sel + 0.00005) return;
+    last_c_time_sel = Sen->c_time();
     uint64_t now_pst_s = Sen->now();
     double dt_pst_s = double(now_pst_s - pst_s_now_past) / 1e3;
     pst_s_now_past = now_pst_s;
@@ -486,7 +504,7 @@ void print_signal_sel_serial(const bool reset, Sensors* Sen,
             "unit_sel,%13.4f, %8.4f, %8.4f, %d, %d, %10.7f, "
             "%8.6f,%8.6f,%8.6f,%8.6f,%8.6f,   %d,%8.6f,%8.6f,%8.6f,%8.6f,   "
             "%8.6f,%8.6f, ",
-            Sen->cTime(), Sen->T(), dt_pst_s,
+            Sen->c_time(), Sen->T(), dt_pst_s,
             Sen->Flt->reset_all_faults_print(), sp.ib_force(),
             Sen->Flt->cc_diff(), Sen->ib_amp_hdwe(), Sen->ib_noa_hdwe(),
             Sen->ib_amp_model(), Sen->ib_noa_model(), Sen->ib_model(),
@@ -610,26 +628,31 @@ void print_sim_header() {
 
 void print_sim_serial(const bool initializing_all, const bool reset,
                       const bool reset_temp, Sensors* Sen, BatterySim* Sim) {
-  static double last_cTime_sim = 0.;
+  static double last_c_time_sim = 0.;
 
-  // Skip if header due to be printed
-  if (reset || (cp.last_read_debug != sp.debug())) {
+  const bool is_sim_debug =
+      (sp.debug() == 2 || sp.debug() == 3 || sp.debug() == 4 || sp.debug() == 6);
+  // const bool was_sim_debug =
+  //     (cp.last_read_debug == 2 || cp.last_read_debug == 3 ||
+  //      cp.last_read_debug == 4 || cp.last_read_debug == 6);
+
+  if (reset) {
     return;
   }
 
-  if ((sp.debug() == 2 || sp.debug() == 3 || sp.debug() == 4 || sp.debug() == 6)
-   && cp.publishS &&
-      !initializing_all &&
-      (reset_temp || Sim->cTime() > last_cTime_sim + 0.00005)) {
-    static uint64_t pss_now_past = Sen->now();
-    last_cTime_sim = Sim->cTime();
-    uint64_t now_pss = Sen->now();
-    double dt_pst = double(now_pss - pss_now_past) / 1e3;
-    pss_now_past = now_pss;
+  // const bool header_changing = (cp.last_read_debug != sp.debug());
+  // const bool changing_away = was_sim_debug && !is_sim_debug;
+
+  // if (((is_sim_debug && !header_changing) || changing_away) && cp.publishS &&
+  //     !initializing_all &&
+  //     (reset_temp || Sim->c_time() > last_c_time_sim + 0.00005)) {
+  if (is_sim_debug && cp.publishS && !initializing_all &&
+      (reset_temp || Sim->c_time() > last_c_time_sim + 0.00005)) {
+    last_c_time_sim = Sim->c_time();
     sprintf(pr.buff,
             "unit_sim, %13.4f, %8.4f, %8.4f, %d, %10.4f, %d, %11.8f, %11.8f, "
             "%7.6f,%7.6f,%8.4f,%11.9f,%8.4f,",
-            Sim->cTime(), dt_pst, Sim->dt(), CHEM, Sim->q_cap_rated_scaled(),
+            Sim->c_time(), Sim->dt_pst(), Sim->dt(), CHEM, Sim->q_cap_rated_scaled(),
             Sim->bms_off(), Sim->Tb(), Sim->Tb_f(), Sim->vsat(),
             Sim->voc_stat(), Sim->dt_charge(), Sim->ib_fut(), Sim->dt_fut());
     Serial.printf("%s", pr.buff);

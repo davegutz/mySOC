@@ -72,10 +72,8 @@ def get_modeling(mr, mod_force=None):
 
 def sync_to_mon_or_sim(mr, sr, t_mx=None):
     if sr is not None and len(sr.time) < len(mr.time):
-        # time = sr.time
-        # dtime = sr.dt_s
-        time = mr.time
-        dtime = mr.dt
+        time = sr.time
+        dtime = sr.dt_s
     else:
         time = mr.time
         dtime = mr.dt

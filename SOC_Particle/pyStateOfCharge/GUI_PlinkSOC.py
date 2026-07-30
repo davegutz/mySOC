@@ -734,7 +734,7 @@ def compare_run_run_choose():
                     keys=keys,
                     data_file_folder_run=ref_folder_path,
                     data_file_folder_test=test_folder_path,
-                    sync_to_ctime=True,
+                    sync_to_c_time=True,
                 )
             else:
                 tk.messagebox.showerror(message="key not found in" + testpath)

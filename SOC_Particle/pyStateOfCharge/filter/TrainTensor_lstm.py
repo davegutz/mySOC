@@ -665,7 +665,7 @@ def train_tensor_lstm():
             train_predict_fail_ib.append(model.predict(train_x_fail_ib_vec))
 
     # Plot result
-    t_samp = train["cTime"][20] - train["cTime"][19]
+    t_samp = train["c_time"][20] - train["c_time"][19]
     t_samp_input = t_samp * subsample
     t_samp_result = t_samp_input * batch_size
     train_dv_hys_old = resizer(train_attr[["dv_hys_old"]], rows_train, batch_size, sub_samp=subsample)

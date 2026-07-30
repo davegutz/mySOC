@@ -59,7 +59,7 @@ def save_struct_to_csv(obj, file_path):
     """Write every time-dependent variable in obj to a CSV file.
 
     Discovers the time axis by looking for a 1-D numpy array named 'time',
-    then 'cTime'.  Every other 1-D numpy array whose length matches the time
+    then 'c_time'.  Every other 1-D numpy array whose length matches the time
     axis is written as a column.  The time column is always first; the rest
     are alphabetically sorted.  Scalars, multi-dimensional arrays, and arrays
     of a different length are silently skipped.
@@ -83,7 +83,7 @@ def save_struct_to_csv(obj, file_path):
     # --- find time axis -------------------------------------------------------
     time = None
     t_col = None
-    for candidate in ("time", "cTime"):
+    for candidate in ("time", "c_time"):
         raw = attrs.get(candidate)
         if raw is None and hasattr(obj, candidate):
             raw = getattr(obj, candidate)

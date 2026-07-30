@@ -62,22 +62,22 @@ class SyncInfo:
             self.is_empty = True
             return
         self.time_mon = sav_mon.time
-        self.sync_cTime = sync
-        self.cTime = sav_mon.cTime
+        self.sync_c_time = sync
+        self.c_time = sav_mon.c_time
         self.time = sav_mon.time
         self.int_mon = []
         self.length = len(sync)
         rel = []
         delta = []
         for i in np.arange(self.length):
-            rel.append(self.sync_cTime[i] - sav_mon.cTime[0])
+            rel.append(self.sync_c_time[i] - sav_mon.c_time[0])
             if i == 0:
                 delta.append(rel[0])
-                self.int_mon.append([np.where(sav_mon.cTime <= sync[i])])
+                self.int_mon.append([np.where(sav_mon.c_time <= sync[i])])
             else:
                 delta.append(rel[i] - rel[i - 1])
-                self.int_mon.append([np.where((sav_mon.cTime <= sync[i]) & (sav_mon.cTime > sync[i - 1]))])
-        self.int_mon.append([np.where(sav_mon.cTime > sync[self.length - 1])])
+                self.int_mon.append([np.where((sav_mon.c_time <= sync[i]) & (sav_mon.c_time > sync[i - 1]))])
+        self.int_mon.append([np.where(sav_mon.c_time > sync[self.length - 1])])
         self.rel_mon = np.array(rel)
         self.del_mon = np.array(delta)
         return
@@ -85,8 +85,8 @@ class SyncInfo:
     def synchronize(self, sync_del):
         """Call this after building two class instances and calling calculate_master_sync to make sync_del"""
         # Init entire time array again.  First sync is always 0
-        acc_shift = self.sync_cTime[0]
-        self.time_mon = self.cTime.copy()
+        acc_shift = self.sync_c_time[0]
+        self.time_mon = self.c_time.copy()
 
         # Subsequent sets based on difference to master del
         for i in np.arange(self.length + 1):
@@ -220,7 +220,7 @@ def load_data(
         time_end=time_end,
         zero_zero=zero_zero,
         zero_thr=zero_thr_in,
-        sync_cTime=sync,
+        sync_c_time=sync,
         init_time=init_time,
         time_shift=time_shift,
         str_=mon_str,

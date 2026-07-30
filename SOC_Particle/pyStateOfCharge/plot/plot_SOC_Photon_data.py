@@ -20,13 +20,13 @@ import matplotlib.pyplot as plt
 
 def plot_soc_photon_data(r, key):
     var_str = (
-        "unit,               hm,                  cTime,       dt,       "
+        "unit,               hm,                  c_time,       dt,       "
         "sat,sel,mod,  Tb,  vb,  ib,        vsat,dv_dyn,voc_stat,voc_ekf,     "
         "y_ekf,    soc_s,soc_ekf,soc,"
     )
     count = 0
     i = 0
-    cTime_last = None
+    c_time_last = None
     t_v = None
     T_actual = 0.0
     T_actual_past = 0.0
@@ -55,7 +55,7 @@ def plot_soc_photon_data(r, key):
                 list_r = data_r.split(",")
                 unit = list_r[0]
                 hm = list_r[1]
-                cTime = float(list_r[2])
+                c_time = float(list_r[2])
                 dt = float(list_r[3])
                 sat = int(list_r[4])
                 sel = int(list_r[5])
@@ -75,7 +75,7 @@ def plot_soc_photon_data(r, key):
                     count,
                     unit,
                     hm,
-                    cTime,
+                    c_time,
                     dt,
                     sat,
                     sel,
@@ -97,7 +97,7 @@ def plot_soc_photon_data(r, key):
                 if i > 1:
                     # Setup
                     if i == 2:
-                        T_maybe = cTime - cTime_last
+                        T_maybe = c_time - c_time_last
                         T_actual_past = T_maybe
                         n_v = int(time_span / T_maybe)
                         t_v = np.arange(-n_v * T_maybe, 0, T_maybe)
@@ -112,11 +112,11 @@ def plot_soc_photon_data(r, key):
                         y_vec2[:, 1] = voc_stat
                         y_vec2[:, 2] = voc_ekf
                         y_vec2[:, 3] = vsat
-                        print("Point#", i, "at cTime=", cTime, "T may be=", T_maybe, "N=", n_v)
+                        print("Point#", i, "at c_time=", c_time, "T may be=", T_maybe, "N=", n_v)
                         # print('t_v=', t_v)
                         # print('y_vec1=', y_vec1, 'y_vec2=', y_vec2)
                     # Ready for plots
-                    T_actual = cTime - cTime_last
+                    T_actual = c_time - c_time_last
                     dt = T_actual_past - T_actual
                     t_v[:] = t_v[:] + dt
                     y_vec0[-1][0] = soc_s
@@ -159,7 +159,7 @@ def plot_soc_photon_data(r, key):
                     y_vec1 = np.append(y_vec1[1:][:], np.zeros((1, 1)), axis=0)
                     y_vec2 = np.append(y_vec2[1:][:], np.zeros((1, 4)), axis=0)
                 # Past values
-                cTime_last = cTime
+                c_time_last = c_time
                 T_actual_past = T_actual
     except Exception as err:
         print("Something went wrong: ", err)

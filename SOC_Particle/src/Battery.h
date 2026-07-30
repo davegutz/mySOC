@@ -107,12 +107,16 @@ class Battery : public Coulombs {
   float chargeTransfer_rstate() { return ChargeTransfer_->rstate(); };
   float chargeTransfer_T() { return ChargeTransfer_->T(); };
   float chargeTransfer_tau() { return ChargeTransfer_->tau(); };
-  double cTime() { return ctime_; };
+  void c_time(const double input) { c_time_ = input; }
+  double c_time() { return c_time_; };
   bool bms_off() { return bms_off_; };
   float C_rate() { return ib_ / NOM_UNIT_CAP; }
   String decode(const uint8_t mod);
   float dqdt() { return chem_.dqdt; };
+  void dt(const float input) { dt_pst_ = dt_; dt_ = input; }
   float dt() { return dt_; };
+  void dt_pst(const double input) { dt_pst_ = input; }
+  double dt_pst() { return dt_pst_; }
   float dv_dyn() { return dv_dyn_; };
   float dv_hys() { return dv_hys_; };
   float ib() { return ib_; };
@@ -140,8 +144,9 @@ class Battery : public Coulombs {
                        // changing soc and voltage
   bool bms_off_;  // Indicator that battery management system is off, T = off
                   // preventing current flow
-  double ctime_;  // Current time, s
+  double c_time_;  // Current time, s
   float dt_;  // Update time, s
+  double dt_pst_;  // Time since past sample, s
   double dv_dsoc_;  // Derivative scaled, V/fraction
   float dv_dyn_;  // ib-induced back emf, V
   float dv_hys_;  // Hysteresis state, voc-voc_out, V

@@ -321,11 +321,12 @@ void loop() {
     }
 
     // Print
+    print_headers(reset, Sen, Mon);
     print_sim_serial(false, reset, reset_temp, Sen, Sen->Sim);
-    print_rapid_serial(reset, Sen, Mon, reset_temp);  // prints headers
-    Mon->EKF_1x1::print_ekf_serial(Mon, cp.freeze);  // print EKF in Read frame
     print_shunt_serial(reset, Sen);
     print_signal_sel_serial(reset, Sen, Mon, Sen->Sim);
+    print_rapid_serial(reset, Sen, Mon, reset_temp);  // prints headers
+    Mon->EKF_1x1::print_ekf_serial(Mon, cp.freeze);  // print EKF in Read frame
 
   }  // end read (high speed frame)
 

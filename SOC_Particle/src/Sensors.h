@@ -186,8 +186,8 @@ class Sensors {
           uint64_t millis, BatteryMonitor* Mon);
   ~Sensors();
   // Getters and setters for encapsulated member variables
-  void cTime(const double input) { ctime_ = input; }
-  double cTime() { return ctime_; }
+  void c_time(const double input) { c_time_ = input; }
+  double c_time() { return c_time_; }
   int Vb_raw() { return Vb_raw_; }
   void Vb(const float input) { Vb_ = input; }
   float Vb() { return Vb_; }
@@ -489,7 +489,7 @@ class Sensors {
   float Wb_;  // Sensed battery bank power, use to compare to other shunts, W
   uint64_t now_;          // Time at sample, ms
   uint64_t now_temp_;     // Time at sample, ms
-  double ctime_;          // Decimal time, seconds since 1/1/2021
+  double c_time_;          // Decimal time, seconds since 1/1/2021
   double T_;              // Update time, s
   bool reset_;            // Reset flag, T = reset
   double T_filt_;         // Filter update time, s

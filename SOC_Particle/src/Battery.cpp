@@ -44,7 +44,7 @@ Battery::Battery(double* sp_delta_q, const float d_voc_soc, const float dx_voc,
                  const float dy_voc, const float dz_voc)
     : Coulombs(sp_delta_q, (NOM_UNIT_CAP * 3600), COULOMBIC_EFF_SCALE, dx_voc,
                dy_voc, dz_voc),
-      bms_charging_(false), bms_off_(false), ctime_(0.), dt_(0.1),
+      bms_charging_(false), bms_off_(false), c_time_(0.), dt_(0.1), dt_pst_(0.),
       dv_dsoc_(0.3), dv_dyn_(0.), dv_hys_(0.), ib_(0.), ibs_(0.), ib_dyn_(0.),
       initializing_(false), ioc_(0.), nom_vsat_(0.), print_now_(false),
       soft_reset_print_(false), Tb_(NOMINAL_TB), Tb_f_(NOMINAL_TB),
@@ -249,7 +249,7 @@ float BatteryMonitor::calculate(Sensors* Sen, const bool reset_temp,
   Tb_f_rate_ = Sen->Tb_f_rate();
   vsat_ = calc_vsat();
   dt_ = Sen->T();
-  ctime_ = Sen->cTime();
+  c_time_ = Sen->c_time();
   vb_ = Sen->vb();
   ib_ = Sen->ib();
   ib_ = max(min(ib_, IMAX_NUM),
@@ -388,12 +388,12 @@ float BatteryMonitor::calculate(Sensors* Sen, const bool reset_temp,
 
   if (sp.debug() == 34)
     Serial.printf(
-        "BatteryMonitor:ctime,dt,ib,voc_stat_tab,voc_stat_f,voc,voc_dead,dv_"
+        "BatteryMonitor:c_time,dt,ib,voc_stat_tab,voc_stat_f,voc,voc_dead,dv_"
         "dyn,vb,   u,Fx,Bu,P,   z_,S_,K_,y_ekf,soc_ekf, y_ekf_f, soc, conv,  "
         "%12.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,     "
         "%7.3f,%7.3f,%7.4f,%7.4f,       %7.3f,%7.4f,%10.7f,%7.4f,%7.4f,%7.4f, "
         "%7.4f,  %d, %d,\n",
-        ctime_, dt_, ib_, voc_soc_, voc_stat_f_, voc_, voc_dead_, dv_dyn_, vb_,
+        c_time_, dt_, ib_, voc_soc_, voc_stat_f_, voc_, voc_dead_, dv_dyn_, vb_,
         u_, Fx_, Bu_, P_, z_, S_, K_, y_ekf_, soc_ekf_, y_ekf_f_, soc_,
         converged_ekf(), cp.ekf_reset);
   if (sp.debug() == -24)
@@ -749,7 +749,7 @@ float BatterySim::calculate(Sensors* Sen, const bool dc_dc_on,
   Tb_ = Sen->Tb();
   Tb_f_ = Sen->Tb_f();
 
-  ctime_ = Sen->cTime();
+  c_time_ = Sen->c_time();
   dt_in_ms_ = dt_long();
   dt_in_ = double(dt_in_ms_) / 1000.;
   ib_in_ = Sen->Ib_model_in() / ap.nP();

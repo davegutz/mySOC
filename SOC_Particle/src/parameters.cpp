@@ -92,6 +92,7 @@ bool Parameters::is_corrupt() {
 void Parameters::set_nominal() {
   for (uint16_t i = 0; i < n_; i++)
     if (V_[i]->code() != "UT") V_[i]->set_nominal();
+  chit("w;", SOON);        
 }
 
 // class VolatilePars

@@ -44,14 +44,14 @@ plt.rcParams["legend.fontsize"] = "small"
 def add_ib_lag(data):
     lag_tau = ib_lag(data.chm[0])
     IbLag = LagExp(1.0, lag_tau, -100.0, 100.0)
-    n = len(data.cTime)
+    n = len(data.c_time)
     if data.ib_lag is None:
         data = rf.rec_append_fields(data, "ib_lag", np.array(data.sat, dtype=float))
         data.ib_lag = np.zeros(n)
-    dt = data.cTime[1] - data.cTime[0]
+    dt = data.c_time[1] - data.c_time[0]
     for i in range(n):
         if i > 0:
-            dt = data.cTime[i] - data.cTime[i - 1]
+            dt = data.c_time[i] - data.c_time[i - 1]
         data.ib_lag[i] = IbLag.calculate_tau(float(data.ib[i]), i == 0, dt, lag_tau)
     return data
 
@@ -61,7 +61,7 @@ def add_voc_soc_new(data):
     chm = data.chm[1]
     chem = Chemistry(chm)
     chem.assign_all_mod(chm)
-    n = len(data.cTime)
+    n = len(data.c_time)
     data.voc_soc_new = np.zeros(n)
     for i in range(n):
         data.voc_soc_new[i] = chem.lookup_voc(data.soc[i], data.Tb[i])
@@ -70,10 +70,10 @@ def add_voc_soc_new(data):
 
 # Scale soc and adjust ib for observed calibration error
 def adjust_soc(data, dDA_in, scap_in=None):
-    n = len(data.cTime)
+    n = len(data.c_time)
     d_soc = 0.0
     for i in range(n - 1):
-        T = data.cTime[i + 1] - data.cTime[i]
+        T = data.c_time[i + 1] - data.c_time[i]
         # Accumulated soc change
         if scap_in is None:
             d_soc += dDA_in * T / data.qcrs[i]

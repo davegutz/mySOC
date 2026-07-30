@@ -97,13 +97,13 @@ def compare_pair_rms(run_path, ver_path, tol=1e-3, rtol=1e-3, tau=60.0):
     except Exception as e:
         return {"file": run_path.name, "ver_file": ver_path.name, "error": str(e), "diffs": []}
 
-    # locate time column — raw clean files use 'cTime'; processed files use 'time'
-    _time_col = next((c for c in ("time", "cTime") if c in df_run.columns and c in df_ver.columns), None)
+    # locate time column — raw clean files use 'c_time'; processed files use 'time'
+    _time_col = next((c for c in ("time", "c_time") if c in df_run.columns and c in df_ver.columns), None)
     if _time_col is None:
         return {
             "file": run_path.name,
             "ver_file": ver_path.name,
-            "error": 'no "time" or "cTime" column found',
+            "error": 'no "time" or "c_time" column found',
             "diffs": [],
         }
 
@@ -280,12 +280,12 @@ def plot_rms_diffs(results, data_file=None, save_plots=False, show_killer_=True,
 
 # noinspection PyPep8Naming
 def compare_run_run(
-    keys=None, data_file_folder_run=None, data_file_folder_test=None, sync_to_ctime=False, terse=True, hardcopy=False
+    keys=None, data_file_folder_run=None, data_file_folder_test=None, sync_to_c_time=False, terse=True, hardcopy=False
 ):
 
     print(
         f"\ncompare_run_run:\n{keys=}\n{data_file_folder_run=}\n"
-        f"{data_file_folder_test=}\n{sync_to_ctime=}\n{terse=}\n{hardcopy=}\n"
+        f"{data_file_folder_test=}\n{sync_to_c_time=}\n{terse=}\n{hardcopy=}\n"
     )
 
     date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
@@ -331,7 +331,7 @@ def compare_run_run(
         not sync_info_run.is_empty
         and not sync_info_test.is_empty
         and sync_info_run.length == sync_info_test.length
-        and (sync_info_run.length > 0 or sync_to_ctime is True)
+        and (sync_info_run.length > 0 or sync_to_c_time is True)
     ):
         # Make target sync vector
         master_sync_del = calculate_master_sync(sync_info_run.del_mon, sync_info_test.del_mon)
@@ -340,14 +340,14 @@ def compare_run_run(
         sync_info_test.synchronize(master_sync_del)
         mon_test.time = sync_info_test.time_mon.copy()
         # print(
-        #     f"{sync_to_ctime=}\n{sync_info_run.del_mon=}\n"
+        #     f"{sync_to_c_time=}\n{sync_info_run.del_mon=}\n"
         #     f"{sync_info_test.del_mon=}\n{master_sync_del=}\n{mon_test.time=}"
         # )
-    elif sync_to_ctime:
-        cTime_0_run = mon_run.cTime[0]
-        cTime_sync = cTime_0_run
-        mon_run.time = mon_run.cTime - cTime_sync
-        mon_test.time = mon_test.cTime - cTime_sync
+    elif sync_to_c_time:
+        c_time_0_run = mon_run.c_time[0]
+        c_time_sync = c_time_0_run
+        mon_run.time = mon_run.c_time - c_time_sync
+        mon_test.time = mon_test.c_time - c_time_sync
     else:
         print(
             f"Using simplified sync with |Ib|>0.  Data sets too small to sync or not equivalent number of sync pulses"
@@ -492,7 +492,7 @@ def main():
     ]
     data_file_folder_run = "G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20260524"
     data_file_folder_test = "G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20260524a"
-    sync_to_ctime = False
+    sync_to_c_time = False
     terse = True
     hardcopy = True
 
@@ -500,7 +500,7 @@ def main():
         keys=keys,
         data_file_folder_run=data_file_folder_run,
         data_file_folder_test=data_file_folder_test,
-        sync_to_ctime=sync_to_ctime,
+        sync_to_c_time=sync_to_c_time,
         terse=terse,
         hardcopy=hardcopy,
     )

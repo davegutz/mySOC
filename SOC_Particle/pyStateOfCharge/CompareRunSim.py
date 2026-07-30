@@ -49,7 +49,7 @@ def shift_time(obj, n_steps, fields=None):
     """Shift fields of a struct-like object by n_steps positions.
 
     fields: iterable of attribute names to shift. If None (default), shifts the
-            time column ('time' or 'cTime' if present), back/forward-extrapolating
+            time column ('time' or 'c_time' if present), back/forward-extrapolating
             gaps using the local dt — original behavior. If provided, shifts each
             named data field instead; gaps are filled with the boundary value
             (data fields aren't necessarily monotonic so dt extrapolation doesn't
@@ -64,7 +64,7 @@ def shift_time(obj, n_steps, fields=None):
 
     if fields is None:
         t_col = None
-        for candidate in ("time", "cTime"):
+        for candidate in ("time", "c_time"):
             if hasattr(obj, candidate):
                 raw = getattr(obj, candidate)
                 if raw is not None and hasattr(raw, "__len__") and len(raw) > 1:
@@ -271,9 +271,8 @@ def compare_run_sim(
             print("save_struct_to_csv: no filename available, skipping CSV export")
         else:
             # Shift time in sim_ver; soc_s is computed at G.i but save_s() records at t[G.i-1]
-            sim_ver = shift_time(sim_ver, 1)
+            # sim_ver = shift_time(sim_ver, 1)
             # if shift_soc_s:
-
             #     sim_ver = shift_time(sim_ver, 1, fields=("dt_charge_s", "dt_fut_s",))
             for obj, struct_name in (
                 (mon_run, "mon_run"),
@@ -282,8 +281,6 @@ def compare_run_sim(
                 (sim_ver, "sim_ver"),
             ):
                 save_struct_to_csv(obj, filename_root + "_" + struct_name + ".csv")
-
-
 
     # Plots
     if plots:
@@ -439,10 +436,10 @@ def main():  # Example usage.  ok on 20260217
     """
     data_file = '/home/daveg/.local/SOC_Particle/dataReduction/g20260612a/vcFlat_soc3p2_hi_lo_bb.csv'
     unit_key = 'g20260612a_soc3p2_hi_lo_bb'
-    time_end = 10
+    time_end = None
     compare_run_ver = True
     shift_soc_s = True
-    plots = False
+    plots = True
     use_mon_soc_ = False
     verbose = False
     scale_batt = 1.0

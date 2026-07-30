@@ -325,7 +325,7 @@ void Sensors::ib_choose_hi_lo() {
   }
   // UsingNone: both ib sensors hard-failed. Zero the current channels (so the
   // EKF and Coulomb counter integrate 0), but keep timing alive from ShuntAmp
-  // because dt_ib_hdwe_=0 would zero T_ and corrupt now_/ctime_, stopping
+  // because dt_ib_hdwe_=0 would zero T_ and corrupt now_/c_time_, stopping
   // serial output.
   else {
     Ib_hdwe_ = 0.;
@@ -451,17 +451,20 @@ void Sensors::select_volt_and_current_and_temp(BatteryMonitor* Mon) {
   Ib_amp_rms_ = IbAmpRMS->update(Ib_amp_);
   Ib_noa_rms_ = IbNoaRMS->update(Ib_noa_);
   T_ = double(dt_ib_) / 1000.;  // s
+  static uint64_t now_past = 0ULL;
   now_ = sample_time_ib_ - inst_millis_ + inst_time_ * 1000;
-  ctime_ = double(now_) / 1000.;
-  // Log.info("    select_volt_and_current_and_temp now:  now_,%lld,
-  // cTime,%7.3f,", now_, double(now_)/1000.);
+  if (now_past == 0ULL) now_past = now_;
+  now_past = now_;
+  c_time_ = double(now_) / 1000.;
+  Sim->c_time(c_time_);
+  Sim->dt(T_);
 
   if (sp.debug() == 62)
     Serial.printf(
-        " ctime%12.3f T%6.3f Ib%7.3f Ib_hdwe%7.3f Ib_hdwe_model%7.3f "
+        " c_time%12.3f T%6.3f Ib%7.3f Ib_hdwe%7.3f Ib_hdwe_model%7.3f "
         "Ib_amp%7.3f Ib_amp_model%7.3f Ib_amp_hdwe%7.3f Ib_noa%7.3f "
         "Ib_noa_model%7.3f Ib_noa_hdwe%7.3f\n",
-        ctime_, T_, Ib_, Ib_hdwe_, Ib_hdwe_model_, Ib_amp_, Ib_amp_model_,
+        c_time_, T_, Ib_, Ib_hdwe_, Ib_hdwe_model_, Ib_amp_, Ib_amp_model_,
         Ib_amp_hdwe_, Ib_noa_, Ib_noa_model_, Ib_noa_hdwe_);
 }
 

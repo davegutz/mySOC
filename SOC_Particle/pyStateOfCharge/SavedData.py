@@ -44,7 +44,7 @@ class SavedData:
         time_end=None,
         zero_zero=False,
         zero_thr=0.02,
-        sync_cTime=None,
+        sync_c_time=None,
         init_time=None,
         time_shift=None,
         str_=None,
@@ -69,15 +69,15 @@ class SavedData:
 
             # Specials
             self.i = 0
-            self.time = np.array(self.cTime)
+            self.time = np.array(self.c_time)
 
             # manage data shape
             # Find first non-zero ib and use to adjust time
             # Ignore initial run of non-zero ib because resetting from previous run
             if zero_zero:
                 self.zero_end = 0
-            elif sync_cTime is not None:
-                self.zero_end = np.where(self.cTime < sync_cTime[0])[0][-1] + 2
+            elif sync_c_time is not None:
+                self.zero_end = np.where(self.c_time < sync_c_time[0])[0][-1] + 2
             else:
                 try:
                     self.zero_end = 0
@@ -124,7 +124,7 @@ class SavedData:
 
             # Load again with new i_end
             self.assign_all_from(rap, i_end=i_end)
-            self.time = np.array(self.cTime) - self.time_run_start
+            self.time = np.array(self.c_time) - self.time_run_start
             self.time_min = self.time / 60.0
             self.time_day = self.time / 3600.0 / 24.0
             if self.time_shift:
@@ -133,7 +133,7 @@ class SavedData:
             if hasattr(rap, "qcap"):
                 self.q_capacity = rap.qcap[:i_end]
             # Lag for saturation
-            n = len(self.cTime)
+            n = len(self.c_time)
             ib_lag = Chemistry_BMS.ib_lag(self.chm[0])
             IbLag = LagExp(1.0, ib_lag, -100.0, 100.0)
             self.ib_lag = np.zeros(n)
@@ -378,12 +378,12 @@ class SavedData:
                 if i == 0 or self.time[i] <= self.init_time:
                     lag_reset = True
                     if i < n - 1:
-                        T_lag = self.cTime[i + 1] - self.cTime[i]
+                        T_lag = self.c_time[i + 1] - self.c_time[i]
                     else:
-                        T_lag = self.cTime[i] - self.cTime[i - 1]
+                        T_lag = self.c_time[i] - self.c_time[i - 1]
                 else:
                     lag_reset = False
-                    T_lag = self.cTime[i] - self.cTime[i - 1]
+                    T_lag = self.c_time[i] - self.c_time[i - 1]
                 self.ib_lag[i] = IbLag.calculate_tau(float(self.ib[i]), lag_reset, T_lag, ib_lag)
 
     def assign_all_from(self, x=None, i_end=None, no_clobber=False):
@@ -442,7 +442,7 @@ class SavedData:
     def __str__(self):
         s = "{},".format(self.unit[self.i])
         s += "{},".format(self.hm[self.i])
-        # s += "{:13.3f},".format(self.cTime[self.i])
+        # s += "{:13.3f},".format(self.c_time[self.i])
         s += "{:8.3f},".format(self.ib[self.i])
         s += "{:7.2f},".format(self.vsat[self.i])
         s += "{:5.2f},".format(self.dv_dyn[self.i])
@@ -465,8 +465,8 @@ class SavedDataSim:
         if data is None:
             pass
         else:
-            self.cTime = np.array(data.c_time_sim)
-            self.time = self.cTime - time_run_start
+            self.c_time = np.array(data.c_time_sim)
+            self.time = self.c_time - time_run_start
             if time_end is None:
                 i_end = len(self.time)
             else:
@@ -529,7 +529,7 @@ class SavedDataSim:
 
     def __str__(self):
         s = "{},".format(self.unit[self.i])
-        # s += "{:13.3f},".format(self.cTime[self.i])
+        # s += "{:13.3f},".format(self.c_time[self.i])
         # s += "{:5.2f},".format(self.Tb_s[self.i])
         s += "{:8.3f},".format(self.vsat_s[self.i])
         s += "{:5.2f},".format(self.voc_stat_s[self.i])
