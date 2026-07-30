@@ -326,10 +326,12 @@ float BatteryMonitor::calculate(Sensors* Sen, const bool reset_temp,
   vb_model_rev_ = voc_soc_ + dv_dyn_ + dv_hys_;
 
   // EKF 1x1
+  cp.ekf_executing = false;
   if (eframe_ == 0 || reset_ekf) {
+    cp.ekf_executing = true;
     static uint64_t ekf_now_past = Sen->now();
     float ddq_dt = ib_charge_ekf;
-    bool freeze = Sen->Flt->vb_fa_lt() ||
+    cp.freeze = Sen->Flt->vb_fa_lt() ||
                   bms_off_;  // Freeze EKF with voltage fault or bms_off
 
     now_ekf_ = Sen->now();
@@ -344,7 +346,7 @@ float BatteryMonitor::calculate(Sensors* Sen, const bool reset_temp,
       solve_ekf(reset_ekf, reset_temp, Sen);
     } 
     else {
-      predict_ekf(ddq_dt, freeze);         // u = d(dq)/dt
+      predict_ekf(ddq_dt, cp.freeze);         // u = d(dq)/dt
       update_ekf(voc_stat_f_, 0., MXEPS);  // z = _f, estimated = voc_filtered =
                                            // hx, predicted = est past
     }
@@ -374,9 +376,6 @@ float BatteryMonitor::calculate(Sensors* Sen, const bool reset_temp,
           true, IN_SERVICE);
 
     if (sp.debug() == -2 && cp.ekf_reset) print_ekf_header();
-    if (sp.debug() == 3 || sp.debug() == 4 || sp.debug() == 6 ||
-        sp.debug() == -2)
-      EKF_1x1::print_ekf_serial(this, freeze);  // print EKF in Read frame
 
     if (reset_ekf) cp.ekf_reset = false;
   }
@@ -971,9 +970,6 @@ double BatterySim::count_coulombs(Sensors* Sen, const bool reset_temp,
                   coul_eff_, d_delta_q_s_, *sp_delta_q_, q_, sp.mod_vb(),
                   model_saturated_, reset_temp_past),
               true, IN_SERVICE);
-
-  // print_sim_serial
-  print_sim_serial(initializing_all, reset_temp, Sen, this);
 
   // Save and return
   reset_temp_past = reset_temp;

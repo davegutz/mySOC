@@ -103,12 +103,11 @@ all
 // Dependent includes.   Easier to sp.debug code if remove unused include files
 #include "Sync.h"
 #include "subs.h"
-// #include "Summary.h"
 #include "Cloud.h"
 #include "debug.h"
 #include "parameters.h"
 #include "serial.h"
-// #include "ble.h"
+#include "myLibrary/EKF_1x1.h"
 
 // #define BOOT_CLEAN      // Use this to clear 'lockup' problems introduced
 // during testing using Talk
@@ -322,9 +321,11 @@ void loop() {
     }
 
     // Print
+    print_sim_serial(false, reset, reset_temp, Sen, Sen->Sim);
+    print_rapid_serial(reset, Sen, Mon, reset_temp);  // prints headers
+    Mon->EKF_1x1::print_ekf_serial(Mon, cp.freeze);  // print EKF in Read frame
     print_shunt_serial(reset, Sen);
     print_signal_sel_serial(reset, Sen, Mon, Sen->Sim);
-    print_rapid_data(reset, Sen, Mon, reset_temp);
 
   }  // end read (high speed frame)
 

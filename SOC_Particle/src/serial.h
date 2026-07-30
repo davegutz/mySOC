@@ -50,13 +50,13 @@ bool is_finished(const char in_char);
 void print_battery_header();
 void print_battery_serial();
 void print_all_header(Sensors* Sen);
-void print_rapid_data(const bool reset, Sensors* Sen, BatteryMonitor* Mon,
+void print_rapid_serial(const bool reset, Sensors* Sen, BatteryMonitor* Mon,
                       const bool reset_temp);
 void print_rapid_header();
 void print_rapid_serial(const bool reset, Publish* pubList, Sensors* Sen,
                         BatteryMonitor* Mon);
-void print_sim_serial(const bool initializing_all, const bool reset_temp,
-                      Sensors* Sen, BatterySim* Sim);
+void print_sim_serial(const bool initializing_all, const bool reset,
+                      const bool reset_temp, Sensors* Sen, BatterySim* Sim);
 void print_sim_header();
 void print_shunt_header(Sensors* Sen);
 void print_shunt_serial(const bool reset, Sensors* Sen);

@@ -49,11 +49,13 @@ class CommandPars {
                        // pass, 1 per Control pass
   String asap_str;     // Hold chit_chat asap data - no waiting, ASAP all of
                        // now_str processed before Control pass
-  bool freeze;         // Stop applying (describe()) the queues
+  bool freeze;         // Freeze ekf
+  bool ekf_executing;  // ekf frame active
   bool inp_token;      // Whether inp_str is complete
   bool cmd_token;      // Whether cmd_str has been applied
   bool chitchat;       // Outer frame call, used in chitchat functions
   bool inf_reset;      // Use talk to reset infinite counter
+  int16_t last_read_debug;  // Use to sequence printing
   bool model_cutback;  // On model cutback
   bool model_saturated;       // Sim on cutback and saturated
   uint32_t num_v_print;       // Number of print echos made, for checking on BLE
@@ -76,6 +78,7 @@ class CommandPars {
 
   CommandPars() {
     inf_reset = false;
+    last_read_debug = 0;
     model_cutback = false;
     model_saturated = false;
     num_v_print = 0UL;
@@ -90,6 +93,7 @@ class CommandPars {
     chitchat = false;
     inp_token = false;
     freeze = false;
+    ekf_executing = false;
     ctl_str = "";
     inp_str = "";
     cmd_str = "";

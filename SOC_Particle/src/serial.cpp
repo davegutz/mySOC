@@ -27,6 +27,7 @@
 #include "command.h"
 #include "constants.h"
 #include "debug.h"
+#include "myLibrary/EKF_1x1.h"
 
 extern CommandPars cp;  // Various parameters shared at system level
 extern BleCharacteristic txCharacteristic;
@@ -250,36 +251,38 @@ void EKF_1x1::print_ekf_serial(BatteryMonitor* Mon, const bool freeze) {
   if (eTime <= last_eTime + 0.00005) return;
   last_eTime = eTime;
 
-  Serial.printf(
-      "unit_ekf,%13.4f,%8.4f,%2d,%2d,%13.10f,%13.10f,%13.10f,%10.7g,%10.7g,"
-      "%10.7g,%10.7g,% 10.7g,%10.7g,%11.9g,%10.7g,%12.9g,",
-    eTime, dt_ekf_, cp.ekf_reset, freeze, Mon->voc_stat_f(), Fx_, Bu_, Q_, R_,
-    P_, S_, K_, u_, x_, y_, z_);
+  if (sp.debug() == 3 || sp.debug() == 4 || sp.debug() == 6 ||
+      sp.debug() == -2){
+    Serial.printf(
+        "unit_ekf,%13.4f,%8.4f,%2d,%2d,%13.10f,%13.10f,%13.10f,%10.7g,%10.7g,"
+        "%10.7g,%10.7g,% 10.7g,%10.7g,%11.9g,%10.7g,%12.9g,",
+      eTime, dt_ekf_, cp.ekf_reset, freeze, Mon->voc_stat_f(), Fx_, Bu_, Q_, R_,
+      P_, S_, K_, u_, x_, y_, z_);
 
-  Serial.printf("%11.9g,%10.7g,%11.9g,%10.7g,%12.9g,%10.7g,%d,%11.8f,%11.9f,",
-                x_prior_, P_prior_, x_post_, P_post_, hx_, H_, freeze_,
-                Tb_f_for_hx_, x_for_hx_);
+    Serial.printf("%11.9g,%10.7g,%11.9g,%10.7g,%12.9g,%10.7g,%d,%11.8f,%11.9f,",
+                  x_prior_, P_prior_, x_post_, P_post_, hx_, H_, freeze_,
+                  Tb_f_for_hx_, x_for_hx_);
 
-  Serial.printf("%9.6f,%9.6f,%12.9f,%12.9f,", Mon->vocStatFilt_T(),
-                Mon->vocStatFilt_tau(), Mon->vocStatFilt_rstate(),
-                Mon->vocStatFilt_lstate());
+    Serial.printf("%9.6f,%9.6f,%12.9f,%12.9f,", Mon->vocStatFilt_T(),
+                  Mon->vocStatFilt_tau(), Mon->vocStatFilt_rstate(),
+                  Mon->vocStatFilt_lstate());
 
-  Serial.printf("%9.6f,%12.9f,%12.9f,", Mon->y_ekf_f_T(), Mon->y_ekf_f_tau(),
-                Mon->y_ekf_f_lstate());
+    Serial.printf("%9.6f,%12.9f,%12.9f,", Mon->y_ekf_f_T(), Mon->y_ekf_f_tau(),
+                  Mon->y_ekf_f_lstate());
 
-  Serial.printf("\n");
+    Serial.printf("\n");
+  }
 }
 
-void print_rapid_data(const bool reset, Sensors* Sen, BatteryMonitor* Mon,
+void print_rapid_serial(const bool reset, Sensors* Sen, BatteryMonitor* Mon,
                       const bool reset_temp) {
-  static int16_t last_read_debug = 0;
   static double last_cTime = 0.;
-  if (sp.debug() == -2 && (reset || last_read_debug != sp.debug())) {
+  if (sp.debug() == -2 && (reset || cp.last_read_debug != sp.debug())) {
     print_ekf_header();
   }
   if ((sp.debug() == 1 || sp.debug() == 2 || sp.debug() == 3 ||
        sp.debug() == 4 || sp.debug() == 6)) {
-    if (reset || (last_read_debug != sp.debug())) {
+    if (reset || (cp.last_read_debug != sp.debug())) {
       cp.num_v_print = 0UL;
       print_all_header(Sen);
     }
@@ -292,7 +295,7 @@ void print_rapid_data(const bool reset, Sensors* Sen, BatteryMonitor* Mon,
       last_cTime = Mon->cTime();
     }
   }
-  last_read_debug = sp.debug();
+  cp.last_read_debug = sp.debug();
 }
 
 // Print primary data
@@ -605,9 +608,15 @@ void print_sim_header() {
   Serial.printf("\n");
 }
 
-void print_sim_serial(const bool initializing_all, const bool reset_temp,
-                      Sensors* Sen, BatterySim* Sim) {
+void print_sim_serial(const bool initializing_all, const bool reset,
+                      const bool reset_temp, Sensors* Sen, BatterySim* Sim) {
   static double last_cTime_sim = 0.;
+
+  // Skip if header due to be printed
+  if (reset || (cp.last_read_debug != sp.debug())) {
+    return;
+  }
+
   if ((sp.debug() == 2 || sp.debug() == 3 || sp.debug() == 4 || sp.debug() == 6)
    && cp.publishS &&
       !initializing_all &&
