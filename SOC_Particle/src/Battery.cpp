@@ -44,14 +44,14 @@ Battery::Battery(double* sp_delta_q, const float d_voc_soc, const float dx_voc,
                  const float dy_voc, const float dz_voc)
     : Coulombs(sp_delta_q, (NOM_UNIT_CAP * 3600), COULOMBIC_EFF_SCALE, dx_voc,
                dy_voc, dz_voc),
-      bms_charging_(false), bms_off_(false), c_time_(0.), dt_(0.1), dt_pst_(0.),
-      dv_dsoc_(0.3), dv_dyn_(0.), dv_hys_(0.), ib_(0.), ibs_(0.), ib_dyn_(0.),
-      initializing_(false), ioc_(0.), nom_vsat_(0.), print_now_(false),
-      soft_reset_print_(false), Tb_(NOMINAL_TB), Tb_f_(NOMINAL_TB),
-      vb_(NOMINAL_VB), voc_(NOMINAL_VB), voc_soc_(NOMINAL_VB),
-      voc_stat_(NOMINAL_VB), voltage_low_(false), vsat_(NOMINAL_VB),
-      ChargeTransfer_(nullptr), rand_A_(nullptr), rand_B_(nullptr),
-      rand_C_(nullptr), rand_D_(nullptr) {
+      bms_charging_(false), bms_off_(false), c_time_(0.), c_time_past_(0.),
+      dt_(0.1), dt_pst_(0.), dv_dsoc_(0.3), dv_dyn_(0.), dv_hys_(0.), ib_(0.),
+      ibs_(0.), ib_dyn_(0.), initializing_(false), ioc_(0.), nom_vsat_(0.),
+      print_now_(false), soft_reset_print_(false), Tb_(NOMINAL_TB),
+      Tb_f_(NOMINAL_TB), vb_(NOMINAL_VB), voc_(NOMINAL_VB),
+      voc_soc_(NOMINAL_VB), voc_stat_(NOMINAL_VB), voltage_low_(false),
+      vsat_(NOMINAL_VB), ChargeTransfer_(nullptr), rand_A_(nullptr),
+      rand_B_(nullptr), rand_C_(nullptr), rand_D_(nullptr) {
   nom_vsat_ = chem_.v_sat - HDB_VB;  // Center in hysteresis
   ChargeTransfer_ = new LagExp(
       EKF_NOM_DT, chem_.tau_ct, -NOM_UNIT_CAP,

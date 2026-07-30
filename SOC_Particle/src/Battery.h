@@ -145,6 +145,7 @@ class Battery : public Coulombs {
   bool bms_off_;  // Indicator that battery management system is off, T = off
                   // preventing current flow
   double c_time_;  // Current time, s
+  double c_time_past_;  // Past time, s
   float dt_;  // Update time, s
   double dt_pst_;  // Time since past sample, s
   double dv_dsoc_;  // Derivative scaled, V/fraction
@@ -253,8 +254,14 @@ class BatterySim : public Battery {
  public:
   BatterySim(const float dx_voc, const float dy_voc, const float dz_voc);
   ~BatterySim();
-  void assign_times(const double input) {
-    dt_fut_ = input - c_time_; c_time_ = input;  }
+  void assign_times(const double input) {                                                                                                                                                            
+    if (c_time_ > 0.0) {
+      dt_pst_ = input - c_time_;  // Actual past sample elapsed time (s)
+    }
+    dt_fut_ = input - c_time_;
+    c_time_past_ = c_time_;
+    c_time_ = input;
+  }
   float calc_inj(const uint64_t now, const uint8_t type, const float amp,
                  const double freq);
   virtual double calc_soc_voc(const double soc, const double Tb_f,
