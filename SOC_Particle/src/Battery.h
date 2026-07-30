@@ -253,6 +253,8 @@ class BatterySim : public Battery {
  public:
   BatterySim(const float dx_voc, const float dy_voc, const float dz_voc);
   ~BatterySim();
+  void assign_times(const double input) {
+    dt_fut_ = input - c_time_; c_time_ = input;  }
   float calc_inj(const uint64_t now, const uint8_t type, const float amp,
                  const double freq);
   virtual double calc_soc_voc(const double soc, const double Tb_f,

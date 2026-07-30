@@ -206,7 +206,7 @@ Sensors::Sensors(double T, double T_temp, Pins* pins, Sync* ReadSensors,
       Ib_hdwe_f_cal_(0.), Ib_noa_(0.), Ib_noa_hdwe_(0.), Ib_noa_hdwe_f_(0.),
       Ib_noa_hdwe_kf_(0.), Ib_noa_rms_(0.), Ib_noa_model_(0.), Ib_hdwe_(0.),
       Ib_hdwe_model_(0.), Ib_model_(0.), Ib_model_in_(0.), Vb_rms_(0.),
-      Vc_rms_(0.), Wb_(0.), now_(0ULL), now_temp_(0ULL), T_(0.), reset_(false),
+      Vc_rms_(0.), Wb_(0.), now_(0ULL), now_temp_(0ULL), c_time_(0.), dt_pst_(0.), T_(0.), reset_(false),
       T_filt_(0.), T_temp_(0.), elapsed_inj_(0ULL), start_inj_(0ULL),
       stop_inj_(0ULL), end_inj_(0ULL), control_time_(0.), display_(true),
       bms_off_(false), sat_(false), saturated_(false) {
@@ -454,10 +454,10 @@ void Sensors::select_volt_and_current_and_temp(BatteryMonitor* Mon) {
   static uint64_t now_past = 0ULL;
   now_ = sample_time_ib_ - inst_millis_ + inst_time_ * 1000;
   if (now_past == 0ULL) now_past = now_;
+  dt_pst_ = double(now_ - now_past) / 1000.;
   now_past = now_;
   c_time_ = double(now_) / 1000.;
-  Sim->c_time(c_time_);
-  Sim->dt(T_);
+  Sim->assign_times(c_time_);
 
   if (sp.debug() == 62)
     Serial.printf(

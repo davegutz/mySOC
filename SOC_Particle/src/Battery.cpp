@@ -749,7 +749,6 @@ float BatterySim::calculate(Sensors* Sen, const bool dc_dc_on,
   Tb_ = Sen->Tb();
   Tb_f_ = Sen->Tb_f();
 
-  c_time_ = Sen->c_time();
   dt_in_ms_ = dt_long();
   dt_in_ = double(dt_in_ms_) / 1000.;
   ib_in_ = Sen->Ib_model_in() / ap.nP();
@@ -758,6 +757,7 @@ float BatterySim::calculate(Sensors* Sen, const bool dc_dc_on,
     dt_fut_ = dt_in_;
     ib_fut_ = ib_in_;
   }
+  dt_pst_ = dt_;
   dt_ = max((float)dt_fut_, 1e-4f);
   ib_ = max(min(ib_fut_, IMAX_NUM),
             -IMAX_NUM);  //  Past value ib_.  Overflow protection when ib_ past
