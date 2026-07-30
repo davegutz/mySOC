@@ -615,8 +615,8 @@ void print_signal_sel_serial(const bool reset, Sensors* Sen,
 // print sim for data collection
 void print_sim_header() {
   Serial.printf(
-      "unit_m,  c_time_sim,  dt_fut_s, dt_s, dt_pst, chm_s, qcrs_s, bms_off_s,"
-      "Tb_s, Tb_f_s, vsat_s, voc_stat_s, dt_charge_s, ib_fut_s, dt_fut_s,");
+      "unit_m,  c_time_sim,  dt_fut_s, dt_s, dt_pst_s, chm_s, qcrs_s, bms_off_s,"
+      "Tb_s, Tb_f_s, vsat_s, voc_stat_s, dt_charge_s, ib_fut_s, ");
   Serial.printf(
       "dv_dyn_s, vb_s, ib_s, ib_dyn_s, dv_hys_s, ib_in_s, ib_charge_s, "
       "ioc_s, ");
@@ -651,11 +651,10 @@ void print_sim_serial(const bool initializing_all, const bool reset,
     last_c_time_sim = Sim->c_time();
     sprintf(pr.buff,
             "unit_sim, %13.4f,%8.4f,%8.4f,%8.4f,%d,%10.4f,%d,%11.8f,%11.8f, "
-            "%7.6f,%7.6f,%8.4f,%11.9f,%8.4f,",
+            "%7.6f,%7.6f,%8.4f,%11.9f,",
             Sim->c_time(), Sim->dt_fut(), Sim->dt(), Sim->dt_pst(), CHEM,
             Sim->q_cap_rated_scaled(), Sim->bms_off(), Sim->Tb(), Sim->Tb_f(),
-            Sim->vsat(), Sim->voc_stat(), Sim->dt_charge(), Sim->ib_fut(),
-            Sim->dt_fut());
+            Sim->vsat(), Sim->voc_stat(), Sim->dt_charge(), Sim->ib_fut());
     Serial.printf("%s", pr.buff);
 
     sprintf(pr.buff, "%11.9f,%11.9f,%11.9f,%11.9f,%11.9f,%11.9f,%11.9f,%11.9f,",

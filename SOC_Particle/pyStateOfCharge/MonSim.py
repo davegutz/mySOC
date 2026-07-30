@@ -428,7 +428,7 @@ def replicate(OPT: UserOptions):
         # Save plot info
         mon.save(t[G.i], T, mon.soc, sim.voc, SN, rp, sim)
         sim.save(t[max(G.i - 1, 0)], Tpast)
-        sim.save_s(t[max(G.i - 1, 0)])
+        sim.save_s(t[max(G.i - 1, 0)], SN=SN)
         Tpast = T
 
         # Print initial

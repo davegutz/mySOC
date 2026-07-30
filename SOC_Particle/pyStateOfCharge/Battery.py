@@ -352,6 +352,11 @@ class BatteryMonitor(Battery, EKF1x1):
         so equations error when soc<=0 to match data.    See Battery.h
         """
         # Parents
+        self.SN = SN
+        self.c_time = 0.0
+        self.c_time_sel = 0.0
+        self.c_time_shunt = 0.0
+        self.c_time_e = 0.0
         self.soc_ekf = 0.0  # Filtered state of charge from ekf (0-1)
         EKF1x1.__init__(self)
         self.time_min = self.time / 60.0
@@ -681,6 +686,9 @@ class BatteryMonitor(Battery, EKF1x1):
         i=None,
         i_ekf=None,
     ):
+        self.SN = SN
+        self.i = i
+        self.i_ekf = i_ekf
         self.cc_dif_prev = self.soc_ekf - self.soc
         self.reset = reset
         if reset:
@@ -1015,6 +1023,31 @@ class BatteryMonitor(Battery, EKF1x1):
         self.dt = dt
         self.time_min = self.time / 60.0
         self.time_day = self.time_min / 60.0 / 24.0
+
+        if SN is None:
+            SN = getattr(self, "SN", None)
+        if SN is not None and getattr(SN, "mon_run", None) is not None:
+            mon_run = SN.mon_run
+            idx = G.i
+            if hasattr(mon_run, "c_time") and mon_run.c_time is not None and idx < len(mon_run.c_time):
+                self.c_time = float(mon_run.c_time[idx])
+            elif hasattr(mon_run, "cTime") and mon_run.cTime is not None and idx < len(mon_run.cTime):
+                self.c_time = float(mon_run.cTime[idx])
+
+            if hasattr(mon_run, "c_time_sel") and mon_run.c_time_sel is not None and idx < len(mon_run.c_time_sel):
+                self.c_time_sel = float(mon_run.c_time_sel[idx])
+
+            if hasattr(mon_run, "c_time_shunt") and mon_run.c_time_shunt is not None and idx < len(mon_run.c_time_shunt):
+                self.c_time_shunt = float(mon_run.c_time_shunt[idx])
+
+            i_ekf_idx = getattr(self, "i_ekf", None)
+            if i_ekf_idx is None:
+                i_ekf_idx = idx
+            if hasattr(mon_run, "c_time_e") and mon_run.c_time_e is not None and i_ekf_idx < len(mon_run.c_time_e):
+                self.c_time_e = float(mon_run.c_time_e[i_ekf_idx])
+            elif hasattr(mon_run, "time_e") and mon_run.time_e is not None and i_ekf_idx < len(mon_run.time_e):
+                self.c_time_e = float(mon_run.time_e[i_ekf_idx])
+
         if abs(soc_run) < 1e-6:
             soc_run = 1e-6
         self.e_soc_ekf = (self.soc_ekf - soc_run) / soc_run
@@ -1310,6 +1343,9 @@ class BatterySim(Battery):
         self.dt_charge = 0.0  # Update time at charge current time frame, s
         self.dt_fut = 0.0  # Update time at charge current time frame, s
         self.ib_charge = 0.0  # Charge current, A
+        self.SN = SN
+        self.c_time = 0.0
+        self.c_time_sim = 0.0
         self.saved_s = SavedS("ver_s")  # for plots and prints
         self.ib_fut = 0.0  # Future value of limited current, A
         self.reset_temp_past = self.model_saturated
@@ -1426,6 +1462,7 @@ class BatterySim(Battery):
         i=None,
         i_ekf=None,
     ):
+        self.SN = SN
         self.reset = reset
         if self.chm != chem:
             self.chemistry.assign_all_mod(chem, self.unit)
@@ -1515,7 +1552,10 @@ class BatterySim(Battery):
         self.ib_fut = min(ib_charge_fut, self.sat_ib_max)  # the feedback of self.ib
         # self.ib_charge = ib_charge_fut# same time plane as volt calcs.  (This prevents sat logic from working)
         self.ib_charge = self.ib_fut  # same time plane as volt calcs
-        self.dt_fut = dt_charge
+        if hasattr(SN, "dt_fut_s") and SN.dt_fut_s is not None and G.i < len(SN.dt_fut_s):
+            self.dt_fut = SN.dt_fut_s[G.i]
+        else:
+            self.dt_fut = dt_charge
 
         # empty  **** don't know why this was here.  cannot bms_off_ empty because that causes weird interaction with
         # bms logic and also doesn't make sense to have a different empty cutoff when modeling.  If there is a need for
@@ -1593,11 +1633,29 @@ class BatterySim(Battery):
         # Append all parameters to
         self.append_to(self.saved)
 
-    def save_s(self, time):
+    def save_s(self, time, SN=None):
+        if SN is None:
+            SN = getattr(self, "SN", None)
         self.time = time
+        self.dt_pst_s = self.dt_past
         self.dt_s = self.dt
         self.dt_charge_s = self.dt_charge
         self.dt_fut_s = self.dt_fut
+
+        idx = max(G.i - 1, 0)
+        if SN is not None and getattr(SN, "sim_run", None) is not None:
+            sim_run = SN.sim_run
+            c_time_val = None
+            if hasattr(sim_run, "c_time_sim") and sim_run.c_time_sim is not None and idx < len(sim_run.c_time_sim):
+                c_time_val = float(sim_run.c_time_sim[idx])
+            elif hasattr(sim_run, "c_time") and sim_run.c_time is not None and idx < len(sim_run.c_time):
+                c_time_val = float(sim_run.c_time[idx])
+            elif hasattr(sim_run, "cTime") and sim_run.cTime is not None and idx < len(sim_run.cTime):
+                c_time_val = float(sim_run.cTime[idx])
+
+            if c_time_val is not None:
+                self.c_time_sim = c_time_val
+                self.c_time = c_time_val
         self.chm_s = self.chm
         self.qcrs_s = self.q_cap_rated_scaled
         self.qcap_s = self.q_capacity
@@ -1911,6 +1969,10 @@ class Saved:
         self.str = str_
         self.time_run_start = None
         self.time = []
+        self.c_time = []
+        self.c_time_sel = []
+        self.c_time_shunt = []
+        self.c_time_e = []
         self.time_min = []
         self.time_day = []
         self.time_t = []
@@ -2065,6 +2127,7 @@ class SavedS:
         self.time = []
         self.unit = []  # text title
         self.c_time = []  # Control time, s
+        self.c_time_sim = []
         self.dt = []
         self.chm_s = []
         self.qcrs_s = []
@@ -2090,6 +2153,7 @@ class SavedS:
         self.ib_charge_s = []
         self.dt_charge_s = []
         self.dt_fut_s = []
+        self.dt_pst_s = []
         self.ib_fut_s = []
         self.sat_s = []
         self.ddq_s = []

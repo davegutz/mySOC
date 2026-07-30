@@ -272,8 +272,7 @@ def compare_run_sim(
         else:
             # Shift time in sim_ver; soc_s is computed at G.i but save_s() records at t[G.i-1]
             # sim_ver = shift_time(sim_ver, 1)
-            # if shift_soc_s:
-            #     sim_ver = shift_time(sim_ver, 1, fields=("dt_charge_s", "dt_fut_s",))
+            # sim_ver = shift_time(sim_ver, 1, fields=("dt_fut_s",))
             for obj, struct_name in (
                 (mon_run, "mon_run"),
                 (mon_ver, "mon_ver"),
@@ -444,7 +443,7 @@ def main():  # Example usage.  ok on 20260217
     verbose = False
     scale_batt = 1.0
     slr_hys_sim = 1.0
-    request_history = 1
+    request_history = 3
     init_time = None
     time_shift = None
     strict_overplot = True
