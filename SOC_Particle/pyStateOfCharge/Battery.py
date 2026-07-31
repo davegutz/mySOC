@@ -165,10 +165,6 @@ class Battery(BatteryConstants, Coulombs):
         self.bms_off_past = self.bms_off
         self.mod = 7
         self.tweak_test = tweak_test
-        self.ib_lag = 0.0
-        self.IbLag = LagExp(
-            1.0, 1.0, -100.0, 100.0
-        )  # Lag to be run on saturation to produce ib_lag.  T and tau set at run time
         self.voc_soc = None
         self.voc_soc_new = 0.0
         self.scale_cap = scale_cap
@@ -795,8 +791,8 @@ class BatteryMonitor(Battery, EKF1x1):
             ib_lag_reset = (G.i == 0)
             if OPT is not None and getattr(OPT, "mon_run", None) is not None:
                 if getattr(OPT.mon_run, "reset", None) is not None:
-                    ib_lag_reset = ib_lag_reset or bool(OPT.mon_run.reset[G.i] > 0.0) or bool(OPT.mon_run.reset_all_faults[G.i] > 0.0)
-        self.ib_lag = self.IbLag.calculate_tau(self.ib, ib_lag_reset, self.dt, self.chemistry.ib_lag_tau)
+                    ib_lag_reset = ib_lag_reset or bool(OPT.mon_run.reset[G.i] > 0.0) or \
+                                   bool(OPT.mon_run.reset_all_faults[G.i] > 0.0)
 
         # Dynamic emf
         if rp.modeling_vb or rp.modeling_ib:
@@ -1152,7 +1148,6 @@ class BatteryMonitor(Battery, EKF1x1):
         self.y_ekf_f = self.y_ekf_f
         self.H = getattr(self, "H", 1.0)
         self.H_pst = getattr(self, "H_pst", 1.0)
-        self.ib_lag = self.ib_lag
         self.qcap = self.q_capacity
         self.qcrs = self.q_cap_rated_scaled
         if rp is not None and not rp.modeling_ib:
@@ -1547,13 +1542,6 @@ class BatterySim(Battery):
             ib_charge_fut = 0.0
         if self.bms_off and self.voltage_low:
             self.ib = 0.0
-        ib_lag_reset = self.reset
-        if G.i < 3:
-            ib_lag_reset = (G.i == 0)
-            if OPT is not None and getattr(OPT, "mon_run", None) is not None:
-                if getattr(OPT.mon_run, "reset", None) is not None:
-                    ib_lag_reset = ib_lag_reset or bool(OPT.mon_run.reset[G.i] > 0.0) or bool(OPT.mon_run.reset_all_faults[G.i] > 0.0)
-        self.ib_lag = self.IbLag.calculate_tau(self.ib, ib_lag_reset, self.dt, self.chemistry.ib_lag_tau)
         # Charge transfer dynamics
         self.ib_dyn = self.ChargeTransfer.calculate_tau_seeded(
             self.ib, SN.ib_dyn_s[G.i], self.reset, self.dt, self.chemistry.tau_ct
@@ -2119,7 +2107,6 @@ class Saved:
         self.e_wrap_n_filt = []  # Verification of filtered wrap calculation, V
         self.e_wrap_n_trim = []  # Verification of filtered wrap calculation, V
         self.e_wrap_rate = []  # Verification of filtered wrap rate calculation, V/s
-        self.ib_lag = []  # Lagged ib, A
         self.voc_soc_new = []  # New schedule values
         self.ib_amp = []
         self.ib_amp_model = []

@@ -52,7 +52,6 @@ class SavedData:
         self.str = str_
         i_end = 0
         n = 0
-        ib_lag = 0.0
         IbLag = None
         self.time_shift = time_shift
 
@@ -134,10 +133,6 @@ class SavedData:
                 self.q_capacity = rap.qcap[:i_end]
             # Lag for saturation
             n = len(self.c_time)
-            ib_lag = Chemistry_BMS.ib_lag(self.chm[0])
-            IbLag = LagExp(1.0, ib_lag, -100.0, 100.0)
-            self.ib_lag = np.zeros(n)
-            # self.sel = np.array(rap.sel[:i_end])
             self.mod_data = np.array(rap.mod[:i_end])
             self.bms_off = np.array(rap.bmso[:i_end])
             if not hasattr(rap, "ib_dyn_T"):

@@ -17,23 +17,6 @@
 import numpy as np
 from pyDAGx import myTables
 
-
-# tentative values lags
-IB_LAG_BB = 180.0
-IB_LAG_CH = 180.0
-
-
-def ib_lag(chm):
-    if chm == 0.0:
-        lag = IB_LAG_BB
-    elif chm == 1.0 or chm == 2.0:
-        lag = IB_LAG_CH
-    else:
-        print("bad chm value=", chm)
-        return None
-    return lag
-
-
 class BMS:
     """Battery Management System Properties"""
 
@@ -84,7 +67,6 @@ class Chemistry(BMS):
         self.lu_x_hys = None
         self.lu_n_hys = None
         self.assign_all_mod(mod_code=mod_code, unit=unit)
-        self.ib_lag_tau = IB_LAG_BB
         self.Dw = Dw  # Adjust voc(soc)
 
     # Assign chemistry, anytime

@@ -22,7 +22,6 @@ from Battery import Battery, BatteryMonitor, is_sat
 from Battery import calculate_capacity, Retained
 from Colors import Colors
 from plot.plq import plq as plq
-from Chemistry_BMS import ib_lag
 from filter.myFilters import LagExp
 
 # Suppress all UserWarning messages
@@ -41,26 +40,6 @@ def add_ib(data):
         data = rf.rec_append_fields(data, "ib_amp_hdwe", np.array(data.ib_amp_hdwe_f, dtype=float))
     if hasattr(data, "ib_noa_hdwe_f"):
         data = rf.rec_append_fields(data, "ib_noa_hdwe", np.array(data.ib_noa_hdwe_f, dtype=float))
-    return data
-
-
-# Add ib_lag = ib lagged by time constant
-# noinspection PyPep8Naming
-def add_ib_lag(data, mon):
-    lag_tau = ib_lag(mon.chemistry.mod_code)
-    IbLag = LagExp(1.0, lag_tau, -100.0, 100.0)
-    n = len(data.time)
-    if n < 2:
-        return data
-    if not hasattr(data, "ib_lag"):
-        data = rf.rec_append_fields(data, "ib_lag", np.array(data.time, dtype=float))
-        data.ib_lag = np.zeros(n)
-    dt = data.time[1] - data.time[0]
-    for i in range(n):
-        if i > 0:
-            dt = data.time[i] - data.time[i - 1]
-        # noinspection PyUnresolvedReferences
-        data.ib_lag[i] = IbLag.calculate_tau(float(data.ib_f[i]), i == 0, dt, lag_tau)
     return data
 
 
@@ -180,7 +159,6 @@ def add_stuff_f(
     d_mod = rf.rec_append_fields(d_mod, "dt", np.array(dt, dtype=float))
     d_mod = rf.rec_append_fields(d_mod, "ib_charge_f", np.array(ib_charge_f, dtype=float))
     d_mod = rf.rec_append_fields(d_mod, "dv_dyn_f", np.array(dv_dyn_f, dtype=float))
-    d_mod = add_ib_lag(d_mod, mon)
     d_mod = add_ib(d_mod)
     d_mod = calc_fault(d_ra, d_mod)
     voc_stat_chg = np.copy(d_mod.voc_stat_f)
