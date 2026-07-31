@@ -1340,8 +1340,8 @@ class BatterySim(Battery):
             min_=-Battery.NOM_UNIT_CAP * scale,
         )
         self.d_delta_q = 0.0  # Charging rate, Coulombs/sec
-        self.dt_charge = 0.0  # Update time at charge current time frame, s
-        self.dt_fut = 0.0  # Update time at charge current time frame, s
+        self.dt_charge = Battery.EKF_NOM_DT  # Update time at charge current time frame, s
+        self.dt_fut = Battery.EKF_NOM_DT  # Update time at charge current time frame, s
         self.ib_charge = 0.0  # Charge current, A
         self.SN = SN
         self.c_time = 0.0
@@ -1375,7 +1375,7 @@ class BatterySim(Battery):
         self.sat_s = 0.0
         self.soc_s = 0.0
         self.vb_s = 0.0
-        self.ib_dyn_T_s = 0.0
+        self.ib_dyn_T_s = 0.1
         self.ib_dyn_lstate_s = 0.0
         self.ib_dyn_rstate_s = 0.0
         self.ib_dyn_tau_s = 0.0
@@ -1471,6 +1471,7 @@ class BatterySim(Battery):
         self.Tb = Tb
         self.dt_past = self.dt
         self.dt = dt
+        self.dt_fut = dt
         self.dt_charge = dt_charge
         self.ib_in = ib
         if self.reset and SN.sim_run.bms_off_s[0]:
@@ -1637,11 +1638,11 @@ class BatterySim(Battery):
         if SN is None:
             SN = getattr(self, "SN", None)
         self.time = time
-        self.dt_s = self.dt
-        self.dt_charge_s = self.dt_charge
-        self.dt_fut_s = self.dt_fut
+        self.dt_s = self.dt if self.dt > 0.0 else (float(SN.sim_run.dt_s[0]) if (SN is not None and hasattr(getattr(SN, "sim_run", None), "dt_s")) else Battery.EKF_NOM_DT)
+        self.dt_charge_s = self.dt_charge if self.dt_charge > 0.0 else (float(SN.sim_run.dt_charge_s[0]) if (SN is not None and hasattr(getattr(SN, "sim_run", None), "dt_charge_s")) else Battery.EKF_NOM_DT)
+        self.dt_fut_s = self.dt_fut if self.dt_fut > 0.0 else (float(SN.sim_run.dt_fut_s[0]) if (SN is not None and hasattr(getattr(SN, "sim_run", None), "dt_fut_s")) else Battery.EKF_NOM_DT)
 
-        idx = max(G.i - 1, 0)
+        idx = G.i
         if SN is not None and getattr(SN, "sim_run", None) is not None:
             sim_run = SN.sim_run
             c_time_val = None

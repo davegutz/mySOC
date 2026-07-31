@@ -156,7 +156,7 @@ class Sensors:
             self.ib_charge_s = self.sim_run.ib_charge_s
             self.ib_dyn_s = self.sim_run.ib_dyn_s
             self.dv_dyn_s = self.sim_run.dv_dyn_s
-            self.dt_s = self.sim_run.dt_s
+            self.dt_s = self.sim_run.dt_s if hasattr(self.sim_run, "dt_s") else self.mon_run.dt
             self.dt_charge_s = self.sim_run.dt_charge_s
             self.dt_fut_s = self.sim_run.dt_fut_s
             self.d_delta_q_s_init = 0.0
@@ -186,7 +186,7 @@ class Sensors:
             if not hasattr(self.mon_run, "ib_dyn_n"):
                 self.mon_run.ib_dyn_n = np.copy(self.mon_run.ib_noa_hdwe_f)
 
-            self.dt_s = self.sim_run.dt_s
+            self.dt_s = self.sim_run.dt_s if hasattr(self.sim_run, "dt_s") else self.mon_run.dt
             self.dt_charge_s = self.sim_run.dt_charge_s
             self.dt_fut_s = self.sim_run.dt_fut_s
             if not hasattr(self.mon_run, "ibmm"):

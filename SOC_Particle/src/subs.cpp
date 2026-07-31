@@ -488,7 +488,7 @@ void sense_synth_select(const bool reset, const bool reset_temp,
       (uint32_t)max(0, (long)ap.until_q() - (long)(millis() - millis_past)));
   if (ap.until_q() == 0UL && until_q_past > 0UL) {
     chit("BZ;", SOON);
-    cp.freeze = false;  // unfreeze the queues
+    cp.freeze_queues = false;  // unfreeze the queues
   }
   until_q_past = ap.until_q();
   millis_past = millis();

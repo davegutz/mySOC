@@ -85,7 +85,7 @@ bool recall_X(const char letter_1, BatteryMonitor* Mon, Sensors* Sen) {
         case (13):  // Xp9: Xp10: Xp11: Xp12: Xp13:  Program regression
           // Regression tests 9=tweak, 10=tweak w data, 11=cycle, 12 1/2 cycle
 
-          chit("Xp0;vv0;Xm255;Xts;Ca1;", SOON);
+          chit("Xp0;vv0;Xm255;W4;Xts;Ca1;", SOON);
           chit("Rb;", SOON);
 
           if (INT_in == 10)  // Xp10:  rapid tweak
@@ -97,13 +97,13 @@ bool recall_X(const char letter_1, BatteryMonitor* Mon, Sensors* Sen) {
           else if (INT_in == 11)  // Xp11:  slow tweak
           {
             chit("Xf.002;Xa-60;XW60000;XT60000;XC1;", SOON);
-            chit("vv4;W4;XR;XQ622000;Xm247;", SOON);
+            chit("vv4;W4;XR;XQ700000;Xm247;", SOON);
           }
 
           else if (INT_in == 12)  // Xp12:  slow half tweak
           {
             chit("Xf.0002;Xa-6;XW60000;XT240000;XC.5;", SOON);
-            chit("vv4;W4;XR;XQ622000;Xm247;", SOON);
+            chit("vv4;W4;XR;XQ700000;Xm247;", SOON);
           }
 
           else if (INT_in == 13)  // Xp13:  tri tweak

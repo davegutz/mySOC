@@ -171,7 +171,7 @@ BatteryMonitor::BatteryMonitor(const float dx_voc, const float dy_voc,
     : Battery(sp.delta_q_ptr(), VM, dx_voc, dy_voc, dz_voc), delta_q_ekf_(0.),
       SdVb_(nullptr), EKF_converged(nullptr), ice_(nullptr),
       amp_hrs_remaining_ekf_(0.), amp_hrs_remaining_soc_(0.), eframe_(0),
-      ekf_conv_(false), ib_charge_(0.), ib_past_(0.),
+      ekf_conv_(false), freeze_ekf_(false), ib_charge_(0.), ib_past_(0.),
       q_ekf_(NOM_UNIT_CAP * 3600.), soc_ekf_(1.0), tcharge_(0.),
       tcharge_ekf_(0.), vb_model_rev_(NOMINAL_VB), voc_dead_(NOMINAL_VB),
       voc_stat_f_(NOMINAL_VB), y_ekf_(0.), y_ekf_f_(0.), y_ekf_f_T_(0.),
@@ -331,8 +331,9 @@ float BatteryMonitor::calculate(Sensors* Sen, const bool reset_temp,
     cp.ekf_executing = true;
     static uint64_t ekf_now_past = Sen->now();
     float ddq_dt = ib_charge_ekf;
-    cp.freeze = Sen->Flt->vb_fa_lt() ||
-                  bms_off_;  // Freeze EKF with voltage fault or bms_off
+
+    // Freeze EKF with voltage fault or bms_off
+    freeze_ekf_ = Sen->Flt->vb_fa_lt() || bms_off_;
 
     now_ekf_ = Sen->now();
     dt_ekf_ = float(now_ekf_ - ekf_now_past) / 1e3;
@@ -346,7 +347,7 @@ float BatteryMonitor::calculate(Sensors* Sen, const bool reset_temp,
       solve_ekf(reset_ekf, reset_temp, Sen);
     } 
     else {
-      predict_ekf(ddq_dt, cp.freeze);         // u = d(dq)/dt
+      predict_ekf(ddq_dt, freeze_ekf_);         // u = d(dq)/dt
       update_ekf(voc_stat_f_, 0., MXEPS);  // z = _f, estimated = voc_filtered =
                                            // hx, predicted = est past
     }
@@ -757,7 +758,7 @@ float BatterySim::calculate(Sensors* Sen, const bool dc_dc_on,
     dt_fut_ = dt_in_;
     ib_fut_ = ib_in_;
   }
-  dt_ = max((float)dt_in_, 1e-4f);
+  dt_ = max((float)dt_fut_, 1e-4f);
   ib_ = max(min(ib_fut_, IMAX_NUM),
             -IMAX_NUM);  //  Past value ib_.  Overflow protection when ib_ past
                          //  value used

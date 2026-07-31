@@ -277,7 +277,7 @@ def compare_run_sim(
                 (mon_run, "mon_run"),
                 (mon_ver, "mon_ver"),
                 (sim_run, "sim_run"),
-                (sim_ver, "sim_ver"),
+                (sim_s_ver if sim_s_ver is not None else sim_ver, "sim_ver"),
             ):
                 save_struct_to_csv(obj, filename_root + "_" + struct_name + ".csv")
 
@@ -433,7 +433,7 @@ def main():  # Example usage.  ok on 20260217
         8:  vb_wrap
         9:  dyn_n
     """
-    data_file = '/home/daveg/.local/SOC_Particle/dataReduction/g20260612a/tHiFailHdwe_soc3p2_hi_lo_bb.csv'
+    data_file = '/home/daveg/.local/SOC_Particle/dataReduction/g20260612a/slowTweakRegression_soc3p2_hi_lo_bb.csv'
     unit_key = 'g20260612a_soc3p2_hi_lo_bb'
     time_end = None
     compare_run_ver = True

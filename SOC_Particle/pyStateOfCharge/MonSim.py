@@ -73,7 +73,7 @@ def get_modeling(mr, mod_force=None):
 def sync_to_mon_or_sim(mr, sr, t_mx=None):
     if sr is not None and len(sr.time) < len(mr.time):
         time = sr.time
-        dtime = sr.dt_s
+        dtime = sr.dt_fut_s
     else:
         time = mr.time
         dtime = mr.dt
@@ -301,13 +301,14 @@ def replicate(OPT: UserOptions):
         else:
             _chm_s = OPT.Bsim
 
+        sim_dt_in = 0.1 if G.i == 0 else SN.dt_fut_s[max(G.i - 1, 0)]
         sim.calculate(
             _chm_s,
             Tb_s[G.i],
             Tb_f_s[G.i],
             vb_,
             ib_in_s,
-            SN.dt_s[G.i],
+            sim_dt_in,
             SN.dt_charge_s[G.i],
             reset,
             None,
@@ -427,8 +428,8 @@ def replicate(OPT: UserOptions):
 
         # Save plot info
         mon.save(t[G.i], T, mon.soc, sim.voc, SN, rp, sim)
-        sim.save(t[max(G.i - 1, 0)], Tpast)
-        sim.save_s(t[max(G.i - 1, 0)], SN=SN)
+        sim.save_s(t[G.i], SN=SN)
+        sim.save(t[G.i], Tpast)
         Tpast = T
 
         # Print initial
@@ -470,7 +471,7 @@ def replicate(OPT: UserOptions):
             print(
                 "at time {:5.3f}\n".format(now),
                 f"skip_ekf {bool(SN.mon_run.skip_ekf[i_ekf])}\n"
-                f"skip_temp {bool(SN.mon_run.skip_temp[i_temp])}\n"
+                # f"skip_temp {bool(SN.mon_run.skip_temp[i_temp])}\n"
                 f"skip_sel {bool(SN.mon_run.skip_sel[G.i])}\n"
                 f"skip_mon {bool(SN.mon_run.skip_mon[G.i])}\n"
                 f"skip_sim {bool(SN.sim_run.skip_sim[G.i])}\n"

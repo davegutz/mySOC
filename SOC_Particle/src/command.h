@@ -49,7 +49,7 @@ class CommandPars {
                        // pass, 1 per Control pass
   String asap_str;     // Hold chit_chat asap data - no waiting, ASAP all of
                        // now_str processed before Control pass
-  bool freeze;         // Freeze ekf
+  bool freeze_queues;  // Freeze queues
   bool ekf_executing;  // ekf frame active
   bool inp_token;      // Whether inp_str is complete
   bool cmd_token;      // Whether cmd_str has been applied
@@ -92,7 +92,7 @@ class CommandPars {
     ts = 1.;
     chitchat = false;
     inp_token = false;
-    freeze = false;
+    freeze_queues = false;
     ekf_executing = false;
     ctl_str = "";
     inp_str = "";

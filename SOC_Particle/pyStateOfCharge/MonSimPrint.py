@@ -722,7 +722,8 @@ def print_soc_s_RunSim(SN, i_temp, t, mon, sim, calc_temp, i_ekf, calc_ekf, df=F
         print_pair(SN.sim_run.dt_fut_s[G.i], sim.dt_fut_s, 12, 4, 'dt_fut_s', h, df)
         print_pair(SN.mon_run.dt[G.i], mon.dt, 12, 4, 'dt', h, df)
         print_pair(SN.sim_run.dt_charge_s[G.i], sim.dt_charge, 12, 4, 'dt_charge_s', h, df)
-        print_pair(SN.sim_run.dt_s[G.i], sim.dt, 12, 4, 'dt_s', h, df)
+        if hasattr(SN.sim_run, "dt_s"):
+            print_pair(SN.sim_run.dt_s[G.i], sim.dt, 12, 4, 'dt_s', h, df)
         print_pair(SN.mon_run.ib[G.i], mon.ib, 14, 5, 'ib', h, df)
         print_pair(SN.sim_run.ib_s[G.i], mon.ib_s, 14, 5, 'ib_s', h, df)
         print_pair(SN.sim_run.ib_in_s[G.i], mon.ib_in_s, 16, 7, 'ib_in_s', h, df)

@@ -191,6 +191,7 @@ class BatteryMonitor : public Battery, public EKF_1x1 {
   double delta_q_ekf() { return delta_q_ekf_; };
   double delta_q_ekf_;  // Charge deficit represented by charge, C
   float dv_dyn() { return dv_dyn_; };
+  bool freeze() { return freeze_; };
   double hx() { return hx_; };
   float ib_charge() { return ib_charge_; };
   void init_battery_mon(const bool reset, Sensors* Sen);
@@ -227,6 +228,7 @@ class BatteryMonitor : public Battery, public EKF_1x1 {
   float amp_hrs_remaining_soc_;  // Disch amp*time left if drain to soc_0, A-h
   uint8_t eframe_;  // Run EKF slower than Coul Ctr and ChargeTransfer models
   bool ekf_conv_;  // Check that EKF error is within tolerance (T=converged)
+  bool freeze_ekf_;  // Freeze the EKF under some conditions, T=freeze
   float ib_charge_;  // Current input avaiable for charging, A
   float ib_past_;  // Value to synchronize e_wrap dynamics with model, A
   double q_ekf_;  // Filtered charge calculated by ekf, C

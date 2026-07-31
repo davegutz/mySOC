@@ -256,9 +256,8 @@ bool followup(const char letter_0, const char letter_1, BatteryMonitor* Mon,
           if (ap.until_q_p->success())
             Serial.printf("Going black for %7.1f seconds\n",
                           float(ap.until_q()) / 1000.);
-          Serial.printf(
-              "Freezing queues.  When using 'XQ' unfreeze with 'cc'\n");
-          cp.freeze = true;
+          Serial.printf("Freeze queues. When using 'XQ' unfreeze with 'cc'\n");
+          cp.freeze_queues = true;
           break;
       }
       break;

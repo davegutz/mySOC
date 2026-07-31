@@ -95,7 +95,7 @@ void benign_zero(BatteryMonitor* Mon, Sensors* Sen)  // BZ
 // only with chitchat Freezing with ctl_str bypasses the rest queues are allowed
 // to keep building
 void chatter() {
-  if (!cp.cmd_str.length() && !cp.freeze) {
+  if (!cp.cmd_str.length() && !cp.freeze_queues) {
     // Always pull from control and asap if available and run them
     if (cp.ctl_str.length()) {
       cp.cmd_str = chat_cmd_from(&cp.ctl_str);
@@ -122,8 +122,8 @@ void chatter() {
   }
 
 #ifdef SOFT_DEBUG_QUEUE
-  if (cp.chitchat || (cp.freeze && cp.chitchat && cp.asap_str.length()) ||
-      (!cp.freeze && cp.asap_str.length()))
+  if (cp.chitchat || (cp.freeze_queues && cp.chitchat && cp.asap_str.length()) ||
+      (!cp.freeze_queues && cp.asap_str.length()))
     debug_queue("chatter exit");
 #endif
 
@@ -199,14 +199,14 @@ bool chitter(const bool chitchat, BatteryMonitor* Mon, Sensors* Sen) {
 #ifdef SOFT_DEBUG_QUEUE
         debug_queue("chitter control:");
 #endif
-        describe(Mon, Sen);  // may set cp.freeze
+        describe(Mon, Sen);  // may set cp.freeze_queues
 #ifdef SOFT_DEBUG_QUEUE
         debug_queue("chitter control response:");
 #endif
       }
 
       // Then continue with ctl_str stripped off (assuming just one)
-      if (!cp.freeze) {
+      if (!cp.freeze_queues) {
         nibble = chit_nibble_inp();
         request = chit_classify_nibble(&nibble);
 
@@ -336,7 +336,7 @@ void clear_queues() {
   cp.queue_str = "";
   cp.soon_str = "";
   cp.asap_str = "";
-  cp.freeze = false;
+  cp.freeze_queues = false;
   chit("XS;vv0;Dh;", ASAP);  // quiet with nominal chitchat rate
   Serial.printf("\nCLEARED queues\n");
 }
@@ -427,13 +427,13 @@ void describe(BatteryMonitor* Mon, Sensors* Sen) {
 
           case ('f'):  // cf:  freeze queues
             Serial.printf("***FREEZE QUEUES\n");
-            cp.freeze = true;
+            cp.freeze_queues = true;
             break;
 
           case ('u'):  // cu:  unfreeze queues
             Serial.printf(
                 "***UNFREEZE QUEUES.  If runing with XQ use 'cc' instead\n");
-            if (ap.until_q() == 0UL) cp.freeze = false;
+            if (ap.until_q() == 0UL) cp.freeze_queues = false;
             break;
 
           default:

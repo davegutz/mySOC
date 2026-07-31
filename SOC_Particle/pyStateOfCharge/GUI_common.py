@@ -548,8 +548,8 @@ lookup = {
         ),
     ),
     "slowTweakRegression": (
-        700,
-        slow + "Rs;W4;Xp11" + quiet + cleanup + "<XD;",
+        750,
+        slow + "Rs;W4;Xp11;" + quiet + cleanup + "<XD;",
         (
             "Should run one very large slow (~15 min) current discharge/r"
             "echarge cycle without fault.   It will take 60 seconds to st"

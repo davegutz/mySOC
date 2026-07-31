@@ -284,7 +284,7 @@ void debug_queue(const String who) {
     Serial.printf(
         "%s:  chitchat %d freeze %d inp_token %d CONTROL[%s] ASAP[%s] SOON[%s] "
         "QUEUE[%s] LAST[%s] CMD[%s]\n",
-        who.c_str(), cp.chitchat, cp.freeze, cp.inp_token, cp.ctl_str.c_str(),
+        who.c_str(), cp.chitchat, cp.freeze_queues, cp.inp_token, cp.ctl_str.c_str(),
         cp.asap_str.c_str(), cp.soon_str.c_str(), cp.queue_str.c_str(),
         cp.last_str.c_str(), cp.cmd_str.c_str());
 }

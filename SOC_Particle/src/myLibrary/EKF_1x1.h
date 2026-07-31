@@ -36,7 +36,7 @@ class EKF_1x1 {
   // functions
   void predict_ekf(const double u, const bool freeze);
   virtual void pretty_print();
-  void print_ekf_serial(BatteryMonitor* Mon, const bool freeze);
+  void print_ekf_serial(BatteryMonitor* Mon);
   void update_ekf(const double z, double x_min, double x_max);
   double x() { return (x_); };
   double y() { return (y_); };
