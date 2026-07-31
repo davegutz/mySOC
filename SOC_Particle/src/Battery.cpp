@@ -488,7 +488,11 @@ void BatteryMonitor::ekf_update(double* hx, double* H, double* x_for_hx,
   *x_for_hx = max(min(x_, MXEPS), 0.0);
   // Measurement function hx(x), x=soc ideal capacitor
   *hx = Battery::calc_soc_voc(*x_for_hx, Tb_f_, &dv_dsoc_);
-  *H = min((1. - H_ALPHA) * (*H_pst_) + H_ALPHA * dv_dsoc_, H_MAX);
+  if (cp.ekf_reset) {
+    *H = min(dv_dsoc_, H_MAX);
+  } else {
+    *H = min((1. - H_ALPHA) * (*H_pst_) + H_ALPHA * dv_dsoc_, H_MAX);
+  }
   *H_pst_ = *H;
 
 
@@ -529,6 +533,7 @@ void BatteryMonitor::init_soc_ekf(const double soc) {
   delta_q_ekf_ = q_ekf_ - q_capacity_;
   double dv_dsoc;
   hx_ = z_ = calc_soc_voc(soc_ekf_, Tb_f_, &dv_dsoc);
+  H_pst_ = H_ = min(dv_dsoc, H_MAX);
   y_ekf_ = 0.;
   y_ekf_f_ = 0.;
 }

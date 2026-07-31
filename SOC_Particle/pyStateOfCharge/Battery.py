@@ -851,9 +851,8 @@ class BatteryMonitor(Battery, EKF1x1):
             self.voc_stat_f_T = self.voc_stat_filt.dt
             self.frz = self.bms_off
             self.predict_ekf(u=ddq_dt, reset=self.reset_ekf, freeze=self.frz, OPT=OPT, i_ekf=i_ekf)  # u = d(q)/dt
-            self.update_ekf(
-                z=self.voc_stat_f, x_min=0.0, x_max=Battery.MXEPS, OPT=OPT, i_ekf=i_ekf
-            )  # z = voc, voc_filtered = hx
+            self.update_ekf(z=self.voc_stat_f, x_min=0.0, x_max=Battery.MXEPS, OPT=OPT)
+                                                                                        # z = voc, voc_filtered = hx
             self.soc_ekf = self.x  # x = Vsoc (0-1 ideal capacitor voltage) proxy for soc
             self.y_ekf = self.y
             self.q_ekf = self.soc_ekf * self.q_capacity
@@ -934,16 +933,22 @@ class BatteryMonitor(Battery, EKF1x1):
         self.Bu = self.dt_eframe / self.chemistry.tau_sd * self.chemistry.r_sd
         return self.Fx, self.Bu
 
-    def ekf_update(self):
+    def ekf_update(self, OPT=None):
         # Measurement function hx(x), x = soc ideal capacitor
         x_lim = max(min(self.x, Battery.MXEPS), 0.0)
         self.x_for_hx = x_lim
         self.tb_f_for_hx = self.Tb_f
-        self.hx, self.dv_dsoc = self.calc_soc_voc(x_lim, tb_f=self.tb_f_for_hx, printit=False)
+        tb_f_calc = 15.0 if (self.tb_f_for_hx is None or np.isnan(self.tb_f_for_hx)) else self.tb_f_for_hx
+        self.hx, self.dv_dsoc = self.calc_soc_voc(x_lim, tb_f=tb_f_calc, printit=False)
+
         # Jacobian of measurement function
-        self.H = (1. - Battery.H_ALPHA) * self.H_pst + Battery.H_ALPHA * self.dv_dsoc
-        self.H = min(self.H, Battery.H_MAX)
+        if self.reset_ekf:
+            self.H = OPT.mon_run.H[G.i]
+        else:
+            self.H = (1. - Battery.H_ALPHA) * self.H_pst + Battery.H_ALPHA * self.dv_dsoc
+            self.H = min(self.H, Battery.H_MAX)
         self.H_pst = self.H
+
         return self.hx, self.H, self.tb_f_for_hx, self.x_for_hx
 
     def init_soc_ekf(self, mr, i, i_ekf):
@@ -968,15 +973,34 @@ class BatteryMonitor(Battery, EKF1x1):
         else:
             self.P_prior = self.P
 
-        if hasattr(mr, "H"):
-            self.H = mr.H[i_ekf]
-        else:
-            self.H = mr.z[i_ekf]
+        # Calculate fallback dv_dsoc in case H / H_pst are not in run data
+        tb_f_calc = 15.0 if (self.Tb_f is None or np.isnan(self.Tb_f)) else self.Tb_f
+        _, dv_dsoc_init = self.calc_soc_voc(self.soc_ekf, tb_f=tb_f_calc, printit=False)
+        h_default = min(dv_dsoc_init, Battery.H_MAX)
+        if h_default <= 0.0:
+            h_default = 1.0
 
-        if hasattr(mr, "H_pst"):
-            self.H_pst = mr.H_pst[i_ekf]
+        if mr is not None:
+            if hasattr(mr, "H_pst") and getattr(mr, "H_pst", None) is not None and len(mr.H_pst) > i_ekf and (0.0 < float(mr.H_pst[i_ekf]) < 10.0):
+                self.H_pst = float(mr.H_pst[i_ekf])
+            elif hasattr(mr, "H_pst_") and getattr(mr, "H_pst_", None) is not None and len(mr.H_pst_) > i_ekf and (0.0 < float(mr.H_pst_[i_ekf]) < 10.0):
+                self.H_pst = float(mr.H_pst_[i_ekf])
+            elif hasattr(mr, "H") and getattr(mr, "H", None) is not None and len(mr.H) > i_ekf and (0.0 < float(mr.H[i_ekf]) < 10.0):
+                self.H_pst = float(mr.H[i_ekf])
+            elif hasattr(mr, "H_") and getattr(mr, "H_", None) is not None and len(mr.H_) > i_ekf and (0.0 < float(mr.H_[i_ekf]) < 10.0):
+                self.H_pst = float(mr.H_[i_ekf])
+            else:
+                self.H_pst = h_default
+
+            if hasattr(mr, "H") and getattr(mr, "H", None) is not None and len(mr.H) > i_ekf and (0.0 < float(mr.H[i_ekf]) < 10.0):
+                self.H = float(mr.H[i_ekf])
+            elif hasattr(mr, "H_") and getattr(mr, "H_", None) is not None and len(mr.H_) > i_ekf and (0.0 < float(mr.H_[i_ekf]) < 10.0):
+                self.H = float(mr.H_[i_ekf])
+            else:
+                self.H = self.H_pst
         else:
-            self.H_pst = mr.z[i_ekf]
+            self.H_pst = h_default
+            self.H = h_default
 
         if hasattr(mr, "S"):
             self.S = mr.S[i_ekf]
@@ -1126,6 +1150,8 @@ class BatteryMonitor(Battery, EKF1x1):
         self.e_wrap_n_trimmed = self.LoopIbNoa.e_wrap_trimmed
         self.y_ekf = self.y_ekf
         self.y_ekf_f = self.y_ekf_f
+        self.H = getattr(self, "H", 1.0)
+        self.H_pst = getattr(self, "H_pst", 1.0)
         self.ib_lag = self.ib_lag
         self.qcap = self.q_capacity
         self.qcrs = self.q_cap_rated_scaled

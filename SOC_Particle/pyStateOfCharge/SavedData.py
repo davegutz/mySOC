@@ -340,9 +340,9 @@ class SavedData:
         if self.z is None:
             self.z = np.copy(self.voc_stat_f)
         if self.H is None:
-            self.H = np.copy(self.voc_stat_f)
-        # if self.H_pst is None:
-        #     self.H_pst = np.copy(self.voc_stat_f)
+            self.H = None
+        if hasattr(self, "H_pst") and self.H_pst is None:
+            self.H_pst = None
         if self.hx is None:
             self.hx = np.copy(self.voc_stat_f)
         if self.K is None:
