@@ -319,7 +319,7 @@ void print_rapid_serial(const bool reset, Sensors* Sen, BatteryMonitor* Mon,
 // Print primary data
 void print_rapid_header() {
   Serial.printf(
-      "unit_rap, c_time, dt, dt_prs, hm, reset, reset_temp, soft_reset, "
+      "unit_rap, c_time, dt, dt_rap, hm, reset, reset_temp, soft_reset, "
       "soft_reset_sim, reset_all_faults, ekf_reset, kf_reset, init_mon, "
       "init_sim,   ");
   Serial.printf("chm, qcrs, qcap, sat, saturated, sel, mod, bmso,  ");
@@ -335,13 +335,13 @@ void print_rapid_header() {
 
 void print_rapid_serial(const bool reset, Publish* pubList, Sensors* Sen,
                         BatteryMonitor* Mon) {
-  static uint64_t prs_now_past = Sen->now();
-  uint64_t now_prs = Sen->now();
-  double dt_prs = double(now_prs - prs_now_past) / 1e3;
-  prs_now_past = now_prs;
+  static uint64_t rap_now_past = Sen->now();
+  uint64_t now_rap = Sen->now();
+  double dt_rap = double(now_rap - rap_now_past) / 1e3;
+  rap_now_past = now_rap;
   sprintf(pr.buff,
           "%s,%13.4f,%8.4f,%8.4f,%s,   %2d,%2d,%2d,%2d,%2d,%2d,%2d,%2d,%2d,   ",
-          pubList->unit.c_str(), Mon->c_time(), Mon->dt(), dt_prs,
+          pubList->unit.c_str(), Mon->c_time(), Mon->dt(), dt_rap,
           pubList->hm_string.c_str(), reset, Sen->reset_temp(),
           cp.soft_reset_print, cp.soft_reset_sim_print,
           Sen->Flt->reset_all_faults_print(), cp.ekf_reset_print,
@@ -447,7 +447,7 @@ void print_shunt_serial(const bool reset, Sensors* Sen) {
 // print_signal_select for data collection
 void print_signal_sel_header() {
   Serial.printf(
-      "unit_s, c_time_sel, dt_sel, dt_pst_s, resaf, user_sel, cc_dif, "
+      "unit_s, c_time_sel, dt_sel, resaf, user_sel, cc_dif, "
       "ib_amp_hdwe, ib_noa_hdwe, ib_amp_model, ib_noa_model, ib_model, kfres, "
       "vovcm, vovcn, ib_amp_hdwe_kf, ib_noa_hdwe_kf, ib_diff, ib_diff_f, ");
   Serial.printf(
@@ -494,17 +494,13 @@ void print_signal_sel_serial(const bool reset, Sensors* Sen,
   static double last_c_time_sel = 0.;
   if ((sp.debug() == 2 || sp.debug() == 4 || sp.debug() == 61 ||
    sp.debug() == 6) && cp.publishS) {
-    static uint64_t pst_s_now_past = Sen->now();
     if (!reset && Sen->c_time() <= last_c_time_sel + 0.00005) return;
     last_c_time_sel = Sen->c_time();
-    uint64_t now_pst_s = Sen->now();
-    double dt_pst_s = double(now_pst_s - pst_s_now_past) / 1e3;
-    pst_s_now_past = now_pst_s;
     sprintf(pr.buff,
-            "unit_sel,%13.4f, %8.4f, %8.4f, %d, %d, %10.7f, "
+            "unit_sel,%13.4f, %8.4f, %d, %d, %10.7f, "
             "%8.6f,%8.6f,%8.6f,%8.6f,%8.6f,   %d,%8.6f,%8.6f,%8.6f,%8.6f,   "
             "%8.6f,%8.6f, ",
-            Sen->c_time(), Sen->T(), dt_pst_s,
+            Sen->c_time(), Sen->T(),
             Sen->Flt->reset_all_faults_print(), sp.ib_force(),
             Sen->Flt->cc_diff(), Sen->ib_amp_hdwe(), Sen->ib_noa_hdwe(),
             Sen->ib_amp_model(), Sen->ib_noa_model(), Sen->ib_model(),
@@ -615,7 +611,7 @@ void print_signal_sel_serial(const bool reset, Sensors* Sen,
 // print sim for data collection
 void print_sim_header() {
   Serial.printf(
-      "unit_m,  c_time_sim,  dt_fut_s, dt_s, dt_pst_s, chm_s, qcrs_s, bms_off_s,"
+      "unit_m,  c_time_sim,  dt_fut_s, dt_s, chm_s, qcrs_s, bms_off_s,"
       "Tb_s, Tb_f_s, vsat_s, voc_stat_s, dt_charge_s, ib_fut_s, ");
   Serial.printf(
       "dv_dyn_s, vb_s, ib_s, ib_dyn_s, dv_hys_s, ib_in_s, ib_charge_s, "
@@ -650,9 +646,9 @@ void print_sim_serial(const bool initializing_all, const bool reset,
       (reset_temp || Sim->c_time() > last_c_time_sim + 0.00005)) {
     last_c_time_sim = Sim->c_time();
     sprintf(pr.buff,
-            "unit_sim, %13.4f,%8.4f,%8.4f,%8.4f,%d,%10.4f,%d,%11.8f,%11.8f, "
+            "unit_sim, %13.4f,%8.4f,%8.4f,%d,%10.4f,%d,%11.8f,%11.8f, "
             "%7.6f,%7.6f,%8.4f,%11.9f,",
-            Sim->c_time(), Sim->dt_fut(), Sim->dt(), Sim->dt_pst(), CHEM,
+            Sim->c_time(), Sim->dt_fut(), Sim->dt(), CHEM,
             Sim->q_cap_rated_scaled(), Sim->bms_off(), Sim->Tb(), Sim->Tb_f(),
             Sim->vsat(), Sim->voc_stat(), Sim->dt_charge(), Sim->ib_fut());
     Serial.printf("%s", pr.buff);

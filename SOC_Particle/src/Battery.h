@@ -113,10 +113,8 @@ class Battery : public Coulombs {
   float C_rate() { return ib_ / NOM_UNIT_CAP; }
   String decode(const uint8_t mod);
   float dqdt() { return chem_.dqdt; };
-  void dt(const float input) { dt_pst_ = dt_; dt_ = input; }
+  void dt(const float input) { dt_ = input; }
   float dt() { return dt_; };
-  void dt_pst(const double input) { dt_pst_ = input; }
-  double dt_pst() { return dt_pst_; }
   float dv_dyn() { return dv_dyn_; };
   float dv_hys() { return dv_hys_; };
   float ib() { return ib_; };
@@ -145,9 +143,7 @@ class Battery : public Coulombs {
   bool bms_off_;  // Indicator that battery management system is off, T = off
                   // preventing current flow
   double c_time_;  // Current time, s
-  double c_time_past_;  // Past time, s
   float dt_;  // Update time, s
-  double dt_pst_;  // Time since past sample, s
   double dv_dsoc_;  // Derivative scaled, V/fraction
   float dv_dyn_;  // ib-induced back emf, V
   float dv_hys_;  // Hysteresis state, voc-voc_out, V
@@ -254,11 +250,12 @@ class BatterySim : public Battery {
  public:
   BatterySim(const float dx_voc, const float dy_voc, const float dz_voc);
   ~BatterySim();
-  void assign_times(const double input) {                                                                                                                                                            
+  void assign_times(const double input) {
     if (c_time_ > 0.0) {
       dt_pst_ = input - c_time_;  // Actual past sample elapsed time (s)
     }
     dt_fut_ = input - c_time_;
+    dt_fut_ms_ = (uint32_t)round(dt_fut_ * 1000.0);
     c_time_past_ = c_time_;
     c_time_ = input;
   }
@@ -297,6 +294,7 @@ class BatterySim : public Battery {
   SqInj* Sq_inj_;  // Class to create square waves
   TriInj* Tri_inj_;  // Class to create triangle waves
   CosInj* Cos_inj_;  // Class to create cosine waves
+  double c_time_past_;  // Past c_time for Sim only
   uint32_t duty_;  // Used in Test Mode to inject Fake shunt current (0 - 255)
   double d_delta_q_s_;  // Charge rate, C/s
   double dt_charge_;  // Input update time of current available for charging, s
@@ -304,6 +302,7 @@ class BatterySim : public Battery {
   uint32_t dt_fut_ms_;  // Future delta update of model sample, ms
   double dt_in_;  // Input update time of model sample, s
   double dt_fut_; // Future update time of model sample, s
+  double dt_pst_; // Past update time of model sample for Sim only, s
   float ib_charge_;  // Current input avaiable for charging, A
   float ib_fut_;  // Future value of limited current, A
   float ib_in_;  // Saved value of current input, A

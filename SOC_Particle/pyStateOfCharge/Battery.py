@@ -1637,7 +1637,6 @@ class BatterySim(Battery):
         if SN is None:
             SN = getattr(self, "SN", None)
         self.time = time
-        self.dt_pst_s = self.dt_past
         self.dt_s = self.dt
         self.dt_charge_s = self.dt_charge
         self.dt_fut_s = self.dt_fut
@@ -2153,7 +2152,6 @@ class SavedS:
         self.ib_charge_s = []
         self.dt_charge_s = []
         self.dt_fut_s = []
-        self.dt_pst_s = []
         self.ib_fut_s = []
         self.sat_s = []
         self.ddq_s = []

@@ -188,8 +188,6 @@ class Sensors {
   // Getters and setters for encapsulated member variables
   void c_time(const double input) { c_time_ = input; }
   double c_time() { return c_time_; }
-  void dt_pst(const double input) { dt_pst_ = input; }
-  double dt_pst() { return dt_pst_; }
   int Vb_raw() { return Vb_raw_; }
   void Vb(const float input) { Vb_ = input; }
   float Vb() { return Vb_; }
@@ -492,7 +490,6 @@ class Sensors {
   uint64_t now_;          // Time at sample, ms
   uint64_t now_temp_;     // Time at sample, ms
   double c_time_;          // Decimal time, seconds since 1/1/2021
-  double dt_pst_;          // Time since past sample, s
   double T_;              // Update time, s
   bool reset_;            // Reset flag, T = reset
   double T_filt_;         // Filter update time, s

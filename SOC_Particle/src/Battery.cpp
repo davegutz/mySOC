@@ -44,8 +44,8 @@ Battery::Battery(double* sp_delta_q, const float d_voc_soc, const float dx_voc,
                  const float dy_voc, const float dz_voc)
     : Coulombs(sp_delta_q, (NOM_UNIT_CAP * 3600), COULOMBIC_EFF_SCALE, dx_voc,
                dy_voc, dz_voc),
-      bms_charging_(false), bms_off_(false), c_time_(0.), c_time_past_(0.),
-      dt_(0.1), dt_pst_(0.), dv_dsoc_(0.3), dv_dyn_(0.), dv_hys_(0.), ib_(0.),
+      bms_charging_(false), bms_off_(false), c_time_(0.),
+      dt_(0.1), dv_dsoc_(0.3), dv_dyn_(0.), dv_hys_(0.), ib_(0.),
       ibs_(0.), ib_dyn_(0.), initializing_(false), ioc_(0.), nom_vsat_(0.),
       print_now_(false), soft_reset_print_(false), Tb_(NOMINAL_TB),
       Tb_f_(NOMINAL_TB), vb_(NOMINAL_VB), voc_(NOMINAL_VB),
@@ -757,8 +757,7 @@ float BatterySim::calculate(Sensors* Sen, const bool dc_dc_on,
     dt_fut_ = dt_in_;
     ib_fut_ = ib_in_;
   }
-  dt_pst_ = dt_;
-  dt_ = max((float)dt_fut_, 1e-4f);
+  dt_ = max((float)dt_in_, 1e-4f);
   ib_ = max(min(ib_fut_, IMAX_NUM),
             -IMAX_NUM);  //  Past value ib_.  Overflow protection when ib_ past
                          //  value used
@@ -822,8 +821,6 @@ float BatterySim::calculate(Sensors* Sen, const bool dc_dc_on,
   ib_fut_ = min(ib_charge_fut, sat_ib_max_);  // the feedback of ib_
   // ib_charge_ = ib_charge_fut;  // Same time plane as volt calcs, added past
   // value.  (This prevents sat logic from working)
-  dt_fut_ms_ = dt_in_ms_;
-  dt_fut_ = dt_in_;
   dt_charge_ = dt_fut_;
   ib_charge_ = ib_fut_;  // Same time plane as volt calcs, added past value
 
