@@ -626,6 +626,7 @@ class BatteryMonitor(Battery, EKF1x1):
         self.ib_lo_limited_lo = False
         self.ib_lo_limited_hi = False
         self.ib_lo_active = True
+        self.H_pst = self.H
         self.IbLoLimitedLo = TFDelay(
             in_=False,
             t_true=Battery.IB_LO_ACTIVE_SET * Battery.cp_ts,
@@ -940,7 +941,9 @@ class BatteryMonitor(Battery, EKF1x1):
         self.tb_f_for_hx = self.Tb_f
         self.hx, self.dv_dsoc = self.calc_soc_voc(x_lim, tb_f=self.tb_f_for_hx, printit=False)
         # Jacobian of measurement function
-        self.H = min(self.dv_dsoc, Battery.H_MAX)
+        self.H = (1. - Battery.H_ALPHA) * self.H_pst + Battery.H_ALPHA * self.dv_dsoc
+        self.H = min(self.H, Battery.H_MAX)
+        self.H_pst = self.H
         return self.hx, self.H, self.tb_f_for_hx, self.x_for_hx
 
     def init_soc_ekf(self, mr, i, i_ekf):
@@ -969,6 +972,11 @@ class BatteryMonitor(Battery, EKF1x1):
             self.H = mr.H[i_ekf]
         else:
             self.H = mr.z[i_ekf]
+
+        if hasattr(mr, "H_pst"):
+            self.H_pst = mr.H_pst[i_ekf]
+        else:
+            self.H_pst = mr.z[i_ekf]
 
         if hasattr(mr, "S"):
             self.S = mr.S[i_ekf]
@@ -2018,6 +2026,7 @@ class Saved:
         self.voc_stat_ekf = []
         self.R = []
         self.H = []
+        self.H_pst = []
         self.S = []
         self.K = []
         self.hx = []

@@ -48,6 +48,7 @@ def rename_all(ra_or_cl):
     ra_or_cl = rename(ra_or_cl, "P_post_", "P_post")
     ra_or_cl = rename(ra_or_cl, "hx_", "hx")
     ra_or_cl = rename(ra_or_cl, "H_", "H")
+    ra_or_cl = rename(ra_or_cl, "H_pst_","H_pst")  # <--- Add this
     ra_or_cl = rename(ra_or_cl, "tb_f_hx_", "tb_f_for_hx")
     ra_or_cl = rename(ra_or_cl, "x_for_hx_", "x_for_hx")
     ra_or_cl = rename(ra_or_cl, "skip", "skip_temp")

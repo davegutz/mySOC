@@ -30,6 +30,7 @@ class EKF1x1:
         self.R = 0.0  # State uncertainty
         self.P = 0.0  # Uncertainty covariance
         self.H = 0.0  # Jacobian of h(x)
+        self.H_pst = 0.0  # Jacobian of h(x)
         self.S = 0.0  # System uncertainty
         self.K = 0.0  # Kalman gain
         self.hx = 0.0  # Output of observation function h(x)
@@ -58,6 +59,7 @@ class EKF1x1:
         s += "  R = {:10.6g}\n".format(self.R)
         s += "  Q = {:10.6g}\n".format(self.Q)
         s += "  H = {:10.6g}\n".format(self.H)
+        s += "  H_pst = {:10.6g}\n".format(self.H_pst)
         s += "  Outputs:\n"
         s += "  x_prior  = {:10.8g}\n".format(self.x_prior)
         s += "  x        = {:10.8g}\n".format(self.x)

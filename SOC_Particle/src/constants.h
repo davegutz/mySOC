@@ -449,9 +449,10 @@ const float QUIET_RES(QUIET_SET /
 #endif
 
 // Conversion gains
-constexpr double H_CELL_MAX = 7.5;                                                                                                                                                               
-const double H_MAX = NS * H_CELL_MAX;                                                                                                                                                           
-  // Voltage measurement gains
+constexpr double H_CELL_MAX = 15.;
+const double H_MAX = NS * H_CELL_MAX;
+const double H_ALPHA = 0.05;
+// Voltage measurement gains
 #if !defined(HDWE_BARE)
 const float VB_CONV_GAIN =
     float(PHOTON_ADC_VOLT) * float(VB_SENSE_R_HI + VB_SENSE_R_LO) /

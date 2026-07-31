@@ -483,12 +483,14 @@ void BatteryMonitor::ekf_predict(double* Fx_, double* Bu_) {
 
 // EKF model for update
 void BatteryMonitor::ekf_update(double* hx, double* H, double* x_for_hx,
-                                double* tb) {
+                                double* tb, double *H_pst_) {
   *tb = Tb_f_;
   *x_for_hx = max(min(x_, MXEPS), 0.0);
   // Measurement function hx(x), x=soc ideal capacitor
   *hx = Battery::calc_soc_voc(*x_for_hx, Tb_f_, &dv_dsoc_);
-  *H = min(dv_dsoc_, H_MAX);  // Jacodian of measurement function
+  *H = min((1. - H_ALPHA) * (*H_pst_) + H_ALPHA * dv_dsoc_, H_MAX);
+  *H_pst_ = *H;
+
 
   if (sp.debug() == 93 || sp.debug() == -2)
     Serial.printf(

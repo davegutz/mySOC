@@ -60,7 +60,8 @@ class EKF_1x1 {
   double x_post_;
   double P_post_;
   double hx_;           // Output of observation function h(x)
-  double H_;            // Jacobian of h(x)
+  double H_;  // Jacobian of h(x)
+  double H_pst_; // Past Jacobian of h(x)
   bool freeze_;         // Command to freeze x_ and P_
   uint64_t now_ekf_;    // Time value extracted from sensors, ms
   double dt_ekf_;       // Update time for EKF major frame
@@ -74,7 +75,8 @@ class EKF_1x1 {
   @param H gets Jacobian of h(x)
   */
   virtual void ekf_predict(double* Fx, double* Bu) = 0;
-  virtual void ekf_update(double* hx, double* H, double* x, double* tb_f) = 0;
+  virtual void ekf_update(double* hx, double* H, double* x, double* tb_f,
+                          double* H_pst_) = 0;
 };
 
 // Methods

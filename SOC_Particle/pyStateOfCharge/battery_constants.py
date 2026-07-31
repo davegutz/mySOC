@@ -52,6 +52,7 @@ class BatteryConstants:
     F_MAX_T_WRAP = None
     HDB_VB = None
     H_MAX = None
+    H_ALPHA = 0.05
     hdwe_ib_hi_lo = None
     HDWE_IB_HI_LO_AMP_HI = None
     HDWE_IB_HI_LO_AMP_LO = None

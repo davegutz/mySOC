@@ -96,7 +96,7 @@ void print_battery_header() {
   Serial.printf(
       "cp_ts, CHEM, DF2, EKF_CONV, EKF_NOM_DT, EKF_Q_SD_NORM, EKF_R_SD_NORM,");
   Serial.printf(
-      "EKF_T_CONV, EKF_T_RES, EWHI_TRM_SLR, EWLO_TRM_SLR, F_MAX_T_WRAP, "
+      "EKF_T_CONV, EKF_T_RES, EWHI_TRM_SLR, EWLO_TRM_SLR, F_MAX_T_WRAP,H_ALPHA,"
       "H_MAX, HDB_VB, HDWE_IB_HI_LO_AMP_HI, HDWE_IB_HI_LO_AMP_LO,");
   Serial.printf(
       "HDWE_IB_HI_LO_NOA_HI, HDWE_IB_HI_LO_NOA_LO, HYS_IB_THR, "
@@ -147,8 +147,8 @@ void print_battery_serial() {
   Serial.printf("%s", pr.buff);
 
   sprintf(pr.buff, "%10.7f,%10.7f,%10.7f,%10.7f,%10.7f,%10.7f,%10.7f,%10.7f,"
-          "%10.7f,",
-          EWHI_TRM_SLR, EWLO_TRM_SLR, F_MAX_T_WRAP, H_MAX, HDB_VB,
+          "%10.7f,%10.7f,",
+          EWHI_TRM_SLR, EWLO_TRM_SLR, F_MAX_T_WRAP, H_ALPHA, H_MAX, HDB_VB,
           HDWE_IB_HI_LO_AMP_HI, HDWE_IB_HI_LO_AMP_LO, HDWE_IB_HI_LO_NOA_HI,
           HDWE_IB_HI_LO_NOA_LO);
   Serial.printf("%s", pr.buff);
@@ -210,7 +210,7 @@ void print_ekf_header() {
       "unit_e,c_time_e,dt_ekf,cp_ekf_reset,freeze,voc_stat_f,Fx_, Bu_, Q_, R_,"
       "P_, S_, K_, u_, x_, y_, z_,");
   Serial.printf(
-      "x_prior_, P_prior_, x_post_, P_post_, hx_, H_, frz_, tb_f_hx_, "
+      "x_prior_, P_prior_, x_post_, P_post_, hx_, H_, H_pst_, frz_, tb_f_hx_, "
       "x_for_hx_,");
   Serial.printf(
       "  voc_stat_f_T, voc_stat_f_tau, voc_stat_f_rstate, voc_stat_f_lstate,");
@@ -232,9 +232,10 @@ void EKF_1x1::print_ekf_serial(BatteryMonitor* Mon) {
       c_time_e, dt_ekf_, cp.ekf_reset, Mon->freeze(), Mon->voc_stat_f(), Fx_,
       Bu_, Q_, R_, P_, S_, K_, u_, x_, y_, z_);
 
-    Serial.printf("%11.9g,%10.7g,%11.9g,%10.7g,%12.9g,%10.7g,%d,%11.8f,%11.9f,",
-                  x_prior_, P_prior_, x_post_, P_post_, hx_, H_, freeze_,
-                  Tb_f_for_hx_, x_for_hx_);
+    Serial.printf("%11.9g,%10.7g,%11.9g,%10.7g,%12.9g,%10.7g,%10.7g,%d,%11.8f,"
+                  "%11.9f,",
+                  x_prior_, P_prior_, x_post_, P_post_, hx_, H_, H_pst_,
+                  freeze_, Tb_f_for_hx_, x_for_hx_);
 
     Serial.printf("%9.6f,%9.6f,%12.9f,%12.9f,", Mon->vocStatFilt_T(),
                   Mon->vocStatFilt_tau(), Mon->vocStatFilt_rstate(),
