@@ -851,7 +851,7 @@ class BatteryMonitor(Battery, EKF1x1):
             self.voc_stat_f_T = self.voc_stat_filt.dt
             self.frz = self.bms_off
             self.predict_ekf(u=ddq_dt, reset=self.reset_ekf, freeze=self.frz, OPT=OPT, i_ekf=i_ekf)  # u = d(q)/dt
-            self.update_ekf(z=self.voc_stat_f, x_min=0.0, x_max=Battery.MXEPS, OPT=OPT)
+            self.update_ekf(z=self.voc_stat_f, x_min=0.0, x_max=Battery.MXEPS, OPT=OPT, i_ekf=i_ekf)
                                                                                         # z = voc, voc_filtered = hx
             self.soc_ekf = self.x  # x = Vsoc (0-1 ideal capacitor voltage) proxy for soc
             self.y_ekf = self.y
@@ -933,7 +933,7 @@ class BatteryMonitor(Battery, EKF1x1):
         self.Bu = self.dt_eframe / self.chemistry.tau_sd * self.chemistry.r_sd
         return self.Fx, self.Bu
 
-    def ekf_update(self, OPT=None):
+    def ekf_update(self, OPT=None, i_ekf=None):
         # Measurement function hx(x), x = soc ideal capacitor
         x_lim = max(min(self.x, Battery.MXEPS), 0.0)
         self.x_for_hx = x_lim
@@ -943,7 +943,7 @@ class BatteryMonitor(Battery, EKF1x1):
 
         # Jacobian of measurement function
         if self.reset_ekf:
-            self.H = OPT.mon_run.H[G.i]
+            self.H = OPT.mon_run.H[i_ekf]
         else:
             self.H = (1. - Battery.H_ALPHA) * self.H_pst + Battery.H_ALPHA * self.dv_dsoc
             self.H = min(self.H, Battery.H_MAX)

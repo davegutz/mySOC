@@ -107,7 +107,7 @@ class EKF1x1:
             self.x_prior = self.x
             self.P_prior = self.P
 
-    def update_ekf(self, z, x_min, x_max, OPT=None):
+    def update_ekf(self, z, x_min, x_max, OPT=None, i_ekf=None):
         """1x1 Extended Kalman Filter update
         Inputs:
             z   1x1 input, =voc, dynamic predicted by other model, V
@@ -123,7 +123,7 @@ class EKF1x1:
             S   1x1 system uncertainty
             SI  1x1 system uncertainty inverse
         """
-        self.hx, self.H, self.tb_f_for_hx, self.x_for_hx = self.ekf_update(OPT)
+        self.hx, self.H, self.tb_f_for_hx, self.x_for_hx = self.ekf_update(OPT, i_ekf)
         self.z = z
         if not self.reset:
             pht = self.P * self.H
