@@ -859,9 +859,8 @@ class BatteryMonitor(Battery, EKF1x1):
             if OPT is not None and getattr(OPT, "mon_run", None) is not None and getattr(OPT.mon_run, "y_ekf_f", None) is not None:
                 if len(OPT.mon_run.y_ekf_f) > G.i and np.any(OPT.mon_run.y_ekf_f != 0.0):
                     out_init = OPT.mon_run.y_ekf_f[G.i]
-            self.y_ekf_f = self.y_ekf_filt_lag.calculate_seeded(
-                in_=in_val, _out_init=out_init, dt=self.dt_eframe, reset=self.reset_temp
-            )
+            self.y_ekf_f = self.y_ekf_filt_lag.calculate_seeded(in_=in_val, _out_init=out_init, dt=self.dt_eframe,
+                                                                reset=self.reset_ekf)
             self.y_ekf_f_T = self.y_ekf_filt_lag.dt
             self.y_ekf_f_tau = self.y_ekf_filt_lag.tau
             self.y_ekf_f_state = self.y_ekf_filt_lag.state
