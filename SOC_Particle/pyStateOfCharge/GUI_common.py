@@ -531,7 +531,7 @@ lookup = {
         140,
         modHalfInit + tranPrep + noisePackage + d50 + "XQ25000;" + c00 + silentPackage + quiet + cleanup + "<XD;",
         (
-            "Noisy ampHiFail.  Should detect and switch amp current failure.",
+            "Noisy noaHiFail.  Should detect and switch noa current failure.",
             "Start looking at 'Ult 1'. Fault record (frozen). Will see 'd"
             "iff' flashing on display even after fault cleared automatica"
             "lly (lost redundancy).",
@@ -860,8 +860,6 @@ macro_lookup = {
     "c00": (5, c00, ("", "", "", "")),
     "dv0": (5, dv0, ("", "", "", "")),
     "twitch": (5, twitch, ("", "", "", "")),
-    "noaHiFail": (5, d50, ("", "", "", "")),
-    "noaHiFailNoise": (5, d50, ("", "", "", "")),
 }
 
 plink_connection = {

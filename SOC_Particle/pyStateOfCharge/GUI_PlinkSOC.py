@@ -1860,17 +1860,17 @@ def grab_auto():
                 set_red(Test.battery_button)
 
             if "macro" in config:
-                if config["macro"] in macro_lookup:
-                    macro_option.set(config["macro"])
-                    set_red(macro_sel)
-                elif config["macro"] in lookup:
-                    # If it's in 'lookup' but not 'macro_lookup', it's likely intended as an 'option'
-                    option.set(config["macro"])
+                m_name = config["macro"]
+                if m_name in lookup:
+                    option.set(m_name)
                     set_red(sel)
                     set_red(sel1)
                     lookup_start()
+                elif m_name in macro_lookup:
+                    macro_option.set(m_name)
+                    set_red(macro_sel)
                 else:
-                    print(f"Error: Macro '{config['macro']}' not found in macro_lookup or lookup. Skipping.")
+                    print(f"Error: Macro '{m_name}' not found in lookup or macro_lookup. Skipping.")
 
             # Track AUTO case progress (used by start_plink for status print)
             auto_case_index = index
