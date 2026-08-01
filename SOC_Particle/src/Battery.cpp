@@ -128,7 +128,6 @@ float_t Battery::calc_vsat() {
 
 // Print
 void Battery::pretty_print() {
-#if !IN_SERVICE
   Serial.printf("Battery:\n");
   Serial.printf("  bms_charging %d\n", bms_charging_);
   Serial.printf("  bms_off %d\n", bms_off_);
@@ -151,9 +150,6 @@ void Battery::pretty_print() {
   Serial.printf("  voc_stat%7.3f, V\n", voc_stat_);
   Serial.printf("  voltage_low %d, BMS will turn off\n", voltage_low_);
   Serial.printf("  vsat%7.3f, V\n", vsat_);
-#else
-  Serial.printf("Battery: silent DEPLOY\n");
-#endif
 }
 
 // EKF model for update
@@ -310,9 +306,10 @@ float BatteryMonitor::calculate(Sensors* Sen, const bool reset_temp,
   voc_ = vb_ - dvdyn;
   if (!ap.fake_faults()) {
     if ((bms_off_ && voltage_low_) || Sen->Flt->vb_fa_lt()) {
+Serial.printf("[UBC CHECK] vb_fa_lt=%d Vb=%.4f\n", Sen->Flt->vb_fa_lt(), Sen->Vb());
       voc_ = voc_stat_ = voc_dead_ =
-          vb_;  // Keep high to avoid chatter with voc_stat_ used above in
-                // voltage_low
+      vb_;  // Keep high to avoid chatter with voc_stat_ used above in
+            // voltage_low
     }
   }
   dv_dyn_ = vb_ - voc_;
@@ -320,6 +317,12 @@ float BatteryMonitor::calculate(Sensors* Sen, const bool reset_temp,
   // Hysteresis model
   dv_hys_ = 0.;  // disable hys g20230530a
   voc_stat_ = voc_ - dv_hys_;
+  if (reset_temp && sp.mod_vb()) {
+    double dv_dsoc;
+    float dv_bias = (reset_temp || reset_ekf) ? 0.0f : ap.dv_voc_soc();
+    voc_stat_ = calc_soc_voc(soc_, Tb_f_, &dv_dsoc) + dv_bias;
+    voc_ = voc_stat_;
+  }
   ioc_ = ib_dyn_in;
 
   // Reversionary model
@@ -341,7 +344,6 @@ float BatteryMonitor::calculate(Sensors* Sen, const bool reset_temp,
     if (ddq_dt > 0. && !sp.tweak_test()) ddq_dt *= coul_eff_;
     voc_stat_f_ = VocStatFilt->calculate(voc_stat_, reset_ekf || reset_temp,
                                          ap.voc_stat_filt(), dt_ekf_);
-
     // ddq_dt -= chem_.dqdt * q_capacity_ * T_rate;  // noisy
     if (reset_ekf) {
       solve_ekf(reset_ekf, reset_temp, Sen);
@@ -517,9 +519,16 @@ void BatteryMonitor::init_battery_mon(const bool reset, Sensors* Sen) {
             -IMAX_NUM);       // Overflow protection when ib_ past value used
   if (isnan(vb_)) vb_ = 13.;  // reset overflow
   if (isnan(ib_)) ib_ = 0.;   // reset overflow
-  dv_dyn_ = ib_ * chem_.r_ss * ap.slr_res();
-  voc_ = vb_ - dv_dyn_;
-#ifdef DEBUG_INIT
+
+  if (sp.mod_vb()) {
+    double dv_dsoc;
+    voc_stat_ = voc_ = calc_soc_voc(soc_, Tb_f_, &dv_dsoc);
+    vb_ = voc_ + dv_dyn_;
+  } else {
+    voc_ = vb_ - dv_dyn_;
+  } 
+
+  #ifdef DEBUG_INIT
   if (sp.debug() == -1)
     Serial.printf("mon: ib%7.3f vb%7.3f voc%7.3f\n", ib_, vb_, voc_);
 #endif
@@ -561,7 +570,6 @@ bool BatteryMonitor::is_sat(const bool reset) {
 
 // Print
 void BatteryMonitor::pretty_print(Sensors* Sen) {
-#if !IN_SERVICE
   Serial.printf("BM::");
   this->Battery::pretty_print();
   Serial.printf(" BM::BM:\n");
@@ -582,9 +590,6 @@ void BatteryMonitor::pretty_print(Sensors* Sen) {
   Serial.printf(" *ap_s_cap_mon%7.3f Slr\n", ap.s_cap_mon());
   Serial.printf("  vb_model_rev%7.3f V\n", vb_model_rev_);
   this->Battery::Coulombs::pretty_print();
-#else
-  Serial.printf("BatteryMonitor: silent DEPLOY\n");
-#endif
 }
 
 // Reset Coulomb Counter state to EKF under restricted conditions especially new
@@ -776,7 +781,8 @@ float BatterySim::calculate(Sensors* Sen, const bool dc_dc_on,
   double soc_lim = max(min(soc_, 1.0), -0.2);  // slightly beyond
 
   // VOC-OCV model
-  voc_stat_ = calc_soc_voc(soc_, Tb_f_, &dv_dsoc_) + ap.dv_voc_soc();
+  float dv_bias = reset ? 0.0f : ap.dv_voc_soc();
+  voc_stat_ = calc_soc_voc(soc_, Tb_f_, &dv_dsoc_) + dv_bias;
   voc_stat_ = min(voc_stat_ + (soc_ - soc_lim) * dv_dsoc_,
                   vsat_ * 1.2);  // slightly beyond sat but don't windup
 
@@ -1018,7 +1024,6 @@ void BatterySim::init_battery_sim(const bool reset, Sensors* Sen) {
 
 // Print
 void BatterySim::pretty_print() {
-#if !IN_SERVICE
   Serial.printf("BS::");
   this->Battery::pretty_print();
   Serial.printf(" BS::BS:\n");
@@ -1036,7 +1041,4 @@ void BatterySim::pretty_print() {
   Serial.printf(" *ap_s_cap_sim%7.3f Slr\n", ap.s_cap_sim());
   hys_->pretty_print(0., 0., 0.);
   this->Battery::Coulombs::pretty_print();
-#else
-  Serial.printf("BatterySim: silent DEPLOY\n");
-#endif
 }

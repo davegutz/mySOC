@@ -112,7 +112,6 @@ bool recall_P(const char letter_1, BatteryMonitor* Mon, Sensors* Sen) {
       Serial.printf("\nmodeling=%d\n", sp.modeling());
       Serial.printf("S:");
       Sen->Sim->pretty_print();
-      // Serial.printf("S::"); Sen->Sim->Coulombs::pretty_print();
       Serial.printf("\nSen->T %9.6f\n", Sen->T());
       break;
 

@@ -124,7 +124,6 @@ void EKF_1x1::init_ekf(double soc, double Pinit) {
 
 // Pretty Print
 void EKF_1x1::pretty_print() {
-#if !IN_SERVICE
   Serial.printf("EKF_1x1:\n");
   Serial.printf("In:\n");
   Serial.printf("  u  %8.4f, A\n", u_);
@@ -133,7 +132,8 @@ void EKF_1x1::pretty_print() {
   Serial.printf("  z  %8.4f, V\n", z_);
   Serial.printf("  R%13.10f\n", R_);
   Serial.printf("  Q%13.10f\n", Q_);
-  Serial.printf("  H   %7.3f\n", H_);
+  Serial.printf("  H    %7.3f\n", H_);
+  Serial.printf("  H_pst%7.3f\n", H_pst_);
   Serial.printf("Out:\n");
   Serial.printf("  xp %13.10f, Vsoc (0-1 fraction)\n", x_prior_);
   Serial.printf("  x  %13.10f, Vsoc (0-1 fraction)\n", x_);
@@ -145,7 +145,4 @@ void EKF_1x1::pretty_print() {
   Serial.printf("  P%13.10f\n", P_);
   Serial.printf("  K%13.10f\n", K_);
   Serial.printf("  S%13.10f\n", S_);
-#else
-  Serial.printf("EKF_1x1: silent DEPLOY\n");
-#endif
 }

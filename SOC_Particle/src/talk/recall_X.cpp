@@ -156,10 +156,11 @@ bool recall_X(const char letter_1, BatteryMonitor* Mon, Sensors* Sen) {
         Sen->end_inj(Sen->stop_inj() + ap.tail_inj());
         Serial.printf(
             "**\n*** RUN: at %s, %7.3f cycles %s to %s with %ld wait and %ld "
-            "tail\n\n",
+            "tail; freq%7.3f cycles%7.3f amp%7.3f type%2d \n\n",
             toString(Sen->now()).c_str(), ap.cycles_inj(),
             toString(Sen->start_inj()).c_str(),
-            toString(Sen->stop_inj()).c_str(), ap.wait_inj(), ap.tail_inj());
+            toString(Sen->stop_inj()).c_str(), ap.wait_inj(), ap.tail_inj(),
+            sp.freq(), ap.cycles_inj(), sp.Amp(ap.nP()), sp.type());
       } else
         Serial.printf("Wait%5.1fs for init\n",
                       float(TEMP_INIT_DELAY - Sen->now()) / 1000.f);

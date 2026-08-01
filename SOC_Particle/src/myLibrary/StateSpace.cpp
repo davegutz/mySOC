@@ -118,7 +118,6 @@ void StateSpace::pretty_print_vec(const String name, const uint8_t n,
 
 // Pretty Print
 void StateSpace::pretty_print(void) {
-#if !IN_SERVICE
   Serial.printf("StateSpace:\n");
   Serial.printf("  dt %9.6f\n", dt_);
   pretty_print_mat("A ", n_, n_, A_);
@@ -132,9 +131,6 @@ void StateSpace::pretty_print(void) {
   if (n_ == 2 && p_ == 2) {
     pretty_print_mat("AinvB", n_, n_, AinvB_);
   }
-#else
-  Serial.printf("StateSpace: silent DEPLOY\n");
-#endif
 }
 
 // Scale elements as requested

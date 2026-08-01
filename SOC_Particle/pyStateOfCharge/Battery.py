@@ -820,7 +820,11 @@ class BatteryMonitor(Battery, EKF1x1):
         self.dv_hys = 0.0
         self.voc_stat = self.voc - self.dv_hys
         if reset:
-            self.voc_stat = self.voc
+            if rp.modeling_vb:
+                self.voc_stat, self.dv_dsoc = self.calc_soc_voc(self.soc, self.Tb_f)
+                self.voc = self.voc_stat
+            else:
+                self.voc_stat = self.voc
         self.ioc = self.ib
 
         # EKF 1x1
@@ -1517,7 +1521,8 @@ class BatterySim(Battery):
 
         # VOC-OCV model
         self.voc_stat, self.dv_dsoc = self.calc_soc_voc(soc + Battery.D_SOC_S, self.Tb_f)
-        self.voc_stat += Battery.ap_dv_voc_soc
+        if not self.reset:
+            self.voc_stat += Battery.ap_dv_voc_soc
         # slightly beyond but don't windup
         self.voc_stat = min(self.voc_stat + (soc - soc_lim) * self.dv_dsoc, self.vsat * 1.2)
 

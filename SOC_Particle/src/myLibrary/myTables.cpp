@@ -183,7 +183,6 @@ TableInterp::~TableInterp() { delete x_; }
 // functions
 double TableInterp::interp() { return -999.; }
 void TableInterp::pretty_print() {
-#if !IN_SERVICE
   uint16_t i;
   Serial.printf("    x={");
   for (i = 0; i < n1_; i++) {
@@ -195,9 +194,6 @@ void TableInterp::pretty_print() {
     Serial.printf("%7.3f, ", v_[i]);
   }
   Serial.printf("};\n");
-#else
-  Serial.printf("TableInterp: silent DEPLOY\n");
-#endif
 }
 
 // 1-D Interpolation Table Lookup
@@ -267,7 +263,6 @@ double TableInterp2D::interp(double x, double y) {
 }
 
 void TableInterp2D::pretty_print() {
-#if !IN_SERVICE
   uint16_t i, j;
   Serial.printf("    dx%7.3f dy%7.3f dz%7.3f\n", dx_, dy_, dz_);
   Serial.printf("    y={");
@@ -283,7 +278,4 @@ void TableInterp2D::pretty_print() {
     Serial.printf("},\n");
   }
   Serial.printf("      };\n");
-#else
-  Serial.printf("TableInterp2D: silent DEPLOY\n");
-#endif
 }

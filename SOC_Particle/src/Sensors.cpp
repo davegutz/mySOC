@@ -68,7 +68,6 @@ Shunt::~Shunt() {}
 // functions
 
 void Shunt::pretty_print() {
-#if !IN_SERVICE
   Serial.printf(" reset %d;\n", reset_);
   Serial.printf(" *sp_Ib_bias%7.3f; A\n", *sp_ib_bias_);
   Serial.printf(" *sp_ib_scale%7.3f; A\n", *sp_ib_scale_);
@@ -91,9 +90,6 @@ void Shunt::pretty_print() {
     KF_->pretty_print();
   } else
     Serial.printf(" not using KF\n");
-#else
-  Serial.printf("Shunt: silent DEPLOY\n");
-#endif
 }
 
 // Convert sampled shunt data to Ib engineering units

@@ -237,7 +237,6 @@ double KalmanFilter::update(const double meas) {
 
 // Pretty Print
 void KalmanFilter::pretty_print() {
-#if !IN_SERVICE
   Serial.printf("KF:\n");
   Serial.printf("In:\n");
   Serial.printf(" u   %8.4f, V\n", u_);
@@ -260,7 +259,4 @@ void KalmanFilter::pretty_print() {
                 P_[1][0], P_[1][1]);
   Serial.printf(" K  [%8.4f, \n     %8.4f  ]\n", K_[0], K_[1]);
   Serial.printf(" S   %8.4f\n", S_);
-#else
-  Serial.printf("EKF_1x1: silent DEPLOY\n");
-#endif
 }

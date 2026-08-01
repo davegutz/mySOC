@@ -388,7 +388,6 @@ double Chemistry::lookup_voc(const double soc, const double tb_f) {
 
 // Pretty print
 void Chemistry::pretty_print() {
-#if !IN_SERVICE
   Serial.printf("Chemistry:\n");
   Serial.printf("  dqdt%7.3f, frac/dg C\n", dqdt);
   Serial.printf("  dv_min_abs%7.3f, V\n", dv_min_abs);
@@ -423,7 +422,4 @@ void Chemistry::pretty_print() {
   hys_Tx_->pretty_print();
   Serial.printf("  r_min(soc):\n");
   hys_Tn_->pretty_print();
-#else
-  Serial.printf("Chemistry: silent DEPLOY\n");
-#endif
 }

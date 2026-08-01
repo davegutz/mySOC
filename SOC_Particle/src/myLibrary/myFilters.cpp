@@ -305,9 +305,9 @@ LagExp::~LagExp() {}
 // functions
 void LagExp::assignCoeff(double tau, double T) {
   tau_ = tau;
-  T_ = T;
+  T_ = max(T, 1e-6);
   double eTt = exp(-T_ / tau_);
-  double meTt = 1 - eTt;
+  double meTt = max(1. - eTt, 1e-6);
   a_ = tau_ / T_ - eTt / meTt;
   b_ = 1.0 / meTt - tau_ / T_;
   c_ = meTt / T_;
@@ -608,6 +608,8 @@ void RateLagExp::rateState(double in, const double T) {
 }
 void RateLagExp::rateState(double in, double, double) { return; }
 void RateLagExp::assignCoeff(double tau) {
+  tau_ = fmax(tau_, 1e-6);
+  T_ = fmax(T_, 1e-6);
   double eTt = exp(-T_ / tau_);
   a_ = tau_ / T_ - eTt / (1 - eTt);
   b_ = 1.0 / (1 - eTt) - tau_ / T_;

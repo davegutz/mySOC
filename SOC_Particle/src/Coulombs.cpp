@@ -61,7 +61,6 @@ Coulombs::~Coulombs() {}
 // operators
 // Pretty print
 void Coulombs::pretty_print() {
-#if !IN_SERVICE
   Serial.printf("Coulombs:\n");
   Serial.printf(" coul_eff%9.5f\n", coul_eff_);
   Serial.printf(" d_delta_q%9.1f, C\n", d_delta_q_);
@@ -93,7 +92,6 @@ void Coulombs::pretty_print() {
   Serial.printf("Coulombs: silent DEPLOY\n");
   Serial.printf(" Chemistry::\n");
   chem_pretty_print();
-#endif
 }
 
 // functions

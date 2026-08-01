@@ -464,7 +464,7 @@ def print_ekf_RunSim(SN, i_temp, i_ekf, t, mon, sim, calc_ekf, calc_temp, df=Fal
         print_pair(SN.mon_run.y_ekf_f_lstate[i_ekf], mon.y_ekf_f_state, 12, 9, 'y_ekf_f_state', h, df)
         print_pair(SN.mon_run.z[i_ekf], mon.z, 13, 9, 'z', h, df)
         print_pair(SN.mon_run.hx[i_ekf], mon.hx, 15, 9, 'hx', h, df)
-        print_pair(SN.mon_run.voc_ekf[G.i], mon.voc_ekf, 12, 9, 'mon.voc_ekf', h, df)
+        print_pair(SN.mon_run.voc_ekf[G.i], mon.voc_ekf, 13, 9, 'mon.voc_ekf', h, df)
         print_pair(SN.mon_run.Tb_f[G.i], mon.Tb_f, 12, 8, 'Tb_f', h, df)
         print_pair(SN.mon_run.x_prior[i_ekf], mon.x_prior, 12, 8, 'x_prior', h, df)
         print_pair(SN.mon_run.x[i_ekf], mon.x, 13, 8, 'x', h, df)

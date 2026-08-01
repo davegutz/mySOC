@@ -84,7 +84,6 @@ float Hysteresis::look_slr(const float dv, const float soc) {
 
 // Print
 void Hysteresis::pretty_print(const float dx, const float dy, const float dz) {
-#if !IN_SERVICE
   float res = look_hys(0., 0.8);
   Serial.printf("Hysteresis:\n");
   Serial.printf("  cap%10.1f, F\n", chem_->hys_cap);
@@ -100,9 +99,6 @@ void Hysteresis::pretty_print(const float dx, const float dy, const float dz) {
   Serial.printf("  soc%8.4f\n", soc_);
   Serial.printf("  tau%10.1f, null, s\n", res * chem_->hys_cap);
   chem_->pretty_print();
-#else
-  Serial.printf("Hysteresis: silent DEPLOY\n");
-#endif
 }
 
 // Dynamic update

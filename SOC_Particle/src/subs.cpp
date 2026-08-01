@@ -261,7 +261,8 @@ void initialize_all(BatteryMonitor* Mon, Sensors* Sen, const float soc_in,
     debug_m1(Mon, Sen);
   }
 #endif
-  Mon->calculate(Sen, true, false);  // Call again because sat is a UBC
+  Sen->Flt->reset_all_faults();
+  Mon->calculate(Sen, true, use_soc_in);  // Call again because sat is a UBC
 #ifdef DEBUG_INIT
   if (sp.debug() == -1) {
     Serial.printf("M.calc2:  ");
