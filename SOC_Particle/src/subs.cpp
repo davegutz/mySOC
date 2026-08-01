@@ -346,6 +346,11 @@ void monitor(const bool reset, const bool reset_temp, const bool reset_ekf,
   Mon->calc_charge_time(Mon->q(), Mon->q_capacity(), Sen->ib(), Mon->soc());
 }
 
+// Print firmware
+void print_firmware_version(){
+  Serial.printf("Firmware: 20260612a (Built %s %s)\n", __DATE__, __TIME__);
+}
+
 // Read sensors, model signals, select between them.
 // Sim used for any missing signals (Tb, Vb, Ib)
 //    Needed here in this location to have available a value for

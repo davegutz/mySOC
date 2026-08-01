@@ -82,7 +82,8 @@ bool recall_X(const char letter_1, BatteryMonitor* Mon, Sensors* Sen) {
         case (10):
         case (11):
         case (12):
-        case (13):  // Xp9: Xp10: Xp11: Xp12: Xp13:  Program regression
+        case (13):
+        case (15):  // Xp9: Xp10: Xp11: Xp12: Xp13:  Program regression
           // Regression tests 9=tweak, 10=tweak w data, 11=cycle, 12 1/2 cycle
 
           chit("Xp0;vv0;Xm255;W4;Xts;Ca1;", SOON);
@@ -110,6 +111,12 @@ bool recall_X(const char letter_1, BatteryMonitor* Mon, Sensors* Sen) {
           {
             chit("Xtt;Xf.02;Xa-29500;XW5000;XT5000;XC3;", SOON);
             chit("vv4;W4;XR;XQ180000;Xm247;", SOON);
+          }
+
+          else if (INT_in == 15)  // Xp15:  slow init
+          {
+            chit("Xf.2;Xa0;XW10000;XT10000;XC1;", SOON);
+            chit("vv4;W4;XR;XQ50000;Xm247;", SOON);
           }
 
           break;

@@ -414,7 +414,7 @@ def print_ekf_RunSim(SN, i_temp, i_ekf, t, mon, sim, calc_ekf, calc_temp, df=Fal
             print(Colors.reset, end="")
         return None
     i_ekf = max(i_ekf, 0)
-    print_hdr = (calc_temp or calc_ekf) and count_since_last_header > HDR_SPREAD
+    print_hdr = (calc_temp or calc_ekf) and count_since_last_header > HDR_SPREAD or i_ekf == 0
     if (calc_temp or calc_ekf) and count_since_last_header > HDR_SPREAD:
         count_since_last_header = 0
     if G.i > 0:
@@ -429,6 +429,9 @@ def print_ekf_RunSim(SN, i_temp, i_ekf, t, mon, sim, calc_ekf, calc_temp, df=Fal
         set_color(Colors.fg.lightblue)
     elif mon.reset:
         set_color(Colors.fg.red)
+    if not calc_ekf:
+        print(Colors.reset, end="")
+        return
 
     for i_hdr in range(int(print_hdr), -1, -1):
         h = (i_hdr == 1)

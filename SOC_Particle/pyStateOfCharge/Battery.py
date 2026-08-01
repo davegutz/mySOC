@@ -950,13 +950,22 @@ class BatteryMonitor(Battery, EKF1x1):
         if mr is None:
             return
         self.soc_ekf = mr.soc_ekf[i]
-        if hasattr(mr, "y_ekf"):
-            self.y_ekf = mr.y_ekf[i_ekf]
-        elif hasattr(mr, "y"):
-            self.y_ekf = mr.y[i_ekf]
         self.init_ekf(mr.soc_ekf[i], 0.0)
         self.q_ekf = self.soc * self.q_capacity
         self.P = mr.P[i_ekf]
+
+        # Calculate hx and y_ekf from reset state (matching src/Battery.cpp lines 535 & 357)
+        tb_f_calc = 15.0 if (self.Tb_f is None or np.isnan(self.Tb_f)) else self.Tb_f
+        self.hx, dv_dsoc_init = self.calc_soc_voc(self.soc_ekf, tb_f=tb_f_calc, printit=False)
+        if hasattr(self, "voc_stat_f") and self.voc_stat_f is not None and not np.isnan(self.voc_stat_f) and self.voc_stat_f != 0.0:
+            self.y = self.voc_stat_f - self.hx
+            self.y_ekf = self.y
+        elif hasattr(mr, "y_ekf"):
+            self.y_ekf = mr.y_ekf[i_ekf]
+            self.y = self.y_ekf
+        elif hasattr(mr, "y"):
+            self.y_ekf = mr.y[i_ekf]
+            self.y = self.y_ekf
 
         if hasattr(mr, "P_post"):
             self.P_post = mr.P_post[i_ekf]
@@ -969,8 +978,6 @@ class BatteryMonitor(Battery, EKF1x1):
             self.P_prior = self.P
 
         # Calculate fallback dv_dsoc in case H / H_pst are not in run data
-        tb_f_calc = 15.0 if (self.Tb_f is None or np.isnan(self.Tb_f)) else self.Tb_f
-        _, dv_dsoc_init = self.calc_soc_voc(self.soc_ekf, tb_f=tb_f_calc, printit=False)
         h_default = min(dv_dsoc_init, Battery.H_MAX)
         if h_default <= 0.0:
             h_default = 1.0

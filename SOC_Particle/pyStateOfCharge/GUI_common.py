@@ -76,6 +76,7 @@ unit_list = [
 battery_list = ["bb", "chg"]
 sel_list = [
     "custom",
+    "slowInit",
     "zero_with_pc",
     "ampHiEmptFail",
     "ampHiFail",
@@ -183,18 +184,18 @@ macro_sel_list = [
 
 # Macro
 satInit = "Dh;*W;*vv0;*XS;*Ca1;BZ;Ff0;DP1;HR;Rf;"
-hdwNoVbPcMidInit = "vv0;Xm2;Ca0.50;BZ;Ff0;W20;DP1;HR;Rf;"
-modFlatInit = "vv0;Xm247;Ca0.90;BZ;Ff0;DP1;HR;Rf;"
-modFlatInitHi = "vv0;Xm3;Ca0.90;BZ;Ff0;DP1;HR;Rf;"
-modFullInit = "vv0;Xm247;Ca0.93;BZ;Ff0;DP1;HR;Rf;"  # kickers off 0.94
-modLoInit = "vv0;Xm247;Ca0.17;BZ;Ff0;DP1;HR;Rf;"
-modHalfInit = "vv0;Xm247;Ca0.50;BZ;Ff0;DP1;HR;Rf;"
+hdwNoVbPcMidInit = "vv0;Pd;Xm2;Ca0.50;BZ;Ff0;W20;DP1;HR;Rf;"
+modFlatInit = "vv0;Pd;Xm247;Ca0.90;BZ;Ff0;DP1;HR;Rf;"
+modFlatInitHi = "vv0;Pd;Xm3;Ca0.90;BZ;Ff0;DP1;HR;Rf;"
+modFullInit = "vv0;Pd;Xm247;Ca0.93;BZ;Ff0;DP1;HR;Rf;"  # kickers off 0.94
+modLoInit = "vv0;Pd;Xm247;Ca0.17;BZ;Ff0;DP1;HR;Rf;"
+modHalfInit = "vv0;Pd;Xm247;Ca0.50;BZ;Ff0;DP1;HR;Rf;"
 modHalfInit230 = "Pv;Pr;-vv-1;-Xm230;Pm;Ps;-Ca0.50;Pm;Ps;BZ;Ff0;DP1;HR;Rf;"
-modHalfInit239 = "-vv0;-Xm239;-Ca0.50;BZ;Ff0;DP1;HR;Rf;"
-modHalfInitNoCc = "vv0;Xm247;Ca0.50;BZ;Ff0;DP1;HR;Rf;"
-modEmptInitBB = "vv0;Xm247;Ca0.090;BZ;Ff0;DP1;HR;Rf;"
-modEmptInitCHG = "vv0;Xm247;Ca-0.004;BZ;Ff0;DP1;HR;Rf;"
-modEmptInitGen = "vv0;Xm247;Ca0.17;BZ;Ff0;DP1;HR;Rf;"
+modHalfInit239 = "-vv0;Pd;-Xm239;-Ca0.50;BZ;Ff0;DP1;HR;Rf;"
+modHalfInitNoCc = "vv0;Pd;Xm247;Ca0.50;BZ;Ff0;DP1;HR;Rf;"
+modEmptInitBB = "vv0;Pd;Xm247;Ca0.090;BZ;Ff0;DP1;HR;Rf;"
+modEmptInitCHG = "vv0;Pd;Xm247;Ca-0.004;BZ;Ff0;DP1;HR;Rf;"
+modEmptInitGen = "vv0;Pd;Xm247;Ca0.17;BZ;Ff0;DP1;HR;Rf;"
 noisePackage = "DT.05;DV0.3;DM.75;DN6;"
 silentPackage = "DT;DV;DM;DN;"
 synced_slow = "Dr400;D>400;ED1;DP1;"
@@ -202,9 +203,9 @@ synced_slow_pulse = "Dr800;D>800;ED1;DP1;"
 slow = synced_slow_pulse
 quiet = "vv0;Dr;DP;D>;Dh;"
 quietwait = "<vv0;Dr;DP;D>;Dh;"
-cleanup = "Hd;Pf;<HR;<Rf;"
+cleanup = "Hd;Pf;<HR;<Rf;<Pd;"
 tempCleanup = "Rf; "
-time_stamp = "XY;"
+time_stamp = "XY;Pd;"
 zeroPrepHdweNoVb = "HR;Dh1000;W34;Fi2;Fo2;Rs;W34;"
 zero_set_hdwe_no_Vb = "vv0;Xm2;Ca0.50;W20;BZ;Ff1;DP1;HR;Fi2;Fo2;Rf;vv99;W1;<Xm2;"
 tranPrep = "HR;Dh1000;W2;Rs;W48;vv4;W17;"
@@ -254,12 +255,12 @@ restore_r = (
 lookup = {
     "satInit": (
         22,
-        "Y;RS;RV;" + quiet + "cc;Dh;Dr;*W;*vv0;*XS;*Ca1;BZ;Ff0;ED;DP1;<HR;<Rf;" + "Pv;Pr;<XK;",
+        "Y;RS;RV;" + quiet + "cc;Dh;Dr;*W;*vv0;*XS;*Ca1;BZ;Ff0;ED;DP1;<HR;<Rf;" + "Pv;Pr;<Pd;<XK;",
         ("",),
     ),
     "initMid": (
         22,
-        "Y;RS;RV;" + quiet + "cc;Dh1800000;*W;*vv0;*XS;*Ca.5;BZ;Ff0;ED;<HR;<Rf;" + "Pv;Pr;<XK;",
+        "Y;RS;RV;" + quiet + "cc;Dh1800000;*W;*vv0;*XS;*Ca.5;BZ;Ff0;ED;<HR;<Rf;" + "Pv;Pr;<Pd;<XK;",
         ("",),
     ),
     "saveAdjusts": (
@@ -278,10 +279,18 @@ lookup = {
     ),
     "custom": (
         72,
-        "XQ60000;<XD;",
+        "XQ60000;<Pd;<XD;",
         (
             "For general purpose data collection",
             "'save data' will present a choice of file name",
+            "",
+        ),
+    ),
+    "slowInit": (
+        100,
+        slow + "Rs;W4;Xp15;" + quiet + cleanup + "<Pd;<XD;",
+        (
+            "Should initialize to high charge slow point and run a short 0 amplitude transient",
             "",
         ),
     ),

@@ -144,6 +144,8 @@ void talkH(BatteryMonitor* Mon, Sensors* Sen) {
   sendTxBuf("all\n", true, IN_SERVICE);
   sendTxBuf("  Pb= ", true, IN_SERVICE);
   sendTxBuf("vb details\n", true, IN_SERVICE);
+  sendTxBuf("  Pd= ", true, IN_SERVICE);
+  sendTxBuf("firmware build date\n", true, true);
   sendTxBuf("  Pe= ", true, IN_SERVICE);
   sendTxBuf("ekf\n", true, IN_SERVICE);
   sendTxBuf("  Pf= ", true, IN_SERVICE);

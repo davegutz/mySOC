@@ -532,11 +532,14 @@ void BatteryMonitor::init_soc_ekf(const double soc) {
   q_ekf_ = soc_ekf_ * q_capacity_;
   delta_q_ekf_ = q_ekf_ - q_capacity_;
   double dv_dsoc;
-  hx_ = z_ = calc_soc_voc(soc_ekf_, Tb_f_, &dv_dsoc);
+  hx_ = calc_soc_voc(soc_ekf_, Tb_f_, &dv_dsoc);
+  z_ = voc_stat_f_;
   H_pst_ = H_ = min(dv_dsoc, H_MAX);
-  y_ekf_ = 0.;
+  y_ = z_ - hx_;
+  y_ekf_ = y_;
   y_ekf_f_ = 0.;
 }
+
 
 /* is_sat:  Calculate saturation status
   Inputs:

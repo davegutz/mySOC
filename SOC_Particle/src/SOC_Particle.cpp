@@ -198,6 +198,8 @@ void setup() {
   // local_config.h for presently used config file)
   handle_boot_sequence();
 
+  print_firmware_version();
+
   sendTxBuf("End setup()\n\n", true, IN_SERVICE);
 }  // setup
 

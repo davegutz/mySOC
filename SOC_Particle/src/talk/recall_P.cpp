@@ -53,6 +53,10 @@ bool recall_P(const char letter_1, BatteryMonitor* Mon, Sensors* Sen) {
                     Sen->Vb());
       break;
 
+    case ('d'):  // Pd:  Print firmware version date
+      print_firmware_version();
+      break;
+
     case ('e'):  // Pe:  Print EKF
       sendTxBuf("\nMon::", true, IN_SERVICE);
       Mon->EKF_1x1::pretty_print();
