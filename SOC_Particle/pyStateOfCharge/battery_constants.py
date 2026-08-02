@@ -33,6 +33,8 @@ class BatteryConstants:
     ap_ewhi_slr = None
     ap_ewlo_slr = None
     ap_hys_scale = None
+    ap_h_alpha = None
+    ap_h_max = None
     ap_ib_diff_slr = None
     ap_ib_quiet_slr = None
     ap_nS = None

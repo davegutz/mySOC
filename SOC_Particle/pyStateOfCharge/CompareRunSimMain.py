@@ -37,17 +37,17 @@ def main():  # Example usage.  ok on 20260217
         9:  dyn_n
         10: cc_diff
     """
-    data_file = '/home/daveg/.local/SOC_Particle/dataReduction/g20260612a/slowTweakRegression_soc3p2_hi_lo_bb.csv'
+    data_file = '/home/daveg/.local/SOC_Particle/dataReduction/g20260612a/offSitBmsNoiseBB_soc3p2_hi_lo_bb.csv'
     unit_key = 'g20260612a_soc3p2_hi_lo_bb'
-    time_end = None
+    time_end = 12
     compare_run_ver = True
     shift_soc_s = True
-    plots = True
+    plots = False
     use_mon_soc_ = False
     verbose = False
     scale_batt = 1.0
     slr_hys_sim = 1.0
-    request_history = 10
+    request_history = 5
     init_time = None
     time_shift = None
     strict_overplot = True
@@ -73,13 +73,6 @@ def main():  # Example usage.  ok on 20260217
         compare_run_ver=compare_run_ver,
         shift_soc_s=shift_soc_s,
     )
-
-
-# import cProfile
-# if __name__ == '__main__':
-#     cProfile.run('main()')
-#
-
 
 if __name__ == "__main__":  #
     main()

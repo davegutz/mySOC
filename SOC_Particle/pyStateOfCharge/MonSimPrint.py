@@ -450,7 +450,7 @@ def print_ekf_RunSim(SN, i_temp, i_ekf, t, mon, sim, calc_ekf, calc_temp, df=Fal
         print_pair(calc_ekf, None, 8, 0, 'calc_ekf', h, df)
         print_pair(SN.mon_run.sat[G.i], mon.sat, 4, 0, 'sat', h, df)
         print_pair(SN.mon_run.voc_stat[G.i], mon.voc_stat, 11, 5, 'voc_stat', h, df)
-        print_pair(SN.mon_run.voc_stat[G.i - 1], mon.voc_stat_past, 11, 5, '', h, df)
+        print_pair(SN.mon_run.voc_stat[G.i - 1], mon.voc_stat_past, 11, 5, 'voc_stat_past', h, df)
         print_pair(bool(SN.mon_run.bms_off[G.i - 1]), bool(mon.bms_off_past), 7, 0, 'bms_off_past', h, df)
         print_pair(bool(SN.mon_run.voltage_low[G.i]), bool(mon.voltage_low), 7, 0, 'voltage_low', h, df)
         print_pair(bool(SN.mon_run.bms_off[G.i]), bool(mon.bms_off), 7, 0, 'bms_off', h, df)

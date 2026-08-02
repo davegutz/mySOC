@@ -151,6 +151,7 @@ macro_sel_list = [
     "cleanup",
     "tempCleanup",
     "tranPrep",
+    "tranPrepOff",
     "synced_slow",
     "slow",
     "slowTwitchDef",
@@ -195,7 +196,7 @@ modHalfInit = "vv0;Pd;Xm247;Ca0.50;BZ;Ff0;DP1;HR;Rf;"
 modHalfInit230 = "Pv;Pr;-vv-1;-Xm230;Pm;Ps;-Ca0.50;Pm;Ps;BZ;Ff0;DP1;HR;Rf;"
 modHalfInit239 = "-vv0;Pd;-Xm239;-Ca0.50;BZ;Ff0;DP1;HR;Rf;"
 modHalfInitNoCc = "vv0;Pd;Xm247;Ca0.50;BZ;Ff0;DP1;HR;Rf;"
-modEmptInitBB = "vv0;Pd;Xm247;Ca0.090;BZ;Ff0;DP1;HR;Rf;"
+modEmptInitBB = "vv0;Pd;Xm247;Ca0.130;BZ;Ff0;DP1;HR;Rf;"
 modEmptInitCHG = "vv0;Pd;Xm247;Ca-0.004;BZ;Ff0;DP1;HR;Rf;"
 modEmptInitGen = "vv0;Pd;Xm247;Ca0.17;BZ;Ff0;DP1;HR;Rf;"
 noisePackage = "DT.05;DV0.3;DM.75;DN6;"
@@ -211,6 +212,7 @@ time_stamp = "XY;Pd;"
 zeroPrepHdweNoVb = "HR;Dh1000;W34;Fi2;Fo2;Rs;W34;"
 zero_set_hdwe_no_Vb = "vv0;Xm2;Ca0.50;W20;BZ;Ff1;DP1;HR;Fi2;Fo2;Rf;vv99;W1;<Xm2;"
 tranPrep = "HR;Dh1000;W2;Rs;W48;vv4;W17;"
+tranPrepOff = "HR;Dh1000;W2;Rs;W48;vv4;W90;"
 tranPrepKf = "HR;Dh1000;W2;Rs;W48;vv6;W17;"
 slowTranPrep = "HR;vv4;W2;Rs;" + slow + "W5;"
 slowTwitchDef = "Rb;Rf;Sh0;Xts;Xf0.004;Mm1000;Mn-1000;Nm1000;Nn-1000;XW10000;XT10;XC2;"
@@ -602,13 +604,13 @@ lookup = {
         ),
     ),
     "offSitBmsNoiseBB": (
-        670,
+        730,
         modEmptInitBB
         + (
             slowTwitchDef
             + "Xa-162;"
+            + tranPrepOff
             + noisePackage
-            + tranPrep
             + "XR;XQ568000;"
             + "Xa0;"
             + silentPackage
@@ -628,13 +630,13 @@ lookup = {
         ),
     ),
     "offSitBmsNoiseCHG": (
-        670,
+        730,
         modEmptInitCHG
         + (
             slowTwitchDef
             + "Xa-324;"
+            + tranPrepOff
             + noisePackage
-            + tranPrep
             + "XR;XQ568000;"
             + "Xa0;"
             + silentPackage
@@ -732,7 +734,7 @@ lookup = {
     ),
     "vHiFailNoise": (
         165,
-        modHalfInit + noisePackage + tranPrep + "XY;Dv0.82;XQ60000;" + dv0 + quiet + cleanup + "<XD;",
+        modHalfInit + tranPrep + noisePackage + "XY;Dv0.82;XQ60000;" + dv0 + quiet + cleanup + "<XD;",
         (
             "Should detect voltage failure and display '*fail' and 'redl' within 60 seconds.",
             "To diagnose, begin with 'Ult 1'.   Look for e_wrap to go through ewlo_thr.",
