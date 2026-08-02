@@ -379,7 +379,7 @@ lookup = {
         130,
         modHalfInit + tranPrep + d50 + "XQ25000;" + c00 + quiet + cleanup + "<XD;",
         (
-            "Inject 50A into amp. With ib_diff only nothing changes then "
+            "Inject 50A into noa. With ib_diff only nothing changes then "
             "should isolate to the noa by wrap and choose amp.",
             "'diff' will be displayed then ib_fail due to wrap of noa",
             "To evaluate plots, start looking at 'Ult 1'. Fault record (frozen).",
@@ -393,7 +393,7 @@ lookup = {
             "Should run three very large current discharge/recharge cycles without latched fail",
             "Best test for seeing time skews and checking fault logic for false trips",
             "Occasional jumps in ib_sel_stat are normal when pass through 0 A.  "
-            "And Noa will fault and fail temprorarily",
+            "And Noa will fault and fail temporarily",
         ),
     ),
     "allProto": (
@@ -464,13 +464,21 @@ lookup = {
         695,
         modEmptInitBB
         + (slowTwitchDef + "Xa-162;" + tranPrep + twitch + "XQ568000;" + "Pf;W2;Xa0;" + quiet + cleanup + "Sh1;<XD;"),
-        ("for CompareRunRun.py Argon vs Photon builds. This is the only test for that.",),
+        (
+            "Quiet off-sit BMS test around empty for BB battery.",
+            "Operates around saturation, going low enough to exercise BMS shutoff and hysteresis reset.",
+            "Used for CompareRunRun Argon vs Photon build comparisons.",
+        ),
     ),
     "offSitBmsCHG": (
         695,
         modEmptInitCHG
         + (slowTwitchDef + "Xa-324;" + tranPrep + twitch + "XQ568000;" + "Pf;W2;Xa0;" + quiet + cleanup + "Sh1;<XD;"),
-        ("for CompareRunRun.py Argon vs Photon builds. This is the only test for that.",),
+        (
+            "Quiet off-sit BMS test around empty for CHG battery.",
+            "Operates around saturation, going low enough to exercise BMS shutoff and hysteresis reset.",
+            "Used for CompareRunRun Argon vs Photon build comparisons.",
+        ),
     ),
     "triTweakDisch": (
         230,
@@ -521,7 +529,7 @@ lookup = {
         155,
         modHalfInit + tranPrep + dm50 + "XQ50000;" + c00 + quiet + cleanup + "<XD;",
         (
-            "Should detect and switch amp current failure.",
+            "Should detect and switch noa current failure.",
             "Start looking at 'Ult 1'. Fault record (frozen). Will see 'd"
             "iff' flashing on display even after fault cleared automatica"
             "lly (lost redundancy).",
@@ -532,7 +540,7 @@ lookup = {
         155,
         modFullInit + "DS-0.30" + tranPrep + dm50 + "XQ50000;" + c00 + quiet + cleanup + "DS;<XD;",
         (
-            "Race with artificially low SAT logic to detect and switch amp current failure.",
+            "Race with artificially low SAT logic to detect and switch noa current failure.",
             "Start looking at 'Ult 1'. Fault record (frozen). Will see 'diff' flashing on display.",
             "ib_diff_fa will set red_loss but wait for wrap_fa to isolate and make selection change",
         ),
@@ -702,9 +710,9 @@ lookup = {
             "8A bias on noa, amp in range at 0A and reflects battery stat"
             "e.  Artificially tight cc_diff threshold. Will detect and sw"
             "itch noa current failure due to wrap+diff. Once wrap trips d"
-            "iff won't be displayed. Cannnot ever produce a cc_diff fault"
+            "iff won't be displayed. Cannot ever produce a cc_diff fault"
             ".",
-            "Will display “diff” due to 6 A difference..",
+            "Will display “diff” due to 8A difference.",
             "EKF won't move because fed by amp.",
             "Run for 6  minutes to see potential cc_diff_fa",
         ),
@@ -715,9 +723,9 @@ lookup = {
         (
             "5A bias on noa, amp in range at 0A and reflects battery stat"
             "e. Artificially tight cc_diff threshold. Not enough current "
-            "to trip the noa wrap.  Cannnot ever produce a cc_diff fault "
+            "to trip the noa wrap.  Cannot ever produce a cc_diff fault "
             "because amp still used.",
-            "Will display “diff” due to 5 A difference..",
+            "Will display “diff” due to 5A difference.",
             "EKF won't move because fed by amp.",
             "Run for 6  minutes to see potential cc_diff_fa",
         ),
@@ -766,9 +774,9 @@ lookup = {
         modHalfInit
         + ("D^7;" + tranPrep + "XY;W10;D^-113;XQ120000;" + "D^;Rf;W50;" + cleanup + "<W50;" + quietwait + "<Pf;<XD;"),
         (
-            "Simulates open thermistor.",
-            "To diagnose, begin with 'Ult 1'.   Look for e_wrap to go through ewlo_thr.",
-            "You may have to increase magnitude of injection (Dv).  The threshold is 32 * r_ss.",
+            "Simulates low temperature (-113 deg C offset) in model.",
+            "Should detect thermistor fault (tb_flt) when temperature drops below low_t limit.",
+            "Verify fault detection and recovery when temperature bias is removed.",
             "There MUST be no SATURATION",
         ),
     ),
@@ -777,9 +785,9 @@ lookup = {
         modHalfInit
         + ("D^7;" + tranPrep + "XY;W10;D^+50;XQ120000;" + "D^;Rf;W50;" + cleanup + "<W50;" + quietwait + "<Pf;<XD;"),
         (
-            "Simulates open thermistor.",
-            "To diagnose, begin with 'Ult 1'.   Look for e_wrap to go through ewlo_thr.",
-            "You may have to increase magnitude of injection (Dv).  The threshold is 32 * r_ss.",
+            "Simulates high temperature (+50 deg C offset) in model.",
+            "Should detect thermistor fault (tb_flt) when temperature exceeds hi_t limit.",
+            "Verify fault detection and recovery when temperature bias is removed.",
             "There MUST be no SATURATION",
         ),
     ),
@@ -788,9 +796,9 @@ lookup = {
         modHalfInit230
         + (tranPrep + "XY;W10;Dt-113;XQ120000;" + "Dt;Rf;W50;" + cleanup + "<W50;" + quietwait + "<Pf;<XD;"),
         (
-            "Simulates open thermistor.",
-            "To diagnose, begin with 'Ult 1'.   Look for e_wrap to go through ewlo_thr.",
-            "You may have to increase magnitude of injection (Dv).  The threshold is 32 * r_ss.",
+            "Simulates low temperature (-113 deg C offset) on hardware thermistor input.",
+            "Should detect thermistor fault (tb_flt) when temperature drops below low_t limit.",
+            "Verify fault detection and recovery when temperature bias is removed.",
             "There MUST be no SATURATION",
         ),
     ),
@@ -799,9 +807,9 @@ lookup = {
         modHalfInit230
         + (tranPrep + "XY;W10;Dt+50;XQ120000;" + "Dt;Rf;W50;" + cleanup + "<W50;" + quietwait + "<Pf;<XD;"),
         (
-            "Simulates open thermistor.",
-            "To diagnose, begin with 'Ult 1'.   Look for e_wrap to go through ewlo_thr.",
-            "You may have to increase magnitude of injection (Dv).  The threshold is 32 * r_ss.",
+            "Simulates high temperature (+50 deg C offset) on hardware thermistor input.",
+            "Should detect thermistor fault (tb_flt) when temperature exceeds hi_t limit.",
+            "Verify fault detection and recovery when temperature bias is removed.",
             "There MUST be no SATURATION",
         ),
     ),
