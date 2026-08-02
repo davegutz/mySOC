@@ -451,7 +451,7 @@ const float QUIET_RES(QUIET_SET /
 // Conversion gains
 constexpr double H_CELL_MAX = 15.;
 const double H_MAX = NS * H_CELL_MAX;
-const double H_ALPHA = 0.05;
+const double H_ALPHA = 0.05;  // Ha
 // Voltage measurement gains
 #if !defined(HDWE_BARE)
 const float VB_CONV_GAIN =

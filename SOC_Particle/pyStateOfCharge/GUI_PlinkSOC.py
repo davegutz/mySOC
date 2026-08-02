@@ -817,7 +817,7 @@ def compare_run_ver_batch():
 
             if should_skip_battery_case(battery, macro_val):
                 reason = f"battery upcase {battery.upper()!r} contained in case name {macro_val!r}"
-                print(f"\033[91mRunVer SKIP  {case_desc}: {reason}\033[0m")
+                print(f"\033[92mRunVer SKIP  {case_desc}: {reason}\033[0m")
                 problem_cases.append((case_desc, reason))
                 continue
 
@@ -862,9 +862,9 @@ def compare_run_ver_batch():
                 title="RunVer Complete", message=f"All {n_total} case(s) executed successfully."
             )
         else:
-            print("\033[91m--- RunVer problem summary ---\033[0m")
+            print("\033[92m--- RunVer comment summary ---\033[0m")
             for desc, reason in problem_cases:
-                print(f"\033[91m  {desc}: {reason}\033[0m")
+                print(f"\033[92m  {desc}: {reason}\033[0m")
             tkinter.messagebox.showwarning(
                 title="RunVer Complete",
                 message=f"{n_total - n_problems} of {n_total} case(s) ran.\n"

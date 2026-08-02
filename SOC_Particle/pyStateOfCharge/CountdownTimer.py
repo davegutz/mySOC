@@ -67,17 +67,28 @@ class CountdownTimer(tk.Toplevel):
 
     def close(self):
         if self._flasher_after_id is not None:
-            self.after_cancel(self._flasher_after_id)
+            try:
+                self.after_cancel(self._flasher_after_id)
+            except Exception:
+                pass
             self._flasher_after_id = None
         if self._countdown_after_id is not None:
-            self.after_cancel(self._countdown_after_id)
+            try:
+                self.after_cancel(self._countdown_after_id)
+            except Exception:
+                pass
             self._countdown_after_id = None
         if self.flasher_window is not None:
             try:
-                self.flasher_window.destroy()
+                if self.flasher_window.winfo_exists():
+                    self.flasher_window.destroy()
             except Exception:
                 pass
-        self.destroy()
+        try:
+            if self.winfo_exists():
+                self.destroy()
+        except Exception:
+            pass
 
     def begin(self):
         """Countdown in seconds then exit"""
@@ -142,17 +153,31 @@ class CountdownTimer(tk.Toplevel):
                 # update window
                 self._flasher_after_id = self.after(500, self.flasher_update)
             else:
-                self.flasher_window.destroy()
-                self.destroy()
+                if self.flasher_window is not None:
+                    try:
+                        if self.flasher_window.winfo_exists():
+                            self.flasher_window.destroy()
+                    except Exception:
+                        pass
+                try:
+                    if self.winfo_exists():
+                        self.destroy()
+                except Exception:
+                    pass
         except Exception as e:
             print("e=", e)
             print("killing flasher window")
             if self.flasher_window is not None:
                 try:
-                    self.flasher_window.destroy()
+                    if self.flasher_window.winfo_exists():
+                        self.flasher_window.destroy()
                 except Exception:
                     pass
-            self.destroy()
+            try:
+                if self.winfo_exists():
+                    self.destroy()
+            except Exception:
+                pass
 
 
 def start_timer():

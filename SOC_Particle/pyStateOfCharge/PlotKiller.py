@@ -112,13 +112,25 @@ class PlotKiller(tk.Toplevel):
         do_hardcopy(self.fig_list, self.fig_files, self.pdf_path, self.pdf_base)
 
     def close_figs(self):
+        try:
+            self.update_idletasks()  # Flush pending Tk draw callbacks
+        except Exception:
+            pass
         if self.fig_list is None:
             plt.close("all")
         else:
             for fig in self.fig_list:
+                try:
+                    fig.canvas.flush_events()
+                except Exception:
+                    pass        # self.grab_release()
+
                 plt.close(fig)
-        # self.grab_release()
-        self.destroy()
+        try:
+            if self.winfo_exists():
+                self.destroy()
+        except (tk.TclError, Exception):
+            pass
 
 
 def show_and_kill(string, caller, fig_list=None, fig_files=None, pdf_path=".", pdf_base=None, hardcopy=False):

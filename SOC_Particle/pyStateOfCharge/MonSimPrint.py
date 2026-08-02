@@ -202,6 +202,8 @@ def print_hist(OPT, SN, i_temp, i_ekf, t, mon, calc_temp, calc_ekf, sim, df=True
                     hdr = print_vb_wrap_RunSim(SN, i_temp, i_ekf, t, mon, sim, calc_temp, calc_ekf, df)
                 case 9:  # request_history for dyn_n
                     hdr = print_dyn_n_RunSim(SN, i_temp, i_ekf, t, mon, sim, calc_temp, calc_ekf, df)
+                case 10:  # request_history for cc_diff
+                    hdr = print_cc_diff_RunSim(SN, i_temp, i_ekf, t, mon, sim, calc_temp, calc_ekf, df)
         case "HistSim":
             match OPT.request_history:
                 case 0:
@@ -216,6 +218,8 @@ def print_hist(OPT, SN, i_temp, i_ekf, t, mon, calc_temp, calc_ekf, sim, df=True
                 #     hdr = print_temp_HistSim(SN, i_temp, t, mon, sim, calc_temp, i_ekf, calc_ekf, df)
                 case 5:
                     hdr = print_volt_HistSim(SN, i_temp, i_ekf, t, mon, calc_temp, calc_ekf, df)
+                case 10:
+                    hdr = print_cc_diff_RunSim(SN, i_temp, i_ekf, t, mon, sim, calc_temp, calc_ekf, df)
     return hdr
 
 
@@ -1110,6 +1114,122 @@ def print_vb_wrap_RunSim(SN, i_temp, i_ekf, t, mon, sim, calc_temp, calc_ekf, df
         print_pair(SN.mon_run.e_wrap_m_trim[G.i], mon.e_wrap_m_trim, 16, 5, 'e_wrap_trim', h, df)
         print_pair(SN.mon_run.e_wrap_m_trimmed[G.i], mon.LoopIbAmp.e_wrap_trimmed, 12, 6, 'e_wrap_trimmed', h, df)
         print_pair(SN.mon_run.e_wrap_m_filt[G.i], mon.e_wrap_m_filt, 11, 5, 'e_wrap_m_filt', h, df)
+        print_pair(SN.mon_run.ib_diff_fa[G.i], None, 10, 0, 'ib_diff_fa', h, df)
+        print_pair(SN.mon_run.wrap_m_and_n_fa[G.i], None, 15, 0, 'wrap_m_and_n_fa', h, df)
+        print_pair(SN.mon_run.wrap_lo_m_flt[G.i], mon.wrap_lo_m_flt, 16, 0, 'wrap_lo_m_flt', h, df)
+        print_pair(SN.mon_run.wrap_lo_m_fa[G.i], mon.wrap_lo_m_fa, 11, 0, 'wrap_lo_m_fa', h, df)
+        print_pair(SN.mon_run.wrap_lo_n_fa[G.i], mon.wrap_lo_n_fa, 11, 0, 'wrap_lo_n_fa', h, df)
+        print_pair(SN.mon_run.wrap_lo_fa[G.i], None, 14, 0, 'wrap_lo_fa', h, df)
+        print_pair(SN.mon_run.wrap_hi_m_fa[G.i], mon.wrap_hi_m_fa, 14, 0, 'wrap_hi_m_fa', h, df)
+        print_pair(SN.mon_run.wrap_hi_n_fa[G.i], mon.wrap_hi_n_fa, 14, 0, 'wrap_hi_n_fa', h, df)
+        print_pair(SN.mon_run.wrap_hi_fa[G.i], None, 14, 0, 'wrap_hi_fa', h, df)
+        print_pair(SN.mon_run.ib_is_functional[G.i], None, 18, 0, 'ib_is_functional', h, df)
+        print_pair(SN.mon_run.wv_fa[G.i], None, 18, 0, 'wrap_vb_faj', h, df)
+        print_pair(bool(SN.mon_run.ib_quiet[G.i]), None, 18, 0, 'ib_quiet', h, df)
+        print_pair(bool(SN.mon_run.ib_really_quiet[G.i]), None, 18, 0, 'ib_really_quiet', h, df, end="\n")
+
+    print(Colors.reset, end="")
+    return 'header'
+
+
+# 10
+# noinspection PyPep8Naming
+def print_cc_diff_RunSim(SN, i_temp, i_ekf, t, mon, sim, calc_temp, calc_ekf, df=False):
+    global count_since_last_header, vv_warning_printed
+    if not hasattr(SN.mon_run, "voltage_low") or SN.mon_run.voltage_low is None:
+        if not vv_warning_printed:
+            print(Colors.fg.red, end="")
+            print(
+                f"\n**********\nLikely a vv1-vv3 run.  Not printing print_cc_d"
+                f"iff_RunSim  (request_hist_in=10)\n*************\n"
+            )
+            vv_warning_printed = True
+            print(Colors.reset, end="")
+        return None
+    print_hdr = (calc_temp or calc_ekf) and count_since_last_header > HDR_SPREAD
+    if (calc_temp or calc_ekf) and count_since_last_header > HDR_SPREAD:
+        count_since_last_header = 0
+    if G.i > 0:
+        count_since_last_header += 1
+    if mon.reset:
+        set_color(Colors.fg.red)
+    elif mon.reset_temp:
+        set_color(Colors.fg.orange)
+    else:
+        set_color(Colors.reset)
+
+    for i_hdr in range(int(print_hdr), -1, -1):
+        h = (i_hdr == 1)
+        print_pair(G.i, None, 4, 0, 'i', h, df)
+        print_pair(t[G.i], None, 8, 3, 'time', h, df)
+        print_pair(mon.reset, None, 2, 0, 'r', h, df)
+        print_pair(mon.reset_temp, None, 7, 0, 'rt', h, df)
+        print_pair(mon.reset_kf, None, 4, 0, 'rk', h, df)
+        print_pair(i_temp, None, 4, 0, 'it', h, df)
+        print_pair(calc_temp, None, 4, 0, 'ct', h, df)
+        print_pair(mon.reset_ekf, None, 7, 0, 're', h, df)
+        print_pair(i_ekf, None, 4, 0, 'ie', h, df)
+        print_pair(calc_ekf, None, 4, 0, 'ce', h, df)
+        print_pair(bool(SN.mon_run.reset[G.i]), None, 7, 0, 'reset', h, df)
+        print_pair(bool(SN.mon_run.reset_temp[G.i]), None, 10, 0, 'reset_temp', h, df)
+        print_pair(bool(SN.mon_run.reset_all_faults[G.i]), None, 16, 0, 'reset_all_faults', h, df)
+        print_pair(bool(SN.mon_run.soft_reset[G.i]), None, 15, 0, 'soft_reset', h, df)
+        print_pair(bool(SN.mon_run.soft_reset_sim[G.i]), None, 15, 0, 'soft_reset_sim', h, df)
+        print_pair(bool(SN.mon_run.init_mon[G.i]), None, 15, 0, 'init_mon', h, df)
+        print_pair(bool(SN.mon_run.init_sim[G.i]), None, 15, 0, 'init_sim', h, df)
+        print_pair(SN.mon_run.sat[G.i], mon.sat, 4, 0, 'sa', h, df)
+        print_pair(bool(SN.mon_run.bms_off[G.i]), bool(mon.bms_off), 7, 0, 'bms_off', h, df)
+        print_pair(bool(SN.mon_run.voltage_low[G.i]), bool(mon.voltage_low), 7, 0, 'voltage_low', h, df)
+        print_pair(bool(SN.sim_run.bms_off_s[G.i]), bool(sim.bms_off), 7, 0, 'bms_off_s', h, df)
+        print_pair(bool(SN.sim_run.voltage_low_s[G.i]), bool(sim.voltage_low), 7, 0, 'voltage_low_s', h, df)
+        print_pair(SN.mon_run.dt[G.i], mon.dt, 10, 4, 'dt', h, df)
+        print_pair(SN.mon_run.vb[G.i], mon.vb, 13, 7, 'vb', h, df)
+        print_pair(SN.mon_run.ib_amp[G.i], mon.ib_amp, 15, 6, 'ib_amp', h, df)
+
+        # Coulomb counter, EKF SOC & cc_diff fault logic parameters
+        soc_val = SN.mon_run.soc[G.i] if hasattr(SN.mon_run, "soc") and SN.mon_run.soc is not None else None
+        soc_ekf_val = SN.mon_run.soc_ekf[G.i] if hasattr(SN.mon_run, "soc_ekf") and SN.mon_run.soc_ekf is not None else None
+        mon_soc_val = getattr(mon, "soc", None)
+        mon_soc_ekf_val = getattr(mon, "soc_ekf", None)
+
+        if hasattr(SN.mon_run, "cc_dif") and SN.mon_run.cc_dif is not None:
+            run_cc_dif = SN.mon_run.cc_dif[G.i]
+        elif soc_val is not None and soc_ekf_val is not None:
+            run_cc_dif = soc_ekf_val - soc_val
+        else:
+            run_cc_dif = None
+
+        if hasattr(mon, "cc_dif") and mon.cc_dif is not None:
+            mon_cc_dif = mon.cc_dif
+        elif mon_soc_val is not None and mon_soc_ekf_val is not None:
+            mon_cc_dif = mon_soc_ekf_val - mon_soc_val
+        else:
+            mon_cc_dif = None
+
+        if hasattr(SN.mon_run, "cc_diff_thr") and SN.mon_run.cc_diff_thr is not None:
+            run_cc_diff_thr = SN.mon_run.cc_diff_thr[G.i]
+        else:
+            run_cc_diff_thr = getattr(mon, "cc_diff_thr", 0.2)
+
+        mon_cc_diff_thr = getattr(mon, "cc_diff_thr", 0.2)
+
+        run_ccd_flt = bool(SN.mon_run.ccd_flt[G.i]) if hasattr(SN.mon_run, "ccd_flt") and SN.mon_run.ccd_flt is not None else False
+        mon_ccd_flt = bool(getattr(mon, "ccd_flt", False))
+
+        run_ccd_fa = bool(SN.mon_run.ccd_fa[G.i]) if hasattr(SN.mon_run, "ccd_fa") and SN.mon_run.ccd_fa is not None else False
+        mon_ccd_fa = bool(getattr(mon, "ccd_fa", False))
+
+        run_flt_ekf = bool(SN.mon_run.flt_ekf[G.i]) if hasattr(SN.mon_run, "flt_ekf") and SN.mon_run.flt_ekf is not None else False
+        mon_flt_ekf = bool(getattr(mon, "flt_ekf", False))
+
+        print_pair(soc_val, mon_soc_val, 13, 6, 'soc', h, df)
+        print_pair(soc_ekf_val, mon_soc_ekf_val, 13, 6, 'soc_ekf', h, df)
+        print_pair(run_cc_dif, mon_cc_dif, 13, 6, 'cc_dif', h, df)
+        print_pair(run_cc_diff_thr, mon_cc_diff_thr, 13, 6, 'cc_diff_thr', h, df)
+        print_pair(run_ccd_flt, mon_ccd_flt, 10, 0, 'ccd_flt', h, df)
+        print_pair(run_ccd_fa, mon_ccd_fa, 10, 0, 'ccd_fa', h, df)
+        print_pair(run_flt_ekf, mon_flt_ekf, 10, 0, 'flt_ekf', h, df)
+
         print_pair(SN.mon_run.ib_diff_fa[G.i], None, 10, 0, 'ib_diff_fa', h, df)
         print_pair(SN.mon_run.wrap_m_and_n_fa[G.i], None, 15, 0, 'wrap_m_and_n_fa', h, df)
         print_pair(SN.mon_run.wrap_lo_m_flt[G.i], mon.wrap_lo_m_flt, 16, 0, 'wrap_lo_m_flt', h, df)

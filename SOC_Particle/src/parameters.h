@@ -73,6 +73,7 @@ class VolatilePars : public Parameters {
   FloatV* ewhi_slr_p;
   FloatV* ewlo_slr_p;
   BooleanV* fake_faults_p;
+  FloatV* h_alpha_p;
   FloatV* hys_scale_p;
   FloatV* hys_state_p;
   FloatV* ib_amp_add_p;
@@ -160,6 +161,8 @@ class VolatilePars : public Parameters {
   void ewlo_slr(const float input) { ewlo_slr_ = input; }
   bool fake_faults() { return fake_faults_; }
   void fake_faults(const bool input) { fake_faults_ = input; }
+  float h_alpha() { return h_alpha_; }
+  void h_alpha(const float input) { h_alpha_ = input; }
   float hys_scale() { return hys_scale_; }
   void hys_scale(const float input) { hys_scale_ = input; }
   float hys_state() { return hys_state_; }
@@ -278,6 +281,7 @@ class VolatilePars : public Parameters {
   float ewlo_slr_;       // Scale wrap lo detection thresh, scalar
   bool fake_faults_;     // Faults faked (ignored).  Used to evaluate a
                          // configuration, deploy it without disrupting use
+  float h_alpha_;        // EKF noise filter coefficient, scalar
   float hys_scale_;      // Sim hysteresis scalar
   float hys_state_;      // Sim hysteresis state
   float ib_amp_add_;     // Fault injection bias on amp, A

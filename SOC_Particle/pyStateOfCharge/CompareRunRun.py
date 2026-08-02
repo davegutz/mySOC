@@ -1,4 +1,4 @@
-# MonSim:  Monitor and Simulator replication of Particle Photon Application
+# CompareRunRun.py: Compare two recorded application runs
 # Copyright (C) 2026 Dave Gutz
 #
 # This library is free software; you can redistribute it and/or
@@ -13,10 +13,9 @@
 #
 # See http://www.fsf.org/licensing/licenses/lgpl.txt for full license text.
 
-"""Python model of what's installed on the Particle Photon.  Includes
-a monitor object (MON) and a simulation object (SIM).   The monitor is
-the EKF and Coulomb Counter.   The SIM is a battery model, that also has a
-Coulomb Counter built in."""
+"""Compare two recorded application run dataset files (Run vs Run),
+synchronizing time signals, computing EWMA difference metrics, and generating
+comparison plots and report hardcopies."""
 
 import math
 import os
@@ -474,37 +473,3 @@ def compare_run_run(
     print("DONE")
 
     return fig_list, fig_files
-
-
-# noinspection PyUnusedLocal
-def main():
-    import sys
-
-    if sys.platform == "linux":
-        gdrive = "/home/daveg/gdrive/"
-    else:
-        gdrive = "G:/My Drive/"
-
-    # Cut-pasted from GUI_TestSOC Run window
-    keys = [
-        ("rapidTweakRegression_soc3p2_hi_lo_bb.csv", "g20260524_soc3p2_hi_lo_bb"),
-        ("rapidTweakRegression_soc3p2_hi_lo_bb.csv", "g20260524a_soc3p2_hi_lo_bb"),
-    ]
-    data_file_folder_run = "G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20260524"
-    data_file_folder_test = "G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20260524a"
-    sync_to_c_time = False
-    terse = True
-    hardcopy = True
-
-    compare_run_run(
-        keys=keys,
-        data_file_folder_run=data_file_folder_run,
-        data_file_folder_test=data_file_folder_test,
-        sync_to_c_time=sync_to_c_time,
-        terse=terse,
-        hardcopy=hardcopy,
-    )
-
-
-if __name__ == "__main__":  # Example usage.  Ran ok 20260217
-    main()

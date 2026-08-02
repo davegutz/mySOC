@@ -306,7 +306,6 @@ float BatteryMonitor::calculate(Sensors* Sen, const bool reset_temp,
   voc_ = vb_ - dvdyn;
   if (!ap.fake_faults()) {
     if ((bms_off_ && voltage_low_) || Sen->Flt->vb_fa_lt()) {
-Serial.printf("[UBC CHECK] vb_fa_lt=%d Vb=%.4f\n", Sen->Flt->vb_fa_lt(), Sen->Vb());
       voc_ = voc_stat_ = voc_dead_ =
       vb_;  // Keep high to avoid chatter with voc_stat_ used above in
             // voltage_low

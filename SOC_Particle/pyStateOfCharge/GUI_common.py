@@ -77,6 +77,7 @@ battery_list = ["bb", "chg"]
 sel_list = [
     "custom",
     "slowInit",
+    "offSitInit",
     "zero_with_pc",
     "ampHiEmptFail",
     "ampHiFail",
@@ -106,6 +107,7 @@ sel_list1 = [
     "offSitBmsNoiseBB",
     "offSitBmsNoiseCHG",
     "ampHiFailSlow",
+    "ampHiFailSlowNoAlpha",
     "noaHiFailSlow",
     "noaHiFailSlower",
     "noaHiFailSlowest",
@@ -198,8 +200,8 @@ modEmptInitCHG = "vv0;Pd;Xm247;Ca-0.004;BZ;Ff0;DP1;HR;Rf;"
 modEmptInitGen = "vv0;Pd;Xm247;Ca0.17;BZ;Ff0;DP1;HR;Rf;"
 noisePackage = "DT.05;DV0.3;DM.75;DN6;"
 silentPackage = "DT;DV;DM;DN;"
-synced_slow = "Dr400;D>400;ED1;DP1;"
-synced_slow_pulse = "Dr800;D>800;ED1;DP1;"
+synced_slow = "Dr400;D>400;ED1;DP1;Sh0;"
+synced_slow_pulse = "Dr800;D>800;ED1;DP1;Sh0;"
 slow = synced_slow_pulse
 quiet = "vv0;Dr;DP;D>;Dh;"
 quietwait = "<vv0;Dr;DP;D>;Dh;"
@@ -288,9 +290,17 @@ lookup = {
     ),
     "slowInit": (
         100,
-        slow + "Rs;W4;Xp15;" + quiet + cleanup + "<Pd;<XD;",
+        slow + "Ff;Rs;W4;Xp15;" + quiet + cleanup + "<Pd;<XD;",
         (
             "Should initialize to high charge slow point and run a short 0 amplitude transient",
+            "",
+        ),
+    ),
+    "offSitInit": (
+        100,
+        modEmptInitBB + "Ff;Rs;W4;Xp16;" + quiet + cleanup + "Sh;<Pd;<XD;",
+        (
+            "Should initialize to low charge slow point and run a short 0 amplitude transient",
             "",
         ),
     ),
@@ -342,7 +352,7 @@ lookup = {
             (
                 "To evaluate plots, start looking at 'Ult 1'. Fault record (frozen). Will see 'diff' "
                 "flashing on display soon after fault cleared automatically (lost redundancy).  Also "
-                "will see verification imbedded model respond to the bad current signal by elevating vb, "
+                "will see verification embedded model respond to the bad current signal by elevating vb, "
                 "an effect that won't appear in data from app."
             ),
             "Loss of ibm set 'accy' because loss of most accurate sensor.",
@@ -357,7 +367,7 @@ lookup = {
             (
                 "To evaluate plots, start looking at 'Ult 1'. Fault record (frozen). Will see 'diff' "
                 "flashing on display soon after fault cleared automatically (lost redundancy).  Also "
-                "will see verification imbedded model respond to the bad current signal by elevating vb, "
+                "will see verification embedded model respond to the bad current signal by elevating vb, "
                 "an effect that won't appear in data from app."
             ),
             "Loss of ibm set 'accy' because loss of most accurate sensor.",
@@ -645,7 +655,20 @@ lookup = {
     ),
     "ampHiFailSlow": (
         535,
-        modHalfInit + "Fc0.0006;Fd0.5;" + tranPrep + c10 + "XQ400000;" + c00 + quiet + cleanup + "<XD;",
+        modHalfInit + "SC0.0006;Fd0.5;" + tranPrep + c10 + "XQ400000;" + c00 + quiet + cleanup + "<XD;",
+        (
+            "10A bias on amp, disable wrap, noa in range at 0A and reflec"
+            "ts battery state. Artificially tight cc_diff threshold.  Wil"
+            "l detect diff but no wrap. Will be slow (~6 min) cc_diff det"
+            "ection as it waits for the EKF to wind up to produce a cc_di"
+            "ff fault and complete isolation and switch to noa.",
+            "EKF should tend to follow voltage while soc wanders away.",
+            "Run for 6  minutes to see that cc_diff_fa does set",
+        ),
+    ),
+    "ampHiFailSlowNoAlpha": (
+        535,
+        modHalfInit + "SC0.0006;Fd0.5;Ha1;" + tranPrep + c10 + "XQ400000;" + c00 + quiet + cleanup + "Ha;<XD;",
         (
             "10A bias on amp, disable wrap, noa in range at 0A and reflec"
             "ts battery state. Artificially tight cc_diff threshold.  Wil"
@@ -658,7 +681,7 @@ lookup = {
     ),
     "noaHiFailSlow": (
         525,
-        modHalfInit + "Fc0.0006;" + tranPrep + d20 + "XQ400000;" + c00 + quiet + cleanup + "<XD;",
+        modHalfInit + "SC0.0006;" + tranPrep + d20 + "XQ400000;" + c00 + quiet + cleanup + "<XD;",
         (
             "20A bias on noa, amp in range at 0A and reflects battery sta"
             "te. Artificially tight cc_diff threshold. Will detect and sw"
@@ -672,7 +695,7 @@ lookup = {
     ),
     "noaHiFailSlower": (
         525,
-        modHalfInit + "Fc0.0006;" + tranPrep + d08 + "XQ400000;" + c00 + quiet + cleanup + "<XD;",
+        modHalfInit + "SC0.0006;" + tranPrep + d08 + "XQ400000;" + c00 + quiet + cleanup + "<XD;",
         (
             "8A bias on noa, amp in range at 0A and reflects battery stat"
             "e.  Artificially tight cc_diff threshold. Will detect and sw"
@@ -686,7 +709,7 @@ lookup = {
     ),
     "noaHiFailSlowest": (
         525,
-        modHalfInit + "Fc0.0006;" + tranPrep + d05 + "XQ400000;" + c00 + quiet + cleanup + "<XD;",
+        modHalfInit + "SC0.0006;" + tranPrep + d05 + "XQ400000;" + c00 + quiet + cleanup + "<XD;",
         (
             "5A bias on noa, amp in range at 0A and reflects battery stat"
             "e. Artificially tight cc_diff threshold. Not enough current "

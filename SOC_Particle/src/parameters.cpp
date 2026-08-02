@@ -104,7 +104,7 @@ VolatilePars::VolatilePars() : Parameters() {
 VolatilePars::~VolatilePars() {}
 
 void VolatilePars::initialize() {
-#define NVOL 61
+#define NVOL 62
   V_ = new Variable*[NVOL];
   V_[n_++] = (bare_slr_p = new FloatV("  ", "SZ", NULL, "Slr debounce", "float", 0, 1000, &bare_slr_, 1));                          // SZ
   V_[n_++] = (cc_diff_slr_p = new FloatV("  ", "SC", NULL, "Slr cc_diff", "float", 0, 1000, &cc_diff_slr_, 1));                     // SC
@@ -118,6 +118,7 @@ void VolatilePars::initialize() {
   V_[n_++] = (ewhi_slr_p = new FloatV("  ", "Fi", NULL, "Slr wrap hi thr", "slr", 0, 1000, &ewhi_slr_, FI_NOM));                    // Fi
   V_[n_++] = (ewlo_slr_p = new FloatV("  ", "Fo", NULL, "Slr wrap lo thr", "slr", 0, 1000, &ewlo_slr_, FO_NOM));                    // Fo
   V_[n_++] = (fake_faults_p = new BooleanV("  ", "Ff", NULL, "Faults ignored", "T=ign", 0, 1, &fake_faults_, FAKE_FAULTS));         // Ff
+  V_[n_++] = (h_alpha_p = new FloatV("  ", "Ha", NULL, "EKF H-alpha", "slr", 0, 1, &h_alpha_, H_ALPHA));                  // Ha
   V_[n_++] = (hys_scale_p = new FloatV("  ", "Sh", NULL, "Sim hys scale", "slr", 0, 100, &hys_scale_, HYS_SCALE));                  // Sh
   V_[n_++] = (hys_state_p = new FloatV("  ", "SH", NULL, "Sim hys state", "v", -10, 10, &hys_state_, 0));                           // SH
   V_[n_++] = (Ib_amp_noise_amp_p = new FloatV("  ", "DM", NULL, "Amp amp noise", "A", 0, 1000, &Ib_amp_noise_amp_, IB_AMP_NOISE));  // DM

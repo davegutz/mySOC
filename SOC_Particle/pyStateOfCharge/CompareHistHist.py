@@ -1,4 +1,4 @@
-# CompareHistSim.py:  load fault, hist, summ data and compare to simulation.
+# CompareHistHist.py: Load two history data dumps and compare them
 # Copyright (C) 2026 Dave Gutz
 #
 # This library is free software; you can redistribute it and/or
@@ -13,7 +13,7 @@
 #
 # See http://www.fsf.org/licensing/licenses/lgpl.txt for full license text.
 
-"""Slice and dice the history dumps."""
+"""Load and compare two history data dumps (Hist vs Hist), evaluating fault signals and plot comparisons."""
 
 import matplotlib.pyplot as plt
 from PlotKiller import show_killer
@@ -170,31 +170,3 @@ def compare_hist_hist(
     print("DONE")
 
     return mon_run, sim_run, mon_tst, sim_tst, sim_s_tst
-
-
-def main():
-
-    # User inputs (multiple input_files allowed
-
-    # Cut-pasted from GUI_TestSOC Run window
-    data_file_run = "G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20250612a/ampHiEmptFail_soc2p2_hi_lo_bb.csv"
-    unit_key_run = "g20250612a_soc2p2_hi_lo_bb"
-    data_file_tst = "G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20250612a/ampHiEmptFail_soc3p2_hi_lo_bb.csv"
-    unit_key_tst = "g20250612a_soc3p2_hi_lo_bb"
-    dt_resample = 1
-    terse = True
-    hardcopy = False
-
-    compare_hist_hist(
-        data_file_run=data_file_run,
-        unit_key_run=unit_key_run,
-        data_file_tst=data_file_tst,
-        unit_key_tst=unit_key_tst,
-        dt_resample=dt_resample,
-        terse=terse,
-        hardcopy=hardcopy,
-    )
-
-
-if __name__ == "__main__":  # Example usage.  Ran ok 20260217
-    main()

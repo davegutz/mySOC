@@ -157,6 +157,7 @@ class SavedData:
             dispw = np.array(self.dispw, dtype=np.uint32)
             self.c_time_sel = np.array(self.c_time_sel) - self.time_run_start
             self.ccd_fa = np.bool_(np.array(falw) & 2**4)
+            self.ccd_flt = np.bool_(np.array(fltw) & 2**4)
             self.ib_diff_flt = np.bool_((np.array(fltw) & 2**8) | (np.array(fltw) & 2**9))
             self.ib_diff_fa = np.bool_((np.array(falw) & 2**8) | (np.array(falw) & 2**9))
             if not hasattr(sel, "vb_hdwe"):

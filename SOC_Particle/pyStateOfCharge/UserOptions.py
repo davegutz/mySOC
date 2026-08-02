@@ -69,7 +69,7 @@ class UserOptions:
 
     stauct_mon: Optional[float] = 1.0
     use_vb_sim: Optional[bool] = False
-    request_history: Optional[int] = 5  # Print simulation history (0 - 5) to check overplot using data in addition
+    request_history: Optional[int] = 5  # Print simulation history (0 - 10) to check overplot using data in addition
     use_ib_mon: Optional[bool] = (
         False  # Drive BatterySim directly with the BatteryMonitor input, useful when raw sim data not available
     )

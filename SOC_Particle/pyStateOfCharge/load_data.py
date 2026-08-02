@@ -182,6 +182,9 @@ def load_data(
         print(f"load_data: returning mon=None")
         return None, None, f, None, temp_flt_file_clean, None
     mon_raw = np.genfromtxt(data_file_clean, delimiter=",", names=True, dtype=float).view(np.recarray)
+    if mon_raw is None or mon_raw.size == 0:
+        print(f"load_data: data file '{path_to_data}' is empty (0 data rows). Returning mon=None")
+        return None, None, f, None, temp_flt_file_clean, None
 
     # Load sel (ref)
     sel_file_clean = write_clean_file(path_to_data, type_="_sel", hdr_key=hdr_key_sel, unit_key=unit_key_sel, skip=skip)

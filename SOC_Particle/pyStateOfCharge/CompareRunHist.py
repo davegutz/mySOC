@@ -1,4 +1,4 @@
-# CompareRunHist.py:  combine a CompareRunSim with CompareHistSim
+# CompareRunHist.py: Combine CompareRunSim with CompareHistSim
 # Copyright (C) 2026 Dave Gutz
 #
 # This library is free software; you can redistribute it and/or
@@ -13,10 +13,7 @@
 #
 # See http://www.fsf.org/licensing/licenses/lgpl.txt for full license text.
 
-"""Python model of what's installed on the Particle Photon.  Includes
-a monitor object (MON) and a simulation object (SIM).   The monitor is
-the EKF and Coulomb Counter.   The SIM is a battery model, that also has a
-Coulomb Counter built in."""
+"""Executive module combining a CompareRunSim evaluation with a CompareHistSim evaluation."""
 
 from CompareRunSim import compare_run_sim
 from CompareHistSim import compare_hist_sim
@@ -106,40 +103,3 @@ def compare_run_hist(
     )
 
     pass
-
-
-# noinspection PyPep8Naming
-def main():  # Example usage:  ok 20260217
-
-    # Cut-pasted from GUI_TestSOC Run window
-    data_file = "G:/My Drive/GitHubArchive/SOC_Particle/dataReduction\\g20250612a\\ampHiEmptFail_soc3p2_hi_lo_bb.csv"
-    unit_key = "g20250612a_soc3p2_hi_lo_bb"
-    time_end = None
-    plots = True
-    strict_overplot = True
-    terse = True
-    dt_resample = 10
-    Tb_force = None
-    use_mon_soc = False
-    verbose = True
-    request_history_run_sim = None
-    request_history_hist_sim = None
-
-    compare_run_hist(
-        data_file=data_file,
-        unit_key=unit_key,
-        plots=plots,
-        time_end=time_end,
-        use_mon_soc=use_mon_soc,
-        verbose=verbose,
-        strict_overplot=strict_overplot,
-        terse=terse,
-        dt_resample=dt_resample,
-        Tb_force=Tb_force,
-        request_history_run_sim=request_history_run_sim,
-        request_history_hist_sim=request_history_hist_sim,
-    )
-
-
-if __name__ == "__main__":  # Example usage.  Ran ok 202602xx
-    main()

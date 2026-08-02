@@ -49,15 +49,22 @@ class Mbox(object):
             b_submit.pack()
 
         b_cancel = tki.Button(frm, text="Cancel")
-        b_cancel["command"] = self.top.destroy
+        b_cancel["command"] = self.close
         b_cancel.pack(padx=4, pady=4)
+
+    def close(self):
+        try:
+            if self.top.winfo_exists():
+                self.top.destroy()
+        except Exception:
+            pass
 
     def entry_to_dict(self, dict_key):
         data = self.entry.get()
         if data:
             d, key = dict_key
             d[key] = data
-            self.top.destroy()
+            self.close()
 
 
 # Dialog for application without a main GUI

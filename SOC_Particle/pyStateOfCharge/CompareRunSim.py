@@ -1,4 +1,4 @@
-# MonSim:  Monitor and Simulator replication of Particle Photon Application
+# CompareRunSim.py: Compare recorded application run data against Python simulation
 # Copyright (C) 2026 Dave Gutz
 #
 # This library is free software; you can redistribute it and/or
@@ -13,10 +13,9 @@
 #
 # See http://www.fsf.org/licensing/licenses/lgpl.txt for full license text.
 
-"""Python model of what's installed on the Particle Photon.  Includes
-a monitor object (MON) and a simulation object (SIM).   The monitor is
-the EKF and Coulomb Counter.   The SIM is a battery model, that also has a
-Coulomb Counter built in."""
+"""Compare recorded application run data against Python battery simulation (MonSim),
+running step-by-step replication, evaluating fault detection, and generating
+comparison plots and report hardcopies."""
 
 from MonSim import replicate, save_clean_file, UserOptions
 from unite_pictures import cleanup_fig_files, precleanup_fig_files, pngs_to_pdf
@@ -163,6 +162,7 @@ def compare_run_sim(
     mon_ver = None
     sim_ver = None
     sim_s_ver = None
+    sim_s_run = None
     mon = None
     sim = None
     filename = None
@@ -219,7 +219,16 @@ def compare_run_sim(
         time_shift=time_shift,
         mon_str=mon_str,
     )
-    sim_s_run = None
+    # Check for missing/empty data before attempting replication
+    if mon_run is None or len(getattr(mon_run, "c_time", [])) == 0:
+        msg = f"CompareRunSim: Missing or empty data in '{data_file}'. Aborting."
+        print(f"\033[91m{msg}\033[0m")
+        if show_killer_:
+            tkinter.messagebox.showerror(
+                title="Missing Data Error",
+                message=f"Missing or empty data in file:\n'{data_file}'\n\nAborting without plots.",
+            )
+        return fig_list, fig_files
 
     # How to initialize
     if mon_run is not None:
@@ -412,70 +421,3 @@ def compare_run_sim(
     print("DONE")
 
     return fig_list, fig_files
-
-
-# noinspection PyUnusedLocal
-def main():  # Example usage.  ok on 20260217
-    if sys.platform == "linux":
-        gdrive = "/home/daveg/gdrive/"
-    else:
-        gdrive = "G:/My Drive/"
-
-    # Cut-pasted from GUI_TestSOC Run window
-    """Request history:
-        1:  ekf
-        2:  soc
-        3:  soc_s
-        4:  temp
-        5:  volt all
-        6:  kf
-        7:  dyn_m
-        8:  vb_wrap
-        9:  dyn_n
-    """
-    data_file = '/home/daveg/.local/SOC_Particle/dataReduction/g20260612a/slowInit_soc3p2_hi_lo_bb.csv'
-    unit_key = 'g20260612a_soc3p2_hi_lo_bb'
-    time_end = None
-    compare_run_ver = True
-    shift_soc_s = True
-    plots = True
-    use_mon_soc_ = False
-    verbose = False
-    scale_batt = 1.0
-    slr_hys_sim = 1.0
-    request_history = 1
-    init_time = None
-    time_shift = None
-    strict_overplot = True
-    terse = True
-    hardcopy = False
-    mon_str = ''
-
-    compare_run_sim(
-        data_file=data_file,
-        unit_key=unit_key,
-        plots=plots,
-        time_end=time_end,
-        use_mon_soc_=use_mon_soc_,
-        verbose=verbose,
-        scale_batt=scale_batt,
-        slr_hys_sim=slr_hys_sim,
-        request_history=request_history,
-        init_time=init_time,
-        time_shift=time_shift,
-        strict_overplot=strict_overplot,
-        terse=terse,
-        hardcopy=hardcopy,
-        compare_run_ver=compare_run_ver,
-        shift_soc_s=shift_soc_s,
-    )
-
-
-# import cProfile
-# if __name__ == '__main__':
-#     cProfile.run('main()')
-#
-
-
-if __name__ == "__main__":  #
-    main()
