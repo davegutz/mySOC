@@ -1599,7 +1599,13 @@ def close_auto_windows(close_figs=False):
     global timer, auto_fig_list
     kill_plink(platform.system())
     _cancel_monitor_plink()
-    if timer is not None:
+    try:
+        from CompareRunSim import is_compare_run_sim_main_running
+        main_running = is_compare_run_sim_main_running()
+    except Exception:
+        main_running = False
+
+    if not main_running and timer is not None:
         # noinspection PyBroadException
         try:
             timer.close()
@@ -1612,7 +1618,7 @@ def close_auto_windows(close_figs=False):
             # noinspection PyBroadException
             try:
                 t = widget.title()
-                if t in ("SOC-close", "SOC-countdown"):
+                if t == "SOC-close" or (not main_running and t == "SOC-countdown"):
                     widget.destroy()
             except Exception:
                 print(Colors.fg.red, 'error near line 1373 of GUI_PlinkSOC.py', Colors.reset)
@@ -2093,9 +2099,6 @@ def save_progress():
         )
         tksleep(0.1)
         copy_clean(plink_test_csv_path.get(), Test.file_path)
-        if timer is not None:
-            timer.close()
-            timer = None
         save_progress_button.config(
             bg=bg_color, activebackground=bg_color, fg="black", activeforeground="black", text="save_progress"
         )

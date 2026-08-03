@@ -43,6 +43,22 @@ import warnings
 warnings.filterwarnings("ignore", category=UserWarning)
 import numpy as np
 
+COMPARE_RUN_SIM_MAIN_RUNNING = False
+
+
+def is_compare_run_sim_main_running():
+    if COMPARE_RUN_SIM_MAIN_RUNNING:
+        return True
+    import inspect
+
+    try:
+        for frame in inspect.stack():
+            if "CompareRunSimMain" in frame.filename:
+                return True
+    except Exception:
+        pass
+    return False
+
 
 def shift_time(obj, n_steps, fields=None):
     """Shift fields of a struct-like object by n_steps positions.

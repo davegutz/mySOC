@@ -149,15 +149,6 @@ def load_off_nominal_battery(Battery_to_add=None):
                 Battery_off_dict[field_name] = Battery_to_add[field_name][0]  # Use first entry only.  Discard the rest
             except IndexError:
                 Battery_off_dict[field_name] = Battery_to_add[field_name]
-                print(f"Battery_off field_name {field_name}   value {Battery_to_add[field_name]}")
-        # print(self.Battery_off_dict)
-        # Print affected values
-        # print(f"dictionary to apply to Battery class")
-        # if Battery_off_dict:
-        #     for key in dir(Battery_to_add):
-        #         if key in Battery_off_dict and not key.startswith('__'):
-        #             print(f"Battery.{key} {getattr(Battery_to_add, key)} --> ", end='')
-        #             print("Battery.{:s} = {:8.6g}".format(key, Battery_off_dict[key]))
         return Battery_off_dict
     else:
         return None
@@ -165,7 +156,7 @@ def load_off_nominal_battery(Battery_to_add=None):
 
 # noinspection PyPep8Naming
 def apply_off_nominal_battery(Battery_, Battery_off_dict):
-    print(f"dictionary to apply to immutable Battery class")
+    print(f"Battery dictionary from firmware to applied to python Battery class")
     if Battery_off_dict:
         # Check exist
         for key in Battery_off_dict:

@@ -1039,9 +1039,6 @@ def save_progress():
         )
         tksleep(0.1)
         copy_clean(putty_test_csv_path.get(), Test.file_path)
-        if timer is not None:
-            timer.close()
-            timer = None
         save_progress_button.config(
             bg=bg_color, activebackground=bg_color, fg="black", activeforeground="black", text="save_progress"
         )

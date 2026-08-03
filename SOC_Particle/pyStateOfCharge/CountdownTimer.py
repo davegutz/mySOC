@@ -66,6 +66,13 @@ class CountdownTimer(tk.Toplevel):
         self.geometry("%dx%d+%d+%d" % (width, height, x, y))
 
     def close(self):
+        try:
+            from CompareRunSim import is_compare_run_sim_main_running
+
+            if is_compare_run_sim_main_running():
+                return
+        except Exception:
+            pass
         if self._flasher_after_id is not None:
             try:
                 self.after_cancel(self._flasher_after_id)
