@@ -42,10 +42,10 @@ def main():  # Example usage.  ok on 20260217
         """
         data_file = '/home/daveg/.local/SOC_Particle/dataReduction/g20260612a/offSitBmsNoiseBB_soc3p2_hi_lo_bb.csv'
         unit_key = 'g20260612a_soc3p2_hi_lo_bb'
-        time_end = -3
+        time_end = None
         compare_run_ver = True
         shift_soc_s = True
-        plots = False
+        plots = True
         use_mon_soc_ = False
         verbose = False
         scale_batt = 1.0

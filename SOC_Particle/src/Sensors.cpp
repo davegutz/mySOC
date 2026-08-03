@@ -656,12 +656,11 @@ void Sensors::Tb_load(const uint16_t tb_pin, const bool reset) {
     Tb_volt_ = 0.;
     Tb_hdwe_ = 0.;
 #endif
-    Tb_model_ = NOMINAL_TB;
   } else {
     Tb_raw_ = 0;
     Tb_hdwe_ = NOMINAL_TB;
-    Tb_model_ = NOMINAL_TB + mod_add;  // Fault injection
   }
+  Tb_model_ = NOMINAL_TB + mod_add;  // Noise and fault injection;
   if ( sp.debug() == 16 ){
     Serial.printf("\nTb_load: T_%7.3f sp.mod_tb() %2d,", T_, sp.mod_tb());
     Serial.printf(" Tb_raw_ %d Tb_volt_ %7.3f res %7.3f lnres %7.3f hdwe_add \
