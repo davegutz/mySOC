@@ -349,7 +349,8 @@ void monitor(const bool reset, const bool reset_temp, const bool reset_ekf,
 
 // Print firmware
 void print_firmware_version(){
-  Serial.printf("Firmware: 20260612a (Built %s %s)\n", __DATE__, __TIME__);
+  Serial.printf("Firmware: %s (Built %s %s)\n", String(version_str).c_str(),
+    __DATE__, __TIME__);
 }
 
 // Read sensors, model signals, select between them.
