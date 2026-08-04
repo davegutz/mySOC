@@ -304,7 +304,7 @@ class Battery(BatteryConstants, Coulombs):
 
 
 # noinspection PyPep8Naming
-class BatteryMonitor(Battery, EKF1x1, Diff, Wrap):
+class BatteryMonitor(Battery, EKF1x1, Wrap):
     """Extend Battery class to make a monitor"""
 
     def __init__(
@@ -356,7 +356,7 @@ class BatteryMonitor(Battery, EKF1x1, Diff, Wrap):
         self.c_time_e = 0.0
         self.soc_ekf = 0.0  # Filtered state of charge from ekf (0-1)
         EKF1x1.__init__(self)
-        Diff.__init__(self, self.dt)
+        self.Diff = Diff(self.dt)
         Wrap.__init__(self, Mon_=self)
 
         self.time_min = self.time / 60.0
@@ -393,7 +393,11 @@ class BatteryMonitor(Battery, EKF1x1, Diff, Wrap):
         self.voc_dead = 0.0
         self.vsat = 0.0
         self.dv_dyn = 0.0
+        self.ib_amp = 0.0
+        self.ib_noa = 0.0
+        self.disable_amp_fault = False
         self.ib_amp_hdwe = 0.0
+
         self.ib_amp_model = 0.0
         self.ib_noa_hdwe = 0.0
         self.ib_noa_model = 0.0
@@ -446,33 +450,8 @@ class BatteryMonitor(Battery, EKF1x1, Diff, Wrap):
         self.mib = False
         self.mvb = False
         self.mtb = False
-        self.ib_dyn_m = 0.0
-        self.ib_dyn_T_m = 0.0
-        self.ib_dyn_rstate_m = 0.0
-        self.ib_dyn_lstate_m = 0.0
-        self.ib_dyn_tau_m = 0.0
-        self.dv_dyn_m = 0.0
-        self.voc_m = 0.0
-        self.voc_soc_m = 0.0
-        self.ib_wrp_T_m = 0.0
-        self.ib_wrp_tau_m = 0.0
-        self.ib_wrp_state_m = 0.0
-        self.ib_wrp_rate_m = 0.0
-        self.ib_wrp_reset_m = 0.0
-        self.e_wrap_m_trim = 0.0
-        self.e_wrap_m_trimmed = 0.0
-        self.ib_dyn_n = 0.0
-        self.ib_dyn_T_n = 0.0
-        self.ib_dyn_rstate_n = 0.0
-        self.ib_dyn_lstate_n = 0.0
-        self.ib_dyn_tau_n = 0.0
-        self.dv_dyn_n = 0.0
-        self.ib_wrp_T_n = 0.0
-        self.ib_wrp_tau_n = 0.0
-        self.ib_wrp_state_n = 0.0
-        self.ib_wrp_rate_n = 0.0
-        self.e_wrap_n_trimmed = 0.0
         self.vb_h_f = 0.0
+
         self.y_ekf = 0.0
         self.y_ekf_f = 0.0
         self.qcap = 0.0
@@ -673,7 +652,9 @@ class BatteryMonitor(Battery, EKF1x1, Diff, Wrap):
         self.ib = max(min(self.ib_in, Battery.IMAX_NUM), -Battery.IMAX_NUM)
 
         # Ib diff logic
-        self.ib_diff = Diff.calculate(self, reset=reset, dt=self.dt, ib_amp=self.ib_amp, ib_noa=self.ib_noa)
+        self.ib_diff = self.Diff.calculate(reset=reset, dt=self.dt, ib_amp=self.ib_amp, ib_noa=self.ib_noa)
+
+
 
         # Wrap logic
         self.wrap(

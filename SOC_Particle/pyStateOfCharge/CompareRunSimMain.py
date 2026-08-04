@@ -51,7 +51,7 @@ def main():  # Example usage.  ok on 20260217
         scale_batt = 1.0
         slr_hys_sim = 1.0
         request_history = 5
-        init_time = None
+        init_time = -20
         time_shift = None
         strict_overplot = True
         terse = True

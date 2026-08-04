@@ -348,6 +348,7 @@ class Fault {
   int8_t ib_sel_stat() { return ib_sel_stat_; };
   void ib_sel_stat(const int sel_stat) { ib_sel_stat_ = sel_stat; };
   void ib_wrap(const bool reset, Sensors* Sen, BatteryMonitor* Mon);
+  LagExp* IbDiffFilt;        // Noise filter for signal selection
   TFDelay* IbLoLimitedHi;  // Persistence low amp limited high active status
   TFDelay* IbLoLimitedLo;  // Persistence low amp limited low active status
   int8_t latch_fake() { return latch_fake_; };
@@ -428,7 +429,6 @@ class Fault {
   TFDelay* IbdNegPer;        // Persistence ib diff lo instantaneous
   TFDelay* IbdHiPer;         // Persistence ib diff hi
   TFDelay* IbdLoPer;         // Persistence ib diff lo
-  LagExp* IbDiffFilt;        // Noise filter for signal selection
   TFDelay* IbNoAmpHardFail;  // Persistence ib hard fail noa
   General2_Pole* QuietFilt;  // Linear filter to test for quiet
   TFDelay* QuietPer;         // Persistence ib quiet disconnect detection

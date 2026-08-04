@@ -486,6 +486,8 @@ void print_signal_sel_header() {
   Serial.printf(
       "  Tb_model, Tb_model_f, Tb_model_f_rate, Tb_model_f_rstate, "
       "Tb_model_f_lstate, Tb_model_f_dt, Tb_model_f_tau, ");
+  Serial.printf(
+      "ib_diff_rstate, ib_diff_state, ib_diff_T, ib_diff_tau,");
   Serial.printf("  fltw, falw, dispw,");
   Serial.printf("\n");
 }
@@ -595,10 +597,13 @@ void print_signal_sel_serial(const bool reset, Sensors* Sen,
             Sen->Tb_hdwe_f_lstate(), Sen->Tb_hdwe_f_dt(), Sen->Tb_hdwe_f_tau());
     Serial.printf("%s", pr.buff);
 
-    sprintf(pr.buff, "%11.8f,%11.8f,%11.8f,%11.8f,%11.8f,%11.8f,%11.8f, ",
+    sprintf(pr.buff, "%11.8f,%11.8f,%11.8f,%11.8f,%11.8f,%11.8f,%11.8f,%11.8f,"
+      "%11.8f,%11.8f,%11.8f, ",
             Sen->Tb_model(), Sen->Tb_model_f(), Sen->Tb_model_f_rate(),
             Sen->Tb_model_f_rstate(), Sen->Tb_model_f_lstate(),
-            Sen->Tb_model_f_dt(), Sen->Tb_model_f_tau());
+            Sen->Tb_model_f_dt(), Sen->Tb_model_f_tau(),
+            Sen->Flt->IbDiffFilt->rstate(), Sen->Flt->IbDiffFilt->state(),
+            Sen->Flt->IbDiffFilt->T(), Sen->Flt->IbDiffFilt->tau());
     Serial.printf("%s", pr.buff);
 
     sprintf(pr.buff, "%lu, %lu, %lu,", Sen->Flt->fltw(), Sen->Flt->falw(),

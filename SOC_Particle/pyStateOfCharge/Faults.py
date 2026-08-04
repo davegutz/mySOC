@@ -56,6 +56,10 @@ class Diff:
             tau=Battery.TAU_ERR_FILT,
             min_=-Battery.IBATT_DISAGREE_THRESH * 1.5,
             max_=Battery.IBATT_DISAGREE_THRESH * 1.5)
+        self.ib_diff_T = 0.
+        self.ib_diff_rstate = 0.
+        self.ib_diff_state = 0.
+        self.ib_diff_tau = 0.
         self.LoHi = TFDelay(
             dt=self.dt,
             in_=False,
@@ -133,6 +137,10 @@ class Diff:
         self.ib_diff_f = self.IbDiffFilt.calculate(in_=self.ib_diff,
                     reset=self.reset or self.disable_amp_fault or self.ib_lo_limited_hi or self.ib_lo_limited_lo,
                     dt=self.dt)
+        self.ib_diff_T = self.IbDiffFilt.dt
+        self.ib_diff_rstate = self.IbDiffFilt.rstate
+        self.ib_diff_state = self.IbDiffFilt.state
+        self.ib_diff_tau = self.IbDiffFilt.tau
         self.ib_diff_thr = Battery.IBATT_DISAGREE_THRESH * Battery.ap_ib_diff_slr
         self.ib_diff_hi_flt = self.IbdPosPer.calculate(self.ib_diff_f >= self.ib_diff_thr,
                                                   Battery.IBATT_INST_DIFF_SET, Battery.IBATT_INST_DIFF_RES,
@@ -297,30 +305,12 @@ class Looparound:
 
 
 # noinspection PyPep8Naming
-class Wrap:
-    """Wrap error detection and current channel scaling logic"""
+class MyLooparounds:
+    """Instantiate two Looparound objects (Amp and Noa) and their parameters."""
 
     def __init__(self, Mon_):
         from Battery import Battery
-        from filter.Scale import ScaleSelector
-        from filter.myFilters import SlidingDeadband
-        from filter.TFDelay import TFDelay
 
-        self.sdb_voc = SlidingDeadband(Battery.HDB_VB)
-        self.e_wrap = 0.0
-        self.e_wrap_filt = 0.0
-        self.e_wrap_rate = 0.0
-        self.ib_amp_pst = 0.0
-        self.ib_noa_pst = 0.0
-        self.ib_noa_2pst = 0.0
-        self.e_wrap_m = None
-        self.e_wrap_m_filt = None
-        self.e_wrap_m_trim = None
-        self.e_wrap_n = None
-        self.e_wrap_n_filt = None
-        self.e_wrap_n_trim = None
-        self.e_wrap_n_rate = None
-        self.e_wrap_m_rate = None
         self.LoopIbAmp = Looparound(
             Mon_=Mon_,
             wrap_hi_volt=Battery.WRAP_HI_AMPV,
@@ -335,10 +325,76 @@ class Wrap:
             max_err=Battery.MAX_WRAP_ERR_FILT,
             name="Noa",
         )
-        self.ewnhi_thr = 0.0
-        self.ewnlo_thr = 0.0
+
+        # Amp (m) parameters
+        self.ib_dyn_m = 0.0
+        self.ib_dyn_T_m = 0.0
+        self.ib_dyn_rstate_m = 0.0
+        self.ib_dyn_lstate_m = 0.0
+        self.ib_dyn_tau_m = 0.0
+        self.dv_dyn_m = 0.0
+        self.voc_m = 0.0
+        self.voc_soc_m = 0.0
+        self.ib_wrp_T_m = 0.0
+        self.ib_wrp_tau_m = 0.0
+        self.ib_wrp_state_m = 0.0
+        self.ib_wrp_rate_m = 0.0
+        self.ib_wrp_reset_m = 0.0
+        self.e_wrap_m = None
+        self.e_wrap_m_filt = None
+        self.e_wrap_m_trim = None
+        self.e_wrap_m_trimmed = 0.0
+        self.e_wrap_m_rate = None
         self.ewmhi_thr = 0.0
         self.ewmlo_thr = 0.0
+        self.wrap_hi_m_flt = False
+        self.wrap_hi_m_fa = False
+        self.wrap_lo_m_flt = False
+        self.wrap_lo_m_fa = False
+
+        # Noa (n) parameters
+        self.ib_dyn_n = 0.0
+        self.ib_dyn_T_n = 0.0
+        self.ib_dyn_rstate_n = 0.0
+        self.ib_dyn_lstate_n = 0.0
+        self.ib_dyn_tau_n = 0.0
+        self.dv_dyn_n = 0.0
+        self.ib_wrp_T_n = 0.0
+        self.ib_wrp_tau_n = 0.0
+        self.ib_wrp_state_n = 0.0
+        self.ib_wrp_rate_n = 0.0
+        self.e_wrap_n = None
+        self.e_wrap_n_filt = None
+        self.e_wrap_n_trim = None
+        self.e_wrap_n_trimmed = 0.0
+        self.e_wrap_n_rate = None
+        self.ewnhi_thr = 0.0
+        self.ewnlo_thr = 0.0
+        self.wrap_hi_n_flt = False
+        self.wrap_hi_n_fa = False
+        self.wrap_lo_n_flt = False
+        self.wrap_lo_n_fa = False
+
+
+# noinspection PyPep8Naming
+class Wrap(MyLooparounds):
+    """Wrap error detection and current channel scaling logic"""
+
+    def __init__(self, Mon_):
+        from Battery import Battery
+        from filter.Scale import ScaleSelector
+        from filter.myFilters import SlidingDeadband
+        from filter.TFDelay import TFDelay
+
+        MyLooparounds.__init__(self, Mon_)
+
+        self.sdb_voc = SlidingDeadband(Battery.HDB_VB)
+        self.e_wrap = 0.0
+        self.e_wrap_filt = 0.0
+        self.e_wrap_rate = 0.0
+        self.ib_amp_pst = 0.0
+        self.ib_noa_pst = 0.0
+        self.ib_noa_2pst = 0.0
         self.e_wrap_m_reset = True
         self.sel_brk_hdwe = ScaleSelector(
             Battery.HDWE_IB_HI_LO_NOA_LO,
@@ -346,14 +402,6 @@ class Wrap:
             Battery.HDWE_IB_HI_LO_AMP_HI,
             Battery.HDWE_IB_HI_LO_NOA_HI,
         )
-        self.wrap_hi_m_flt = False
-        self.wrap_hi_m_fa = False
-        self.wrap_lo_m_flt = False
-        self.wrap_lo_m_fa = False
-        self.wrap_hi_n_flt = False
-        self.wrap_hi_n_fa = False
-        self.wrap_lo_n_flt = False
-        self.wrap_lo_n_fa = False
         self.ib_lo_active = True
         self.IbLoLimitedLo = TFDelay(
             in_=False,
@@ -367,6 +415,7 @@ class Wrap:
             t_false=Battery.IB_LO_ACTIVE_RES * Battery.cp_ts,
             dt=0.1,
         )
+
 
     def calculate(
         self, reset=True, ib_noa_hdwe=0.0, SN=None, ib_amp=0.0, ib_noa=0.0, ib_amp_pst=None,

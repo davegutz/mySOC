@@ -279,6 +279,7 @@ void Fault::ib_diff(const bool reset, Sensors* Sen, BatteryMonitor* Mon) {
       ib_diff_,
       reset_loc || disable_amp_fault_ || ib_lo_limited_hi_ || ib_lo_limited_lo_,
       Sen->T());
+
   ib_diff_thr_ = IBATT_DISAGREE_THRESH * ap.ib_diff_slr();
   faultAssign(
       IbdPosPer->calculate((ib_diff_f_ >= ib_diff_thr_), IBATT_INST_DIFF_SET,
