@@ -304,15 +304,24 @@ class Exec:
         if self.version is None:
             self.version = "undefined"
         self.version_path = str(PurePosixPath(self.dataReduction_folder or ".") / (self.version or "undefined"))
-        try:
-            os.makedirs(self.version_path, exist_ok=True)
-        except OSError:
+        if not Path(self.dataReduction_folder or "").exists():
             tk.messagebox.showerror(
                 title="Error",
-                message=self.version_path
+                message=str(self.dataReduction_folder)
                 + " unavailable. Abort opening\nTurn on Drive & refresh"
                 + " dataReduction Folder.",
             )
+        else:
+            try:
+                os.makedirs(self.version_path, exist_ok=True)
+            except OSError:
+                tk.messagebox.showerror(
+                    title="Error",
+                    message=self.version_path
+                    + " unavailable. Abort opening\nTurn on Drive & refresh"
+                    + " dataReduction Folder.",
+                )
+
         # Following need explicit shallow copy lines
         self.folder_button = myButton(
             master,
@@ -412,7 +421,9 @@ class Exec:
         self.cf.save_to_file()
         self.version_button.config(text=self.version)
         self.version_path = str(PurePosixPath(self.dataReduction_folder or ".") / (self.version or "undefined"))
-        os.makedirs(self.version_path, exist_ok=True)
+        if Path(self.dataReduction_folder or "").exists():
+            os.makedirs(self.version_path, exist_ok=True)
+
         self.create_file_path_and_key()
         self.update_key_label()
         self.label.config(text=self.file_txt)

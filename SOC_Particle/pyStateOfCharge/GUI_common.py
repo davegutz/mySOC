@@ -75,6 +75,7 @@ unit_list = [
 ]
 battery_list = ["bb", "chg"]
 sel_list = [
+    "quick",
     "custom",
     "slowInit",
     "offSitInit",
@@ -199,6 +200,7 @@ modHalfInitNoCc = "vv0;Pd;Xm247;Ca0.50;BZ;Ff0;DP1;HR;Rf;"
 modEmptInitBB = "vv0;Pd;Xm247;Ca0.130;BZ;Ff0;DP1;HR;Rf;"
 modEmptInitCHG = "vv0;Pd;Xm247;Ca-0.004;BZ;Ff0;DP1;HR;Rf;"
 modEmptInitGen = "vv0;Pd;Xm247;Ca0.17;BZ;Ff0;DP1;HR;Rf;"
+quick = "vv0;Xm247;Ca0.5;BZ;DP1;HR;Rf;W12;vv4;W30;vv0;"
 noisePackage = "DT.05;DV0.3;DM.75;DN6;"
 silentPackage = "DT;DV;DM;DN;"
 synced_slow = "Dr400;D>400;ED1;DP1;Sh0;"
@@ -279,6 +281,15 @@ lookup = {
             "For testing out the adjustments and memory",
             "Read through output and witness set and reset of all",
             "The DS2482 moderate headroom should not exceed limit printed.  EG 11 of 12 is ok.",
+        ),
+    ),
+    "quick": (
+        35,
+        quick + cleanup + "<Pd;<XD;",
+        (
+            "For general purpose interface check",
+            "",
+            "",
         ),
     ),
     "custom": (
@@ -843,7 +854,7 @@ lookup = {
     ),
     "vcFlat": (
         140,
-        modFlatInitHi + tranPrepKf + "D30.6;" + "XQ25000;" + "Pf;W2;D3;Rf;W50;" + quiet + cleanup + "<XD;",
+        modFlatInitHi + tranPrepKf + "D30.6;" + "XQ25000;" + "D3;" + quiet + cleanup + "<XD;",
         (
             "Inject 0.6V into sensed Vc (normally 1.65).  Should fail both currents.",
             "To evaluate plots, start looking at 'Ult 1'. Fault record (frozen).",
