@@ -279,12 +279,18 @@ def plot_rms_diffs(results, data_file=None, save_plots=False, show_killer_=True,
 
 # noinspection PyPep8Naming
 def compare_run_run(
-    keys=None, data_file_folder_run=None, data_file_folder_test=None, sync_to_c_time=False, terse=True, hardcopy=False
+    keys=None,
+    data_file_folder_run=None,
+    data_file_folder_test=None,
+    sync_to_c_time=False,
+    terse=True,
+    hardcopy=False,
+    init_time=None,
 ):
 
     print(
         f"\ncompare_run_run:\n{keys=}\n{data_file_folder_run=}\n"
-        f"{data_file_folder_test=}\n{sync_to_c_time=}\n{terse=}\n{hardcopy=}\n"
+        f"{data_file_folder_test=}\n{sync_to_c_time=}\n{terse=}\n{hardcopy=}\n{init_time=}\n"
     )
 
     date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
@@ -306,8 +312,14 @@ def compare_run_run(
 
     # Load old ref data
     data_file_run = str(PurePosixPath(data_file_folder_run) / data_file_txt_run)
+    data_file_test = str(PurePosixPath(data_file_folder_test) / data_file_txt_test)
+
+    if init_time is None:
+        from GUI_common import get_init_time_for_macro
+        init_time = get_init_time_for_macro(data_file_test)
+
     mon_run, sim_run, f_run, data_file_run_clean, temp_flt_file_run_clean, sync_info_run = load_data(
-        data_file_run, 1, unit_key_run, zero_zero, time_end
+        data_file_run, 1, unit_key_run, zero_zero, time_end, init_time=init_time
     )
     sim_s_run = None
     mon_run.str_ = "r1"
@@ -315,9 +327,8 @@ def compare_run_run(
     f_run.str_ = "f1"
 
     # Load new test data
-    data_file_test = str(PurePosixPath(data_file_folder_test) / data_file_txt_test)
     mon_test, sim_test, f_test, data_file_ver_clean, temp_flt_file_ver_clean, sync_info_test = load_data(
-        data_file_test, 1, unit_key_test, zero_zero, time_end
+        data_file_test, 1, unit_key_test, zero_zero, time_end, init_time=init_time
     )
     sim_s_test = None
     mon_test.str_ = "r2"

@@ -363,7 +363,7 @@ class SavedData:
             self.time_e = np.copy(self.dt)
 
         # Initialization time logic
-        if init_time:
+        if init_time is not None:
             self.init_time = init_time
         else:
             if self.time[0] == 0.0:  # no initialization flat detected at beginning of recording

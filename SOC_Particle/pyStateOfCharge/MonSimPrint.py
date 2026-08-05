@@ -111,6 +111,23 @@ def print_pair(val1, val2, total_digits, sig_digits, name, print_name, df=False,
     print(out_str, end=end)
     return out_str
 
+
+# Appears at beginning of every print columns
+def print_col_leads(h, df, t, SN, mon, sim, i_temp, calc_temp, i_ekf, calc_ekf):
+    print_pair(G.i, None, 4, 0, 'i', h, df)
+    print_pair(t[G.i], None, 7, 3, 'time', h, df)
+    print_pair(bool(SN.mon_run.reset[G.i]), mon.reset, 2, 0, 'r', h, df)
+    print_pair(bool(SN.mon_run.kf_reset[G.i]), mon.reset_kf, 2, 0, 'rk', h, df)
+    print_pair(bool(SN.mon_run.reset_temp[G.i]), mon.reset_temp, 2, 0, 'rt', h, df)
+    print_pair(bool(SN.mon_run.cp_ekf_reset[i_ekf]), mon.reset_ekf, 2, 0, 're', h, df)
+    print_pair(i_temp, None, 2, 0, 'it', h, df)
+    print_pair(calc_temp, None, 2, 0, 'ct', h, df)
+    print_pair(i_ekf, None, 2, 0, 'ie', h, df)
+    print_pair(calc_ekf, None, 2, 0, 'ce', h, df)
+    print_pair(SN.mon_run.sat[G.i], mon.sat, 2, 0, 'sa', h, df)
+    print_pair(SN.sim_run.sat_s[G.i], sim.sat, 2, 0, 'sa_s', h, df)
+
+
 # noinspection PyPep8Naming
 def prn_soc_debug(OPT, leader="", time=None, i_temp=None, mon=None, sim=None):
     execute = False
@@ -218,7 +235,7 @@ def print_hist(OPT, SN, i_temp, i_ekf, t, mon, calc_temp, calc_ekf, sim, df=True
                 # case 4:
                 #     hdr = print_temp_HistSim(SN, i_temp, t, mon, sim, calc_temp, i_ekf, calc_ekf, df)
                 case 5:
-                    hdr = print_volt_HistSim(SN, i_temp, i_ekf, t, mon, calc_temp, calc_ekf, df)
+                    hdr = print_volt_HistSim(SN, i_temp, i_ekf, t, mon, sim, calc_temp, calc_ekf, df)
                 case 10:
                     hdr = print_cc_diff_RunSim(SN, i_temp, i_ekf, t, mon, sim, calc_temp, calc_ekf, df)
     return hdr
@@ -252,18 +269,8 @@ def print_dyn_m_RunSim(SN, i_temp, i_ekf, t, mon, sim, calc_temp, calc_ekf, df=F
 
     for i_hdr in range(int(print_hdr), -1, -1):
         h = (i_hdr == 1)
-        print_pair(G.i, None, 2, 0, 'i', h, df)
-        print_pair(t[G.i], None, 8, 3, 'time', h, df)
-        print_pair(bool(SN.mon_run.reset[G.i]), mon.reset,  2, 0, 'r', h, df)
-        print_pair(bool(SN.mon_run.reset_temp[G.i]), mon.reset_temp, 2, 0, 'rt', h, df)
-        print_pair(bool(SN.mon_run.kf_reset[G.i]), mon.reset_temp, 2, 0, 'rk', h, df)
-        print_pair(i_temp, None, 4, 0, 'it', h, df)
-        print_pair(calc_temp, None, 2, 0, 'ct', h, df)
-        print_pair(bool(SN.mon_run.cp_ekf_reset[i_ekf]), mon.reset_ekf,  2, 0, 're', h, df)
-        print_pair(i_ekf, None, 4, 0, 'ie', h, df)
-        print_pair(calc_ekf, None, 2, 0, 'ce', h, df)
-        print_pair(bool(SN.mon_run.reset[G.i]), None, 2, 0, 'reset', h, df)
-        print_pair(bool(SN.mon_run.reset_temp[G.i]), None, 2, 0, 'reset_temp', h, df)
+        print_col_leads(h, df, t, SN, mon, sim, i_temp, calc_temp, i_ekf, calc_ekf)
+
         print_pair(bool(SN.mon_run.reset_all_faults[G.i]), None, 2, 0, 'reset_all_faults', h, df)
         print_pair(bool(SN.mon_run.soft_reset[G.i]), None, 2, 0, 'soft_reset', h, df)
         print_pair(bool(SN.mon_run.soft_reset_sim[G.i]), None, 2, 0, 'soft_reset_sim', h, df)
@@ -345,18 +352,8 @@ def print_dyn_n_RunSim(SN, i_temp, i_ekf, t, mon, sim, calc_temp, calc_ekf, df=F
 
     for i_hdr in range(int(print_hdr), -1, -1):
         h = (i_hdr == 1)
-        print_pair(G.i, None, 2, 0, 'i', h, df)
-        print_pair(t[G.i], None, 8, 3, 'time', h, df)
-        print_pair(bool(SN.mon_run.reset[G.i]), mon.reset,  2, 0, 'r', h, df)
-        print_pair(bool(SN.mon_run.reset_temp[G.i]), mon.reset_temp, 2, 0, 'rt', h, df)
-        print_pair(bool(SN.mon_run.kf_reset[G.i]), mon.reset_temp, 2, 0, 'rk', h, df)
-        print_pair(i_temp, None, 4, 0, 'it', h, df)
-        print_pair(calc_temp, None, 2, 0, 'ct', h, df)
-        print_pair(bool(SN.mon_run.cp_ekf_reset[i_ekf]), mon.reset_ekf,  2, 0, 're', h, df)
-        print_pair(i_ekf, None, 4, 0, 'ie', h, df)
-        print_pair(calc_ekf, None, 2, 0, 'ce', h, df)
-        print_pair(bool(SN.mon_run.reset[G.i]), None, 2, 0, 'reset', h, df)
-        print_pair(bool(SN.mon_run.reset_temp[G.i]), None, 2, 0, 'reset_temp', h, df)
+        print_col_leads(h, df, t, SN, mon, sim, i_temp, calc_temp, i_ekf, calc_ekf)
+
         print_pair(bool(SN.mon_run.reset_all_faults[G.i]), None, 2, 0, 'reset_all_faults', h, df)
         print_pair(bool(SN.mon_run.soft_reset[G.i]), None, 2, 0, 'soft_reset', h, df)
         print_pair(bool(SN.mon_run.soft_reset_sim[G.i]), None, 2, 0, 'soft_reset_sim', h, df)
@@ -418,12 +415,16 @@ def print_ekf_RunSim(SN, i_temp, i_ekf, t, mon, sim, calc_ekf, calc_temp, df=Fal
             vv_warning_printed = True
             print(Colors.reset, end="")
         return None
+    if not calc_ekf:
+        print(Colors.reset, end="")
+        return
+
     i_ekf = max(i_ekf, 0)
-    print_hdr = (calc_temp or calc_ekf) and count_since_last_header > HDR_SPREAD or i_ekf == 0
-    if (calc_temp or calc_ekf) and count_since_last_header > HDR_SPREAD:
+    print_hdr = count_since_last_header > HDR_SPREAD or count_since_last_header == 0
+    if print_hdr:
         count_since_last_header = 0
-    if G.i > 0:
-        count_since_last_header += 1
+    count_since_last_header += 1
+
     if mon.reset_ekf:
         set_color(Colors.fg.red)
     elif mon.u_ekf == 0.0:
@@ -434,23 +435,11 @@ def print_ekf_RunSim(SN, i_temp, i_ekf, t, mon, sim, calc_ekf, calc_temp, df=Fal
         set_color(Colors.fg.lightblue)
     elif mon.reset:
         set_color(Colors.fg.red)
-    if not calc_ekf:
-        print(Colors.reset, end="")
-        return
 
     for i_hdr in range(int(print_hdr), -1, -1):
         h = (i_hdr == 1)
-        print_pair(G.i, None, 4, 0, 'i', h, df)
-        print_pair(t[G.i], None, 7, 3, 'time', h, df)
-        print_pair(bool(SN.mon_run.reset[G.i]), mon.reset,  2, 0, 'r', h, df)
-        print_pair(bool(SN.mon_run.reset_temp[G.i]), mon.reset_temp, 2, 0, 'rt', h, df)
-        print_pair(bool(SN.mon_run.kf_reset[G.i]), mon.reset_temp, 2, 0, 'rk', h, df)
-        print_pair(SN.mon_run.dt[G.i], mon.dt, 6, 3, 'dt', h, df)
-        print_pair(SN.sim_run.dt_fut_s[G.i], sim.dt_fut, 6, 3, 'dt_s', h, df)
-        print_pair(i_ekf, None, 5, 0, 'i_ekf', h, df)
-        print_pair(bool(SN.mon_run.cp_ekf_reset[i_ekf]), mon.reset_ekf,  2, 0, 're', h, df)
-        print_pair(calc_ekf, None, 8, 0, 'calc_ekf', h, df)
-        print_pair(SN.mon_run.sat[G.i], mon.sat, 2, 0, 'sat', h, df)
+        print_col_leads(h, df, t, SN, mon, sim, i_temp, calc_temp, i_ekf, calc_ekf)
+
         print_pair(SN.mon_run.voc_stat[G.i], mon.voc_stat, 11, 5, 'voc_stat', h, df)
         print_pair(SN.mon_run.voc_stat[G.i - 1], mon.voc_stat_past, 11, 5, 'voc_stat_past', h, df)
         print_pair(bool(SN.mon_run.bms_off[G.i - 1]), bool(mon.bms_off_past), 2, 0, 'bms_off_past', h, df)
@@ -530,16 +519,8 @@ def print_kf_RunSim(SN, i_temp, i_ekf, t, mon, sim, calc_temp, calc_ekf, df=Fals
 
     for i_hdr in range(int(print_hdr), -1, -1):
         h = (i_hdr == 1)
-        print_pair(G.i, None, 4, 0, 'i', h, df)
-        print_pair(t[G.i], None, 8, 3, 'time', h, df)
-        print_pair(bool(SN.mon_run.reset[G.i]), mon.reset,  2, 0, 'r', h, df)
-        print_pair(bool(SN.mon_run.reset_temp[G.i]), mon.reset_temp, 2, 0, 'rt', h, df)
-        print_pair(bool(SN.mon_run.kf_reset[G.i]), mon.reset_temp, 2, 0, 'rk', h, df)
-        print_pair(SN.mon_run.dt[G.i], mon.dt, 6, 3, 'dt', h, df)
-        print_pair(SN.sim_run.dt_fut_s[G.i], sim.dt_fut, 6, 3, 'dt_s', h, df)
-        print_pair(i_ekf, None, 5, 0, 'i_ekf', h, df)
-        print_pair(bool(SN.mon_run.cp_ekf_reset[i_ekf]), mon.reset_ekf,  2, 0, 're', h, df)
-        print_pair(calc_ekf, None, 2, 0, 'calc_ekf', h, df)
+        print_col_leads(h, df, t, SN, mon, sim, i_temp, calc_temp, i_ekf, calc_ekf)
+
         print_pair(SN.mon_run.dt[G.i], mon.dt, 9, 4, 'dt', h, df)
         print_pair(SN.mon_run.dtm[G.i], SN.KfShuntAmp.dt, 9, 4, 'dtm', h, df)
         print_pair(SN.mon_run.dtn[G.i], SN.KfShuntNoa.dt, 9, 4, 'dtn', h, df)
@@ -601,21 +582,8 @@ def print_soc_RunSim(SN, i_temp, t, mon, sim, calc_temp, i_ekf, calc_ekf, df=Fal
 
     for i_hdr in range(int(print_hdr), -1, -1):
         h = (i_hdr == 1)
-        print_pair(G.i, None, 4, 0, 'i', h, df)
-        print_pair(t[G.i], None, 7, 3, 'time', h, df)
-        print_pair(bool(SN.mon_run.reset[G.i]), mon.reset,  2, 0, 'r', h, df)
-        print_pair(bool(SN.mon_run.reset_temp[G.i]), mon.reset_temp, 2, 0, 'rt', h, df)
-        print_pair(bool(SN.mon_run.kf_reset[G.i]), mon.reset_temp, 2, 0, 'rk', h, df)
-        print_pair(SN.mon_run.dt[G.i], mon.dt, 6, 3, 'dt', h, df)
-        print_pair(SN.sim_run.dt_fut_s[G.i], sim.dt_fut, 6, 3, 'dt_s', h, df)
-        print_pair(i_ekf, None, 5, 0, 'i_ekf', h, df)
-        print_pair(calc_ekf, None, 2, 0, 'calc_ekf', h, df)
-        print_pair(i_temp, None, 4, 0, 'it', h, df)
-        print_pair(calc_temp, None, 2, 0, 'ct', h, df)
-        print_pair(bool(SN.mon_run.cp_ekf_reset[i_ekf]), mon.reset_ekf,  2, 0, 're', h, df)
-        print_pair(i_ekf, None, 4, 0, 'ie', h, df)
-        print_pair(calc_ekf, None, 2, 0, 'ce', h, df)
-        print_pair(SN.mon_run.sat[G.i], mon.sat, 2, 0, 'sa', h, df)
+        print_col_leads(h, df, t, SN, mon, sim, i_temp, calc_temp, i_ekf, calc_ekf)
+
         print_pair(SN.mon_run.ib_charge[G.i], mon.ib_charge, 12, 4, 'ib_charge', h, df)
         print_pair(SN.mon_run.soc[G.i], mon.soc, 11, 7, 'soc', h, df)
         print_pair(SN.mon_run.dt[G.i], mon.dt, 9, 4, 'dt', h, df)
@@ -652,18 +620,8 @@ def print_soc_s_HistSim(SN, i_temp, t, mon, sim, calc_temp, i_ekf, calc_ekf, df=
 
     for i_hdr in range(int(print_hdr), -1, -1):
         h = (i_hdr == 1)
-        print_pair(G.i, None, 4, 0, 'i', h, df)
-        print_pair(t[G.i], None, 7, 3, 'time', h, df)
-        print_pair(bool(SN.mon_run.reset[G.i]), mon.reset,  2, 0, 'r', h, df)
-        print_pair(bool(SN.mon_run.reset_temp[G.i]), mon.reset_temp, 2, 0, 'rt', h, df)
-        print_pair(bool(SN.mon_run.kf_reset[G.i]), mon.reset_temp, 2, 0, 'rk', h, df)
-        print_pair(i_temp, None, 4, 0, 'it', h, df)
-        print_pair(calc_temp, None, 2, 0, 'ct', h, df)
-        print_pair(bool(SN.mon_run.cp_ekf_reset[i_ekf]), mon.reset_ekf,  2, 0, 're', h, df)
-        print_pair(i_ekf, None, 4, 0, 'ie', h, df)
-        print_pair(calc_ekf, None, 2, 0, 'ce', h, df)
-        print_pair(SN.mon_run.sat[G.i], mon.sat, 2, 0, 'sa', h, df)
-        print_pair(SN.sim_run.sat_s[G.i], sim.sat, 2, 0, 'sa_s', h, df)
+        print_col_leads(h, df, t, SN, mon, sim, i_temp, calc_temp, i_ekf, calc_ekf)
+
         print_pair(SN.mon_run.dt[G.i], mon.dt, 12, 4, 'dt', h, df)
         print_pair(SN.sim_run.dt_s[G.i], sim.dt, 12, 4, 'dt_s', h, df)
         print_pair(SN.sim_run.ib_in_s[G.i], sim.ib_in, 14, 5, 'ib_in_s', h, df)
@@ -725,20 +683,8 @@ def print_soc_s_RunSim(SN, i_temp, t, mon, sim, calc_temp, i_ekf, calc_ekf, df=F
 
     for i_hdr in range(int(print_hdr), -1, -1):
         h = (i_hdr == 1)
-        print_pair(G.i, None, 4, 0, 'i', h, df)
-        print_pair(t[G.i], None, 7, 3, 'time', h, df)
-        print_pair(bool(SN.mon_run.reset[G.i]), mon.reset,  2, 0, 'r', h, df)
-        print_pair(bool(SN.mon_run.reset_temp[G.i]), mon.reset_temp, 2, 0, 'rt', h, df)
-        print_pair(bool(SN.mon_run.kf_reset[G.i]), mon.reset_temp, 2, 0, 'rk', h, df)
-        print_pair(sim.reset_temp_past, None, 4, 0, 'rtps', h, df)
-        print_pair(mon.reset_kf, None, 4, 0, 'rk', h, df)
-        print_pair(i_temp, None, 4, 0, 'it', h, df)
-        print_pair(calc_temp, None, 4, 0, 'ct', h, df)
-        print_pair(bool(SN.mon_run.cp_ekf_reset[i_ekf]), mon.reset_ekf,  2, 0, 're', h, df)
-        print_pair(i_ekf, None, 4, 0, 'ie', h, df)
-        print_pair(calc_ekf, None, 2, 0, 'ce', h, df)
-        print_pair(SN.mon_run.sat[G.i], mon.sat, 2, 0, 'sa', h, df)
-        print_pair(SN.sim_run.sat_s[G.i], sim.sat, 2, 0, 'sa_s', h, df)
+        print_col_leads(h, df, t, SN, mon, sim, i_temp, calc_temp, i_ekf, calc_ekf)
+
         print_pair(SN.sim_run.dt_fut_s[G.i], sim.dt_fut_s, 12, 4, 'dt_fut_s', h, df)
         print_pair(SN.mon_run.dt[G.i], mon.dt, 12, 4, 'dt', h, df)
         print_pair(SN.sim_run.dt_charge_s[G.i], sim.dt_charge, 12, 4, 'dt_charge_s', h, df)
@@ -828,15 +774,9 @@ def print_temp_RunSim(SN, i_temp, t, mon, sim, calc_temp, i_ekf, calc_ekf, df=Fa
 
     for i_hdr in range(int(print_hdr), -1, -1):
         h = (i_hdr == 1)
-        print_pair(G.i, None, 4, 0, 'i', h, df)
-        print_pair(t[G.i], None, 7, 3, 'time', h, df)
-        print_pair(bool(SN.mon_run.reset[G.i]), mon.reset,  2, 0, 'r', h, df)
-        print_pair(bool(SN.mon_run.reset_temp[G.i]), mon.reset_temp, 2, 0, 'rt', h, df)
-        print_pair(bool(SN.mon_run.kf_reset[G.i]), mon.reset_temp, 2, 0, 'rk', h, df)
+        print_col_leads(h, df, t, SN, mon, sim, i_temp, calc_temp, i_ekf, calc_ekf)
+
         print_pair(mon.mtb, None, 3, 0, 'mtb', h, df)
-        print_pair(bool(SN.mon_run.cp_ekf_reset[i_ekf]), mon.reset_ekf,  2, 0, 're', h, df)
-        print_pair(i_ekf, None, 4, 0, 'ie', h, df)
-        print_pair(calc_ekf, None, 4, 0, 'ce', h, df)
         print_pair(SN.mon_run.Tb_hdwe[G.i], mon.Tb_hdwe, 13, 7, 'Tb_hdwe', h, df)
         print_pair(bool(SN.mon_run.Tb_flt[G.i]), mon.Tb_flt, 2, 0, 'Tb_flt', h, df)
         print_pair(bool(SN.mon_run.Tb_fa[G.i]), mon.Tb_fa, 2, 0, 'Tb_fa', h, df)
@@ -869,7 +809,7 @@ def print_temp_RunSim(SN, i_temp, t, mon, sim, calc_temp, i_ekf, calc_ekf, df=Fa
 
 #5
 # noinspection PyPep8Naming
-def print_volt_HistSim(SN, i_temp, i_ekf, t, mon, calc_temp, calc_ekf, df=False):
+def print_volt_HistSim(SN, i_temp, i_ekf, t, mon, sim, calc_temp, calc_ekf, df=False):
     global count_since_last_header
     print_hdr = (calc_temp or calc_ekf) and count_since_last_header > HDR_SPREAD
     if (calc_temp or calc_ekf) and count_since_last_header > HDR_SPREAD:
@@ -885,17 +825,8 @@ def print_volt_HistSim(SN, i_temp, i_ekf, t, mon, calc_temp, calc_ekf, df=False)
 
     for i_hdr in range(int(print_hdr), -1, -1):
         h = (i_hdr == 1)
-        print_pair(G.i, None, 4, 0, 'i', h, df)
-        print_pair(t[G.i], None, 4, 0, 'time', h, df)
-        print_pair(bool(SN.mon_run.reset[G.i]), mon.reset,  2, 0, 'r', h, df)
-        print_pair(bool(SN.mon_run.reset_temp[G.i]), mon.reset_temp, 2, 0, 'rt', h, df)
-        print_pair(bool(SN.mon_run.kf_reset[G.i]), mon.reset_temp, 2, 0, 'rk', h, df)
-        print_pair(i_temp, None, 4, 0, 'it', h, df)
-        print_pair(calc_temp, None, 4, 0, 'ct', h, df)
-        print_pair(bool(SN.mon_run.cp_ekf_reset[i_ekf]), mon.reset_ekf,  2, 0, 're', h, df)
-        print_pair(i_ekf, None, 4, 0, 'ie', h, df)
-        print_pair(calc_ekf, None, 2, 0, 'ce', h, df)
-        print_pair(SN.mon_run.sat[G.i], mon.sat, 2, 0, 'sa', h, df)
+        print_col_leads(h, df, t, SN, mon, sim, i_temp, calc_temp, i_ekf, calc_ekf)
+
         print_pair(SN.mon_run.Tb_f[G.i], mon.Tb_f, 14, 7, 'Tb_f', h, df)
         print_pair(SN.mon_run.vb_f[G.i], mon.vb, 11, 5, 'vb_f', h, df)
         print_pair(SN.mon_run.ib_f[G.i], mon.ib, 11, 5, 'ib_f', h, df)
@@ -947,16 +878,8 @@ def print_volt_RunSim(SN, i_temp, i_ekf, t, mon, sim, calc_temp, calc_ekf, df=Fa
 
     for i_hdr in range(int(print_hdr), -1, -1):
         h = (i_hdr == 1)
-        print_pair(G.i, None, 4, 0, 'i', h, df)
-        print_pair(t[G.i], None, 8, 3, 'time', h, df)
-        print_pair(bool(SN.mon_run.reset[G.i]), mon.reset,  2, 0, 'r', h, df)
-        print_pair(bool(SN.mon_run.reset_temp[G.i]), mon.reset_temp, 2, 0, 'rt', h, df)
-        print_pair(bool(SN.mon_run.kf_reset[G.i]), mon.reset_temp, 2, 0, 'rk', h, df)
-        print_pair(i_temp, None, 4, 0, 'it', h, df)
-        print_pair(calc_temp, None, 4, 0, 'ct', h, df)
-        print_pair(bool(SN.mon_run.cp_ekf_reset[i_ekf]), mon.reset_ekf,  2, 0, 're', h, df)
-        print_pair(i_ekf, None, 4, 0, 'ie', h, df)
-        print_pair(calc_ekf, None, 4, 0, 'ce', h, df)
+        print_col_leads(h, df, t, SN, mon, sim, i_temp, calc_temp, i_ekf, calc_ekf)
+
         print_pair(bool(SN.mon_run.reset_all_faults[G.i]), None, 2, 0, 'reset_all_faults', h, df)
         print_pair(bool(SN.mon_run.soft_reset[G.i]), None, 2, 0, 'soft_reset', h, df)
         print_pair(bool(SN.mon_run.soft_reset_sim[G.i]), None, 2, 0, 'soft_reset_sim', h, df)
@@ -1098,16 +1021,8 @@ def print_vb_wrap_RunSim(SN, i_temp, i_ekf, t, mon, sim, calc_temp, calc_ekf, df
 
     for i_hdr in range(int(print_hdr), -1, -1):
         h = (i_hdr == 1)
-        print_pair(G.i, None, 4, 0, 'i', h, df)
-        print_pair(t[G.i], None, 8, 3, 'time', h, df)
-        print_pair(bool(SN.mon_run.reset[G.i]), mon.reset,  2, 0, 'r', h, df)
-        print_pair(bool(SN.mon_run.reset_temp[G.i]), mon.reset_temp, 2, 0, 'rt', h, df)
-        print_pair(bool(SN.mon_run.kf_reset[G.i]), mon.reset_temp, 2, 0, 'rk', h, df)
-        print_pair(i_temp, None, 4, 0, 'it', h, df)
-        print_pair(calc_temp, None, 4, 0, 'ct', h, df)
-        print_pair(bool(SN.mon_run.cp_ekf_reset[i_ekf]), mon.reset_ekf,  2, 0, 're', h, df)
-        print_pair(i_ekf, None, 4, 0, 'ie', h, df)
-        print_pair(calc_ekf, None, 4, 0, 'ce', h, df)
+        print_col_leads(h, df, t, SN, mon, sim, i_temp, calc_temp, i_ekf, calc_ekf)
+
         print_pair(bool(SN.mon_run.reset[G.i]), None, 2, 0, 'reset', h, df)
         print_pair(bool(SN.mon_run.reset_temp[G.i]), None, 2, 0, 'reset_temp', h, df)
         print_pair(bool(SN.mon_run.reset_all_faults[G.i]), None, 2, 0, 'reset_all_faults', h, df)
@@ -1177,18 +1092,8 @@ def print_cc_diff_RunSim(SN, i_temp, i_ekf, t, mon, sim, calc_temp, calc_ekf, df
 
     for i_hdr in range(int(print_hdr), -1, -1):
         h = (i_hdr == 1)
-        print_pair(G.i, None, 4, 0, 'i', h, df)
-        print_pair(t[G.i], None, 8, 3, 'time', h, df)
-        print_pair(bool(SN.mon_run.reset[G.i]), mon.reset,  2, 0, 'r', h, df)
-        print_pair(bool(SN.mon_run.reset_temp[G.i]), mon.reset_temp, 2, 0, 'rt', h, df)
-        print_pair(bool(SN.mon_run.kf_reset[G.i]), mon.reset_temp, 2, 0, 'rk', h, df)
-        print_pair(i_temp, None, 4, 0, 'it', h, df)
-        print_pair(calc_temp, None, 4, 0, 'ct', h, df)
-        print_pair(bool(SN.mon_run.cp_ekf_reset[i_ekf]), mon.reset_ekf,  2, 0, 're', h, df)
-        print_pair(i_ekf, None, 4, 0, 'ie', h, df)
-        print_pair(calc_ekf, None, 4, 0, 'ce', h, df)
-        print_pair(bool(SN.mon_run.reset[G.i]), None, 2, 0, 'reset', h, df)
-        print_pair(bool(SN.mon_run.reset_temp[G.i]), None, 2, 0, 'reset_temp', h, df)
+        print_col_leads(h, df, t, SN, mon, sim, i_temp, calc_temp, i_ekf, calc_ekf)
+
         print_pair(bool(SN.mon_run.reset_all_faults[G.i]), None, 2, 0, 'reset_all_faults', h, df)
         print_pair(bool(SN.mon_run.soft_reset[G.i]), None, 2, 0, 'soft_reset', h, df)
         print_pair(bool(SN.mon_run.soft_reset_sim[G.i]), None, 2, 0, 'soft_reset_sim', h, df)

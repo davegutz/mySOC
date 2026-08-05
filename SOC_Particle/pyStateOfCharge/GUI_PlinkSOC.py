@@ -67,13 +67,14 @@ def get_dependency_mtimes():
     """Return dict of filepath -> st_mtime for Python dependencies in project directory."""
     mtimes = {}
     base_dir = Path(__file__).resolve().parent
+    excluded_files = {"CompareRunSimMain.py"}
     # 1. Modules loaded in sys.modules pointing into base_dir
     for mod in list(sys.modules.values()):
         f = getattr(mod, "__file__", None)
         if f and isinstance(f, str):
             p = Path(f).resolve()
             p_str = str(p)
-            if p.is_relative_to(base_dir) and p.suffix == ".py":
+            if p.is_relative_to(base_dir) and p.suffix == ".py" and p.name not in excluded_files:
                 if p_str not in mtimes:
                     try:
                         mtimes[p_str] = p.stat().st_mtime
@@ -83,7 +84,7 @@ def get_dependency_mtimes():
     for p in base_dir.rglob("*.py"):
         p_res = p.resolve()
         p_str = str(p_res)
-        if not any(part.startswith(".") or part in ("venv", "__pycache__") for part in p_res.parts):
+        if not any(part.startswith(".") or part in ("venv", "__pycache__") for part in p_res.parts) and p_res.name not in excluded_files:
             if p_str not in mtimes:
                 try:
                     mtimes[p_str] = p_res.stat().st_mtime
@@ -218,7 +219,9 @@ from GUI_common import (
     default_dict,
     empty_file,
     ExRoot,
+    get_init_time_for_macro,
     lookup,
+    macro_init_time_dict,
     macro_lookup,
     macro_sel_list,
     no_shift_soc_s,
@@ -839,7 +842,7 @@ def compare_run_ver_batch():
                     print(f"Created missing temp folder: {temp_dir}")
                 except Exception as e:
                     reason = f"temp folder not found and could not be created: {e}"
-                    print(f"\033[91mRunVer SKIP  {case_desc}: {reason}\033[0m")
+                    print(f"\033[92mRunVer SKIP  {case_desc}: {reason}\033[0m")
                     problem_cases.append((case_desc, reason))
                     continue
 
@@ -847,7 +850,7 @@ def compare_run_ver_batch():
             pairs = [(r, v) for r, v in pairs if "_mon_run" in r.name or "_sim_run" in r.name]
             if not pairs:
                 reason = f"no mon/sim pairs (option={option_val!r})"
-                print(f"\033[91mRunVer SKIP  {case_desc}: {reason}\033[0m")
+                print(f"\033[92mRunVer SKIP  {case_desc}: {reason}\033[0m")
                 problem_cases.append((case_desc, reason))
                 continue
 
@@ -863,7 +866,7 @@ def compare_run_ver_batch():
                         last_pdf_path = pdf_path
             except Exception as case_e:
                 reason = str(case_e)
-                print(f"\033[91mRunVer FAIL  {case_desc}: {reason}\033[0m")
+                print(f"\033[92mRunVer FAIL  {case_desc}: {reason}\033[0m")
                 problem_cases.append((case_desc, reason))
 
         n_total = len(data_rows)
@@ -923,7 +926,6 @@ def run_sim_all_batch():
             tkinter.messagebox.showwarning(message="No valid data rows in auto_plink.csv")
             return
 
-        all_fig_list = []
         problem_cases = []  # list of (desc, reason)
 
         for config in data_rows:
@@ -935,7 +937,7 @@ def run_sim_all_batch():
 
             if should_skip_battery_case(battery, macro_):
                 reason = f"battery upcase {battery.upper()!r} contained in case name {macro_!r}"
-                print(f"\033[91mRunSimAll SKIP  {case_desc}: {reason}\033[0m")
+                print(f"\033[92mRunSimAll SKIP  {case_desc}: {reason}\033[0m")
                 problem_cases.append((case_desc, reason))
                 continue
 
@@ -946,27 +948,28 @@ def run_sim_all_batch():
 
             if not Path(file_path).is_file():
                 reason = f"file not found: {file_path}"
-                print(f"\033[91mRunSimAll SKIP  {case_desc}: {reason}\033[0m")
+                print(f"\033[92mRunSimAll SKIP  {case_desc}: {reason}\033[0m")
                 problem_cases.append((case_desc, reason))
                 continue
 
             try:
-                print(f"run_sim_all_batch: {file_path}")
-                result = compare_run_sim(
+                init_time_cfg = config.get("init_time", "").strip()
+                init_time_val = float(init_time_cfg) if init_time_cfg else get_init_time_for_macro(macro_)
+                print(f"run_sim_all_batch: {file_path} (init_time={init_time_val})")
+                compare_run_sim(
                     data_file=file_path,
                     unit_key=key,
+                    plots=False,
                     strict_overplot=True,
                     terse=True,
-                    hardcopy=True,
+                    hardcopy=False,
                     show_killer_=False,
-                    fig_list=all_fig_list,
                     shift_soc_s=macro_ not in no_shift_soc_s,
+                    init_time=init_time_val,
                 )
-                if result is not None:
-                    all_fig_list = result[0]
             except Exception as case_e:
                 reason = str(case_e)
-                print(f"\033[91mRunSimAll FAIL  {case_desc}: {reason}\033[0m")
+                print(f"\033[92mRunSimAll FAIL  {case_desc}: {reason}\033[0m")
                 problem_cases.append((case_desc, reason))
 
         n_total = len(data_rows)
@@ -976,20 +979,14 @@ def run_sim_all_batch():
                 title="RunSimAll Complete", message=f"All {n_total} case(s) executed successfully."
             )
         else:
-            print("\033[91m--- RunSimAll problem summary ---\033[0m")
+            print("\033[92m--- RunSimAll problem summary ---\033[0m")
             for desc, reason in problem_cases:
-                print(f"\033[91m  {desc}: {reason}\033[0m")
+                print(f"\033[92m  {desc}: {reason}\033[0m")
             tkinter.messagebox.showwarning(
                 title="RunSimAll Complete",
                 message=f"{n_total - n_problems} of {n_total} case(s) ran.\n"
                 f"{n_problems} case(s) had problems — check the status output for details.",
             )
-
-        if all_fig_list:
-            string = "plots " + str(all_fig_list[0].number) + " - " + str(all_fig_list[-1].number)
-            show_killer(string, "RunSimAll", fig_list=all_fig_list, hardcopy=False)
-        else:
-            print("run_sim_all_batch: no figures produced")
 
     except Exception as e:
         print(f"run_sim_all_batch: {e}")
@@ -2706,9 +2703,9 @@ if __name__ == "__main__":  # Example usage.  Ran ok 20260217
             justify="left",
             font=butt_font,
         )
-        run_ver_button = myButton(
+        run_ver_all_button = myButton(
             auto_buttons_row,
-            text="RunVer",
+            text="RunVerAll",
             command=compare_run_ver_batch,
             fg="blue",
             bg=bg_color,
@@ -2736,9 +2733,9 @@ if __name__ == "__main__":  # Example usage.  Ran ok 20260217
             justify="left",
             font=butt_font,
         )
-        run_ver_button = myButton(
+        run_ver_all_button = myButton(
             auto_buttons_row,
-            text="RunVer",
+            text="RunVerAll",
             command=compare_run_ver_batch,
             fg="blue",
             bg=bg_color,
@@ -2753,7 +2750,7 @@ if __name__ == "__main__":  # Example usage.  Ran ok 20260217
     auto_buttons_row.pack(fill="x")
     auto_button.pack(side="left", padx=5, pady=5)
     run_sim_all_button.pack(side="left", padx=5, pady=5)
-    run_ver_button.pack(side="left", padx=5, pady=5)
+    run_ver_all_button.pack(side="left", padx=5, pady=5)
     tk.Label(auto_group, text="Checkboxes don't matter", font=label_font_gentle, bg=bg_color).pack(pady=(0, 2))
     auto_plink_path_var = tk.StringVar(master, str(Path(plink_test_csv_path.get()).parent / "auto_plink.csv"))
     auto_plink_entry = tk.Entry(

@@ -223,6 +223,10 @@ def compare_run_sim(
             except Exception as e:
                 print(f"CompareRunSim: Error removing old temp file {old_file.name}: {e}")
 
+    if init_time is None:
+        from GUI_common import get_init_time_for_macro
+        init_time = get_init_time_for_macro(data_file)
+
     # # Load mon v4 (old)
     mon_run, sim_run, f, data_file_clean, temp_flt_file_clean, _ = load_data(
         data_file,

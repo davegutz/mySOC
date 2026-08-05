@@ -129,6 +129,26 @@ sel_list1 = [
     "nvm",
 ]
 
+# Mapping of macro/case names to custom init_time values (Option 4). Default is -4.0 if not specified.
+macro_init_time_dict = {
+    "offSitBmsNoiseBB": -20.0,
+    "offSitBmsNoiseCHG": -20.0,
+}
+
+
+def get_init_time_for_macro(macro_name: str, default: float = -4.0) -> float:
+    """Return configured init_time for a given macro/case string or path, defaulting to -4.0 if not in macro_init_time_dict."""
+    if not macro_name:
+        return default
+    macro_str = str(macro_name)
+    if macro_str in macro_init_time_dict:
+        return float(macro_init_time_dict[macro_str])
+    for key, val in macro_init_time_dict.items():
+        if key in macro_str:
+            return float(val)
+    return default
+
+
 # Default content for auto_plink.csv (analogous to default_dict for the .ini file)
 default_auto_header = "folder, version, battery, macro, hardfigure"
 _auto_row = {"folder": default_dr, "version": "g20250612a", "battery": "bb", "hardfigure": "True"}
@@ -149,6 +169,7 @@ macro_sel_list = [
     "noisePackage",
     "silentPackage",
     "quiet",
+    "quick",
     "cleanup",
     "tempCleanup",
     "tranPrep",
@@ -885,6 +906,7 @@ macro_lookup = {
     "noisePackage": (5, noisePackage, ("", "", "", "")),
     "silentPackage": (5, silentPackage, ("", "", "", "")),
     "quiet": (5, quiet, ("", "", "", "")),
+    "quick": (5, quiet, ("", "", "", "")),
     "cleanup": (5, cleanup, ("", "", "", "")),
     "tempCleanup": (5, tempCleanup, ("", "", "", "")),
     "tranPrep": (5, tranPrep, ("", "", "", "")),

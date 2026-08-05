@@ -351,7 +351,8 @@ def replicate(OPT: UserOptions):
             _chm_m = OPT.Bmon
 
         # Monitor EKF sequencing logic
-        if (i_ekf + 1 < len(OPT.mon_run.time_e)) and (OPT.mon_run.time_e[i_ekf + 1] <= OPT.mon_run.time[G.i]):
+        consider_ekf = (i_ekf + 1 < len(OPT.mon_run.time_e)) and (OPT.mon_run.time_e[i_ekf + 1] <= OPT.mon_run.time[G.i])
+        if consider_ekf:
             i_ekf += 1
             reset_ekf = i_ekf < 2 or reset or OPT.run_type == "HistSim"
             if i_ekf < 1:
@@ -360,11 +361,13 @@ def replicate(OPT: UserOptions):
                 T_ekf = OPT.mon_run.time_e[i_ekf] - OPT.mon_run.time_e[i_ekf - 1]  # update
             calc_ekf = True
         else:
+            reset_ekf = False
             calc_ekf = False
+
         SN.update_ekf(max(i_ekf, 0))  # z_init and voc_stat_f_lstate_init
 
         if reset_ekf and calc_ekf:
-            mon.init_soc_ekf(OPT.mon_run, G.i, i_ekf)  # when modeling (assumed in python) ekf wants to equal model
+            mon.init_soc_ekf(OPT.mon_run, G.i, max(i_ekf, 0))  # when modeling (assumed in python) ekf wants to equal model
 
         # Monitor calculate
         mon.calculate(

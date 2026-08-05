@@ -159,7 +159,7 @@ def config_section_map(config, section):
 # Work out all the paths
 def configurator(filepath):
     config_path, config_basename = str(PurePosixPath(filepath).parent), PurePosixPath(filepath).name
-    config_file_path = str(PurePosixPath(config_path) / "GUI_TestSOC.ini")
+    config_file_path = str(PurePosixPath(config_path) / "GUI_PlinkSOC.ini")
     config = load_config(config_file_path)
     return config_path, config_basename, config_file_path, config
 
