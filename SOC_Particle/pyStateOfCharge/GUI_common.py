@@ -235,7 +235,7 @@ time_stamp = "XY;Pd;"
 zeroPrepHdweNoVb = "HR;Dh1000;W34;Fi2;Fo2;Rs;W34;"
 zero_set_hdwe_no_Vb = "vv0;Xm2;Ca0.50;W20;BZ;Ff1;DP1;HR;Fi2;Fo2;Rf;vv99;W1;<Xm2;"
 tranPrep = "HR;Dh1000;W2;Rs;W48;vv4;W17;"
-tranPrepOff = "HR;Dh1000;Rs;W14;vv4;W180;"
+tranPrepOff = "HR;Dh1000;Rs;W14;vv4;W30;"
 tranPrepKf = "HR;Dh1000;W2;Rs;W48;vv6;W17;"
 slowTranPrep = "HR;vv4;W2;Rs;" + slow + "W5;"
 slowTwitchDef = "Rb;Rf;Sh0;Xts;Xf0.004;Mm1000;Mn-1000;Nm1000;Nn-1000;XW10000;XT10;XC2;"
@@ -499,7 +499,7 @@ lookup = {
         (
             "Quiet off-sit BMS test around empty for BB battery.",
             "Operates around saturation, going low enough to exercise BMS shutoff and hysteresis reset.",
-            "Used for CompareRunRun Argon vs Photon build comparisons.",
+            "Originally used for CompareRunRun Argon vs Photon build comparisons.",
         ),
     ),
     "offSitBmsCHG": (
@@ -509,7 +509,7 @@ lookup = {
         (
             "Quiet off-sit BMS test around empty for CHG battery.",
             "Operates around saturation, going low enough to exercise BMS shutoff and hysteresis reset.",
-            "Used for CompareRunRun Argon vs Photon build comparisons.",
+            "Originally used for CompareRunRun Argon vs Photon build comparisons.",
         ),
     ),
     "triTweakDisch": (
@@ -644,7 +644,7 @@ lookup = {
         ),
     ),
     "offSitBmsNoiseBB": (
-        760,
+        750,
         modEmptInitBB
         + (
             slowTwitchDef
@@ -664,13 +664,13 @@ lookup = {
             "ck up. Tune Ca to start just above vsat. Go low enough to ex"
             "ercise hys reset ",
             "Make sure comes back on.",
-            "It will show one shutoff only since becomes biased with pure"
+            "It barely shuts off on second cycle since becomes biased with pure"
             " sine input with half of down current ignored on first cycle"
             " during the shutoff.",
         ),
     ),
     "offSitBmsNoiseCHG": (
-        760,
+        750,
         modEmptInitCHG
         + (
             slowTwitchDef
@@ -690,7 +690,7 @@ lookup = {
             "ck up. Tune Ca to start just above vsat. Go low enough to ex"
             "ercise hys reset ",
             "Make sure comes back on.",
-            "It will show one shutoff only since becomes biased with pure"
+            "It barely shuts off on second cycle since becomes biased with pure"
             " sine input with half of down current ignored on first cycle"
             " during the shutoff.",
         ),

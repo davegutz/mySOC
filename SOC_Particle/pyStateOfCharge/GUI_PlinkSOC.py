@@ -237,10 +237,42 @@ from GUI_common import (
 sys.stdout.write("\033]0;SOC\007")
 sys.stdout.flush()
 
-# Tee stdout/stderr to a log file so Console.app shows output when launched as a .app bundle
-_log_dir = os.path.expanduser("~/Library/Logs") if plat == "darwin" else os.path.expanduser("~")
+# Tee stdout/stderr to a log file in same folder as auto_plink.csv
+if plat == "linux":
+    _log_dir = os.path.expanduser("~/.local")
+elif plat == "darwin":
+    _log_dir = os.path.expanduser("~/.local")
+else:
+    local_app_data_ = os.getenv("LOCALAPPDATA") or str(Path.home() / "AppData" / "Local")
+    _log_dir = str(Path(local_app_data_) / "Temp")
+
 os.makedirs(_log_dir, exist_ok=True)
-_log_file = open(os.path.join(_log_dir, "GUI_PlinkSOC.log"), "a", buffering=1)
+_log_file_path = os.path.join(_log_dir, "GUI_PlinkSOC.log")
+
+if os.path.isfile(_log_file_path):
+    _log_size_bytes = os.path.getsize(_log_file_path)
+    _max_bytes = 500 * 1024 * 1024  # 500 MB limit
+    if _log_size_bytes > _max_bytes:
+        _log_size_mb = _log_size_bytes / (1024 * 1024)
+        import tkinter as _tk
+        from tkinter import messagebox as _mb
+
+        _root = _tk.Tk()
+        _root.withdraw()
+        _root.attributes("-topmost", True)
+        _mb.showwarning(
+            title="GUI_PlinkSOC Log File Large Warning",
+            message=(
+                f"Warning: 'GUI_PlinkSOC.log' size ({_log_size_mb:.1f} MB) "
+                f"exceeds the 500 MB threshold.\n\n"
+                f"Location:\n{_log_file_path}\n\n"
+                f"Please consider archiving or deleting this log file."
+            ),
+            parent=_root,
+        )
+        _root.destroy()
+
+_log_file = open(_log_file_path, "a", buffering=1)
 
 plink_pid = None
 linux_terminal_pid = None  # Linux: terminal process (xterm/qterminal) — killed explicitly on stop
@@ -821,6 +853,7 @@ def compare_run_ver_batch():
         all_fig_files = []
         last_pdf_path = None
         problem_cases = []  # list of (desc, reason)
+        disagree_cases = []  # list of (desc, reason) for cases that ran but did not report 'All pairs agree within tolerance.'
 
         for config in data_rows:
             version = config.get("version", Test.version)
@@ -857,6 +890,18 @@ def compare_run_ver_batch():
             try:
                 results = [compare_pair(run, ver, tol) for run, ver in pairs]
                 report(results, tol, option=option_val, macro=macro_val)
+                all_agree = not any(r.get("diffs") or "error" in r for r in results)
+                if not all_agree:
+                    diff_details = []
+                    for r in results:
+                        if "error" in r:
+                            diff_details.append(f"error: {r['error']}")
+                        elif r.get("diffs"):
+                            params = [d["param"] for d in r["diffs"]]
+                            diff_details.append(f"diffs in {', '.join(params)}")
+                    reason = "; ".join(diff_details) if diff_details else "differences found"
+                    disagree_cases.append((case_desc, reason))
+
                 ret = plot_diffs(results, data_file=Test.file_path, show_killer_=False)
                 if ret is not None:
                     figs, files, pdf_path = ret
@@ -868,7 +913,10 @@ def compare_run_ver_batch():
                 reason = str(case_e)
                 print(f"\033[92mRunVer FAIL  {case_desc}: {reason}\033[0m")
                 problem_cases.append((case_desc, reason))
+                disagree_cases.append((case_desc, f"failed: {reason}"))
 
+        print(f"\n\n----------------------------\nBatch Summary\n-------------------------------\n")
+        print(f"Problem Summary")
         n_total = len(data_rows)
         n_problems = len(problem_cases)
         if not problem_cases:
@@ -879,10 +927,21 @@ def compare_run_ver_batch():
             print("\033[92m--- RunVer comment summary ---\033[0m")
             for desc, reason in problem_cases:
                 print(f"\033[92m  {desc}: {reason}\033[0m")
+            print("\n\n")
+        print(f"Disagree Summary")
+        n_disagree = len(disagree_cases)
+        if disagree_cases:
+            print("\033[91m--- Cases NOT agreeing within tolerance ---\033[0m")
+            for desc, reason in disagree_cases:
+                print(f"\033[91m  {desc}: {reason}\033[0m")
             tkinter.messagebox.showwarning(
                 title="RunVer Complete",
-                message=f"{n_total - n_problems} of {n_total} case(s) ran.\n"
-                f"{n_problems} case(s) had problems — check the status output for details.",
+                message=f"{n_disagree} case(s) did not agree within tolerance — check the status output for details.",
+            )
+        else:
+            print("\033[92mAll cases agreed within tolerance.\033[0m")
+            tkinter.messagebox.showinfo(
+                title="RunVer Complete", message=f"All executed case(s) agreed within tolerance."
             )
 
         show_batch_diffs(all_fig_list, all_fig_files, last_pdf_path)
@@ -975,6 +1034,7 @@ def run_sim_all_batch():
         n_total = len(data_rows)
         n_problems = len(problem_cases)
         if not problem_cases:
+            print("\033[92mAll cases executed successfully.\033[0m")
             tkinter.messagebox.showinfo(
                 title="RunSimAll Complete", message=f"All {n_total} case(s) executed successfully."
             )

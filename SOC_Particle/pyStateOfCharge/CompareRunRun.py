@@ -190,7 +190,7 @@ def report_rms(results, tol, rtol, tau):
             print(f"    {d['param']:<30}  {d['peak_avg']:>12.6f}  {d['mean_avg']:>12.6f}  {d['first_time']:>10.3f}")
         print()
     if not any_diff:
-        print("  All pairs agree within tolerance.\n")
+        print("\033[92m  All pairs agree within tolerance.\033[0m\n")
 
 
 _RMS_COLS = 3

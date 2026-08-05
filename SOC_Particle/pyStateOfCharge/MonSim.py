@@ -361,8 +361,19 @@ def replicate(OPT: UserOptions):
                 T_ekf = OPT.mon_run.time_e[i_ekf] - OPT.mon_run.time_e[i_ekf - 1]  # update
             calc_ekf = True
         else:
-            reset_ekf = False
-            calc_ekf = False
+            reset_ekf = reset
+            calc_ekf = reset
+
+        if reset:
+            reset_ekf = True
+            calc_ekf = True
+            if T_ekf is None:
+                if hasattr(OPT.mon_run, "dt_ekf") and len(OPT.mon_run.dt_ekf) > max(i_ekf, 0):
+                    T_ekf = OPT.mon_run.dt_ekf[max(i_ekf, 0)]
+                elif hasattr(OPT.mon_run, "dt_ekf") and len(OPT.mon_run.dt_ekf) > 0:
+                    T_ekf = OPT.mon_run.dt_ekf[0]
+                else:
+                    T_ekf = T
 
         SN.update_ekf(max(i_ekf, 0))  # z_init and voc_stat_f_lstate_init
 

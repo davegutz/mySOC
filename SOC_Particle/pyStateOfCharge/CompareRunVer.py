@@ -369,7 +369,7 @@ def report(results, tol, rtol=1e-3, option="", macro=""):
         print()
 
     if not any_diff:
-        print("  All pairs agree within tolerance.\n")
+        print("\033[92m  All pairs agree within tolerance.\033[0m\n")
 
 
 # ── plots ─────────────────────────────────────────────────────────────────────
