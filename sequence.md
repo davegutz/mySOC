@@ -1,23 +1,45 @@
 Top Level Minor Frame
 ```c++
+// Definitions
+VO_CONV_GAIN = 
+VH3V3_CONV_GAIN = 
+VB_CONV_GAIN = 
+AMP_FILT_TAU = 
+TB_FILT = 
+SHUNT_AMP_GAIN = 
+SHUNT_NOA_GAIN = 
+READ_DELAY = 100;   // ms minor frame update
+
+user_input = model_signal_spec;
+sel_brk_hdwe = [];
+Sen = class Sensor;
+Mon = class BatteryMonitor;
+Sim = class BatterySim;
+
+loop() {
+read = wait_for_update(READ_DELAY);
 if (read) {
+	// Signal generator
+	mod_add = signal_generator(user_input);
 
  	// Read sensors, model signals, select between them, synthesize injection
   	sense_synth_select(...) {
-
 		load_ib_vb_tb(){
-
 			// ib load-----------------------------------
 			// Sample Ib
 			Sen->ShuntAmp->sample(...) {
 				sample_Vo(){
 					sample_time_z_ = sample_time_;
 					sample_time_ = millis();
-		 		 	Vo_raw_ = Vo_read_->analogReadDebounced(...);
+		 		 	Vo_read_->analogReadDebounced(...){
+						Vo_raw_ = analogRead(D13);
+					}
 		  			Vo_ = float(Vo_raw_) * VO_CONV_GAIN;
 		  		}
 		  		sample_Vc(){
-		  			Vc_raw_ = Vc_read_->analogReadDebounced(...);
+		  			Vc_read_->analogReadDebounced(...){
+							Vc_raw_ = analogRead(D14);
+					}
 		    			Vc_ = float(Vc_raw_) * VH3V3_CONV_GAIN;
 		  		}
 		  		sample_combine(){
@@ -26,25 +48,27 @@ if (read) {
 			} // Sen->ShuntAmp->sample(...)
 
 		 	Sen->ShuntNoAmp->sample(...){
-				...same as ShuntAmp
+				// ...similar to  ShuntAmp
+					Vo_raw_ = analogRead(D11);
 			}
 			Sen->ShuntAmp->convert(...){
 				vshunt_ = Vo_Vc_;
-				Ishunt_cal_ = vshunt_ * v2a_s_ ;
+				Ishunt_cal_ = vshunt_ * SHUNT_AMP_GAIN ;
 			}
 			Sen->ShuntNoAmp->convert(...){
-				...same as ShuntAmp
+				// ...similar to  ShuntAmp
 			}
 			Sen->Flt->vc_check(...);  // OS fault check
 			Sen->shunt_select_initial(...){
   				Ib_amp_model_ = mod_add;
 				Ib_noa_model_ = mod_add;
 
-				Ib_amp_hdwe_ = ShuntAmp->Ishunt_cal();
-  				Ib_noa_hdwe_ = ShuntNoAmp->Ishunt_cal();
-
-				Vc_hdwe_ = max(ShuntAmp->Vc(), ShuntNoAmp->Vc());
-				Vc_hdwe_sum_ = ShuntAmp->Vc() + ShuntNoAmp->Vc();
+				Ib_amp_hdwe_ = ShuntAmp->Ishunt_cal(){
+					  return Ishunt_cal_ ;
+				}
+  				Ib_noa_hdwe_ = ShuntNoAmp->Ishunt_cal(){
+					// ... similar to ShuntAmp
+				}
 			}
 			ib_choose_hi_lo() {   // Use the first argument and the table second
 							   // argument to choose between 3rd and 4th arguments
@@ -59,12 +83,18 @@ if (read) {
 				Ib_model_in_ = Ib_hdwe_;  // When running normally the model tracks hdwe
 			} 
 			// Otherwise it generates signals for feedback into monitor
+			// Noise is actually separate for each signal. Simplified here
 			else {
-				Ib_model_in_ = mod_add + Ib_noise();
+				Ib_noise = psuedo_random_binary_noise(bits=7, seed=...);
+				Ib_model_in_ = mod_add + Ib_noise;
 			}
 
 			// vb load-----------------------------------
 			Sen->vb_load(myPins->Vb_pin, ...){
+				Vb_raw_ = Vb_read_...;
+				...
+  				Vb_hdwe_ = Vb_raw_) * VB_CONV_GAIN;
+				Vb_hdwe_f_ = VbHdweFilt->calculate(..., AMP_FILT_TAU, T_, ...);
 			}
 			Sen->Flt->vb_check(...);
 
@@ -73,8 +103,10 @@ if (read) {
 				Tb_raw_ = Tb_read_ ...;
 				...
 				Tb_hdwe_ = thermistor_equation(Tb_raw_);
+				Tb_hdwe_f_ = TbHdweFilt->calculate(..., TB_FILT, T_, ...);
 				...
 				Tb_model_ = NOMINAL_TB + Tb_noise();
+				Tb_model_f_ = TbModelFilt->calculate(..., TB_FILT, T_, ...);
 				...
 			}
 			Sen->Flt->Tb_check(...);  //--> TB_FLT, TB_FA
@@ -413,5 +445,6 @@ if (read) {
 	// Print
 	print_...
 
-}
+}  // read
+}  // loop
 ```
