@@ -890,6 +890,7 @@ def compare_run_ver_batch():
             try:
                 results = [compare_pair(run, ver, tol) for run, ver in pairs]
                 report(results, tol, option=option_val, macro=macro_val)
+
                 all_agree = not any(r.get("diffs") or "error" in r for r in results)
                 if not all_agree:
                     diff_details = []
@@ -927,8 +928,6 @@ def compare_run_ver_batch():
             print("\033[92m--- RunVer comment summary ---\033[0m")
             for desc, reason in problem_cases:
                 print(f"\033[92m  {desc}: {reason}\033[0m")
-            print("\n\n")
-        print(f"Disagree Summary")
         n_disagree = len(disagree_cases)
         if disagree_cases:
             print("\033[91m--- Cases NOT agreeing within tolerance ---\033[0m")
@@ -939,7 +938,8 @@ def compare_run_ver_batch():
                 message=f"{n_disagree} case(s) did not agree within tolerance — check the status output for details.",
             )
         else:
-            print("\033[92mAll cases agreed within tolerance.\033[0m")
+            print(f"\n--- RunVerAll disagree summary ---")
+            print("\033[92mAll cases pairs agreed within tolerance.\033[0m")
             tkinter.messagebox.showinfo(
                 title="RunVer Complete", message=f"All executed case(s) agreed within tolerance."
             )
@@ -985,7 +985,10 @@ def run_sim_all_batch():
             tkinter.messagebox.showwarning(message="No valid data rows in auto_plink.csv")
             return
 
+        from CompareRunVer import temp_folder, find_pairs, compare_pair
+
         problem_cases = []  # list of (desc, reason)
+        disagree_cases = []  # list of (desc, reason) for cases that ran but did not report 'All pairs agree within tolerance.'
 
         for config in data_rows:
             folder = config.get("folder", Test.dataReduction_folder)
@@ -1026,26 +1029,54 @@ def run_sim_all_batch():
                     shift_soc_s=macro_ not in no_shift_soc_s,
                     init_time=init_time_val,
                 )
+
+                # Check comparison results
+                ver_temp = temp_folder(version)
+                case_stem = Path(file_txt).stem
+                ver_pairs = find_pairs(ver_temp)
+                ver_pairs = [
+                    (r, v)
+                    for r, v in ver_pairs
+                    if ("_mon_run" in r.name or "_sim_run" in r.name) and r.name.startswith(case_stem)
+                ]
+                if ver_pairs:
+                    results = [compare_pair(r, v, 1e-3, 1e-3) for r, v in ver_pairs]
+                    all_agree = not any(r.get("diffs") or "error" in r for r in results)
+                    if not all_agree:
+                        diff_details = []
+                        for r in results:
+                            if "error" in r:
+                                diff_details.append(f"error: {r['error']}")
+                            elif r.get("diffs"):
+                                params = [d["param"] for d in r["diffs"]]
+                                diff_details.append(f"diffs in {', '.join(params)}")
+                        reason = "; ".join(diff_details) if diff_details else "differences found"
+                        disagree_cases.append((case_desc, reason))
+
             except Exception as case_e:
                 reason = str(case_e)
                 print(f"\033[92mRunSimAll FAIL  {case_desc}: {reason}\033[0m")
                 problem_cases.append((case_desc, reason))
 
-        n_total = len(data_rows)
-        n_problems = len(problem_cases)
-        if not problem_cases:
-            print("\033[92mAll cases executed successfully.\033[0m")
-            tkinter.messagebox.showinfo(
-                title="RunSimAll Complete", message=f"All {n_total} case(s) executed successfully."
-            )
-        else:
-            print("\033[92m--- RunSimAll problem summary ---\033[0m")
+        print(f"\n\n----------------------------\nBatch Summary\n-------------------------------\n")
+        if problem_cases:
+            print("--- RunSimAll problem summary ---")
             for desc, reason in problem_cases:
                 print(f"\033[92m  {desc}: {reason}\033[0m")
+
+        if disagree_cases:
+            print("\033[91m--- Cases NOT agreeing within tolerance ---\033[0m")
+            for desc, reason in disagree_cases:
+                print(f"\033[91m  {desc}: {reason}\033[0m")
             tkinter.messagebox.showwarning(
                 title="RunSimAll Complete",
-                message=f"{n_total - n_problems} of {n_total} case(s) ran.\n"
-                f"{n_problems} case(s) had problems — check the status output for details.",
+                message=f"{len(disagree_cases)} case(s) did not agree within tolerance — check the status output for details.",
+            )
+        else:
+            print(f"\n--- RunSimAll disagree summary ---")
+            print("\033[92mAll cases pairs agreed within tolerance.\033[0m")
+            tkinter.messagebox.showinfo(
+                title="RunSimAll Complete", message="All executed case(s) agreed within tolerance."
             )
 
     except Exception as e:
@@ -1858,7 +1889,11 @@ def grab_auto():
                     print(Colors.fg.red, 'error near line 1535 of GUI_PlinkSOC.py', Colors.reset)
                     pass
 
+        from CompareRunVer import temp_folder, find_pairs, compare_pair
+
         auto_running = True
+        auto_problem_cases = []
+        auto_disagree_cases = []
 
         # Process each line
         def process_next_config(index):
@@ -1892,10 +1927,30 @@ def grab_auto():
                 sel1.config(fg="black", activeforeground="black")
 
                 lookup_start()
+
+                print(f"\n\n----------------------------\nBatch Summary\n-------------------------------\n")
                 print(f"AUTO complete: {n_cases} case(s) run. Original configuration restored.")
-                tkinter.messagebox.showinfo(
-                    "AUTO Complete", f"{n_cases} case(s) run.\nOriginal configuration restored."
-                )
+
+                if auto_problem_cases:
+                    print("\033[92m--- AUTO problem summary ---\033[0m")
+                    for desc, reason in auto_problem_cases:
+                        print(f"\033[92m  {desc}: {reason}\033[0m")
+
+                if auto_disagree_cases:
+                    print("\033[91m--- Cases NOT agreeing within tolerance ---\033[0m")
+                    for desc, reason in auto_disagree_cases:
+                        print(f"\033[91m  {desc}: {reason}\033[0m")
+                    tkinter.messagebox.showwarning(
+                        "AUTO Complete",
+                        f"{n_cases} case(s) run.\n{len(auto_disagree_cases)} case(s) did not agree within tolerance.",
+                    )
+                else:
+                    print(f"\n--- AUTO disagree summary ---")
+                    print("\033[92mAll cases pairs agreed within tolerance.\033[0m")
+                    tkinter.messagebox.showinfo(
+                        "AUTO Complete", f"{n_cases} case(s) run.\nOriginal configuration restored.\nAll executed case(s) agreed within tolerance."
+                    )
+
                 if auto_fig_list:
                     string = "plots " + str(auto_fig_list[0].number) + " - " + str(auto_fig_list[-1].number)
                     show_killer(string, "AUTO", fig_list=auto_fig_list)
@@ -1905,11 +1960,13 @@ def grab_auto():
 
             battery = config.get("battery", Test.battery)
             macro_val = config.get("macro", "")
+            case_desc = f"version={Test.version!r}, macro={macro_val!r}"
             if should_skip_battery_case(battery, macro_val):
+                reason = f"battery upcase {battery.upper()!r} contained in case name {macro_val!r}"
                 print(
-                    f"\033[91mAUTO SKIP case {index + 1}/{len(data_rows)}: "
-                    f"battery upcase {battery.upper()!r} contained in case name {macro_val!r}\033[0m"
+                    f"\033[92mAUTO SKIP case {index + 1}/{len(data_rows)}: {reason}\033[0m"
                 )
+                auto_problem_cases.append((case_desc, reason))
                 process_next_config(index + 1)
                 return
 
@@ -1988,6 +2045,35 @@ def grab_auto():
                                 print(f"***DONE*** detected for config {index + 1}")
                                 close_auto_windows(close_figs=False)
                                 save_data(show_killer_=False)
+
+                                # Check comparison results for this AUTO case
+                                try:
+                                    ver_temp = temp_folder(Test.version)
+                                    case_txt = create_file_txt(macro_val, Test.unit, battery)
+                                    case_stem = Path(case_txt).stem
+                                    ver_pairs = find_pairs(ver_temp)
+                                    ver_pairs = [
+                                        (r, v)
+                                        for r, v in ver_pairs
+                                        if ("_mon_run" in r.name or "_sim_run" in r.name) and r.name.startswith(case_stem)
+                                    ]
+                                    if ver_pairs:
+                                        results = [compare_pair(r, v, 1e-3, 1e-3) for r, v in ver_pairs]
+                                        all_agree = not any(r.get("diffs") or "error" in r for r in results)
+                                        if not all_agree:
+                                            diff_details = []
+                                            for r in results:
+                                                if "error" in r:
+                                                    diff_details.append(f"error: {r['error']}")
+                                                elif r.get("diffs"):
+                                                    params = [d["param"] for d in r["diffs"]]
+                                                    diff_details.append(f"diffs in {', '.join(params)}")
+                                            reason = "; ".join(diff_details) if diff_details else "differences found"
+                                            auto_disagree_cases.append((case_desc, reason))
+                                except Exception as auto_e:
+                                    print(f"Error checking comparison in AUTO: {auto_e}")
+                                    auto_problem_cases.append((case_desc, f"failed: {auto_e}"))
+
                                 # noinspection PyTypeChecker,PyUnfilledParameters
                                 master.after(1000, lambda: process_next_config(index + 1))
                                 return
