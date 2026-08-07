@@ -289,6 +289,10 @@ void load_ib_vb_tb(const bool reset, const bool reset_temp, const bool reset_kf,
                    Sensors* Sen, Pins* myPins, BatteryMonitor* Mon) {
   // Load shunts Ib
   // Outputs:  Sen->Ib_model_in, Sen->Ib_hdwe, Sen->Vb, Sen->Wb
+  // Sample Ib
+  if (reset_kf) sendTxBuf(" SOC_Particle:  reseting kfs\n", true, IN_SERVICE);
+  Sen->ShuntAmp->sample(reset_kf);
+  Sen->ShuntNoAmp->sample(reset_kf);
   Sen->ShuntAmp->convert(sp.mod_ib_amp_dscn(), reset_kf, Sen);
   Sen->ShuntNoAmp->convert(sp.mod_ib_noa_dscn(), reset_kf, Sen);
   Sen->Flt->vc_check(Sen, Mon, VC_MIN, VC_MAX, reset);

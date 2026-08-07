@@ -274,11 +274,6 @@ void loop() {
     }
 #endif
 
-    // Sample Ib
-    if (reset_kf) sendTxBuf(" SOC_Particle:  reseting kfs\n", true, IN_SERVICE);
-    Sen->ShuntAmp->sample(reset_kf);
-    Sen->ShuntNoAmp->sample(reset_kf);
-
     Sen->reset(reset);
 
     // Check for really slow data capture and run EKF each read frame

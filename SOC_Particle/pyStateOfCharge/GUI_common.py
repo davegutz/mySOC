@@ -296,7 +296,7 @@ lookup = {
             "vv4;Dh1000;PR;PV;Pr;Pr;BP2;Pr;BP;Pr;BS2;Pr;BS;Pr;Pr;Pr;DA5;Pr;DB-5;Pr;RS;Pr;Dc0.2;Pr;Dc;DI-10;"
             "Pr;DI;Pr;Dt5;Pr;Dt;Pr;SA2;Pr;SA;Pr;SB2;Pr;SB;Pr;si-1;Pr;RS;Pr;Sk2;Pr;Sk;Pr;SQ2;Pr;SQ;Pr;Sq3;"
             "Pr;Sq;Pr;SV1.1;Pr;SV;Pr;Xb10;Pr;Xb;Pr;Xa1000;Pr;Xa;Pr;Xf1;Pr;RS;Pr;Xm10;Pr;RS;Pr;W3;vv0;XQ3;"
-            "PR;PV;XQ60000;Dh;<XD;"
+            "PR;PV;XQ60000;Dh;Pv;<XD;"
         ),
         (
             "For testing out the adjustments and memory",
@@ -306,7 +306,7 @@ lookup = {
     ),
     "quick": (
         35,
-        quick + cleanup + "<Pd;<XD;",
+        quick + cleanup + "<Pd;Pv;<XD;",
         (
             "For general purpose interface check",
             "",
@@ -315,7 +315,7 @@ lookup = {
     ),
     "custom": (
         72,
-        "XQ60000;<Pd;<XD;",
+        "XQ60000;<Pd;Pv;<XD;",
         (
             "For general purpose data collection",
             "'save data' will present a choice of file name",
@@ -324,7 +324,7 @@ lookup = {
     ),
     "slowInit": (
         100,
-        slow + "Ff;Rs;W4;Xp15;" + quiet + cleanup + "<Pd;<XD;",
+        slow + "Ff;Rs;W4;Xp15;" + quiet + cleanup + "<Pd;Pv;<XD;",
         (
             "Should initialize to high charge slow point and run a short 0 amplitude transient",
             "",
@@ -332,7 +332,7 @@ lookup = {
     ),
     "offSitInit": (
         100,
-        modEmptInitBB + "Ff;Rs;W4;Xp16;" + quiet + cleanup + "Sh;<Pd;<XD;",
+        modEmptInitBB + "Ff;Rs;W4;Xp16;" + quiet + cleanup + "Sh;<Pd;Pv;<XD;",
         (
             "Should initialize to low charge slow point and run a short 0 amplitude transient",
             "",
@@ -359,7 +359,7 @@ lookup = {
             + "Xa;"
             + quiet
             + cleanup
-            + "<XD;"
+            + "Pv;<XD;"
         ),
         (
             "All the best transients BB",
@@ -369,17 +369,17 @@ lookup = {
     ),
     "doNothing": (
         34,
-        "vv0;DP1;vv4;W50;vv0;W2;Hd;<XD;",
+        "vv0;DP1;vv4;W50;vv0;W2;Hd;Pv;<XD;",
         ("Do nothing", "--", "--", "--"),
     ),
     "zero_with_pc": (
         120,
-        hdwNoVbPcMidInit + zeroPrepHdweNoVb + "vv4;W17;" + "XQ25000;" + "vv99;Xm2;XQ15000;" + quiet + cleanup + "<XD;",
+        hdwNoVbPcMidInit + zeroPrepHdweNoVb + "vv4;W17;" + "XQ25000;" + "vv99;Xm2;XQ15000;" + quiet + cleanup + "Pv;<XD;",
         ("Hardware zero_with_pc run", "", "", ""),
     ),
     "ampHiEmptFail": (
         130,
-        modLoInit + tranPrep + c50 + "XQ25000;" + c00 + quiet + cleanup + "<XD;",
+        modLoInit + tranPrep + c50 + "XQ25000;" + c00 + quiet + cleanup + "Pv;<XD;",
         (
             "Inject 50A into amp.  Should detect and switch amp current failure",
             "'diff' will be displayed. After a bit more, current display will change to 0.",
@@ -394,7 +394,7 @@ lookup = {
     ),
     "ampHiFail": (
         130,
-        modHalfInit + tranPrep + c50 + "XQ25000;" + c00 + quiet + cleanup + "<XD;",
+        modHalfInit + tranPrep + c50 + "XQ25000;" + c00 + quiet + cleanup + "Pv;<XD;",
         (
             "Inject 50A into amp.  Should detect and switch amp current failure",
             "'diff' will be displayed. After a bit more, current display will change to 0.",
@@ -409,7 +409,7 @@ lookup = {
     ),
     "noaHiFail": (
         130,
-        modHalfInit + tranPrep + d50 + "XQ25000;" + c00 + quiet + cleanup + "<XD;",
+        modHalfInit + tranPrep + d50 + "XQ25000;" + c00 + quiet + cleanup + "Pv;<XD;",
         (
             "Inject 50A into noa. With ib_diff only nothing changes then "
             "should isolate to the noa by wrap and choose amp.",
@@ -420,7 +420,7 @@ lookup = {
     ),
     "rapidTweakRegression": (
         230,
-        slow + "Rs;W8;Xp10;" + quiet + cleanup + "<XD;",
+        slow + "Rs;W8;Xp10;" + quiet + cleanup + "Pv;<XD;",
         (
             "Should run three very large current discharge/recharge cycles without latched fail",
             "Best test for seeing time skews and checking fault logic for false trips",
@@ -445,7 +445,7 @@ lookup = {
             + c00
             + quiet
             + cleanup
-            + "<XD;"
+            + "Pv;<XD;"
         ),
         (
             "Proto multi",
@@ -456,7 +456,7 @@ lookup = {
     "pulseSoft": (
         85,
         synced_slow_pulse
-        + ("XS;Dm0;Dn0;vv0;Xm255;Ca.5;Pm;W2;Rs;W20;vv4;W10;" + "Xp7;W10;Pc;" + quiet + cleanup + "<XD;"),
+        + ("XS;Dm0;Dn0;vv0;Xm255;Ca.5;Pm;W2;Rs;W20;vv4;W10;" + "Xp7;W10;Pc;" + quiet + cleanup + "Pv;<XD;"),
         (
             "Should generate a very short <10 sec data burst with a curre"
             "nt sensor pulse.  Look at plots for good overlay. e_wrap sho"
@@ -468,7 +468,7 @@ lookup = {
     "pulseHard": (
         85,
         synced_slow_pulse
-        + ("XS;Dm0;Dn0;vv0;Xm255;Ca.5;Pm;W2;Rs;W20;vv4;W10;" + "Xp8;W10;Pc;" + quiet + cleanup + "<XD;"),
+        + ("XS;Dm0;Dn0;vv0;Xm255;Ca.5;Pm;W2;Rs;W20;vv4;W10;" + "Xp8;W10;Pc;" + quiet + cleanup + "Pv;<XD;"),
         (
             "Should generate a very short <10 sec data burst with a hardw"
             "are current pulse.  Look at plots for good overlay. e_wrap s"
@@ -479,7 +479,7 @@ lookup = {
     ),
     "rapidTweakRegressionH0": (
         230,
-        "Sh0;" + slow + "Rs;W4;Xp10;Pf;W2;" + quiet + cleanup + "Sh1;<XD;",
+        "Sh0;" + slow + "Rs;W4;Xp10;Pf;W2;" + quiet + cleanup + "Sh1;Pv;<XD;",
         (
             "Should run three very large current discharge/recharge cycles without fault",
             "No hysteresis. Best test for seeing time skews and checking fault logic for false trips",
@@ -489,7 +489,7 @@ lookup = {
     ),
     "offLowSoc": (
         170,
-        modEmptInitGen + tranPrep + "W25" + vm12 + "XQ55000;" + dv0 + quiet + cleanup + "<XD;",
+        modEmptInitGen + tranPrep + "W25" + vm12 + "XQ55000;" + dv0 + quiet + cleanup + "Pv;<XD;",
         ("Test for clean faults on shutoff.",),
     ),
     "offSitBmsBB": (

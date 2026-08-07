@@ -2,33 +2,32 @@ Top Level Minor Frame
 ```c++
 if (read) {
 
-	// Sample Ib
-	Sen->ShuntAmp->sample(...) {
-		sample_Vo(){
-			sample_time_z_ = sample_time_;
-			sample_time_ = millis();
- 		 	Vo_raw_ = Vo_read_->analogReadDebounced(...);
-  			Vo_ = float(Vo_raw_) * VO_CONV_GAIN;
-  		}
-  		sample_Vc(){
-  			Vc_raw_ = Vc_read_->analogReadDebounced(...);
-    			Vc_ = float(Vc_raw_) * VH3V3_CONV_GAIN;
-  		}
-  		sample_combine(){
-			Vo_Vc_ = Vo_ - Vc_;
-  		}
-	}
-
- 	Sen->ShuntNoAmp->sample(...){
-		...same as ShuntAmp
-	}
-
  	// Read sensors, model signals, select between them, synthesize injection
   	sense_synth_select(...) {
 
 		load_ib_vb_tb(){
 
-			// ib load
+			// ib load-----------------------------------
+			// Sample Ib
+			Sen->ShuntAmp->sample(...) {
+				sample_Vo(){
+					sample_time_z_ = sample_time_;
+					sample_time_ = millis();
+		 		 	Vo_raw_ = Vo_read_->analogReadDebounced(...);
+		  			Vo_ = float(Vo_raw_) * VO_CONV_GAIN;
+		  		}
+		  		sample_Vc(){
+		  			Vc_raw_ = Vc_read_->analogReadDebounced(...);
+		    			Vc_ = float(Vc_raw_) * VH3V3_CONV_GAIN;
+		  		}
+		  		sample_combine(){
+					Vo_Vc_ = Vo_ - Vc_;
+		  		}
+			} // Sen->ShuntAmp->sample(...)
+
+		 	Sen->ShuntNoAmp->sample(...){
+				...same as ShuntAmp
+			}
 			Sen->ShuntAmp->convert(...){
 				vshunt_ = Vo_Vc_;
 				Ishunt_cal_ = vshunt_ * v2a_s_ ;
@@ -36,9 +35,8 @@ if (read) {
 			Sen->ShuntNoAmp->convert(...){
 				...same as ShuntAmp
 			}
-			Sen->Flt->vc_check(...);
+			Sen->Flt->vc_check(...);  // OS fault check
 			Sen->shunt_select_initial(...){
-
   				Ib_amp_model_ = mod_add;
 				Ib_noa_model_ = mod_add;
 
@@ -48,22 +46,29 @@ if (read) {
 				Vc_hdwe_ = max(ShuntAmp->Vc(), ShuntNoAmp->Vc());
 				Vc_hdwe_sum_ = ShuntAmp->Vc() + ShuntNoAmp->Vc();
 			}
-			ib_choose_hi_lo();  // Initial choice
-			// When running normally the model tracks hdwe to synthesize reference
+			ib_choose_hi_lo() {   // Use the first argument and the table second
+							   // argument to choose between 3rd and 4th arguments
+				Ib_hdwe_ = scale_select(Ib_noa_hdwe_, sel_brk_hdwe, Ib_amp_hdwe_, Ib_noa_hdwe_, ...);
+				Ib_hdwe_f_ = scale_select(Ib_noa_hdwe_, sel_brk_hdwe, Ib_amp_hdwe_f_, Ib_noa_hdwe_f_, ...);
+				Ib_hdwe_model_ = scale_select(Ib_noa_model_, sel_brk_hdwe, Ib_amp_model_, Ib_noa_model_, ...);
+				sample_time_ib_hdwe_ = ShuntNoAmp->sample_time();
+				dt_ib_hdwe_ = ShuntNoAmp->dt_ms();
+ 			}
+			// Assign Ib
 			if (!sp.mod_ib()) {
-				Ib_model_in_ = Ib_hdwe_;
+				Ib_model_in_ = Ib_hdwe_;  // When running normally the model tracks hdwe
 			} 
 			// Otherwise it generates signals for feedback into monitor
 			else {
 				Ib_model_in_ = mod_add + Ib_noise();
 			}
 
-			// vb load
+			// vb load-----------------------------------
 			Sen->vb_load(myPins->Vb_pin, ...){
 			}
 			Sen->Flt->vb_check(...);
 
-			// Tb load
+			// Tb load-----------------------------------
 			Sen->Tb_load(myPins->VTb_pin, ...){
 				Tb_raw_ = Tb_read_ ...;
 				...
@@ -72,11 +77,19 @@ if (read) {
 				Tb_model_ = NOMINAL_TB + Tb_noise();
 				...
 			}
-			Sen->Flt->Tb_check(...);
+			Sen->Flt->Tb_check(...);  //--> TB_FLT, TB_FA
+		}  // load_ib_vb_tb
+
+		// Sim initialize as needed from memory
+  		if (reset_temp) {
+			initialize_all(Mon, Sen, 0., false);
 		}
+		Sen->Sim->apply_delta_q_t(reset);
+		Sen->Sim->init_battery_sim(reset, Sen);
+		Mon->init_battery_mon(reset, Sen);
 
 		// Sim calculation
-		Sen->Vb_model(Sen->Sim->calculate());{
+		Sen->Vb_model(Sen->Sim->calculate()){
 			// Inputs
   			Tb_ = Sen->Tb();
  			Tb_f_ = Sen->Tb_f();
@@ -108,23 +121,23 @@ if (read) {
 			ib_charge_ = ib_fut_;  // Same time plane as volt calcs, added past value
 
 			return vb_;
-		}
+		} // Sen->Sim->calculate()
 
-		// Fault logic
+		// Fault Logic, & Selection Logic - selection status and fault reset
 		Sen->Flt->ib_range();
 		Sen->Flt->ib_logic();
 		Sen->Flt->ib_wrap();
 		Sen->Flt->ib_quiet();
 		Sen->Flt->cc_diff();
 		Sen->Flt->ib_diff();
-		Sen->Flt->select_all_logic(){ // Select Logic - selection status and reset
+		Sen->Flt->select_all_logic(){ 
 			// Ib decision tables
 			ib_decision_hi_lo(Sen){
    				ib_choice_ = ...;
 				latch_ = ...;
 				ib_decision_ = ...;
 			}
-		}
+		}  // select_all_logic
 
 
 		// Apply Fault Logic to select signals
@@ -217,14 +230,185 @@ if (read) {
 				dt_fut_ = input - c_time_;
 				c_time_ = input;
 			}
-		}
+		} // select_volt_and_current_and_temp
 
 		// Charge calculation and memory store
-		Sen->Sim->count_coulombs();
-	}
+		Sen->Sim->count_coulombs() {
+			// Inputs
+			Tb_ = Sen->Tb();
+			Tb_f_ = Sen->Tb_f();
+
+			// Saturation and re-init.   Goal is to set q_capacity and hold it so remember
+			// last saturation status
+			static bool reset_temp_past = reset_temp;  // needed because model called first in reset_temp path; need
+											                 // to pick up latest
+			if (initializing_all) reset_temp_past = true;
+			if (!sp.mod_vb())  {  // Real world init sim to track Monitor SOC
+				if (Mon->sat() || reset_temp_past) apply_delta_q(Mon->delta_q());
+			} else {
+				...
+			}
+
+			// Integration.   can go to -20%
+			q_capacity_ = calculate_capacity(Tb_f_);
+			d_delta_q_s_ = ib_charge_ * dt_charge_;  // Coulomb Counting uses Backard Euler Integration
+			if (ib_charge_ > 0.) d_delta_q_s_ *= coul_eff_;
+			if (reset_temp) {
+				*sp_delta_q_ = 0.;
+			}
+			if (!reset_temp_past) {
+				*sp_delta_q_ += d_delta_q_s_;
+				*sp_delta_q_ = max(min(*sp_delta_q_, 0.), -q_capacity_ * 1.2);
+			}
+			q_ = q_capacity_ + *sp_delta_q_;
+			// Normalize
+			soc_ = q_ / q_capacity_;
+
+			// Save and return
+			reset_temp_past = reset_temp;
+			return soc_;
+		}  // Sen->Sim->count_coulombs
+
+	}  // sense_synth_select
 
 	// Calculate Ah remaining
-	monitor(...);
+	monitor(...) {
+		Mon->calculate(Sen, reset_temp, reset_ekf){
+			// Inputs
+			Tb_f_ = Sen->Tb_f();
+			vsat_ = calc_vsat();
+			dt_ = Sen->T();
+			c_time_ = Sen->c_time();
+			vb_ = Sen->vb();
+			ib_ = Sen->ib();
+
+			// Table lookup
+			voc_soc_ = voc_soc_tab(soc_, Tb_f_);
+
+			// Battery management system model
+			... /// --> bms_off, bms_charging, voltage_low
+
+			// Charging
+			ib_charge_ = ib_;
+			float ib_charge_ekf = ib_charge_;
+			if (bms_off_ && !bms_charging_ && sp.mod_vb()) ib_charge_ = 0.;
+			if (bms_off_ && voltage_low_) ib_ = 0.;
+
+			if (reset_temp) ib_past_ = ib_;
+
+			// Dynamic emf. vb_ is stale when running with model
+			float ib_dyn_in;
+			if (sp.mod_vb())  ib_dyn_in = ib_past_;
+			else  ib_dyn_in = ib_;
+			ib_dyn_ = ChargeTransfer_->calculate(ib_dyn_in, reset_temp, chem_.tau_ct, dt_);
+			float dvdyn = ib_dyn_ * chem_.r_ct + ib_dyn_in * chem_.r_0;
+			voc_ = vb_ - dvdyn;
+			if ((bms_off_ && voltage_low_) || Sen->Flt->vb_fa_lt()) { voc_ = voc_stat_ = voc_dead_ = vb_
+			dv_dyn_ = vb_ - voc_;
+
+			// Hysteresis model
+			... // not used
+
+			// voc(soc) table
+			voc_stat_ = calc_soc_voc(soc_, Tb_f_, ...);
+			voc_ = voc_stat_;
+
+			// Reversionary model
+			vb_model_rev_ = voc_soc_ + dv_dyn_;
+
+			// EKF 1x1
+			cp.ekf_executing = false;
+			if (eframe_ == 0 || reset_ekf) {
+				cp.ekf_executing = true;
+				static uint64_t ekf_now_past = Sen->now();
+				float ddq_dt = ib_charge_ekf;
+
+				// Freeze EKF with voltage fault or bms_off
+				freeze_ekf_ = Sen->Flt->vb_fa_lt() || bms_off_;
+
+				now_ekf_ = Sen->now();
+				dt_ekf_ = float(now_ekf_ - ekf_now_past) / 1e3;
+				ekf_now_past = now_ekf_;
+				if (	ddq_dt > 0. && !sp.tweak_test()) ddq_dt *= coul_eff_;
+				voc_stat_f_ = VocStatFilt->calculate(voc_stat_, reset_ekf || reset_temp, ap.voc_stat_filt(), dt_ekf_);
+				if (reset_ekf) {
+					solve_ekf(reset_ekf, reset_temp, Sen);
+				}  else {
+					predict_ekf(ddq_dt, freeze_ekf_);         // u = d(dq)/dt
+					update_ekf(voc_stat_f_, 0., MXEPS);  // z = _f, estimated = voc_filtered =
+						// hx, predicted = est past
+				}
+				soc_ekf_ = x();  // x = Vsoc (0-1 ideal capacitor voltage) proxy for soc
+				q_ekf_ = soc_ekf_ * q_capacity_;
+				delta_q_ekf_ = q_ekf_ - q_capacity_;
+				y_ekf_ = y();  // y = z - hx, residual between measurement and predicted
+				// measurement
+				y_ekf_f_ = Yfilt->calculate(y_ekf_, reset_temp, dt_ekf_);
+
+				// EKF convergence
+				bool conv = abs(y_ekf_f_) < ap.ekf_conv() && !cp.soft_reset && !cp.ekf_reset;  // Initialize false
+				ekf_conv_ = EKF_converged->calculate(conv, EKF_T_CONV, EKF_T_RES, ...)
+
+				if (reset_ekf) cp.ekf_reset = false;
+			}
+			eframe_++;
+			if (reset_temp || reset_ekf || cp.soft_reset || eframe_ >= ap.eframe_mult())
+			eframe_ = 0;  // '>=' allows changing ap.eframe_mult() on the fly
+
+			// Deadband filter
+			voc_dead_ = SdVb_->update(voc_);  // used for saturation test
+
+			// Charge time if used ekf
+			tcharge_ekf = time_to_completion(soc_ekf_, ib_charge_)
+
+			// Past value for synchronization with vb_, only when modeling
+			ib_past_ = ib_;
+
+			return vb_model_rev_;
+		}  // Mon->calculate
+
+		// Debounce saturation calculation done in ekf using voc model
+		Sen->sat(Mon->is_sat(reset));
+		Sen->saturated(Is_sat_delay->calculate(Sen->sat(), T_SAT, T_DESATA, ...));
+
+		// Memory store (Count Coulombs)
+		float cc_ib_in = Mon->ib_charge();
+		if (Sen->Flt->ib_amp_fa() && Sen->Flt->ib_noa_fa() && !ap.fake_faults())
+		cc_ib_in = 0.;
+		Mon->count_coulombs(Sen, reset_temp, cc_ib_in, Sen->sat(), Sen->saturated()) {
+			// Inputs
+			dt_ = Sen->T();
+			tb_f_ = Sen->Tb_f();
+			Tb_f_ = Sen->Tb_f();
+			d_delta_q_ = charge_curr * dt_;
+
+			// State change
+			double d_delta_q_inf = d_delta_q_;
+			if (charge_curr > 0.) d_delta_q_ *= coul_eff_;
+			sat_ = sat;
+			saturated_ = saturated;
+
+			// Saturation.   Goal is to set q_capacity and hold it so remember last saturation status.
+			if (saturated_) {
+				d_delta_q_ = 0.;
+				*sp_delta_q_ = 0.;
+			}
+
+			// Integration.   Can go to negative
+			q_capacity_ = calculate_capacity(tb_f_);
+			if (!reset_temp) 
+				*sp_delta_q_ = max(min(*sp_delta_q_ + d_delta_q_, 0.0), -q_capacity_ * 1.5);
+			q_ = q_capacity_ + *sp_delta_q_;
+
+			// Normalize
+			soc_ = q_ / q_capacity_;
+
+			return soc_;
+		}  // Mon->count_coulombs
+
+		// Charge charge time for display
+		Mon->calc_charge_time(Mon->q(), Mon->q_capacity(), Sen->ib(), Mon->soc());
+	}  // monitor
 
 	// Print
 	print_...

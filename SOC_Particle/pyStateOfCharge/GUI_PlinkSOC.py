@@ -161,7 +161,7 @@ class myButton(_BaseButton):
             def wrapped_command(*c_args, **c_kwargs):
                 current_text = ""
                 try:
-                    if hasattr(self, "cget"):
+                    if hasattr(self, "winfo_exists") and self.winfo_exists():
                         current_text = str(self.cget("text"))
                 except Exception:
                     pass
@@ -172,14 +172,27 @@ class myButton(_BaseButton):
             kwargs["command"] = wrapped_command
         super().__init__(*args, **kwargs)
 
+    def cget(self, key):
+        try:
+            if hasattr(self, "winfo_exists") and not self.winfo_exists():
+                return ""
+            return super().cget(key)
+        except Exception:
+            return ""
+
     def config(self, cnf=None, **kw):
+        try:
+            if hasattr(self, "winfo_exists") and not self.winfo_exists():
+                return
+        except Exception:
+            return
         if "command" in kw and kw["command"]:
             orig_cmd = kw["command"]
 
             def wrapped_cmd(*c_args, **c_kwargs):
                 current_text = ""
                 try:
-                    if hasattr(self, "cget"):
+                    if hasattr(self, "winfo_exists") and self.winfo_exists():
                         current_text = str(self.cget("text"))
                 except Exception:
                     pass
@@ -188,7 +201,10 @@ class myButton(_BaseButton):
                 return orig_cmd(*c_args, **c_kwargs)
 
             kw["command"] = wrapped_cmd
-        super().config(cnf, **kw)
+        try:
+            super().config(cnf, **kw)
+        except Exception:
+            pass
 
     def configure(self, cnf=None, **kw):
         self.config(cnf, **kw)
@@ -1167,6 +1183,8 @@ def _cancel_monitor_plink():
 def monitor_plink_done():
     global _monitor_after_id
     _monitor_after_id = None
+    if not hasattr(master, "winfo_exists") or not master.winfo_exists():
+        return
     done_detected = False
     if Path(plink_test_csv_path.get()).is_file():
         try:
@@ -2599,6 +2617,8 @@ if __name__ == "__main__":  # Example usage.  Ran ok 20260217
         widget = getattr(event, "widget", None)
         if widget is not None:
             try:
+                if hasattr(widget, "winfo_exists") and not widget.winfo_exists():
+                    return
                 w_text = ""
                 if hasattr(widget, "cget"):
                     w_text = widget.cget("text")
@@ -2608,9 +2628,23 @@ if __name__ == "__main__":  # Example usage.  Ran ok 20260217
                     return
             except Exception:
                 pass
-        check_dependencies_and_warn()
+        try:
+            check_dependencies_and_warn()
+        except Exception:
+            pass
 
     master.bind_all("<Button-1>", _on_master_button_click, add="+")
+
+    def on_closing():
+        _cancel_monitor_plink()
+        try:
+            if master.winfo_exists():
+                master.destroy()
+        except Exception:
+            pass
+        os._exit(0)
+
+    master.protocol("WM_DELETE_WINDOW", on_closing)
     master.title("State of Charge (Plink)")
     master.wm_minsize(width=min_width, height=main_height)
     timer = None
