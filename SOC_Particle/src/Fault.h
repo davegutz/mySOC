@@ -310,7 +310,6 @@ class Fault {
   ibSel ib_choice() { return ib_choice_; };
   ibSel ib_choice_past() { return ib_choice_last_; };
   uint16_t ib_decision() { return ib_decision_; };
-  void ib_decision_active_standby(Sensors* Sen);
   void ib_decision_hi_lo(Sensors* Sen);
   void ib_diff(const bool reset, Sensors* Sen, BatteryMonitor* Mon);
   float ib_diff() { return (ib_diff_); };
