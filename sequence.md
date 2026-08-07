@@ -25,7 +25,10 @@ if (read) {
 
  	// Read sensors, model signals, select between them, synthesize injection
   	sense_synth_select(...) {
+
 		load_ib_vb_tb(){
+
+			// ib load
 			Sen->ShuntAmp->convert(...){
 				vshunt_ = Vo_Vc_;
 				Ishunt_cal_ = vshunt_ * v2a_s_ ;
@@ -35,28 +38,40 @@ if (read) {
 			}
 			Sen->Flt->vc_check(...);
 			Sen->shunt_select_initial(...){
-  				Ib_amp_model_ = max(min(mod_add..., Ib_amp_max()), Ib_amp_min());  // uses past Ib
-				Ib_noa_model_ = max(min(mod_add..., Ib_noa_max()), Ib_noa_min());  // uses past Ib
+
+  				Ib_amp_model_ = mod_add;
+				Ib_noa_model_ = mod_add;
+
 				Ib_amp_hdwe_ = ShuntAmp->Ishunt_cal();
-				Vc_hdwe_ = max(ShuntAmp->Vc(), ShuntNoAmp->Vc());
-				Vc_hdwe_sum_ = ShuntAmp->Vc() + ShuntNoAmp->Vc();
   				Ib_noa_hdwe_ = ShuntNoAmp->Ishunt_cal();
 
-			// Initial choice
-			ib_choose_hi_lo();
-
+				Vc_hdwe_ = max(ShuntAmp->Vc(), ShuntNoAmp->Vc());
+				Vc_hdwe_sum_ = ShuntAmp->Vc() + ShuntNoAmp->Vc();
+			}
+			ib_choose_hi_lo();  // Initial choice
 			// When running normally the model tracks hdwe to synthesize reference
 			if (!sp.mod_ib()) {
 				Ib_model_in_ = Ib_hdwe_;
 			} 
 			// Otherwise it generates signals for feedback into monitor
 			else {
-				Ib_model_in_ = mod_add;
+				Ib_model_in_ = mod_add + Ib_noise();
 			}
 
-			Sen->vb_load(myPins->Vb_pin, ...);
+			// vb load
+			Sen->vb_load(myPins->Vb_pin, ...){
+			}
 			Sen->Flt->vb_check(...);
-			Sen->Tb_load(myPins->VTb_pin, ...);
+
+			// Tb load
+			Sen->Tb_load(myPins->VTb_pin, ...){
+				Tb_raw_ = Tb_read_ ...;
+				...
+				Tb_hdwe_ = thermistor_equation(Tb_raw_);
+				...
+				Tb_model_ = NOMINAL_TB + Tb_noise();
+				...
+			}
 			Sen->Flt->Tb_check(...);
 		}
 
@@ -102,12 +117,107 @@ if (read) {
 		Sen->Flt->ib_quiet();
 		Sen->Flt->cc_diff();
 		Sen->Flt->ib_diff();
+		Sen->Flt->select_all_logic(){ // Select Logic - selection status and reset
+			// Ib decision tables
+			ib_decision_hi_lo(Sen){
+   				ib_choice_ = ...;
+				latch_ = ...;
+				ib_decision_ = ...;
+			}
+		}
 
-		// Select Logic
-		Sen->Flt->select_all_logic());
-		Sen->select_volt_and_current_and_temp());
-  Sim->assign_times(c_time_);
 
+		// Apply Fault Logic to select signals
+		Sen->select_volt_and_current_and_temp()){
+
+			// ib select
+			ib_choose_hi_lo(){
+				// No failure
+				Ib_hdwe_ = scale_select(Ib_noa_hdwe_,   sel_brk_hdwe,
+										Ib_amp_hdwe_, Ib_noa_hdwe, ...)
+				Ib_hdwe_f_ = scale_select(Ib_noa_hdwe_, sel_brk_hdwe,
+										Ib_amp_hdwe_f_, Ib_noa_hdwe_f_, ...);
+				Ib_hdwe_model_ = scale_select(Ib_noa_model_, sel_brk_hdwe,
+										Ib_amp_model_, Ib_noa_model_, ...);
+				sample_time_ib_hdwe_ = ShuntNoAmp->sample_time();
+				dt_ib_hdwe_ = ShuntNoAmp->dt_ms();
+			}
+
+			// Tb select
+			if (sp.mod_tb()) {  // Model Tb
+				if (Flt->Tb_fa() ...) {
+					Tb_ = NOMINAL_TB;
+					Tb_f_ = NOMINAL_TB;
+					sample_time_Tb_ = Sim->sample_time();
+	    			} else if (Flt->Tb_flt() ...) { // last good value while flt resolved
+					sample_time_Tb_ = sample_time_Tb_hdwe_;
+					return;
+				} else {
+					Tb_ = Tb_model_;
+					Tb_f_ = Tb_model_f_;
+					sample_time_Tb_ = Sim->sample_time();
+				}
+			} else {  // Hardware Tb
+				if (Flt->Tb_fa() ...) {
+					Tb_ = NOMINAL_TB;
+					Tb_f_ = NOMINAL_TB;
+					sample_time_Tb_ = Sim->sample_time();
+				} else if (Flt->Tb_flt() ...) {  // last good value while flt resolved
+					sample_time_Tb_ = sample_time_Tb_hdwe_;
+					return;
+				} else {
+					Tb_ = Tb_hdwe_;
+					Tb_f_ = Tb_hdwe_f_;
+					sample_time_Tb_ = sample_time_Tb_hdwe_;
+				}
+			}
+
+			// vb select
+			if (sp.mod_vb()) {  // Model vb
+				Vb_f_ = Vb_;
+				if ((Flt->wrap_vb_fa() || Flt->vb_fa_lt()) ...) {
+					Vb_ = Mon->vb_model_rev() * ap.nS();
+					sample_time_vb_ = Sim->sample_time();
+				} else {
+					Vb_ = Vb_model_ + Vb_noise();
+      					sample_time_vb_ = Sim->sample_time();
+				}
+			} else {
+				Vb_f_ = Vb_hdwe_f_;
+				if ((Flt->wrap_vb_fa() || Flt->vb_fa_lt()) ...)) {
+					Vb_ = Mon->vb_model_rev() * ap.nS();  // model backup
+					sample_time_vb_ = Sim->sample_time();
+				} else {
+					Vb_ = Vb_hdwe_;
+					sample_time_vb_ = sample_time_vb_hdwe_;
+				}
+  			}
+
+			// ib
+			if (sp.mod_ib()) {
+				Ib_ = Ib_hdwe_model_;
+				Ib_f_ = Ib_;
+				Ib_amp_ = Ib_amp_model_;
+				Ib_noa_ = Ib_noa_model_;
+				Vc_ = HALF_V3V3;
+				sample_time_ib_ = Sim->sample_time();
+				dt_ib_ = Sim->dt_fut_ms();
+			} else {
+				Ib_ = Ib_hdwe_;
+				Ib_f_ = Ib_hdwe_f_;
+				Ib_amp_ = Ib_amp_hdwe_;
+				Ib_noa_ = Ib_noa_hdwe_;
+				Vc_ = Vc_hdwe_;
+				sample_time_ib_ = sample_time_ib_hdwe_;
+				dt_ib_ = dt_ib_hdwe_;
+			}
+			T_ = double(dt_ib_) / 1000.;  // s
+			now_ = sample_time_ib_ - inst_millis_ + inst_time_ * 1000;
+			Sim->assign_times(input=double(now_) / 1000.){
+				dt_fut_ = input - c_time_;
+				c_time_ = input;
+			}
+		}
 
 		// Charge calculation and memory store
 		Sen->Sim->count_coulombs();
