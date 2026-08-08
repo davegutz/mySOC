@@ -667,6 +667,7 @@ void Sensors::Tb_load(const uint16_t tb_pin, const bool reset) {
 %7.3f Tb_hdwe_ %7.3f mod_add %7.3f Tb_model_ %7.3f\n",
       Tb_raw_, Tb_volt_, res, lnres, hdwe_add, Tb_hdwe_, mod_add, Tb_model_);
   }
+  // T_ is a UBC in following TbHdweFilt->calculate(...,T_,...)
   Tb_hdwe_f_ =
       TbHdweFilt->calculate(Tb_hdwe_, reset || Flt->Tb_fa() || sp.mod_tb_dscn(),
                             ap.Tb_filt(), T_, -T_RLIM, T_RLIM);

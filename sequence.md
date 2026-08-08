@@ -20,13 +20,28 @@ N_HI = 11. // Fully NOA signal charge transition, A (11)
 D11 = V op-amp Noa pin
 D13 = V op-amp Amp pin
 D14 = V common Amp pin
+SHUNT_GAIN = 1333.;  // Shunt V2A gain, A/V (1333 is 100A/0.075V)
+NOMINAL_TB = 15.;  // Middle of the road Tb for decent reversionary, C operation, deg C (15.)
+T_SAT = 24; // Saturation debounce time, sec 
+T_DESAT = 20;  // De-saturation debounce time, sec
+sat_cutback_gain_ = 1000.;  // Gain to retard ib when soc approaches 1, dimensionless
+coul_eff_ = 0.9985;  // Coulombic efficiency - the fraction of charging 
+			// input that gets turned into usable Coulombs
+sat_ib_null_ = 0.;  // Current cutback value for soc=1, A
+
+chem_ = {... }  // structure of chemical properties
+sp = class SavedPars;     // Stored/retained settings & configuration flags
+ap = class VolatilePars;  // Adjustment parameters (e.g. nP parallel, nS series cells)    
+cp = class CommandPars;   // Control & command state flags
+
+
 
 SHUNT_AMP_GAIN = SHUNT_GAIN * SHUNT_AMP_R1 / SHUNT_AMP_R2;
 SHUNT_NOA_GAIN = SHUNT_GAIN * SHUNT_NOA_R1 / SHUNT_NOA_R2;
-VO_CONV_GAIN = PHOTON_ADC_VOLT) / PHOTON_ADC_COUNT
-VH3V3_CONV_GAIN = PHOTON_ADC_VOLT) / PHOTON_ADC_COUNT
+VO_CONV_GAIN = PHOTON_ADC_VOLT) / PHOTON_ADC_COUNT;
+VH3V3_CONV_GAIN = PHOTON_ADC_VOLT) / PHOTON_ADC_COUNT;
 VB_CONV_GAIN = PHOTON_ADC_VOLT) / PHOTON_ADC_COUNT) *
-			(VB_SENSE_R_HI + VB_SENSE_R_LO) / VB_SENSE_R_LO
+			((VB_SENSE_R_HI + VB_SENSE_R_LO) / VB_SENSE_R_LO);
 
 /*
                   ^ scale
@@ -35,6 +50,7 @@ VB_CONV_GAIN = PHOTON_ADC_VOLT) / PHOTON_ADC_COUNT) *
        -          |        -
          -        |      -
       |    -------------          --> 0.0 ==> all sm
+
       |    |      |     |    |
    N_LO   A_LO    |   A_HI   N_HI
                   |
@@ -63,67 +79,60 @@ if (read) {
 			// ib load-----------------------------------
 			// Sample Ib
 			Sen->ShuntAmp->sample(...) {
-				sample_Vo(){
-					sample_time_z_ = sample_time_;  // TODO:  verify past value used here
-					sample_time_ = millis(){
+				sample_Vo(){										// Model temporal
+					sample_time_z_ = sample_time_;  					// Feedback -> PV source
+					sample_time_ = millis(){							// FV source
 						return system_clock_ms;
 					}
-		 		 	Vo_read_->analogReadDebounced(...){
+		 		 	Vo_read_->analogReadDebounced(...){				// FV source
 						Vo_raw_ = analogRead(D13);
 					}
-		  			Vo_ = float(Vo_raw_) * VO_CONV_GAIN;
+		  			Vo_ = float(Vo_raw_) * VO_CONV_GAIN;				// FV
 		  		}
 		  		sample_Vc(){
-		  			Vc_read_->analogReadDebounced(...){
+		  			Vc_read_->analogReadDebounced(...){				// FV source
 							Vc_raw_ = analogRead(D14);
 					}
-		    			Vc_ = float(Vc_raw_) * VH3V3_CONV_GAIN;
+		    			Vc_ = float(Vc_raw_) * VH3V3_CONV_GAIN;			// FV
 		  		}
 		  		sample_combine(){
-					Vo_Vc_ = Vo_ - Vc_;
+					Vo_Vc_ = Vo_ - Vc_;								// FV
 		  		}
 			} // Sen->ShuntAmp->sample(...)
 
-		 	Sen->ShuntNoAmp->sample(...){
+		 	Sen->ShuntNoAmp->sample(...){							// FV source
 				// ...similar to  ShuntAmp
 					Vo_raw_ = analogRead(D11);
 			}
 			Sen->ShuntAmp->convert(...){
-				vshunt_ = Vo_Vc_;
-				Ishunt_cal_ = vshunt_ * SHUNT_AMP_GAIN ;
+				vshunt_ = Vo_Vc_;									// FV
+				Ishunt_cal_ = vshunt_ * SHUNT_AMP_GAIN ;				// FV
 			}
 			Sen->ShuntNoAmp->convert(...){
 				// ...similar to  ShuntAmp
 			}
 			Sen->Flt->vc_check(...);  // OS fault check
 			Sen->shunt_select_initial(...){
-  				Ib_amp_model_ = mod_add;
-				Ib_noa_model_ = mod_add;
+  				Ib_amp_model_ = mod_add;							// FV
+				Ib_noa_model_ = mod_add;							// FV
 
-				Ib_amp_hdwe_ = ShuntAmp->Ishunt_cal(){
+				Ib_amp_hdwe_ = ShuntAmp->Ishunt_cal(){				// FV
 					  return Ishunt_cal_ ;
 				}
   				Ib_noa_hdwe_ = ShuntNoAmp->Ishunt_cal(){
 					// ... similar to ShuntAmp
 				}
 			}
-			ib_choose_hi_lo() {   // Use the first argument and the table second
-							   // argument to choose between 3rd and 4th arguments
-				Ib_hdwe_ 			= scale_select(Ib_noa_hdwe_,  sel_brk_hdwe, Ib_amp_hdwe_,	Ib_noa_hdwe_, ...);
-				Ib_hdwe_f_ 		= scale_select(Ib_noa_hdwe_,  sel_brk_hdwe, Ib_amp_hdwe_f_,	Ib_noa_hdwe_f_, ...);
-				Ib_hdwe_model_ 	= scale_select(Ib_noa_model_, sel_brk_hdwe, Ib_amp_model_,	Ib_noa_model_, ...);
-				sample_time_ib_hdwe_ = ShuntNoAmp->sample_time();
-				dt_ib_hdwe_ = ShuntNoAmp->dt_ms();
- 			}
 			// Assign Ib
 			if (!sp.mod_ib()) {
-				Ib_model_in_ = Ib_hdwe_;  // When running normally the model tracks hdwe
+				// When running normally the model tracks hdwe
+				Ib_model_in_ = Ib_hdwe_;  							// tbd
 			} 
 			// Otherwise it generates signals for feedback into monitor
 			// Noise is actually separate for each signal. Simplified here
 			else {
-				Ib_noise = psuedo_random_binary_noise(bits=7, seed=...);
-				Ib_model_in_ = mod_add + Ib_noise;
+				Ib_noise = psuedo_random_binary_noise(bits=7, seed=...);	// n/a
+				Ib_model_in_ = mod_add + Ib_noise;					// FV
 			}
 
 			// vb load-----------------------------------
@@ -163,10 +172,10 @@ if (read) {
 			// Inputs
   			Tb_ = Sen->Tb();
  			Tb_f_ = Sen->Tb_f();
-			dt_in_ = (sample_time_ - sample_time_z_) / 1000.;
-			ib_in_ = Sen->Ib_model_in() / ap.nP();
-			dt_ = dt_fut_;
-			ib_ = ib_fut_;
+			dt_in_ = (sample_time_ - sample_time_z_) / 1000.;		// FV
+			ib_in_ = Sen->Ib_model_in() / ap.nP();				// FV
+			dt_ = dt_fut_;									// Feedback --> PV
+			ib_ = ib_fut_;									// Feedback --> PV
 			Sen->Ib_model( ib_fut_ );
   
  			 // VOC-OCV model
@@ -176,13 +185,13 @@ if (read) {
 			// ChargeTransfer dynamic model for model
 			ib_dyn_ = ChargeTransfer_->calculate(ib_, reset, chem_.tau_ct, dt_);
 			dvdyn_ =  ib_dyn_ * chem_.r_ct  + ib_ * chem_.r_0;
-			vb_ = voc_ + dvdyn;
+			vb_ = voc_ + dvdyn_;
 			voc_soc_ = voc_stat_;
 
   			// Saturation logic, both full and empty
 			float ib_charge_fut = ib_in_;  // Pass along current to charge unless bms_off.
 			if ( sp.mod_ib )
-				sat_ib_max_ = sat_ib_null_ + (1. - (soc_ + ap.ds_voc_soc())) *  sat_cutback_gain_ ;
+				sat_ib_max_ = sat_ib_null_ + (1. - soc_)) *  sat_cutback_gain_ ;
 			else
 				sat_ib_max_ = ib_charge_fut;  // Disable cutback when real world
 			ib_fut_ = min(ib_charge_fut, sat_ib_max_);  // the feedback of ib_
@@ -214,12 +223,10 @@ if (read) {
 		Sen->select_volt_and_current_and_temp()){
 
 			// ib select
-			ib_choose_hi_lo(){
-				// No failure
+			ib_choose_hi_lo() {   // Use the first argument and the table second
+							   // argument to choose between 3rd and 4th arguments
 				Ib_hdwe_ = scale_select( 		Ib_noa_hdwe_,   	sel_brk_hdwe,
 											Ib_amp_hdwe_, 	Ib_noa_hdwe, ...)
-				Ib_hdwe_f_ = scale_select(		Ib_noa_hdwe_, 		sel_brk_hdwe,
-											Ib_amp_hdwe_f_, 	Ib_noa_hdwe_f_, ...);
 				Ib_hdwe_model_ = scale_select(	Ib_noa_model_, 	sel_brk_hdwe,
 											Ib_amp_model_, 	Ib_noa_model_, ...);
 				sample_time_ib_hdwe_ = ShuntNoAmp->sample_time();
@@ -279,7 +286,6 @@ if (read) {
 			// ib
 			if (sp.mod_ib()) {
 				Ib_ = Ib_hdwe_model_;
-				Ib_f_ = Ib_;
 				Ib_amp_ = Ib_amp_model_;
 				Ib_noa_ = Ib_noa_model_;
 				Vc_ = HALF_V3V3;
@@ -287,7 +293,6 @@ if (read) {
 				dt_ib_ = Sim->dt_fut_ms();
 			} else {
 				Ib_ = Ib_hdwe_;
-				Ib_f_ = Ib_hdwe_f_;
 				Ib_amp_ = Ib_amp_hdwe_;
 				Ib_noa_ = Ib_noa_hdwe_;
 				Vc_ = Vc_hdwe_;
@@ -295,7 +300,7 @@ if (read) {
 				dt_ib_ = dt_ib_hdwe_;
 			}
 			T_ = double(dt_ib_) / 1000.;  // s
-			now_ = sample_time_ib_ - inst_millis_ + inst_time_ * 1000;
+			now_ = sample_time_ib_;
 			Sim->assign_times(input=double(now_) / 1000.){
 				dt_fut_ = input - c_time_;
 				c_time_ = input;
@@ -373,7 +378,9 @@ if (read) {
 			ib_dyn_ = ChargeTransfer_->calculate(ib_dyn_in, reset_temp, chem_.tau_ct, dt_);
 			float dvdyn = ib_dyn_ * chem_.r_ct + ib_dyn_in * chem_.r_0;
 			voc_ = vb_ - dvdyn;
-			if ((bms_off_ && voltage_low_) || Sen->Flt->vb_fa_lt()) { voc_ = voc_stat_ = voc_dead_ = vb_
+			if ((bms_off_ && voltage_low_) || Sen->Flt->vb_fa_lt()) {
+				voc_ = voc_stat_ = voc_dead_ = vb_;
+			}
 			dv_dyn_ = vb_ - voc_;
 
 			// Hysteresis model
@@ -384,7 +391,7 @@ if (read) {
 			voc_ = voc_stat_;
 
 			// Reversionary model
-			vb_model_rev_ = voc_soc_ + dv_dyn_;
+			vb_model_rev_ = voc_soc_ + dv_dyn_;  // TODO:  Verify this is used next frame as past value
 
 			// EKF 1x1
 			cp.ekf_executing = false;

@@ -765,8 +765,8 @@ float BatterySim::calculate(Sensors* Sen, const bool dc_dc_on,
   Tb_f_ = Sen->Tb_f();
 
   dt_in_ms_ = dt_long();
-  dt_in_ = double(dt_in_ms_) / 1000.;
-  ib_in_ = Sen->Ib_model_in() / ap.nP();
+  dt_in_ = double(dt_in_ms_) / 1000.;  // Future value
+  ib_in_ = Sen->Ib_model_in() / ap.nP();  // Future value
   if (reset ) {
     dt_fut_ms_ = dt_in_ms_;
     dt_fut_ = dt_in_;
@@ -827,7 +827,9 @@ float BatterySim::calculate(Sensors* Sen, const bool dc_dc_on,
   }
   dv_dyn_ = vb_ - voc_;
 
-  // Saturation logic, both full and empty
+  // Saturation logic, both full and empty.
+  // Potential algebraic loop because soc is calculated based on ib
+  // that is affected by sat_ib_max_ in the next frame.  Solved by ib_fut_.
   sat_ib_max_ = sat_ib_null_ + (1. - (soc_ + ap.ds_voc_soc())) *
                                    sat_cutback_gain_ *
                                    sp.cutback_gain_slr();  // Ds, Sk
@@ -836,7 +838,7 @@ float BatterySim::calculate(Sensors* Sen, const bool dc_dc_on,
                                   // doing tweak_test test
   ib_fut_ = min(ib_charge_fut, sat_ib_max_);  // the feedback of ib_
   // ib_charge_ = ib_charge_fut;  // Same time plane as volt calcs, added past
-  // value.  (This prevents sat logic from working)
+  // value.  (This allows sat logic to work)
   dt_charge_ = dt_fut_;
   ib_charge_ = ib_fut_;  // Same time plane as volt calcs, added past value
 
