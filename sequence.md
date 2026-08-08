@@ -1,4 +1,4 @@
-Top Level Minor Frame
+  Top Level Minor Frame
 
 ```c++
 // Definitions
@@ -78,85 +78,86 @@ if (read) {
 		load_ib_vb_tb(){
 			// ib load-----------------------------------
 			// Sample Ib
+																	// Model temporal
 			Sen->ShuntAmp->sample(...) {
-				sample_Vo(){										// Model temporal
-					sample_time_z_ = sample_time_;  					// Feedback -> PV source
-					sample_time_ = millis(){							// FV source
+				sample_Vo(){			
+					sample_time_z_ = sample_time_;  						// Feedback -> PV source
+					sample_time_ = millis(){								// FV source
 						return system_clock_ms;
 					}
-		 		 	Vo_read_->analogReadDebounced(...){				// FV source
+		 		 	Vo_read_->analogReadDebounced(...){					// FV source
 						Vo_raw_ = analogRead(D13);
 					}
-		  			Vo_ = float(Vo_raw_) * VO_CONV_GAIN;				// FV
+		  			Vo_ = float(Vo_raw_) * VO_CONV_GAIN;					// FV
 		  		}
 		  		sample_Vc(){
-		  			Vc_read_->analogReadDebounced(...){				// FV source
+		  			Vc_read_->analogReadDebounced(...){					// FV source
 							Vc_raw_ = analogRead(D14);
 					}
-		    			Vc_ = float(Vc_raw_) * VH3V3_CONV_GAIN;			// FV
+		    			Vc_ = float(Vc_raw_) * VH3V3_CONV_GAIN;				// FV
 		  		}
 		  		sample_combine(){
-					Vo_Vc_ = Vo_ - Vc_;								// FV
+					Vo_Vc_ = Vo_ - Vc_;									// FV
 		  		}
 			} // Sen->ShuntAmp->sample(...)
 
-		 	Sen->ShuntNoAmp->sample(...){							// FV source
+		 	Sen->ShuntNoAmp->sample(...){								// FV source
 				// ...similar to  ShuntAmp
 					Vo_raw_ = analogRead(D11);
 			}
 			Sen->ShuntAmp->convert(...){
-				vshunt_ = Vo_Vc_;									// FV
-				Ishunt_cal_ = vshunt_ * SHUNT_AMP_GAIN ;				// FV
+				vshunt_ = Vo_Vc_;										// FV
+				Ishunt_cal_ = vshunt_ * SHUNT_AMP_GAIN ;					// FV
 			}
 			Sen->ShuntNoAmp->convert(...){
 				// ...similar to  ShuntAmp
 			}
 			Sen->Flt->vc_check(...);  // OS fault check
 			Sen->shunt_select_initial(...){
-  				Ib_amp_model_ = mod_add;							// FV
-				Ib_noa_model_ = mod_add;							// FV
+  				Ib_amp_model_ = mod_add;								// FV
+				Ib_noa_model_ = mod_add;								// FV
 
-				Ib_amp_hdwe_ = ShuntAmp->Ishunt_cal(){				// FV
+				Ib_amp_hdwe_ = ShuntAmp->Ishunt_cal(){					// FV
 					  return Ishunt_cal_ ;
 				}
-  				Ib_noa_hdwe_ = ShuntNoAmp->Ishunt_cal(){
+  				Ib_noa_hdwe_ = ShuntNoAmp->Ishunt_cal(){					// FV
 					// ... similar to ShuntAmp
 				}
 			}
 			// Assign Ib
 			if (!sp.mod_ib()) {
 				// When running normally the model tracks hdwe
-				Ib_model_in_ = Ib_hdwe_;  							// tbd
+				Ib_model_in_ = Ib_hdwe_;  								// tbd
 			} 
 			// Otherwise it generates signals for feedback into monitor
 			// Noise is actually separate for each signal. Simplified here
 			else {
-				Ib_noise = psuedo_random_binary_noise(bits=7, seed=...);	// n/a
-				Ib_model_in_ = mod_add + Ib_noise;					// FV
+				Ib_noise = psuedo_random_binary_noise(bits=7, seed=...);		// n/a
+				Ib_model_in_ = mod_add + Ib_noise;						// FV
 			}
 
 			// vb load-----------------------------------
 			Sen->vb_load(myPins->Vb_pin, ...){
-				Vb_raw_ = Vb_read_...;
+				Vb_raw_ = Vb_read_...;									// FV source
 				...
-  				Vb_hdwe_ = Vb_raw_) * VB_CONV_GAIN;
+  				Vb_hdwe_ = Vb_raw_) * VB_CONV_GAIN;						// FV
 				// Note: T_ in following is UBC (past value) from previous frame
-				Vb_hdwe_f_ = VbHdweFilt->calculate(..., AMP_FILT_TAU, T_, ...);
+				Vb_hdwe_f_ = VbHdweFilt->calculate(..., AMP_FILT_TAU, T_, ...);	// FV
 			}
-			Sen->Flt->vb_check(...);
+			Sen->Flt->vb_check(...);										// FV
 
 			// Tb load-----------------------------------
 			Sen->Tb_load(myPins->VTb_pin, ...){
-				Tb_raw_ = Tb_read_ ...;
+				Tb_raw_ = Tb_read_ ...;									// FV	source
 				...
-				Tb_hdwe_ = thermistor_equation(Tb_raw_);
-				Tb_hdwe_f_ = TbHdweFilt->calculate(..., TB_FILT, T_, ...);
+				Tb_hdwe_ = thermistor_equation(Tb_raw_);					// FV
+				Tb_hdwe_f_ = TbHdweFilt->calculate(..., TB_FILT, T_, ...);		// FV
 				...
-				Tb_model_ = NOMINAL_TB + Tb_noise();
-				Tb_model_f_ = TbModelFilt->calculate(..., TB_FILT, T_, ...);
+				Tb_model_ = NOMINAL_TB + Tb_noise();						// FV
+				Tb_model_f_ = TbModelFilt->calculate(..., TB_FILT, T_, ...);		// FV
 				...
 			}
-			Sen->Flt->Tb_check(...);  //--> TB_FLT, TB_FA
+			Sen->Flt->Tb_check(...);  //--> TB_FLT, TB_FA						// FV
 		}  // load_ib_vb_tb
 
 		// Sim initialize as needed from memory
@@ -170,34 +171,36 @@ if (read) {
 		// Sim calculation
 		Sen->Vb_model(Sen->Sim->calculate()){
 			// Inputs
-  			Tb_ = Sen->Tb();
- 			Tb_f_ = Sen->Tb_f();
-			dt_in_ = (sample_time_ - sample_time_z_) / 1000.;		// FV
-			ib_in_ = Sen->Ib_model_in() / ap.nP();				// FV
-			dt_ = dt_fut_;									// Feedback --> PV
-			ib_ = ib_fut_;									// Feedback --> PV
+  			Tb_ = Sen->Tb();											// FV
+ 			Tb_f_ = Sen->Tb_f();										// FV
+			dt_in_ = (sample_time_ - sample_time_z_) / 1000.;					// FV
+			ib_in_ = Sen->Ib_model_in() / ap.nP();							// FV
+			dt_ = dt_fut_;												// Feedback --> PV source
+			ib_ = ib_fut_;												// Feedback --> PV source
 			Sen->Ib_model( ib_fut_ );
   
  			 // VOC-OCV model
-			voc_stat_ = calc_soc_voc(soc_, Tb_f_, ...);
+			voc_stat_ = calc_soc_voc(soc_, Tb_f_, ...);						// Feedback --> PV source
 
 
 			// ChargeTransfer dynamic model for model
-			ib_dyn_ = ChargeTransfer_->calculate(ib_, reset, chem_.tau_ct, dt_);
-			dvdyn_ =  ib_dyn_ * chem_.r_ct  + ib_ * chem_.r_0;
-			vb_ = voc_ + dvdyn_;
-			voc_soc_ = voc_stat_;
+			ib_dyn_ = ChargeTransfer_->calculate(ib_, reset, chem_.tau_ct, dt_);	// PV
+			dvdyn_ =  ib_dyn_ * chem_.r_ct  + ib_ * chem_.r_0;				// PV
+			vb_ = voc_ + dvdyn_;										// PV
+			voc_soc_ = voc_stat_;										// PV
 
   			// Saturation logic, both full and empty
-			float ib_charge_fut = ib_in_;  // Pass along current to charge unless bms_off.
+			// Pass along current to charge unless bms_off
+			float ib_charge_fut = ib_in_;									// FV
 			if ( sp.mod_ib )
-				sat_ib_max_ = sat_ib_null_ + (1. - soc_)) *  sat_cutback_gain_ ;
+				sat_ib_max_ = sat_ib_null_ + (1. - soc_)) *  sat_cutback_gain_ ;	// FV
 			else
-				sat_ib_max_ = ib_charge_fut;  // Disable cutback when real world
-			ib_fut_ = min(ib_charge_fut, sat_ib_max_);  // the feedback of ib_
+				 // Disable cutback when real world
+				sat_ib_max_ = ib_charge_fut;								// FV
+			ib_fut_ = min(ib_charge_fut, sat_ib_max_);  // the feedback of ib_		// FV
 
-			dt_charge_ = dt_fut_;
-			ib_charge_ = ib_fut_;  // Same time plane as volt calcs, added past value
+			dt_charge_ = dt_fut_;										// PV  ??????
+			ib_charge_ = ib_fut_;  // Same time plane as volt calcs, added past value	// FV  ?????
 
 			return vb_;
 		} // Sen->Sim->calculate()
