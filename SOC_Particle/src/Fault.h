@@ -78,19 +78,18 @@ enum dispw {
 };
 
 /*
-          ^ scale
-          |
+                  ^ scale
+                  |
 ------            |          ------- 1.0 ==> all lg
-     -          |        -
-     -        |      -
-    |    -------------             0.0 ==> all sm
-    |    |      |     |    |
-   n_lo   n_hi    |   p_lo   p_hi
-          |
-          |
-          v
-*/
-struct ScaleBrk {
+       -          |        -
+         -        |      -
+      |    -------------             0.0 ==> all sm
+      |     |     |     |     |
+  n_lo   n_hi     |     p_lo  p_hi
+                  |
+                  |
+                  v
+*/struct ScaleBrk {
   float n_lo;
   float n_d;
   float n_hi;

@@ -1,21 +1,56 @@
 Top Level Minor Frame
+
 ```c++
 // Definitions
-VO_CONV_GAIN = 
-VH3V3_CONV_GAIN = 
-VB_CONV_GAIN = 
-AMP_FILT_TAU = 
-TB_FILT = 
-SHUNT_AMP_GAIN = 
-SHUNT_NOA_GAIN = 
+PHOTON_ADC_VOLT = 3.3        // Photon ADC range, V (3.3)
+PHOTON_ADC_COUNT = 4096      // Photon ADC range, counts (4096)
+VB_SENSE_R_HI = 22000  // Vb high sense resistor, ohm (22000)
+VB_SENSE_R_LO = 4700  // Vb low sense resistor, ohm (4700)
+AMP_FILT_TAU =   4.0;  // seconds lag for Vb filtering
+TB_FILT = 120.;  // seconds lag for Tb filtering
 READ_DELAY = 100;   // ms minor frame update
+SHUNT_AMP_R1 = 1500.  // Internal amp resistance 196x, ohms (1500)
+SHUNT_AMP_R2 = 332000.  // Internal amp resistance 196x, ohms (332000)
+SHUNT_NOA_R1 = 1500.  // Internal amp resistance 29.4x, ohms (1500)
+SHUNT_NOA_R2 = 33200.  // Internal amp resistance 29.4x, ohms (33200)
+N_LO = -11. // Fully NOA signal disch transition, A (-11)
+A_LO = -10. // Fully AMP signal disch transition, A (-10)
+A_HI = 10. // Fully AMP signal charge transition, A (10)
+N_HI = 11. // Fully NOA signal charge transition, A (11)
+D11 = V op-amp Noa pin
+D13 = V op-amp Amp pin
+D14 = V common Amp pin
+
+SHUNT_AMP_GAIN = SHUNT_GAIN * SHUNT_AMP_R1 / SHUNT_AMP_R2;
+SHUNT_NOA_GAIN = SHUNT_GAIN * SHUNT_NOA_R1 / SHUNT_NOA_R2;
+VO_CONV_GAIN = PHOTON_ADC_VOLT) / PHOTON_ADC_COUNT
+VH3V3_CONV_GAIN = PHOTON_ADC_VOLT) / PHOTON_ADC_COUNT
+VB_CONV_GAIN = PHOTON_ADC_VOLT) / PHOTON_ADC_COUNT) *
+			(VB_SENSE_R_HI + VB_SENSE_R_LO) / VB_SENSE_R_LO
+
+/*
+                  ^ scale
+                  |
+------            |          -------> 1.0 ==> all lg
+       -          |        -
+         -        |      -
+      |    -------------          --> 0.0 ==> all sm
+      |    |      |     |    |
+   N_LO   A_LO    |   A_HI   N_HI
+                  |
+                  |
+                  v
+*/
+// Scale select between a large ranging signal and small ranging signal for
+// the same sensor.  Small might be a high precision, amplified circuit and
+// large might be low precision, lightly amplified circuit
+sel_brk_hdwe = new ScaleBrk( N_LO,  	A_LO,  A_HI,	N_HI);
+	ScaleBrk::scale_select = {...}  // Calculation function 
 
 user_input = model_signal_spec;
-sel_brk_hdwe = [];
 Sen = class Sensor;
 Mon = class BatteryMonitor;
 Sim = class BatterySim;
-
 loop() {
 read = wait_for_update(READ_DELAY);
 if (read) {
@@ -29,8 +64,10 @@ if (read) {
 			// Sample Ib
 			Sen->ShuntAmp->sample(...) {
 				sample_Vo(){
-					sample_time_z_ = sample_time_;
-					sample_time_ = millis();
+					sample_time_z_ = sample_time_;  // TODO:  verify past value used here
+					sample_time_ = millis(){
+						return system_clock_ms;
+					}
 		 		 	Vo_read_->analogReadDebounced(...){
 						Vo_raw_ = analogRead(D13);
 					}
@@ -72,9 +109,9 @@ if (read) {
 			}
 			ib_choose_hi_lo() {   // Use the first argument and the table second
 							   // argument to choose between 3rd and 4th arguments
-				Ib_hdwe_ = scale_select(Ib_noa_hdwe_, sel_brk_hdwe, Ib_amp_hdwe_, Ib_noa_hdwe_, ...);
-				Ib_hdwe_f_ = scale_select(Ib_noa_hdwe_, sel_brk_hdwe, Ib_amp_hdwe_f_, Ib_noa_hdwe_f_, ...);
-				Ib_hdwe_model_ = scale_select(Ib_noa_model_, sel_brk_hdwe, Ib_amp_model_, Ib_noa_model_, ...);
+				Ib_hdwe_ 			= scale_select(Ib_noa_hdwe_,  sel_brk_hdwe, Ib_amp_hdwe_,	Ib_noa_hdwe_, ...);
+				Ib_hdwe_f_ 		= scale_select(Ib_noa_hdwe_,  sel_brk_hdwe, Ib_amp_hdwe_f_,	Ib_noa_hdwe_f_, ...);
+				Ib_hdwe_model_ 	= scale_select(Ib_noa_model_, sel_brk_hdwe, Ib_amp_model_,	Ib_noa_model_, ...);
 				sample_time_ib_hdwe_ = ShuntNoAmp->sample_time();
 				dt_ib_hdwe_ = ShuntNoAmp->dt_ms();
  			}
@@ -94,6 +131,7 @@ if (read) {
 				Vb_raw_ = Vb_read_...;
 				...
   				Vb_hdwe_ = Vb_raw_) * VB_CONV_GAIN;
+				// Note: T_ in following is UBC (past value) from previous frame
 				Vb_hdwe_f_ = VbHdweFilt->calculate(..., AMP_FILT_TAU, T_, ...);
 			}
 			Sen->Flt->vb_check(...);
@@ -142,11 +180,11 @@ if (read) {
 			voc_soc_ = voc_stat_;
 
   			// Saturation logic, both full and empty
+			float ib_charge_fut = ib_in_;  // Pass along current to charge unless bms_off.
 			if ( sp.mod_ib )
 				sat_ib_max_ = sat_ib_null_ + (1. - (soc_ + ap.ds_voc_soc())) *  sat_cutback_gain_ ;
 			else
 				sat_ib_max_ = ib_charge_fut;  // Disable cutback when real world
-			float ib_charge_fut = ib_in_;  // Pass along current to charge unless bms_off
 			ib_fut_ = min(ib_charge_fut, sat_ib_max_);  // the feedback of ib_
 
 			dt_charge_ = dt_fut_;
@@ -178,12 +216,12 @@ if (read) {
 			// ib select
 			ib_choose_hi_lo(){
 				// No failure
-				Ib_hdwe_ = scale_select(Ib_noa_hdwe_,   sel_brk_hdwe,
-										Ib_amp_hdwe_, Ib_noa_hdwe, ...)
-				Ib_hdwe_f_ = scale_select(Ib_noa_hdwe_, sel_brk_hdwe,
-										Ib_amp_hdwe_f_, Ib_noa_hdwe_f_, ...);
-				Ib_hdwe_model_ = scale_select(Ib_noa_model_, sel_brk_hdwe,
-										Ib_amp_model_, Ib_noa_model_, ...);
+				Ib_hdwe_ = scale_select( 		Ib_noa_hdwe_,   	sel_brk_hdwe,
+											Ib_amp_hdwe_, 	Ib_noa_hdwe, ...)
+				Ib_hdwe_f_ = scale_select(		Ib_noa_hdwe_, 		sel_brk_hdwe,
+											Ib_amp_hdwe_f_, 	Ib_noa_hdwe_f_, ...);
+				Ib_hdwe_model_ = scale_select(	Ib_noa_model_, 	sel_brk_hdwe,
+											Ib_amp_model_, 	Ib_noa_model_, ...);
 				sample_time_ib_hdwe_ = ShuntNoAmp->sample_time();
 				dt_ib_hdwe_ = ShuntNoAmp->dt_ms();
 			}
@@ -221,7 +259,7 @@ if (read) {
 			if (sp.mod_vb()) {  // Model vb
 				Vb_f_ = Vb_;
 				if ((Flt->wrap_vb_fa() || Flt->vb_fa_lt()) ...) {
-					Vb_ = Mon->vb_model_rev() * ap.nS();
+					Vb_ = Mon->vb_model_rev() * ap.nS();  // TODO: verify past value vb_model_rev here
 					sample_time_vb_ = Sim->sample_time();
 				} else {
 					Vb_ = Vb_model_ + Vb_noise();

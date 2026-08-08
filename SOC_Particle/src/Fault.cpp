@@ -1026,8 +1026,9 @@ void Fault::wrap_scalars(BatteryMonitor* Mon) {
 n_d = n_hi - n_lo
 p_d = p_hi - p_lo
 */
-// Scale select between a large and small set of inputs.  Small might be a
-// precise, amplified sensor and large might be the high range equivalent
+// Scale select between a large ranging signal and small ranging signal for
+// the same sensor.  Small might be a high precision, amplified circuit and
+// large might be low precision, lightly amplified circuit
 float scale_select(const float in, const ScaleBrk* brk, const float sm,
                    const float lg) {
   if (brk->n_hi <= in && in <= brk->p_lo) {
