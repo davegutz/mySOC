@@ -160,8 +160,6 @@ if (read) {
 				// Note: T_ in following is UBC (past value) from previous frame
 				Vb_hdwe_f_ = VbHdweFilt->calculate(..., AMP_FILT_TAU, T_, ...);	// FV
 				...
-				sample_time_vb_hdwe_ = millis(){
-					return system_clock_ms;								// FV source
 			}
 			Sen->Flt->vb_check(...);										// FV
 
@@ -175,8 +173,6 @@ if (read) {
 				Tb_model_ = NOMINAL_TB + Tb_noise();						// FV
 				Tb_model_f_ = TbModelFilt->calculate(..., TB_FILT, T_, ...);		// FV
 				...
-				sample_time_Tb_hdwe_ = millis(){
-					return system_clock_ms;								// FV source
 			}
 			Sen->Flt->Tb_check(...);  //--> TB_FLT, TB_FA						// FV
 		}  // load_ib_vb_tb
@@ -278,9 +274,6 @@ if (read) {
 				} else {
 					Tb_ = Tb_model_;										// FV
 					Tb_f_ = Tb_model_f_;									// FV
-					sample_time_Tb_ = Sim->sample_time(){
-							return sample_time_;							// FV
-					}
 				}
 			} else {  // Hardware Tb
 				if (Flt->Tb_fa() ...) {
@@ -291,7 +284,6 @@ if (read) {
 				} else {
 					Tb_ = Tb_hdwe_;
 					Tb_f_ = Tb_hdwe_f_;
-					sample_time_Tb_ = sample_time_Tb_hdwe_;
 				}
 			}
 
@@ -302,8 +294,6 @@ if (read) {
 					...
 				} else {
 					Vb_ = Vb_model_ + Vb_noise();							// PV
-      					sample_time_vb_ = Sim->sample_time(){
-						return sample_time_;								// FV   bug?
 					}
 				}
 			} else {
@@ -312,7 +302,6 @@ if (read) {
 					...
 				} else {
 					Vb_ = Vb_hdwe_;
-					sample_time_vb_ = sample_time_vb_hdwe_;
 				}
   			}
 

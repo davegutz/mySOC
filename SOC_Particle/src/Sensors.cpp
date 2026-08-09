@@ -183,9 +183,8 @@ Sensors::Sensors(double T, double T_temp, Pins* pins, Sync* ReadSensors,
       IbNoaRMS(nullptr), inst_millis_(millis), inst_time_(time_now),
       NoaFilt(nullptr), Prbn_Tb_(nullptr), Prbn_Vb_(nullptr),
       Prbn_Ib_amp_(nullptr), Prbn_Ib_noa_(nullptr), reset_temp_(false),
-      sample_time_ib_(0UL), sample_time_ib_hdwe_(0UL), sample_time_Tb_(0ULL),
-      sample_time_Tb_hdwe_(0UL), sample_time_vb_(0UL),
-      sample_time_vb_hdwe_(0UL), SelFiltCal(nullptr), TbHdweFilt(nullptr),
+      sample_time_ib_(0UL), sample_time_ib_hdwe_(0UL),
+      SelFiltCal(nullptr), TbHdweFilt(nullptr),
       TbModelFilt(nullptr), VbFilt(nullptr), VbRMS(nullptr), VcRMS(nullptr),
       Tb_read_(nullptr), Vb_read_(nullptr), Tb_raw_(0), Tb_volt_(NOMINAL_TB),
       Vb_raw_(0), Vb_(NOMINAL_VB), Vb_f_(NOMINAL_VB), Vb_hdwe_(NOMINAL_VB),
@@ -368,11 +367,9 @@ void Sensors::select_volt_and_current_and_temp(BatteryMonitor* Mon) {
       Tb_ = NOMINAL_TB;
       Tb_f_ = NOMINAL_TB;
       Tb_f_rate_ = 0.;
-      sample_time_Tb_ = Sim->sample_time();
     } else if (Flt->Tb_flt() &&
                !ap.fake_faults())  // last good value while flt resolved
     {
-      sample_time_Tb_ = sample_time_Tb_hdwe_;
       if ( sp.debug()==16 ) Serial.printf("SEL:  Tb_flt%2d fake%2d Tb_fa%2d \
       Tb_%7.3f Tb_f_%7.3f\n", Flt->Tb_flt(), ap.fake_faults(), Flt->Tb_fa(),
       Tb_, Tb_f_);
@@ -381,7 +378,6 @@ void Sensors::select_volt_and_current_and_temp(BatteryMonitor* Mon) {
       Tb_ = Tb_model_;
       Tb_f_ = Tb_model_f_;
       Tb_f_rate_ = Tb_model_f_rate_;
-      sample_time_Tb_ = Sim->sample_time();
     }
     if ( sp.debug() == 16 ) Serial.printf("SEL:  Tb_flt%2d fake%2d Tb_fa%2d \
     Tb_%7.3f Tb_f_%7.3f\n", Flt->Tb_flt(), ap.fake_faults(), Flt->Tb_fa(),
@@ -391,15 +387,12 @@ void Sensors::select_volt_and_current_and_temp(BatteryMonitor* Mon) {
       Tb_ = NOMINAL_TB;
       Tb_f_ = NOMINAL_TB;
       Tb_f_rate_ = 0.;
-      sample_time_Tb_ = Sim->sample_time();
     } else if (Flt->Tb_flt() && !ap.fake_faults()) {
-      sample_time_Tb_ = sample_time_Tb_hdwe_;
       return;
     } else {
       Tb_ = Tb_hdwe_;
       Tb_f_ = Tb_hdwe_f_;
       Tb_f_rate_ = Tb_hdwe_f_rate_;
-      sample_time_Tb_ = sample_time_Tb_hdwe_;
     }
   }
 
@@ -408,19 +401,15 @@ void Sensors::select_volt_and_current_and_temp(BatteryMonitor* Mon) {
     Vb_f_ = Vb_;
     if ((Flt->wrap_vb_fa() || Flt->vb_fa_lt()) && !ap.fake_faults()) {
       Vb_ = Mon->vb_model_rev() * ap.nS();
-      sample_time_vb_ = Sim->sample_time();
     } else {
       Vb_ = Vb_model_ + Vb_noise();
-      sample_time_vb_ = Sim->sample_time();
     }
   } else {
     Vb_f_ = Vb_hdwe_f_;
     if ((Flt->wrap_vb_fa() || Flt->vb_fa_lt()) && !ap.fake_faults()) {
       Vb_ = Mon->vb_model_rev() * ap.nS();
-      sample_time_vb_ = Sim->sample_time();
     } else {
       Vb_ = Vb_hdwe_;
-      sample_time_vb_ = sample_time_vb_hdwe_;
     }
   }
   Vb_rms_ = VbRMS->update(Vb_);
@@ -689,26 +678,25 @@ void Sensors::Tb_load(const uint16_t tb_pin, const bool reset) {
     Tb_print();
     Serial.printf("\n");
   }
-  sample_time_Tb_hdwe_ = millis();
 }
 
 // Print analog voltage
 void Sensors::Tb_print() {
   Serial.printf(
-      "\nTb_print: tb_dscn%2d reset%2d stime%7.3f T%7.3f tb_dscn%2d Tb_raw%4d "
+      "\nTb_print: tb_dscn%2d reset%2d tb_dscn%2d Tb_raw%4d "
       "sp.Tb_bias_hdwe%7.3f Tb_hdwe%7.3f Tb_hdwe_f%7.3f Tb_hdwe_f_dt%7.3f "
       "Tb_hdwe_f_rate%7.3f Tb_hdwe_f_rstate%7.3f Tb_hdwe_f_lstate%7.3f "
       "tb_flt%2d tb_fa%2d\n",
-      sp.mod_tb_dscn(), reset_, float(sample_time_Tb_hdwe_) / 1000.f, T_,
+      sp.mod_tb_dscn(), reset_,
       sp.mod_tb_dscn(), Tb_raw_, sp.Tb_bias_hdwe(), Tb_hdwe_, Tb_hdwe_f_,
       Tb_hdwe_f_dt_, Tb_hdwe_f_rate_, Tb_hdwe_f_rstate_, Tb_hdwe_f_lstate_,
       Flt->Tb_flt(), Flt->Tb_fa());
   Serial.printf(
-      "Tb_print:  reset%2d stime %7.3f T%7.3f tb_dscn%2d            "
+      "Tb_print:  reset%2d T%7.3f tb_dscn%2d            "
       "ap.Tb_bias_model%7.3f Tb_model%7.3f Tb_model_f%7.3f Tb_model_f_dt%7.3f "
       "Tb_model_f_rate%7.3f Tb_model_f_rstate%7.3f Tb_model_f_lstate%7.3f "
       "tb_flt%2d tb_fa%2d\n",
-      reset_, float(sample_time_Tb_hdwe_) / 1000.f, T_, sp.mod_tb_dscn(),
+      reset_,  T_, sp.mod_tb_dscn(),
       ap.Tb_bias_model(), Tb_model_, Tb_model_f_, Tb_model_f_dt_,
       Tb_model_f_rate_, Tb_model_f_rstate_, Tb_model_f_lstate_, Flt->Tb_flt(),
       Flt->Tb_fa());
@@ -730,7 +718,6 @@ void Sensors::vb_load(const uint16_t vb_pin, const bool reset) {
     Vb_raw_ = 0;
     Vb_hdwe_ = 0.;
   }
-  sample_time_vb_hdwe_ = millis();
 }
 
 // Print analog voltage

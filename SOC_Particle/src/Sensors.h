@@ -419,10 +419,6 @@ class Sensors {
                      // T=reset
   uint64_t sample_time_ib_;       // Exact moment of selected Ib sample, ms
   uint64_t sample_time_ib_hdwe_;  // Exact moment of Ib sample, ms
-  uint64_t sample_time_Tb_;       // Exact moment of Tb sample, ms
-  uint64_t sample_time_Tb_hdwe_;  // Exact moment of Tb sample, ms
-  uint64_t sample_time_vb_;       // Exact moment of selected Vb sample, ms
-  uint64_t sample_time_vb_hdwe_;  // Exact moment of Vb sample, ms
   LagExp* SelFiltCal;             // Noise filter for calibration
   LagExp* TbHdweFilt;             // Noise filter for calibration
   LagExp* TbModelFilt;            // Noise filter for calibration
