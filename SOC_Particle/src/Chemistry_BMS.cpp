@@ -389,7 +389,7 @@ double Chemistry::lookup_voc(const double soc, const double tb_f) {
 // Pretty print
 void Chemistry::pretty_print() {
   Serial.printf("Chemistry:\n");
-  Serial.printf("  c_sd%9.3 EKF, farad\n", c_sd);
+  Serial.printf("  c_sd%9.3g EKF, farad\n", c_sd);
   Serial.printf("  coul_eff%7.3f\n", coul_eff);
   Serial.printf("  dqdt%7.3f, frac/dg C\n", dqdt);
   Serial.printf("  dv_min_abs%7.3f, V\n", dv_min_abs);
