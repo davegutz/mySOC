@@ -446,7 +446,7 @@ void Sensors::select_volt_and_current_and_temp(BatteryMonitor* Mon) {
   }
   Ib_amp_rms_ = IbAmpRMS->update(Ib_amp_);
   Ib_noa_rms_ = IbNoaRMS->update(Ib_noa_);
-  T_ = double(dt_ib_) / 1000.;  // s
+  T_ = double(dt_ib_) / 1000.;
   now_ = sample_time_ib_ - inst_millis_ + inst_time_ * 1000;
   c_time_ = double(now_) / 1000.;
   Sim->assign_times(c_time_);
@@ -676,6 +676,7 @@ void Sensors::Tb_load(const uint16_t tb_pin, const bool reset) {
   Tb_hdwe_f_rate_ = TbHdweFilt->rate();
   Tb_hdwe_f_rstate_ = TbHdweFilt->rstate();
   Tb_hdwe_f_lstate_ = TbHdweFilt->lstate();
+  // T_ is a UBC in following TbModelFilt->calculate(...,T_,...)
   Tb_model_f_ = TbModelFilt->calculate(Tb_model_, reset || Flt->Tb_fa(),
                                        ap.Tb_filt(), T_, -T_RLIM, T_RLIM);
   Tb_model_f_dt_ = TbModelFilt->T();
