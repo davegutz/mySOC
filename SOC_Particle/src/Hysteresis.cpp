@@ -93,7 +93,6 @@ void Hysteresis::pretty_print(const float dx, const float dy, const float dz) {
   Serial.printf("  ib%7.3f, A\n", ib_);
   Serial.printf("  ibs%7.3f, A\n", ibs_);
   Serial.printf("  ioc%7.3f, A\n", ioc_);
-  Serial.printf("  res%6.4f, null Ohm\n", res_);
   Serial.printf("  res%7.3f, ohm\n", res_);
   Serial.printf("  slr%7.3f,\n", slr_);
   Serial.printf("  soc%8.4f\n", soc_);

@@ -184,14 +184,15 @@ TableInterp::~TableInterp() { delete x_; }
 double TableInterp::interp() { return -999.; }
 void TableInterp::pretty_print() {
   uint16_t i;
-  Serial.printf("    x={");
-  for (i = 0; i < n1_; i++) {
-    Serial.printf("%7.3f, ", x_[i]);
-  }
-  Serial.printf("};\n");
+  Serial.printf("    n1 %d\n", n1_);
   Serial.printf("    v={");
   for (i = 0; i < n1_; i++) {
     Serial.printf("%7.3f, ", v_[i]);
+  }
+  Serial.printf("};\n");
+  Serial.printf("    x={");
+  for (i = 0; i < n1_; i++) {
+    Serial.printf("%7.3f, ", x_[i]);
   }
   Serial.printf("};\n");
 }
@@ -265,12 +266,7 @@ double TableInterp2D::interp(double x, double y) {
 void TableInterp2D::pretty_print() {
   uint16_t i, j;
   Serial.printf("    dx%7.3f dy%7.3f dz%7.3f\n", dx_, dy_, dz_);
-  Serial.printf("    y={");
-  for (j = 0; j < n2_; j++) Serial.printf("%7.3f, ", y_[j] - dy_);
-  Serial.printf("};\n");
-  Serial.printf("    x={");
-  for (i = 0; i < n1_; i++) Serial.printf("%7.3f, ", x_[i] - dx_);
-  Serial.printf("};\n");
+  Serial.printf("    n1 %d n2 %d\n", n1_, n2_);
   Serial.printf("    v={\n");
   for (j = 0; j < n2_; j++) {
     Serial.printf("      {");
@@ -278,4 +274,10 @@ void TableInterp2D::pretty_print() {
     Serial.printf("},\n");
   }
   Serial.printf("      };\n");
+  Serial.printf("    x={");
+  for (i = 0; i < n1_; i++) Serial.printf("%7.3f, ", x_[i] - dx_);
+  Serial.printf("};\n");
+  Serial.printf("    y={");
+  for (j = 0; j < n2_; j++) Serial.printf("%7.3f, ", y_[j] - dy_);
+  Serial.printf("};\n");
 }

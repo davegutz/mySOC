@@ -39,11 +39,11 @@ double Y_T[M_T] =  // Temperature breakpoints for voc table
 double X_SOC[N_S] =  // soc breakpoints for voc table
     {-0.15, 0.0, 0.05, 0.10,     0.14,  0.17,   0.20,   0.25,   0.30,   0.40,   0.50,   0.60,   0.70,   0.80,   0.90,   0.99, 0.995, 1.00};
 double T_VOC[M_T * N_S] =  // r(soc, dv) table  20250611 data shows this
-    {4.,    4.,        4.,       4.,    8.90, 10.40, 11.15, 11.40, 11.47, 11.60, 11.61, 11.68, 11.75, 11.81, 11.87, 11.92, 13.49, 14.45,
-      4.,    4.,        4.,       4.,    8.90, 10.40, 11.15, 11.40, 11.47, 11.60, 11.61, 11.68, 11.75, 11.81, 11.87, 11.92, 13.49, 14.45,
-      4.,    4.,  10.00, 12.50,  12.67, 12.75, 12.79, 12.85, 12.89, 12.93, 12.94, 12.99, 13.04, 13.11, 13.15, 13.17, 13.62, 14.50,
-      4.,    4.,  11.90, 12.55,  12.65, 12.70, 12.75, 12.85, 12.90, 12.98, 13.02, 13.06, 13.10, 13.14, 13.16, 13.17, 13.62, 14.50,
-      4.,    4.,  11.90, 12.55,  12.65, 12.70, 12.75, 12.85, 12.90, 12.98, 13.02, 13.06, 13.10, 13.14, 13.16, 13.17, 13.62, 14.50};
+    {	4.,    4.,        4.,       4.,    8.90, 10.40, 11.15, 11.40, 11.47, 11.60, 11.61, 11.68, 11.75, 11.81, 11.87, 11.92, 13.49, 14.45,
+	4.,    4.,        4.,       4.,    8.90, 10.40, 11.15, 11.40, 11.47, 11.60, 11.61, 11.68, 11.75, 11.81, 11.87, 11.92, 13.49, 14.45
+	4.,    4.,  10.00, 12.50,  12.67, 12.75, 12.79, 12.85, 12.89, 12.93, 12.94, 12.99, 13.04, 13.11, 13.15, 13.17, 13.62, 14.50,
+	4.,    4.,  11.90, 12.55,  12.65, 12.70, 12.75, 12.85, 12.90, 12.98, 13.02, 13.06, 13.10, 13.14, 13.16, 13.17, 13.62, 14.50
+	4.,    4.,  11.90, 12.55,  12.65, 12.70, 12.75, 12.85, 12.90, 12.98, 13.02, 13.06, 13.10, 13.14, 13.16, 13.17, 13.62, 14.50};
 
 
 sp = class SavedPars;     // Stored/retained settings & configuration flags
@@ -94,56 +94,57 @@ if (read) {
 		load_ib_vb_tb(){
 			// ib load-----------------------------------
 			// Sample Ib
-																	// Model temporal
+																							// Model temporal | Hdwe temporal
 			Sen->ShuntAmp->sample(...) {
 				sample_Vo(){			
-					sample_time_z_ = sample_time_;  						// Feedback -> PV source
+					sample_time_z_ = sample_time_;				// Feedback -> PV source | ditto
 					sample_time_ = millis(){
-						return system_clock_ms;							// FV source
+						return system_clock_ms;											// FV source	|	ditto
 					}
-		 		 	Vo_read_->analogReadDebounced(...){					// FV source
-						Vo_raw_ = analogRead(myPins.Vom_pin);
+		 			Vo_read_->analogReadDebounced(...){
+						Vo_raw_ = analogRead(myPins.Vom_pin);				// FV source	|	ditto
 					}
-		  			Vo_ = float(Vo_raw_) * VO_CONV_GAIN;					// FV
-		  		}
-		  		sample_Vc(){
-		  			Vc_read_->analogReadDebounced(...){					// FV source
-							Vc_raw_ = analogRead(myPins.Vc_pin);
+		  		Vo_ = float(Vo_raw_) * VO_CONV_GAIN;					// FV					| ditto
+		  	}
+		  	sample_Vc(){
+		  		Vc_read_->analogReadDebounced(...){
+						Vc_raw_ = analogRead(myPins.Vc_pin);				// FV source	| ditto
 					}
-		    			Vc_ = float(Vc_raw_) * VH3V3_CONV_GAIN;				// FV
-		  		}
-		  		sample_combine(){
-					Vo_Vc_ = Vo_ - Vc_;									// FV
-		  		}
+	    		Vc_ = float(Vc_raw_) * VH3V3_CONV_GAIN;				// FV					| ditto
+	  		}
+	  		sample_combine(){
+					Vo_Vc_ = Vo_ - Vc_;														// FV					| ditto
+	  		}
 			} // Sen->ShuntAmp->sample(...)
 
-		 	Sen->ShuntNoAmp->sample(...){								// FV source
+		 	Sen->ShuntNoAmp->sample(...){
 				// ...similar to  ShuntAmp
-					Vo_raw_ = analogRead(myPins.Von_pin);
 			}
+
 			Sen->ShuntAmp->convert(...){
-				vshunt_ = Vo_Vc_;										// FV
-				Ishunt_cal_ = vshunt_ * SHUNT_AMP_GAIN ;					// FV
+				vshunt_ = Vo_Vc_;																	// FV				| ditto
+				Ishunt_cal_ = vshunt_ * SHUNT_AMP_GAIN ;					// FV				| ditto
 			}
 			Sen->ShuntNoAmp->convert(...){
 				// ...similar to  ShuntAmp
 			}
 			Sen->Flt->vc_check(...);  // OS fault check
 			Sen->shunt_select_initial(...){
-  				Ib_amp_model_ = mod_add;								// FV
-				Ib_noa_model_ = mod_add;								// FV
+  			Ib_amp_model_ = mod_add;													// FV				| ditto
+				Ib_noa_model_ = mod_add;													// FV				| ditto
 
-				Ib_amp_hdwe_ = ShuntAmp->Ishunt_cal(){					// FV
+				Ib_amp_hdwe_ = ShuntAmp->Ishunt_cal(){						// FV				| ditto
 					  return Ishunt_cal_ ;
 				}
-  				Ib_noa_hdwe_ = ShuntNoAmp->Ishunt_cal(){					// FV
+  				Ib_noa_hdwe_ = ShuntNoAmp->Ishunt_cal(){
 					// ... similar to ShuntAmp
 				}
 			}
+
 			// Assign Ib
 			if (!sp.mod_ib()) {
 				// When running normally the model tracks hdwe
-				Ib_model_in_ = Ib_hdwe_;  								// tbd
+				Ib_model_in_ = Ib_hdwe_;  												// tbd
 			} 
 			// Otherwise it generates signals for feedback into monitor
 			// Noise is actually separate for each signal. Simplified here
@@ -156,7 +157,7 @@ if (read) {
 			Sen->vb_load(myPins.Vb_pin=D12, ...){
 				Vb_raw_ = Vb_read_...;									// FV source
 				...
-  				Vb_hdwe_ = Vb_raw_) * VB_CONV_GAIN;						// FV
+  			Vb_hdwe_ = Vb_raw_) * VB_CONV_GAIN;						// FV
 				// Note: T_ in following is UBC (past value) from previous frame
 				Vb_hdwe_f_ = VbHdweFilt->calculate(..., AMP_FILT_TAU, T_, ...);	// FV
 				...
@@ -176,6 +177,7 @@ if (read) {
 			}
 			Sen->Flt->Tb_check(...);  //--> TB_FLT, TB_FA						// FV
 		}  // load_ib_vb_tb
+
 
 		// Sim initialize as needed from memory
   		if (reset_temp) {

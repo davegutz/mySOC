@@ -65,8 +65,8 @@ void Coulombs::pretty_print() {
   Serial.printf(" coul_eff%9.5f\n", coul_eff_);
   Serial.printf(" d_delta_q%9.1f, C\n", d_delta_q_);
   Serial.printf(" delta_q%9.1f, C\n", *sp_delta_q_);
-  Serial.printf(" delta_q_inf/delta_q_abs%9.1f / %9.1f %8.4f C\n", delta_q_inf_,
-                delta_q_abs(), delta_q_inf_ / delta_q_abs());
+  Serial.printf(" delta_q_abs%9.1f, C\n", delta_q_abs());
+  Serial.printf(" delta_q_inf%9.1f, C\n", delta_q_inf_);
   Serial.printf(" delta_q_neg%9.1f C, time_neg%9.1f s\n", delta_q_neg_,
                 time_neg_);
   Serial.printf(" delta_q_pos%9.1f C, time_pos%9.1f s\n", delta_q_pos_,
@@ -78,16 +78,22 @@ void Coulombs::pretty_print() {
   Serial.printf(" q_cap%9.1f, C\n", q_capacity_);
   Serial.printf(" q_cap_rat%9.1f, C\n", q_cap_rated_);
   Serial.printf(" q_cap_rat_scl%9.1f, C\n", q_cap_rated_scaled_);
+  Serial.printf(" q_inf%9.1f, C\n", q_inf_);
   Serial.printf(" q_min%9.1f, C\n", q_min_);
+  Serial.printf(" rated_t%5.1f dg C\n", chem_.rated_temp);
   Serial.printf(" resetting %d\n", resetting_);
   Serial.printf(" sat %d\n", sat_);
+  Serial.printf(" saturated %d\n", saturated_);
   Serial.printf(" soc%8.4f\n", soc_);
+  Serial.printf(" soc_ekf_min%8.4f\n", soc_ekf_min_);
   Serial.printf(" soc_inf%8.4f\n", soc_inf_);
   Serial.printf(" soc_min%8.4f\n", soc_min_);
-  Serial.printf(" tb_f_%5.1f dg C\n", tb_f_);
-  Serial.printf(" rated_t%5.1f dg C\n", chem_.rated_temp);
+  Serial.printf(" tb_f%5.1f dg C\n", tb_f_);
+  Serial.printf(" Tb_f%5.1f dg C\n", Tb_f_);
   Serial.printf(" tb_f_rate%9.5f dg C / s\n", tb_f_rate_);
-  Serial.printf(" tb_f_rate%9.5f dg C / s\n", Tb_f_rate_);
+  Serial.printf(" Tb_f_rate%9.5f dg C / s\n", Tb_f_rate_);
+  Serial.printf(" time_neg%9.1f s\n", time_neg_);
+  Serial.printf(" time_pos%9.1f s\n", time_pos_);
   Serial.printf("Coulombs (mod_code=%d) ", mod_code());
   Serial.printf("Coulombs: silent DEPLOY\n");
   Serial.printf(" Chemistry::\n");

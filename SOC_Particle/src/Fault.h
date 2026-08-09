@@ -102,8 +102,10 @@ enum dispw {
     p_d = p_hi - p_lo;
   }
   String pretty_print() {
-    String txBuf = String::format("ScaleBrk  [%7.3f %7.3f  %7.3f %7.3f]\n",
-                                  n_lo, n_hi, p_lo, p_hi);
+    String txBuf = String::format(
+        "ScaleBrk  n_d:%7.3f n_hi:%7.3f n_lo:%7.3f p_d:%7.3f p_hi:%7.3f "
+        "p_lo:%7.3f\n",
+        n_d, n_hi, n_lo, p_d, p_hi, p_lo);
     return txBuf;
   }
 };

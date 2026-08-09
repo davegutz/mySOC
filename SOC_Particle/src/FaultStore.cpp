@@ -146,24 +146,7 @@ void Flt_st::pretty_print(const String code) {
     Serial.printf("code %s\n", code.c_str());
     time_long_2_str((time_t)(this->t_flt / 1000ULL), buffer);
     Serial.printf("buffer %s\n", buffer);
-    Serial.printf("t %llu\n", this->t_flt);
-    Serial.printf("Tb_hdwe_filt %7.3f\n", float(this->Tb_hdwe_filt) / SCL_600);
-    Serial.printf("vb_hdwe_filt %7.3f\n",
-                  float(this->vb_hdwe_filt) / sp.vb_hist_slr());
-    Serial.printf("Vc_hdwe_sum %7.3f\n", float(this->Vc_hdwe_sum) / SCL_3000);
-    Serial.printf("ib_amp_hdwe_filt %7.3f\n",
-                  float(this->ib_amp_hdwe_filt) / sp.ib_hist_m_slr());
-    Serial.printf("ib_noa_hdwe_filt %7.3f\n",
-                  float(this->ib_noa_hdwe_filt) / sp.ib_hist_n_slr());
-    Serial.printf("Tb_filt %7.3f\n", float(this->Tb_filt) / SCL_600);
-    Serial.printf("vb_filt %7.3f\n", float(this->vb_filt) / sp.vb_hist_slr());
-    Serial.printf("ib_filt %7.3f\n", float(this->ib_filt) / sp.ib_hist_n_slr());
-    Serial.printf("soc %7.4f\n", float(this->soc) / SCL_16000);
-    Serial.printf("soc_min %7.4f\n", float(this->soc_min) / SCL_16000);
-    Serial.printf("soc_ekf %7.4f\n", float(this->soc_ekf) / SCL_16000);
-    Serial.printf("voc_filt %7.3f\n", float(this->voc_filt) / sp.vb_hist_slr());
-    Serial.printf("voc_stat_filt %7.3f\n",
-                  float(this->voc_stat_filt) / sp.vb_hist_slr());
+    Serial.printf("dummy %lu\n", this->dummy);
     Serial.printf("e_wrap_filt %7.3f\n",
                   float(this->e_wrap_filt) / sp.vb_hist_slr());
     Serial.printf("e_wrap_m_filt %7.3f\n",
@@ -172,7 +155,26 @@ void Flt_st::pretty_print(const String code) {
                   float(this->e_wrap_m_trim) / sp.vb_hist_slr());
     Serial.printf("e_wrap_n_filt %7.3f\n",
                   float(this->e_wrap_n_filt) / sp.vb_hist_slr());
-    Serial.printf("fltw %lu falw %lu\n", this->fltw, this->falw);
+    Serial.printf("falw %lu\n", this->falw);
+    Serial.printf("fltw %lu\n", this->fltw);
+    Serial.printf("ib_amp_hdwe_filt %7.3f\n",
+                  float(this->ib_amp_hdwe_filt) / sp.ib_hist_m_slr());
+    Serial.printf("ib_filt %7.3f\n", float(this->ib_filt) / sp.ib_hist_n_slr());
+    Serial.printf("ib_noa_hdwe_filt %7.3f\n",
+                  float(this->ib_noa_hdwe_filt) / sp.ib_hist_n_slr());
+    Serial.printf("soc %7.4f\n", float(this->soc) / SCL_16000);
+    Serial.printf("soc_ekf %7.4f\n", float(this->soc_ekf) / SCL_16000);
+    Serial.printf("soc_min %7.4f\n", float(this->soc_min) / SCL_16000);
+    Serial.printf("t %llu\n", this->t_flt);
+    Serial.printf("Tb_filt %7.3f\n", float(this->Tb_filt) / SCL_600);
+    Serial.printf("Tb_hdwe_filt %7.3f\n", float(this->Tb_hdwe_filt) / SCL_600);
+    Serial.printf("vb_filt %7.3f\n", float(this->vb_filt) / sp.vb_hist_slr());
+    Serial.printf("vb_hdwe_filt %7.3f\n",
+                  float(this->vb_hdwe_filt) / sp.vb_hist_slr());
+    Serial.printf("Vc_hdwe_sum %7.3f\n", float(this->Vc_hdwe_sum) / SCL_3000);
+    Serial.printf("voc_filt %7.3f\n", float(this->voc_filt) / sp.vb_hist_slr());
+    Serial.printf("voc_stat_filt %7.3f\n",
+                  float(this->voc_stat_filt) / sp.vb_hist_slr());
   }
 }
 

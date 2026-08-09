@@ -136,25 +136,52 @@ class CommandPars {
   }
 
   void pretty_print() {
-
-    // c:/Users/daveg/Documents/GitHub/mySolarStateOfCharge/SOC_Particle/
-    // target/6.
     sendTxBuf(String::format("command parameters(cp):\n"), true, true);
+    sendTxBuf(String::format(" asap_str %s\n", asap_str.c_str()), true, true);
+    sendTxBuf(String::format(" ble_first_char %c\n", ble_first_char), true,
+              true);
+    sendTxBuf(String::format(" chitchat %d\n", chitchat), true, true);
+    sendTxBuf(String::format(" cmd_str %s\n", cmd_str.c_str()), true, true);
+    sendTxBuf(String::format(" cmd_token %d\n", cmd_token), true, true);
+    sendTxBuf(String::format(" ctl_str %s\n", ctl_str.c_str()), true, true);
+    sendTxBuf(String::format(" disp_word %lu\n", disp_word), true, true);
+    sendTxBuf(String::format(" ekf_executing %d\n", ekf_executing), true,
+              true);
+    sendTxBuf(String::format(" ekf_reset %d\n", ekf_reset), true, true);
+    sendTxBuf(String::format(" ekf_reset_print %d\n", ekf_reset_print), true,
+              true);
+    sendTxBuf(String::format(" freeze_queues %d\n", freeze_queues), true,
+              true);
     sendTxBuf(String::format(" inf_reset %d\n", inf_reset), true, true);
+    sendTxBuf(String::format(" inp_str %s\n", inp_str.c_str()), true, true);
+    sendTxBuf(String::format(" inp_token %d\n", inp_token), true, true);
+    sendTxBuf(String::format(" kf_reset %d\n", kf_reset), true, true);
+    sendTxBuf(String::format(" kf_reset_print %d\n", kf_reset_print), true,
+              true);
+    sendTxBuf(String::format(" last_read_debug %d\n", last_read_debug), true,
+              true);
+    sendTxBuf(String::format(" last_str %s\n", last_str.c_str()), true, true);
     sendTxBuf(String::format(" model_cutback %d\n", model_cutback), true,
               true);
     sendTxBuf(String::format(" model_saturated %d\n", model_saturated), true,
               true);
+    sendTxBuf(String::format(" num_v_print %lu\n", num_v_print), true, true);
     sendTxBuf(String::format(" publishS %d\n", publishS), true, true);
+    sendTxBuf(String::format(" queue_str %s\n", queue_str.c_str()), true,
+              true);
     sendTxBuf(String::format(" soft_reset %d\n", soft_reset), true, true);
+    sendTxBuf(String::format(" soft_reset_print %d\n", soft_reset_print),
+              true, true);
     sendTxBuf(String::format(" soft_reset_sim %d\n", soft_reset_sim), true,
               true);
-    sendTxBuf(String::format(" ts %7.3f\n", ts), true, true);
-    sendTxBuf(String::format(" write_summary %d\n", write_summary), true,
+    sendTxBuf(String::format(" soft_reset_sim_print %d\n",
+                             soft_reset_sim_print),
+              true, true);
+    sendTxBuf(String::format(" soft_sim_hold %d\n", soft_sim_hold), true,
               true);
-    sendTxBuf(String::format(" kf_reset %d\n", kf_reset), true, true);
-    sendTxBuf(String::format(" ekf_reset %d\n", ekf_reset), true, true);
-    sendTxBuf(String::format(" disp_word %d\n\n", disp_word), true, true);
-
+    sendTxBuf(String::format(" soon_str %s\n", soon_str.c_str()), true, true);
+    sendTxBuf(String::format(" ts %7.3f\n", ts), true, true);
+    sendTxBuf(String::format(" write_summary %d\n\n", write_summary), true,
+              true);
   }
 };

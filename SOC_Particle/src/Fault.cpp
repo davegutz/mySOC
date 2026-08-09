@@ -160,28 +160,36 @@ void Looparound::calculate(const bool reset, const bool disable_fault,
 String Looparound::pretty_print(Sensors* Sen) {
   String txBuf;
   txBuf =
-      String::format(" reset %d\n", reset_) +
-      String::format(" ib%7.3f A\n", ib_) +
-      String::format(" ib_dyn%7.3f A\n", ib_dyn_) +
       String::format(" dv_dyn%7.3f V\n", dv_dyn_) +
-      String::format(" voc_soc%7.3f V\n", voc_soc_) +
-      String::format(" voc%7.3f V\n", voc_) +
       String::format(" e_wrap (= voc_soc-voc) %7.3f V\n", e_wrap_) +
       String::format(" e_wrap_filt%7.3f V\n", e_wrap_filt_) +
-      String::format(" ewhi_slr%7.3f\n", ap.ewhi_slr()) +
-      String::format(" ewlo_slr%7.3f\n", ap.ewlo_slr()) +
-      String::format(" ewmin_slr%7.3f\n", Sen_->Flt->ewmin_slr()) +
-      String::format(" ewsat_slr%7.3f\n", Sen_->Flt->ewsat_slr()) +
-      String::format(" ewhi_thr_base%7.3f V\n", ewhi_thr_base_) +
-      String::format(" ewlo_thr_base%7.3f V\n", ewlo_thr_base_) +
-      String::format(" ewhi_thr (kicked)%7.3f V\n", ewhi_thr_) +
-      String::format(" ewlo_thr (kicked)%7.3f V\n", ewlo_thr_) +
+      String::format(" e_wrap_rate%7.3f V/s\n", e_wrap_rate_) +
       String::format(" e_wrap_trim%7.3f V\n", e_wrap_trim_) +
       String::format(" e_wrap_trimmed%7.3f V\n", e_wrap_trimmed_) +
-      String::format(" wrap_trim_gain%7.3f r/s\n", wrap_trim_gain_) +
-      String::format(" hi_fault/fail %d/%d\n", hi_fault_, hi_fail_) +
-      String::format(" lo_fault/fail %d/%d\n", lo_fault_, lo_fail_) +
-      String::format(" ewlo_thr/ewhi_thr%7.3f/%7.3f V\n", ewlo_thr_, ewhi_thr_);
+      String::format(" ewhi_slr%7.3f\n", ap.ewhi_slr()) +
+      String::format(" ewhi_thr (kicked)%8.3f V\n", ewhi_thr_) +
+      String::format(" ewhi_thr_base%8.3f V\n", ewhi_thr_base_) +
+      String::format(" ewlo_slr%7.3f\n", ap.ewlo_slr()) +
+      String::format(" ewlo_thr (kicked)%8.3f V\n", ewlo_thr_) +
+      String::format(" ewlo_thr_base%7.3f V\n", ewlo_thr_base_) +
+      String::format(" ewmin_slr%7.3f\n", Sen_->Flt->ewmin_slr()) +
+      String::format(" ewsat_slr%7.3f\n", Sen_->Flt->ewsat_slr()) +
+      String::format(" hi_fail %d\n", hi_fail_) +
+      String::format(" hi_fault %d\n", hi_fault_) +
+      String::format(" ib%7.3f A\n", ib_) +
+      String::format(" ib_dyn%7.3f A\n", ib_dyn_) +
+      String::format(" ib_past%7.3f A\n", ib_past_) +
+      String::format(" imax%7.3f A\n", imax_) +
+      String::format(" imin%7.3f A\n", imin_) +
+      String::format(" lo_fail %d\n", lo_fail_) +
+      String::format(" lo_fault %d\n", lo_fault_) +
+      String::format(" reset %d\n", reset_) +
+      String::format(" vb%7.3f V\n", vb_) +
+      String::format(" voc%7.3f V\n", voc_) +
+      String::format(" voc_soc%7.3f V\n", voc_soc_) +
+      String::format(" wrap_hi_volt%7.3f V\n", wrap_hi_volt_) +
+      String::format(" wrap_lo_volt%7.3f V\n", wrap_lo_volt_) +
+      String::format(" wrap_trim_gain%7.3f r/s\n", wrap_trim_gain_);
   return txBuf;
 }
 
@@ -527,43 +535,66 @@ void Fault::pretty_print(Sensors* Sen, BatteryMonitor* Mon) {
 
   txBuf =
       String::format("\nFault:\n") +
-      String::format(" ib_lo_limited_hi %d\n", ib_lo_limited_hi_) +
-      String::format(" ib_lo_active     %d\n", ib_lo_active_) +
-      String::format(" ib_lo_limited_lo %d\n", ib_lo_limited_lo_) +
-      String::format(" ib_diff%7.3f thr%7.3f Fd^\n", ib_diff_f_, ib_diff_thr_) +
+      String::format(" bms_off %d\n", Mon->bms_off()) +
+      String::format(" cc_diff%7.3f thr%7.3f\n", cc_diff_, cc_diff_thr_) +
+      String::format(" cc_diff_empty_slr%7.3f\n", cc_diff_empty_slr_) +
+      String::format(" cc_diff_fa %d\n", cc_diff_fa_) +
+      String::format(" dis_ib_fa %d\n", ap.disab_ib_fa()) +
+      String::format(" dis_tb_fa %d\n", ap.disab_tb_fa()) +
+      String::format(" dis_vb_fa %d\n", ap.disab_vb_fa_lt()) +
+      String::format(" disable_amp_fault %d\n", disable_amp_fault_) +
+      String::format(" e_wrap%7.3f\n", e_wrap_) +
       String::format(" e_wrap_filt%7.3f\n", e_wrap_filt_) +
-      String::format(" ib_quiet%7.3f thr%7.3f Fq v\n", ib_quiet_,
-                     ib_quiet_thr_) +
-      String::format(" sel_brk_hdwe:     ");
-  sendTxBuf(txBuf, true, true);
-
-  txBuf = Sen->sel_brk_hdwe->pretty_print() + String::format("\n");
-  sendTxBuf(txBuf, true, true);
-
-  txBuf =
+      String::format(" e_wrap_rate%7.3f\n", e_wrap_rate_) +
+      String::format(" ewmax_slr%7.3f\n", ewmax_slr_) +
+      String::format(" ewmin_slr%7.3f\n", ewmin_slr_) +
+      String::format(" ewsat_slr%7.3f\n", ewsat_slr_) +
+      String::format(" falw %lu\n", falw_) +
+      String::format(" fltw %lu\n", fltw_) +
+      String::format(" ib_amp_hi %d\n", ib_amp_hi_) +
+      String::format(" ib_amp_invalid %d\n", ib_amp_invalid_) +
+      String::format(" ib_amp_lo %d\n", ib_amp_lo_) +
+      String::format(" ib_choice %d\n", static_cast<int>(ib_choice_)) +
+      String::format(" ib_decision %d\n", ib_decision_) +
+      String::format(" ib_diff%7.3f thr%7.3f Fd^\n", ib_diff_f_, ib_diff_thr_) +
+      String::format(" ib_is_functional %d\n", ib_is_functional_) +
+      String::format(" ib_is_quiet %d\n", ib_is_quiet_) +
+      String::format(" ib_lo_active %d\n", ib_lo_active_) +
+      String::format(" ib_lo_limited_hi %d\n", ib_lo_limited_hi_) +
+      String::format(" ib_lo_limited_lo %d\n", ib_lo_limited_lo_) +
+      String::format(" ib_noa_hi %d\n", ib_noa_hi_) +
+      String::format(" ib_noa_invalid %d\n", ib_noa_invalid_) +
+      String::format(" ib_noa_lo %d\n", ib_noa_lo_) +
+      String::format(" ib_noa_rate%7.3f\n", ib_noa_rate_) +
+      String::format(" ib_quiet%7.3f thr%7.3f Fq v\n", ib_quiet_, ib_quiet_thr_) +
+      String::format(" ib_rate%7.3f\n", ib_rate_) +
+      String::format(" ib_really_quiet %d\n", ib_really_quiet_) +
+      String::format(" ib_sel_stat %d\n", ib_sel_stat_) +
+      String::format(" latch %d\n", latch_) +
+      String::format(" latch_fake %d\n", latch_fake_) +
+      String::format(" rate_amp %d\n", rate_amp_) +
+      String::format(" rate_noa %d\n", rate_noa_) +
+      String::format(" reset_all_faults %d\n", reset_all_faults_) +
+      String::format(" reset_all_faults_print %d\n", reset_all_faults_print_) +
       String::format(" soc%7.3f soc_ekf%7.3f soc_inf%7.3f voc%7.3f voc_soc%7.3f\n",
                      Mon->soc(), Mon->soc_ekf(), Mon->soc_inf(), Mon->voc(),
                      Mon->voc_soc()) +
-      String::format(" dis_tb_fa %d  dis_vb_fa %d  dis_ib_fa %d\n",
-                     ap.disab_tb_fa(), ap.disab_vb_fa_lt(), ap.disab_ib_fa()) +
-      String::format(" ib_is_quiet %d ib_really_quiet %d\n", ib_is_quiet_,
-                     ib_really_quiet_) +
-      String::format(" bms_off  %d\n\n", Mon->bms_off()) +
-      String::format(" wrap_m_and_n_fa %d\n", Sen->Flt->wrap_m_and_n_fa()) +
-      String::format(" Tbh%9.5f Tbm=%9.5f sel%9.5f\n", Sen->Tb_hdwe(),
+      String::format(" splrr_amp %d\n", splrr_amp_) +
+      String::format(" splrr_noa %d\n", splrr_noa_) +
+      String::format(" Tb Tbh%9.5f Tbm%9.5f sel%9.5f\n", Sen->Tb_hdwe(),
                      Sen->Tb_model(), Sen->Tb()) +
-      String::format(" Tbh%9.5f Tbm=%9.5f sel%9.5f\n", Sen->Tb_hdwe(),
-                     Sen->Tb_model(), Sen->Tb()) +
-      String::format(" Vbh%7.3f Vbm %7.3f sel%7.3f\n", Sen->Vb_hdwe(),
+      String::format(" tb_sel_stat %d\n", tb_sel_stat_) +
+      String::format(" Vb Vbh%7.3f Vbm%7.3f sel%7.3f\n", Sen->Vb_hdwe(),
                      Sen->Vb_model(), Sen->Vb()) +
-      String::format(" Vc_h_m%7.3f\n", Sen->ShuntAmp->Vc()) +
-      String::format(" Vc_h_n%7.3f\n", Sen->ShuntNoAmp->Vc()) +
-      String::format(" Imh%7.3f Imm %7.3f Ib%7.3f\n", Sen->Ib_amp_hdwe(),
-                     Sen->Ib_amp_model(), Sen->Ib()) +
-      String::format(" Inh%7.3f Inm %7.3f Ib%7.3f\n", Sen->Ib_noa_hdwe(),
-                     Sen->Ib_noa_model(), Sen->Ib()) +
-      String::format(" Ibh%7.3f Ibh %7.3f Ib%7.3f\n\n", Sen->Ib_hdwe(),
-                     Sen->Ib_hdwe_model(), Sen->Ib());
+      String::format(" vb_sel_stat %d\n", vb_sel_stat_) +
+      String::format(" Vc_h_m%7.3f Vc_h_n%7.3f\n", Sen->ShuntAmp->Vc(),
+                     Sen->ShuntNoAmp->Vc()) +
+      String::format(" wrap_hi_noa%7.3f\n", wrap_hi_noa_) +
+      String::format(" wrap_hi_volt%7.3f\n", wrap_hi_volt_) +
+      String::format(" wrap_lo_noa%7.3f\n", wrap_lo_noa_) +
+      String::format(" wrap_lo_volt%7.3f\n", wrap_lo_volt_) +
+      String::format(" wrap_m_and_n_fa %d\n\n", Sen->Flt->wrap_m_and_n_fa()) +
+      String::format(" sel_brk_hdwe: ");
   sendTxBuf(txBuf, true, true);
 
   // if ( ib_choice_ != ib_choice_last_ || vb_sel_stat_ != vb_sel_stat_last_ ||

@@ -120,17 +120,21 @@ void StateSpace::pretty_print_vec(const String name, const uint8_t n,
 void StateSpace::pretty_print(void) {
   Serial.printf("StateSpace:\n");
   Serial.printf("  dt %9.6f\n", dt_);
+  Serial.printf("  n %d\n", n_);
+  Serial.printf("  p %d\n", p_);
+  Serial.printf("  q %d\n", q_);
   pretty_print_mat("A ", n_, n_, A_);
-  pretty_print_vec("x ", n_, x_);
-  pretty_print_mat("B ", n_, p_, B_);
-  pretty_print_vec("u ", p_, u_);
-  pretty_print_mat("C ", q_, n_, C_);
-  pretty_print_mat("D ", q_, p_, D_);
-  pretty_print_vec("x_dot ", n_, x_dot_);
-  pretty_print_vec("y ", q_, y_);
   if (n_ == 2 && p_ == 2) {
     pretty_print_mat("AinvB", n_, n_, AinvB_);
   }
+  pretty_print_mat("B ", n_, p_, B_);
+  pretty_print_mat("C ", q_, n_, C_);
+  pretty_print_mat("D ", q_, p_, D_);
+  pretty_print_vec("u ", p_, u_);
+  pretty_print_vec("x ", n_, x_);
+  pretty_print_vec("x_dot ", n_, x_dot_);
+  pretty_print_vec("x_past ", n_, x_past_);
+  pretty_print_vec("y ", q_, y_);
 }
 
 // Scale elements as requested

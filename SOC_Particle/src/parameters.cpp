@@ -326,18 +326,17 @@ void SavedPars::pretty_print_modeling() {
   char buffer[32];
   bitMapPrint(buffer, sp.modeling(), 8);
   Serial.printf(" 0x%s\n", buffer);
-  Serial.printf(" 0x128 ib_noa_dscn %d\n", mod_ib_noa_dscn());
-  Serial.printf(" 0x64  ib_amp_dscn %d\n", mod_ib_amp_dscn());
-  Serial.printf(" 0x32  vb_dscn %d\n", mod_vb_dscn());
-  Serial.printf(" 0x16  temp_dscn %d\n", mod_tb_dscn());
-  Serial.printf(" 0x8   tweak_test %d\n", tweak_test());
-  Serial.printf(" 0x4   current %d\n", mod_ib());
-  Serial.printf(" 0x2   voltage %d\n", mod_vb());
-  Serial.printf(" 0x1   temp %d\n", mod_tb());
-
+  Serial.printf(" 0x4   mod_ib %d\n", mod_ib());
+  Serial.printf(" 0x64  mod_ib_amp_dscn %d\n", mod_ib_amp_dscn());
+  Serial.printf(" 0x128 mod_ib_noa_dscn %d\n", mod_ib_noa_dscn());
+  Serial.printf(" 0x1   mod_tb %d\n", mod_tb());
+  Serial.printf(" 0x16  mod_tb_dscn %d\n", mod_tb_dscn());
+  Serial.printf(" 0x2   mod_vb %d\n", mod_vb());
+  Serial.printf(" 0x32  mod_vb_dscn %d\n", mod_vb_dscn());
   time_long_2_str((time_t)Time_now_, buffer);
   sendTxBuf(String::format(" time %ld hms:  %s\n", Time_now_, buffer), true,
             true);
+  Serial.printf(" 0x8   tweak_test %d\n", tweak_test());
 }
 
 // Print faults
