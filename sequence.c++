@@ -1,6 +1,6 @@
-  Top Level Minor Frame
+//  Top Level Minor Frame
 
-```c++
+//```c++
 // Definitions
 PHOTON_ADC_VOLT = 3.3        // Photon ADC range, V (3.3)
 PHOTON_ADC_COUNT = 4096      // Photon ADC range, counts (4096)
@@ -139,6 +139,8 @@ if (read) {
  				Ib_noa_hdwe_ = ShuntNoAmp->Ishunt_cal(){
 					// ... similar to ShuntAmp
 				}
+			  Vc_hdwe_ = max(ShuntAmp->Vc(), ShuntNoAmp->Vc());// FV				| FV
+ 				Vc_hdwe_sum_ = ShuntAmp->Vc() + ShuntNoAmp->Vc();// FV				| FV
 			}
 
 			// Assign Ib
@@ -191,7 +193,7 @@ if (read) {
 		Mon->init_battery_mon(reset, Sen);
 
 		// Sim calculation
-		Sen->Vb_model(Sen->Sim->calculate()){							// PV for Vb_model_	| tbd
+		Sen->Vb_model(Sen->Sim->calculate()){					// PV for Vb_model_	| same
 			// Inputs
  			Tb_ = Sen->Tb(){
 				return Tb_;																				// FV				| FV
@@ -205,33 +207,35 @@ if (read) {
 			dt_ = dt_fut_;																	// Feedback->PV	| PV
 			ib_ = ib_fut_;																	// Feedback->PV | PV
 			Sen->Ib_model( ib_fut_ * ap.nP() ){
-				Ib_model_ = input;										// PV
+				Ib_model_ = input;																// PV				| PV
  			}
  			 // VOC-OCV model
-			voc_stat_ = calc_soc_voc(soc_, Tb_f_, ...){						// soc_ = Feedback --> PV source; Tb_f = FV; voc_stat_ mixed??
+			voc_stat_ = calc_soc_voc(soc_, Tb_f_, ...){
 				lookup(soc_, Tb_f_, Y_T, X_SOC, T_VOC);
+						// soc_ = Feedback --> PV source; Tb_f = FV; voc_stat_ mixed (noted)
 			}
-			voc_ = voc_stat_;											// mixed? need to use present value of Tb_f above?
+			voc_ = voc_stat_;																		// PV				| PV
 
 			// ChargeTransfer dynamic model for model
-			ib_dyn_ = ChargeTransfer_->calculate(ib_, reset, chem_.tau_ct, dt_);	// PV
-			dvdyn_ =  ib_dyn_ * chem_.r_ct  + ib_ * chem_.r_0;				// PV
-			vb_ = voc_ + dvdyn_;										// PV mixed?
-			voc_soc_ = voc_stat_;										// PV mixed?
+			ib_dyn_ = ChargeTransfer_->calculate(ib_, reset, chem_.tau_ct, dt_);
+																													// PV				| PV
+			dvdyn_ =  ib_dyn_ * chem_.r_ct  + ib_ * chem_.r_0;	// PV				| PV
+			vb_ = voc_ + dvdyn_;																// PV				| PV
+			voc_soc_ = voc_stat_;																// PV				| PV
 
   			// Saturation logic, both full and empty
 			// Pass along current to charge unless bms_off
-			float ib_charge_fut = ib_in_;									// FV
+			float ib_charge_fut = ib_in_;												// FV				| FV
 			if ( sp.mod_ib )
-				sat_ib_max_ = sat_ib_null_ + (1. - soc_)) *  sat_cutback_gain_ ;	// FV
+				sat_ib_max_ = sat_ib_null_ + (1. - soc_)) *  sat_cutback_gain_ ;
+																													// PV
 			else
 				 // Disable cutback when real world
-				sat_ib_max_ = ib_charge_fut;								// FV
-			ib_fut_ = min(ib_charge_fut, sat_ib_max_);  // the feedback of ib_		// FV
-
-			dt_charge_ = dt_fut_;														// Feedback->PV		| PV
-			ib_charge_ = ib_fut_;														// Feedback->PV		| PV
-			return vb_;																					// PV 				| PV
+				sat_ib_max_ = ib_charge_fut;											// FV				| FV
+			ib_fut_ = min(ib_charge_fut, sat_ib_max_);					// FV				| FV
+			dt_charge_ = dt_fut_;													// Feedback->PV		| PV
+			ib_charge_ = ib_fut_;													// Feedback->PV		| PV
+			return vb_;																				// PV 				| PV
 		} // Sen->Sim->calculate()
 
 		// Fault Logic, & Selection Logic - selection status and fault reset
@@ -257,15 +261,17 @@ if (read) {
 			// ib select
 			ib_choose_hi_lo() {   // Use the first argument and the table second
 							   // argument to choose between 3rd and 4th arguments
-				Ib_hdwe_ = scale_select( 		Ib_noa_hdwe_,   	sel_brk_hdwe,	// FV
+				Ib_hdwe_ = scale_select( 		Ib_noa_hdwe_,   	sel_brk_hdwe,
 											Ib_amp_hdwe_, 	Ib_noa_hdwe, ...)
-				Ib_hdwe_model_ = scale_select(	Ib_noa_model_, 	sel_brk_hdwe,	// FV
+																													// FV				| FV
+				Ib_hdwe_model_ = scale_select(	Ib_noa_model_, 	sel_brk_hdwe,
 											Ib_amp_model_, 	Ib_noa_model_, ...);
+																													// FV				| FV
 				sample_time_ib_hdwe_ = ShuntNoAmp->sample_time(){
-							return sample_time_;							// FV
+							return sample_time_;												// FV				| FV
 				}
 				dt_ib_hdwe_ = ShuntNoAmp->dt_ms(){
-					return return sample_time_ - sample_time_z_; 				// FV
+					return return sample_time_ - sample_time_z_; 		// FV				| FV
 				}
 			}
 
@@ -277,8 +283,8 @@ if (read) {
 					...
 					return;
 				} else {
-					Tb_ = Tb_model_;										// FV
-					Tb_f_ = Tb_model_f_;									// FV
+					Tb_ = Tb_model_;																// FV				| FV
+					Tb_f_ = Tb_model_f_;														// FV				| FV
 				}
 			} else {  // Hardware Tb
 				if (Flt->Tb_fa() ...) {
@@ -287,56 +293,56 @@ if (read) {
 					...
 					return;
 				} else {
-					Tb_ = Tb_hdwe_;
-					Tb_f_ = Tb_hdwe_f_;
+					Tb_ = Tb_hdwe_;																	// FV				| FV
+					Tb_f_ = Tb_hdwe_f_;															// FV				| FV
 				}
 			}
 
 			// vb select
 			if (sp.mod_vb()) {  // Model vb
-				Vb_f_ = Vb_;												// PV
+				Vb_f_ = Vb_;																			// PV				| n/a
 				if ((Flt->wrap_vb_fa() || Flt->vb_fa_lt()) ...) {
 					...
 				} else {
-					Vb_ = Vb_model_ + Vb_noise();							// PV
+					Vb_ = Vb_model_ + Vb_noise();										// FV				| n/a
 					}
 				}
 			} else {
-				Vb_f_ = Vb_hdwe_f_;
+				Vb_f_ = Vb_hdwe_f_;																// n/a			| FV
 				if ((Flt->wrap_vb_fa() || Flt->vb_fa_lt()) ...)) {
 					...
 				} else {
-					Vb_ = Vb_hdwe_;
+					Vb_ = Vb_hdwe_;																	// n/a			| FV
 				}
-  			}
+  		}
 
 			// ib
 			if (sp.mod_ib()) {
-				Ib_ = Ib_hdwe_model_;										// FV
-				Ib_amp_ = Ib_amp_model_;									// FV
-				Ib_noa_ = Ib_noa_model_;									// FV
+				Ib_ = Ib_hdwe_model_;															// FV				| n/a
+				Ib_amp_ = Ib_amp_model_;													// FV				| n/a
+				Ib_noa_ = Ib_noa_model_;													// FV				| n/a
 				Vc_ = HALF_V3V3;
 				sample_time_ib_ = Sim->sample_time(){
-					return sample_time_;									// FV
+					return sample_time_;														// FV				| n/a
 				}
 				dt_ib_ = Sim->dt_fut_ms(){
-					return dt_fut_ms_;										// Feedback --> PV source
+					return dt_fut_ms_;										// Feedback->PV				| n/a
 				}
 			} else {
-				Ib_ = Ib_hdwe_;
-				Ib_amp_ = Ib_amp_hdwe_;
-				Ib_noa_ = Ib_noa_hdwe_;
-				Vc_ = Vc_hdwe_;
-				sample_time_ib_ = sample_time_ib_hdwe_;
-				dt_ib_ = dt_ib_hdwe_;
+				Ib_ = Ib_hdwe_;																		// n/a			| FV
+				Ib_amp_ = Ib_amp_hdwe_;														// n/a			| FV
+				Ib_noa_ = Ib_noa_hdwe_;														// n/a			| FV
+				Vc_ = Vc_hdwe_;																		// n/a			| FV
+				sample_time_ib_ = sample_time_ib_hdwe_;						// n/a			| FV
+				dt_ib_ = dt_ib_hdwe_;															// n/a			| FV
 			}
-			T_ = double(dt_ib_) / 1000.;  										// PV
-			now_ = sample_time_ib_;											// FV
+			T_ = double(dt_ib_) / 1000.;  											// PV
+			now_ = sample_time_ib_;															// FV				| FV
 			Sim->assign_times(input=double(now_) / 1000.){
-				dt_fut_ = input - c_time_;										// FV
-				dt_fut_ms_ = (uint32_t)round(dt_fut_ * 1000.0);					// FV
-				c_time_past_ = c_time_;										// Feedback --> PV source
-				c_time_ = input;											// FV
+				dt_fut_ = input - c_time_;												// FV				| FV
+				dt_fut_ms_ = (uint32_t)round(dt_fut_ * 1000.0);		// FV				| FV
+				c_time_past_ = c_time_;									// Feedback->PV				| same
+				c_time_ = input;																	// FV				| FV
 			}
 		} // select_volt_and_current_and_temp
 
@@ -344,10 +350,10 @@ if (read) {
 		Sen->Sim->count_coulombs() {
 			// Inputs
 			Tb_ = Sen->Tb(){
-				return Tb_;												// FV
+				return Tb_;																				// FV				| FV
 			}
 			Tb_f_ = Sen->Tb_f(){
-				return Tb_f_;												// FV
+				return Tb_f_;																			// FV				| FV
 			}
 
 			// Saturation and re-init.   Goal is to set q_capacity and hold it so remember
@@ -362,24 +368,25 @@ if (read) {
 			}
 
 			// Integration.   can go to -20%
-			q_capacity_ = calculate_capacity(Tb_f_);								// FV
+			q_capacity_ = calculate_capacity(Tb_f_);						// FV				| FV
 			// Coulomb Counting uses Backard Euler Integration
-			d_delta_q_s_ = ib_charge_ * dt_charge_;								// PV
-			if (ib_charge_ > 0.) d_delta_q_s_ *= coul_eff_;							// PV
+			d_delta_q_s_ = ib_charge_ * dt_charge_;							// PV				| PV
+			if (ib_charge_ > 0.) d_delta_q_s_ *= coul_eff_;			// PV				| PV
 			if (reset_temp) {
 				*sp_delta_q_ = 0.;
 			}
 			if (!reset_temp_past) {
-				*sp_delta_q_ += d_delta_q_s_;								// PV
-				*sp_delta_q_ = max(min(*sp_delta_q_, 0.), -q_capacity_ * 1.2);		// PV
+				*sp_delta_q_ += d_delta_q_s_;											// PV				| PV
+				*sp_delta_q_ = max(min(*sp_delta_q_, 0.), -q_capacity_ * 1.2);
+																													// PV				| PV
 			}
-			q_ = q_capacity_ + *sp_delta_q_;									// PV
+			q_ = q_capacity_ + *sp_delta_q_;										// PV				| PV
 			// Normalize
-			soc_ = q_ / q_capacity_;											// PV
+			soc_ = q_ / q_capacity_;														// PV				| PV
 
 			// Save and return
 			reset_temp_past = reset_temp;
-			return soc_;													// PV
+			return soc_;																				// PV				| PV
 		}  // Sen->Sim->count_coulombs
 
 	}  // sense_synth_select
@@ -389,33 +396,35 @@ if (read) {
 		Mon->calculate(Sen, reset_temp, reset_ekf){
 			// Inputs
 			Tb_f_ = Sen->Tb_f(){
-				return Tb_f_;												// FV
+				return Tb_f_;																			// FV				| FV
 			}
 			vsat_ = calc_vsat(){
-  				return nom_vsat_ + (Tb_f_ - chem_.rated_temp) * chem_.dvoc_dt;		// FV
+  				return nom_vsat_ + (Tb_f_ - chem_.rated_temp) * chem_.dvoc_dt;
+																													// FV				| FV
 			}
 			dt_ = Sen->T(){
-				return T_;													// PV
+				return T_;																				// PV				| PV
 			}
 			c_time_ = Sen->c_time(){
-				return c_time_;												// FV
+				return Tb_f_;																			// FV				| FV
 			}
 			vb_ = Sen->vb(){
-				return Vb_ / ap.nS();											// PV
+				return Vb_ / ap.nS();															// PV				| PV
 			}
 			ib_ = Sen->ib(){
-				return Ib_ / sp.nP();											// FV
+				return Ib_ / sp.nP();															// FV				| FV
 			}
 
 			// Table lookup
-			voc_soc_ = voc_soc_tab(soc_, Tb_f_);								// Tb_f_ is FV, soc_ is Feedback -> ?
+			voc_soc_ = voc_soc_tab(soc_, Tb_f_);
+						// soc_ = Feedback --> PV source; Tb_f = FV; voc_stat_ mixed (noted)
 
 			// Battery management system model
 			... /// --> bms_off, bms_charging, voltage_low
 
 			// Charging
-			ib_charge_ = ib_;												// FV
-			float ib_charge_ekf = ib_charge_;									// FV
+			ib_charge_ = ib_;																		// FV				| FV
+			float ib_charge_ekf = ib_charge_;										// FV				| FV
 			if (bms_off_ && !bms_charging_ && sp.mod_vb()) ib_charge_ = 0.;
 			if (bms_off_ && voltage_low_) ib_ = 0.;
 
@@ -423,25 +432,29 @@ if (read) {
 
 			// Dynamic emf. vb_ is stale when running with model
 			float ib_dyn_in;
-			if (sp.mod_vb())  ib_dyn_in = ib_past_;								// Feedback source-> PV
-			else  ib_dyn_in = ib_;
-			ib_dyn_ = ChargeTransfer_->calculate(ib_dyn_in, reset_temp, chem_.tau_ct, dt_);	// PV
-			float dvdyn = ib_dyn_ * chem_.r_ct + ib_dyn_in * chem_.r_0;				// PV
-			voc_ = vb_ - dvdyn;												// vb is PV; dvdyn is PV;  -> PV
+			if (sp.mod_vb())  ib_dyn_in = ib_past_;				// Feedback->PV		| same
+			else  ib_dyn_in = ib_;															// FV				| FV
+			ib_dyn_ = ChargeTransfer_->calculate(ib_dyn_in, reset_temp, chem_.tau_ct,
+																						dt_);
+																													// PV				| FV
+			float dvdyn = ib_dyn_ * chem_.r_ct + ib_dyn_in * chem_.r_0;
+																													// PV				| FV
+			voc_ = vb_ - dvdyn;																	// PV				| mixed
 			if ((bms_off_ && voltage_low_) || Sen->Flt->vb_fa_lt()) {
-				voc_ = voc_stat_ = voc_dead_ = vb_;
+				...
 			}
-			dv_dyn_ = vb_ - voc_;											// PV
+			dv_dyn_ = vb_ - voc_;																// PV				| mixed
 
 			// Hysteresis model
 			... // not used
 
 			// voc(soc) table
-			voc_stat_ = calc_soc_voc(soc_, Tb_f_, ...);							// soc_ is ??; Tb_f_ is FV;  -> ??
-			voc_ = voc_stat_;												// ?
+			voc_stat_ = calc_soc_voc(soc_, Tb_f_, ...);
+						// soc_ = Feedback --> PV source; Tb_f = FV; voc_stat_ mixed (noted)
+			voc_ = voc_stat_;																		// PV				| PV
 
 			// Reversionary model
-			vb_model_rev_ = voc_soc_ + dv_dyn_;
+			vb_model_rev_ = voc_soc_ + dv_dyn_;									// PV				| mixed
 
 			// EKF 1x1
 			cp.ekf_executing = false;
@@ -479,68 +492,73 @@ if (read) {
 				if (reset_ekf) cp.ekf_reset = false;
 			}
 			eframe_++;
-			if (reset_temp || reset_ekf || cp.soft_reset || eframe_ >= ap.eframe_mult())
+			if (reset_temp || reset_ekf || cp.soft_reset || eframe_>=ap.eframe_mult())
 			eframe_ = 0;  // '>=' allows changing ap.eframe_mult() on the fly
 
 			// Deadband filter
 			voc_dead_ = SdVb_->update(voc_);  // used for saturation test
+																													// PV				| PV
 
 			// Charge time if used ekf
 			tcharge_ekf = time_to_completion(soc_ekf_, ib_charge_)
 
 			// Past value for synchronization with vb_, only when modeling
-			ib_past_ = ib_;													// FV for feedback
+			ib_past_ = ib_;																	// FV for feedback	| same
 
 			return vb_model_rev_;
 		}  // Mon->calculate
 
 		// Debounce saturation calculation done in ekf using voc model
 		Sen->sat(Mon->is_sat(reset));
-		Sen->saturated(Is_sat_delay->calculate(Sen->sat(), T_SAT, T_DESATA, ...));
+		Sen->saturated(Is_sat_delay->calculate(Sen->sat(), T_SAT, T_DESAT, ...));
 
 		// Memory store (Count Coulombs)
 		float cc_ib_in = Mon->ib_charge();
 		if (Sen->Flt->ib_amp_fa() && Sen->Flt->ib_noa_fa() && !ap.fake_faults())
 		cc_ib_in = 0.;
-		Mon->count_coulombs(Sen, reset_temp, charge_current=Mon.ib_charge(), Sen->sat(), Sen->saturated()) {
+		Mon->count_coulombs(Sen, reset_temp, charge_current=Mon.ib_charge(),
+																		Sen->sat(), Sen->saturated()) {
 			// Inputs
 			dt_ = Sen->T(){
-				return T_;													// PV
-			}
-			dt_fut_ = Sen->T(){
-				return T_;													// FV
+				return T_;																				// PV				| PV
 			}
 			Tb_f_ = Sen->Tb_f(){
-				return Tb_f_;												// FV
+				return Tb_f_;																			// FV				| FV
 			}
-			d_delta_q_ = charge_curr * dt_;									// charge_current is ib_ is FV; dt_ is PV;  -->? mixed  (should use dt_fut_?)
+			charge_curr = Mon.ib_charge(){
+				return ib_;																				// FV				| FV
+			}
+			d_delta_q_ = charge_curr * dt_;											// mixed		| mixed
 
 			// State change
-			double d_delta_q_inf = d_delta_q_;									// ? mixed
+			double d_delta_q_inf = d_delta_q_;									// mixed		| mixed
 			if (charge_curr > 0.) d_delta_q_ *= coul_eff_;
 			sat_ = sat;
 			saturated_ = saturated;
 
-			// Saturation.   Goal is to set q_capacity and hold it so remember last saturation status.
+			// Saturation.   Goal is to set q_capacity and hold it so remember last
+			// saturation status.
 			if (saturated_) {
 				d_delta_q_ = 0.;
 				*sp_delta_q_ = 0.;
 			}
 
 			// Integration.   Can go to negative
-			q_capacity_ = calculate_capacity(Tb_f_);								// FV
+			q_capacity_ = calculate_capacity(Tb_f_);						// FV				| FV
 			if (!reset_temp) 
-				*sp_delta_q_ = max(min(*sp_delta_q_ + d_delta_q_, 0.0), -q_capacity_ * 1.5);
-			q_ = q_capacity_ + *sp_delta_q_;									// ? mixed
+				*sp_delta_q_ = max(min(*sp_delta_q_ + d_delta_q_, 0.0),
+										 -q_capacity_ * 1.5);
+			q_ = q_capacity_ + *sp_delta_q_;										// mixed		| mixed
 
 			// Normalize
-			soc_ = q_ / q_capacity_;											// ? mixed
+			soc_ = q_ / q_capacity_;														// mixed		| mixed
 
-			return soc_;													// ? mixed
+			return soc_;																				// mixed		| mixed
 		}  // Mon->count_coulombs
 
 		// Charge charge time for display
-		Mon->calc_charge_time(Mon->q(), Mon->q_capacity(), Sen->ib(), Mon->soc());	// ? mixed
+		Mon->calc_charge_time(Mon->q(), Mon->q_capacity(), Sen->ib(), Mon->soc());
+																													// mixed		| mixed
 	}  // monitor
 
 	// Print
