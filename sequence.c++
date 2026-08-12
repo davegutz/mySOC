@@ -54,9 +54,9 @@ cp = class CommandPars;   // Control & command state flags
 
 SHUNT_AMP_GAIN = SHUNT_GAIN * SHUNT_AMP_R1 / SHUNT_AMP_R2;
 SHUNT_NOA_GAIN = SHUNT_GAIN * SHUNT_NOA_R1 / SHUNT_NOA_R2;
-VO_CONV_GAIN = PHOTON_ADC_VOLT) / PHOTON_ADC_COUNT;
-VH3V3_CONV_GAIN = PHOTON_ADC_VOLT) / PHOTON_ADC_COUNT;
-VB_CONV_GAIN = PHOTON_ADC_VOLT) / PHOTON_ADC_COUNT) *
+VO_CONV_GAIN = PHOTON_ADC_VOLT / PHOTON_ADC_COUNT;
+VH3V3_CONV_GAIN = PHOTON_ADC_VOLT / PHOTON_ADC_COUNT;
+VB_CONV_GAIN = PHOTON_ADC_VOLT / PHOTON_ADC_COUNT *
 			((VB_SENSE_R_HI + VB_SENSE_R_LO) / VB_SENSE_R_LO);
 
 /*
@@ -83,47 +83,53 @@ user_input = model_signal_spec;
 Sen = class Sensor;
 Mon = class BatteryMonitor;
 Sim = class BatterySim;
+
+
+// Loop
 loop() {
 read = wait_for_update(READ_DELAY);
 if (read) {
 
 	// Manage states
-	Sim->data_of_future_passed(reset){
+	Sen->Sim->data_of_future_passed(reset){
 		...
 		sample_time_s_z_ms_ = sample_time_s_ms_;
+	  soc_pst_ = soc_;
 	}
-
+	Mon->data_of_future_passed(reset){
+	  soc_pst_ = soc_;
+	  ...
 	}
 
  	// Read sensors, model signals, select between them, synthesize injection
-  	sense_synth_select(...) {
+  sense_synth_select(...) {
 		load_ib_vb_tb(){
 			// ib load-----------------------------------
 			// Sample Ib
-																							// Model temporal | Hdwe temporal
+																								// Model temporal | Hdwe temporal
 			Sen->ShuntAmp->sample(...) {
 				sample_Vo(){			
 					sample_time_z_ms_ = sample_time_ms_;						// Feedback->PV | PV
 					sample_time_ms_ = millis(){
 						return system_clock_ms;												// Source->FV	|	FV
 					}
-		 			Vo_read_->analogReadDebounced(...){
+					Vo_read_->analogReadDebounced(...){
 						Vo_raw_ = analogRead(myPins.Vom_pin);					// Source->FV	|	FV
 					}
-		  		Vo_ = float(Vo_raw_) * VO_CONV_GAIN;						// FV					| FV
-		  	}
-		  	sample_Vc(){
-		  		Vc_read_->analogReadDebounced(...){
+					Vo_ = float(Vo_raw_) * VO_CONV_GAIN;						// FV					| FV
+				}
+				sample_Vc(){
+					Vc_read_->analogReadDebounced(...){
 						Vc_raw_ = analogRead(myPins.Vc_pin);					// Source->FV	| FV
 					}
-	    		Vc_ = float(Vc_raw_) * VH3V3_CONV_GAIN;					// FV					| FV
-	  		}
-	  		sample_combine(){
+					Vc_ = float(Vc_raw_) * VH3V3_CONV_GAIN;					// FV					| FV
+				}
+				sample_combine(){
 					Vo_Vc_ = Vo_ - Vc_;															// FV					| FV
-	  		}
+				}
 			} // Sen->ShuntAmp->sample(...)
 
-		 	Sen->ShuntNoAmp->sample(...){
+			Sen->ShuntNoAmp->sample(...){
 				// ...similar to  ShuntAmp
 			}
 
@@ -136,17 +142,17 @@ if (read) {
 			}
 			Sen->Flt->vc_check(...);  // OS fault check
 			Sen->shunt_select_initial(...){
-  			Ib_amp_model_ = mod_add;													// FV				| FV
+				Ib_amp_model_ = mod_add;													// FV				| FV
 				Ib_noa_model_ = mod_add;													// FV				| FV
 
 				Ib_amp_hdwe_ = ShuntAmp->Ishunt_cal(){						// FV				| FV
-					  return Ishunt_cal_ ;
+						return Ishunt_cal_ ;
 				}
- 				Ib_noa_hdwe_ = ShuntNoAmp->Ishunt_cal(){
+				Ib_noa_hdwe_ = ShuntNoAmp->Ishunt_cal(){
 					// ... similar to ShuntAmp
 				}
-			  Vc_hdwe_ = max(ShuntAmp->Vc(), ShuntNoAmp->Vc());// FV				| FV
- 				Vc_hdwe_sum_ = ShuntAmp->Vc() + ShuntNoAmp->Vc();// FV				| FV
+				Vc_hdwe_ = max(ShuntAmp->Vc(), ShuntNoAmp->Vc());// FV				| FV
+				Vc_hdwe_sum_ = ShuntAmp->Vc() + ShuntNoAmp->Vc();// FV				| FV
 			}
 
 			// Assign Ib
@@ -162,10 +168,10 @@ if (read) {
 			Sen->vb_load(myPins.Vb_pin=D12, ...){
 				Vb_raw_ = Vb_read_...;														// n/a	| Source->FV
 				...
-  			Vb_hdwe_ = Vb_raw_ * VB_CONV_GAIN;								// FV		| FV
+				Vb_hdwe_ = Vb_raw_ * VB_CONV_GAIN;								// FV		| FV
 				// Note: T_ in following is UBC (past value) from previous frame
 				Vb_hdwe_f_ = VbHdweFilt->calculate(..., AMP_FILT_TAU, T_, ...);	
-																													// FV		| FV
+																														// FV		| FV
 				...
 			}
 			Sen->Flt->vb_check(...);														// FV		| FV
@@ -180,7 +186,7 @@ if (read) {
 				...
 				Tb_model_ = NOMINAL_TB + Tb_noise();							// FV				| n/a
 				Tb_model_f_ = TbModelFilt->calculate(..., TB_FILT, T_, ...);
-																													// FV				| n/a
+																														// FV				| n/a
 				...
 			}
 			Sen->Flt->Tb_check(...);  //--> TB_FLT, TB_FA				// FV				| FV
@@ -213,8 +219,8 @@ if (read) {
  			}
  			 // VOC-OCV model
 			voc_stat_ = calc_soc_voc(soc_pst_, Tb_f_, ...){
-				lookup(soc_, Tb_f_, Y_T, X_SOC, T_VOC);
-						// soc_ = Feedback --> PV source; Tb_f = FV; voc_stat_ mixed (noted)
+				lookup(soc_pst_, Tb_f_, Y_T, X_SOC, T_VOC);
+						// soc_pst_ = Feedback --> PV source; Tb_f = FV; voc_stat_ mixed (noted)
 			}																										// PV				| PV
 			voc_ = voc_stat_;																		// PV				| PV
 
@@ -229,7 +235,7 @@ if (read) {
 			// Pass along current to charge unless bms_off
 			float ib_charge_fut = ib_in_;												// FV				| FV
 			if ( sp.mod_ib )
-				sat_ib_max_ = sat_ib_null_ + (1. - soc_)*sat_cutback_gain_ ;
+				sat_ib_max_ = sat_ib_null_ + (1. - soc_pst_)*sat_cutback_gain_ ;
 																													// PV
 			else
 				 // Disable cutback when real world
@@ -258,7 +264,7 @@ if (read) {
 
 
 		// Apply Fault Logic to select signals
-		Sen->select_volt_and_current_and_temp()){
+		Sen->select_volt_and_current_and_temp(){
 
 			// ib select
 			ib_choose_hi_lo() {   // Use the first argument and the table second
@@ -270,7 +276,7 @@ if (read) {
 											Ib_amp_model_, 	Ib_noa_model_, ...);
 																													// FV				| FV
 				sample_time_ib_hdwe_ = ShuntNoAmp->sample_time(){
-							return sample_time_ms_;												// FV				| FV
+							return sample_time_ms_;											// FV				| FV
 				}
 				dt_ib_hdwe_ms_ = ShuntNoAmp->dt_ms(){
 					return return sample_time_ms_ - sample_time_z_ms_;
@@ -308,7 +314,6 @@ if (read) {
 					...
 				} else {
 					Vb_ = Vb_model_ + Vb_noise();										// FV				| n/a
-					}
 				}
 			} else {
 				Vb_f_ = Vb_hdwe_f_;																// n/a			| FV
@@ -361,7 +366,8 @@ if (read) {
 
 			// Saturation and re-init.   Goal is to set q_capacity and hold it so remember
 			// last saturation status
-			static bool reset_temp_past = reset_temp;  // needed because model called first in reset_temp path; need
+			static bool reset_temp_past = reset_temp; 
+							// needed because model called first in reset_temp path; need
 											                 // to pick up latest
 			if (initializing_all) reset_temp_past = true;
 			if (!sp.mod_vb())  {  // Real world init sim to track Monitor SOC
@@ -426,8 +432,8 @@ if (read) {
 			}
 
 			// Table lookup
-			voc_soc_ = voc_soc_tab(soc_, Tb_f_);								// PV				| PV
-					// soc_ is Feedback->PV; Tb_f is FV; voc_stat_ mixed (noted; neglect)
+			voc_soc_ = voc_soc_tab(soc_pst_, Tb_f_);								// PV				| PV
+					// soc_pst_ is Feedback->PV; Tb_f is FV; voc_stat_ mixed (noted; neglect)
 
 			// Battery management system model
 			... /// --> bms_off, bms_charging, voltage_low
@@ -459,8 +465,8 @@ if (read) {
 			... // not used
 
 			// voc(soc) table
-			voc_stat_ = calc_soc_voc(soc_, Tb_f_, ...);					// PV				| PV
-						// soc_ = Feedback->PV; Tb_f = FV; voc_stat_ mixed (noted)
+			voc_stat_ = calc_soc_voc(soc_pst_, Tb_f_, ...);					// PV				| PV
+						// soc_pst_ = Feedback->PV; Tb_f = FV; voc_stat_ mixed (noted)
 			voc_ = voc_stat_;																		// PV				| PV
 
 			// Reversionary model
@@ -559,20 +565,25 @@ if (read) {
 
 		// Charge charge time for display
 		Mon->calc_charge_time(
-									Mon->q(){ return q_;},								// mixed		| FV****
-									Mon->q_capacity(){return q_capacity_},// mixed 		| FV****
-									Sen->ib(){ return ib_ },							// FV 			| FV
-									Mon->soc(){ return soc_});						// mixed		| FV****
-																													// mixed		| FV****
+									Mon->q(){ return q_;},							// mixed		| FV****	|
+									Mon->q_capacity(){return q_capacity_},// mixed 	| FV****	|
+									Sen->ib(){ return ib_ },						// FV 			| FV			|
+									Mon->soc(){ return soc_});					// mixed		| FV****	v
+																													=	// mixed		| FV****
 	}  // monitor
 
 	// Print
 	print_...
 
 	// Manage states
-	// Sen->Sim->data_of_future_passed(){
-	  // sample_time_s_z_ms_ = sample_time_s_ms_;						// Feedback->FV	| n/a
-	// }
+	Sen->Sim->data_of_future_passed(...) {
+	  sample_time_s_z_ms_ = sample_time_s_ms_;						// Feedback->FV	| n/a
+    soc_pst_ = soc_;
+	}
+	Mon->data_of_future_past(...) {
+ 		...
+    soc_pst_ = soc_;
+	}
 
 }  // read
 }  // loop

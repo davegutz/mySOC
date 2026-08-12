@@ -387,7 +387,7 @@ void loop() {
   // Manage states                    
   if (read) {
     Sen->Sim->data_of_future_past(reset);
-    Mon->data_of_future_past();
+    Mon->data_of_future_past(reset);
   }
 
 }  // loop
