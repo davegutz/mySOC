@@ -257,7 +257,6 @@ class BatterySim : public Battery {
   void assign_times(const double input) {
     dt_pst_s_ = input - c_time_s_;
     dt_pst_s_ms_ = (uint32_t)round(dt_pst_s_ * 1000.0);
-    c_time_ = input;
     c_time_s_ = input;
   }
   float calc_inj(const uint64_t now, const uint8_t type, const float amp,
