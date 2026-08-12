@@ -117,7 +117,7 @@ class Shunt {
   // operators
   // functions
   bool bare_shunt() { return (bare_shunt_); };
-  uint64_t dt_ms() { return sample_time_ - sample_time_z_; };  // ms
+  uint64_t dt_ms() { return sample_time_ms_ - sample_time_z_ms_; };  // ms
   void convert(const bool disconnect, const bool reset, Sensors* Sen);
   float Ishunt_cal() { return Ishunt_cal_; };
   float ishunt_cal() { return Ishunt_cal_ / ap.nP(); };
@@ -134,7 +134,7 @@ class Shunt {
   void sample_filter_kf(const bool reset_kf);
   void sample_Vc();
   void sample_Vo();
-  uint64_t sample_time() { return sample_time_; };
+  uint64_t sample_time() { return sample_time_ms_; };
   float vshunt() { return vshunt_; };
   int16_t vshunt_int() { return vshunt_int_; };
   float Vc() { return Vc_; };
@@ -143,38 +143,38 @@ class Shunt {
   float Vo_Vc_kf() { return vshunt_kf_; };
 
  protected:
-  String name_;             // For print statements, multiple instances
-  uint8_t port_;            // Octal I2C port used by Acafruit_ADS1015
-  bool bare_shunt_;         // If ADS to be ignored
-  float v2a_s_;             // Selected shunt conversion gain, A/V
-  int16_t vshunt_int_;      // Sensed shunt voltage, count
-  int16_t vshunt_int_0_;    // Interim conversion, count
-  int16_t vshunt_int_1_;    // Interim conversion, count
-  float vshunt_;            // Sensed shunt voltage, V
-  float vshunt_kf_;         // Sensed kalman filtered shunt voltage, V
-  float Ishunt_cal_;        // Sensed bank current, calibrated ADC, A
-  float Ishunt_cal_kf_;     // Sensed kalman filtered bank current,
-                            // calibrated ADC, A
-  float* sp_ib_bias_;       // Global bias, A
-  float* sp_ib_scale_;      // Global scale, A
-  bool reset_;              // Status of reset command input
-  uint64_t sample_time_;    // Exact moment of hardware sample, ms
-  uint64_t sample_time_z_;  // Exact moment of past hardware sample, ms
-  bool dscn_cmd_;           // User command to ignore hardware, T=ignore
-  uint8_t vc_pin_;          // Common voltage pin
-  uint8_t vo_pin_;          // Output voltage pin
-  int Vc_raw_;              // Raw analog read, integer
-  float Vc_;                // Sensed Vc, common op amp voltage ref, V
-  int Vo_raw_;              // Raw analog read, integer
-  float Vo_;                // Sensed Vo, output of op amp, V
-  float Vo_Vc_;             // Sensed Vo-Vc, difference in output of op amps, V
-  bool using_opamp_;        // Using differential hardware amp
-  bool using_kf_;           // Using Kalman Filter.  If not, set filter = input
-  KalmanFilter* KF_;        // Noise filter
-  AnalogReadP2* Vc_read_;   // Debounced analog read for Vc
-  AnalogReadP2* Vo_read_;   // Debounced analog read for Vo
-  TFDelay* Bare_delay_;     // Persistence declaring bare_ after Vc_read_
-                            // transition
+  String name_;  // For print statements, multiple instances
+  uint8_t port_;  // Octal I2C port used by Acafruit_ADS1015
+  bool bare_shunt_;  // If ADS to be ignored
+  float v2a_s_;  // Selected shunt conversion gain, A/V
+  int16_t vshunt_int_;  // Sensed shunt voltage, count
+  int16_t vshunt_int_0_;  // Interim conversion, count
+  int16_t vshunt_int_1_;  // Interim conversion, count
+  float vshunt_;  // Sensed shunt voltage, V
+  float vshunt_kf_;  // Sensed kalman filtered shunt voltage, V
+  float Ishunt_cal_;  // Sensed bank current, calibrated ADC, A
+  float Ishunt_cal_kf_;  // Sensed kalman filtered bank current,
+                         // calibrated ADC, A
+  float* sp_ib_bias_;  // Global bias, A
+  float* sp_ib_scale_;  // Global scale, A
+  bool reset_;  // Status of reset command input
+  uint64_t sample_time_ms_;  // Exact moment of hardware sample, ms
+  uint64_t sample_time_z_ms_;  // Exact moment of past hardware sample, ms
+  bool dscn_cmd_;  // User command to ignore hardware, T=ignore
+  uint8_t vc_pin_;  // Common voltage pin
+  uint8_t vo_pin_;  // Output voltage pin
+  int Vc_raw_;  // Raw analog read, integer
+  float Vc_;  // Sensed Vc, common op amp voltage ref, V
+  int Vo_raw_;  // Raw analog read, integer
+  float Vo_;  // Sensed Vo, output of op amp, V
+  float Vo_Vc_;  // Sensed Vo-Vc, difference in output of op amps, V
+  bool using_opamp_;  // Using differential hardware amp
+  bool using_kf_;  // Using Kalman Filter.  If not, set filter = input
+  KalmanFilter* KF_;  // Noise filter
+  AnalogReadP2* Vc_read_;  // Debounced analog read for Vc
+  AnalogReadP2* Vo_read_;  // Debounced analog read for Vo
+  TFDelay* Bare_delay_;  // Persistence declaring bare_ after Vc_read_
+                         // transition
 };
 
 // Sensors (like a big struct with public access)
@@ -280,22 +280,22 @@ class Sensors {
   float Vc_rms() { return Vc_rms_; }
   void Wb(const float input) { Wb_ = input; }
   float Wb() { return Wb_; }
-  void now(const uint64_t input) { now_ = input; }
-  uint64_t now() { return now_; }
-  uint64_t now_temp() { return now_temp_; }
+  void now(const uint64_t input) { now_ms_ = input; }
+  uint64_t now() { return now_ms_; }
+  uint64_t now_temp() { return now_temp_ms_; }
   void T(const double input) { T_ = input; }
   double T() { return T_; }
   void reset(const bool input) { reset_ = input; }
   bool reset() { return reset_; }
   double T_temp() { return T_temp_; }
-  void elapsed_inj(const uint64_t input) { elapsed_inj_ = input; }
-  uint64_t elapsed_inj() { return elapsed_inj_; }
-  void start_inj(const uint64_t input) { start_inj_ = input; }
-  uint64_t start_inj() { return start_inj_; }
-  void stop_inj(const uint64_t input) { stop_inj_ = input; }
-  uint64_t stop_inj() { return stop_inj_; }
-  void end_inj(const uint64_t input) { end_inj_ = input; }
-  uint64_t end_inj() { return end_inj_; }
+  void elapsed_inj(const uint64_t input) { elapsed_inj_ms_ = input; }
+  uint64_t elapsed_inj() { return elapsed_inj_ms_; }
+  void start_inj(const uint64_t input) { start_inj_ms_ = input; }
+  uint64_t start_inj() { return start_inj_ms_; }
+  void stop_inj(const uint64_t input) { stop_inj_ms_ = input; }
+  uint64_t stop_inj() { return stop_inj_ms_; }
+  void end_inj(const uint64_t input) { end_inj_ms_ = input; }
+  uint64_t end_inj() { return end_inj_ms_; }
   void control_time(const double input) { control_time_ = input; }
   double control_time() { return control_time_; }
   bool display() { return display_; }
@@ -401,14 +401,14 @@ class Sensors {
   ScaleBrk* sel_brk_hdwe;  // Active/active scale break
  protected:
   LagExp* AmpFilt;                  // Noise filter for calibration
-  uint64_t dt_ib_;                  // Delta update of selected Ib sample, ms
-  uint64_t dt_ib_hdwe_;             // Delta update of Ib sample, ms
+  uint64_t dt_ib_ms_;                  // Delta update of selected Ib sample, ms
+  uint64_t dt_ib_hdwe_ms_;             // Delta update of Ib sample, ms
   RecursiveRMSMonitorFP* IbAmpRMS;  // RMS noise monitor for amp
   RecursiveRMSMonitorFP* IbNoaRMS;  // RMS noise monitor for noa
   // Deliberate choice based on inputs and results
   void ib_choose_active_standby();
   void ib_choose_hi_lo();  // Deliberate choice based on inputs and results
-  uint64_t inst_millis_;   // millis offset to account for setup() time, ms
+  uint64_t inst_ms_;   // millis offset to account for setup() time, ms
   uint64_t inst_time_;     // UTC Zulu at instantiation, s
   LagExp* NoaFilt;         // Noise filter for calibration
   PRBS_7* Prbn_Tb_;        // Tb noise generator model only
@@ -417,8 +417,8 @@ class Sensors {
   PRBS_7* Prbn_Ib_noa_;    // Ib non-amplified sensor noise generator model only
   bool reset_temp_;  // Keep track of temperature reset, stored for plotting,
                      // T=reset
-  uint64_t sample_time_ib_;       // Exact moment of selected Ib sample, ms
-  uint64_t sample_time_ib_hdwe_;  // Exact moment of Ib sample, ms
+  uint64_t sample_time_ib_ms_;       // Exact moment of selected Ib sample, ms
+  uint64_t sample_time_ib_hdwe_ms_;  // Exact moment of Ib sample, ms
   LagExp* SelFiltCal;             // Noise filter for calibration
   LagExp* TbHdweFilt;             // Noise filter for calibration
   LagExp* TbModelFilt;            // Noise filter for calibration
@@ -483,17 +483,17 @@ class Sensors {
   float Vb_rms_;          // Battery bank voltage noise RMS, V
   float Vc_rms_;          // Battery bank voltage noise RMS, V
   float Wb_;  // Sensed battery bank power, use to compare to other shunts, W
-  uint64_t now_;          // Time at sample, ms
-  uint64_t now_temp_;     // Time at sample, ms
+  uint64_t now_ms_;          // Time at sample, ms
+  uint64_t now_temp_ms_;     // Time at sample, ms
   double c_time_;          // Decimal time, seconds since 1/1/2021
   double T_;              // Update time, s
   bool reset_;            // Reset flag, T = reset
   double T_filt_;         // Filter update time, s
   double T_temp_;         // Temperature update time, s
-  uint64_t elapsed_inj_;  // Injection elapsed time, ms
-  uint64_t start_inj_;    // Start of calculated injection, ms
-  uint64_t stop_inj_;     // Stop of calculated injection, ms
-  uint64_t end_inj_;      // End of print injection, ms
+  uint64_t elapsed_inj_ms_;  // Injection elapsed time, ms
+  uint64_t start_inj_ms_;    // Start of calculated injection, ms
+  uint64_t stop_inj_ms_;     // Stop of calculated injection, ms
+  uint64_t end_inj_ms_;      // End of print injection, ms
   double control_time_;   // Decimal time, seconds since 1/1/2021
   bool display_;          // Use display
   bool bms_off_;    // Calculated by BatteryMonitor, battery off, low voltage,

@@ -48,7 +48,7 @@ Shunt::Shunt(const String name, const uint8_t port, float* sp_ib_scale,
       vshunt_int_(0), vshunt_int_0_(0), vshunt_int_1_(0), vshunt_(0.),
       vshunt_kf_(0.), Ishunt_cal_(0.), Ishunt_cal_kf_(0.),
       sp_ib_bias_(sp_Ib_bias), sp_ib_scale_(sp_ib_scale), reset_(false),
-      sample_time_(0UL), sample_time_z_(0UL), dscn_cmd_(false), vc_pin_(vc_pin),
+      sample_time_ms_(0UL), sample_time_z_ms_(0UL), dscn_cmd_(false), vc_pin_(vc_pin),
       vo_pin_(vo_pin), Vc_raw_(HALF_V3V3 / VH3V3_CONV_GAIN),
       Vc_(HALF_V3V3), Vo_raw_(0), Vo_(0.), Vo_Vc_(0.),
       using_opamp_(using_opAmp), using_kf_(using_kf) {
@@ -61,7 +61,7 @@ Shunt::Shunt(const String name, const uint8_t port, float* sp_ib_scale,
   KF_ = new KalmanFilter(0.1, 0., KF_Q_STD, KF_R_STD);
   Vc_read_ = new AnalogReadP2(vc_pin_);
   Vo_read_ = new AnalogReadP2(vo_pin_);
-  Bare_delay_ = new TFDelay(false, RAW_BARE_SET, RAW_BARE_RES, sample_time_);
+  Bare_delay_ = new TFDelay(false, RAW_BARE_SET, RAW_BARE_RES, sample_time_ms_);
 }
 Shunt::~Shunt() {}
 // operators
@@ -77,8 +77,8 @@ void Shunt::pretty_print() {
   Serial.printf(" Ishunt_cal_kf%7.3f, A\n", Ishunt_cal_kf_);
   Serial.printf(" port 0x%X\n", port_);
   Serial.printf(" reset %d\n", reset_);
-  Serial.printf(" sample_time %llu ms\n", sample_time_);
-  Serial.printf(" sample_time_z %llu ms\n", sample_time_z_);
+  Serial.printf(" sample_time %llu ms\n", sample_time_ms_);
+  Serial.printf(" sample_time_z %llu ms\n", sample_time_z_ms_);
   Serial.printf(" using_kf %d\n", using_kf_);
   Serial.printf(" using_opamp %d\n", using_opamp_);
   Serial.printf(" v2a_s%7.2f, A/V\n", v2a_s_);
@@ -149,7 +149,7 @@ void Shunt::sample(const bool reset_kf) {
     Serial.printf(
         "reset_kf %d ADCref %7.3f samp_t %llu vo_pin_ %d V0_raw_ %d Vo_ %7.3f "
         "Vo_Vc_%7.3f vshunt_kf_ %7.3f  vc_pin_ %d Vc_raw_ %d Vc_ %7.3f\n",
-        reset_kf, (float)analogGetReference(), sample_time_, vo_pin_, Vo_raw_,
+        reset_kf, (float)analogGetReference(), sample_time_ms_, vo_pin_, Vo_raw_,
         Vo_, Vo_Vc_, vshunt_kf_, vc_pin_, Vc_raw_, Vc_);
 }
 
@@ -177,8 +177,8 @@ void Shunt::sample_Vc() {
 
 // Sample Vo output voltage of amplifier
 void Shunt::sample_Vo() {
-  sample_time_z_ = sample_time_;
-  sample_time_ = millis();
+  sample_time_z_ms_ = sample_time_ms_;
+  sample_time_ms_ = millis();
   Vo_raw_ = Vo_read_->analogReadDebounced(VRAW_BARE_DETECTED * ap.bare_slr(),
                                           reset_, name_);
   Vo_ = float(Vo_raw_) * VO_CONV_GAIN;
@@ -188,11 +188,11 @@ void Shunt::sample_Vo() {
 Sensors::Sensors(double T, double T_temp, Pins* pins, Sync* ReadSensors,
                  Sync* ReadTemp, Sync* Talk, Sync* Summarize, uint64_t time_now,
                  uint64_t millis, BatteryMonitor* Mon)
-    : AmpFilt(nullptr), dt_ib_(0ULL), dt_ib_hdwe_(0ULL), IbAmpRMS(nullptr),
-      IbNoaRMS(nullptr), inst_millis_(millis), inst_time_(time_now),
+    : AmpFilt(nullptr), dt_ib_ms_(0ULL), dt_ib_hdwe_ms_(0ULL), IbAmpRMS(nullptr),
+      IbNoaRMS(nullptr), inst_ms_(millis), inst_time_(time_now),
       NoaFilt(nullptr), Prbn_Tb_(nullptr), Prbn_Vb_(nullptr),
       Prbn_Ib_amp_(nullptr), Prbn_Ib_noa_(nullptr), reset_temp_(false),
-      sample_time_ib_(0UL), sample_time_ib_hdwe_(0UL),
+      sample_time_ib_ms_(0UL), sample_time_ib_hdwe_ms_(0UL),
       SelFiltCal(nullptr), TbHdweFilt(nullptr),
       TbModelFilt(nullptr), VbFilt(nullptr), VbRMS(nullptr), VcRMS(nullptr),
       Tb_read_(nullptr), Vb_read_(nullptr), Tb_raw_(0), Tb_volt_(NOMINAL_TB),
@@ -210,9 +210,9 @@ Sensors::Sensors(double T, double T_temp, Pins* pins, Sync* ReadSensors,
       Ib_hdwe_f_cal_(0.), Ib_noa_(0.), Ib_noa_hdwe_(0.), Ib_noa_hdwe_f_(0.),
       Ib_noa_hdwe_kf_(0.), Ib_noa_rms_(0.), Ib_noa_model_(0.), Ib_hdwe_(0.),
       Ib_hdwe_model_(0.), Ib_model_(0.), Ib_model_in_(0.), Vb_rms_(0.),
-      Vc_rms_(0.), Wb_(0.), now_(0ULL), now_temp_(0ULL), c_time_(0.), T_(0.), reset_(false),
-      T_filt_(0.), T_temp_(0.), elapsed_inj_(0ULL), start_inj_(0ULL),
-      stop_inj_(0ULL), end_inj_(0ULL), control_time_(0.), display_(true),
+      Vc_rms_(0.), Wb_(0.), now_ms_(0ULL), now_temp_ms_(0ULL), c_time_(0.), T_(0.), reset_(false),
+      T_filt_(0.), T_temp_(0.), elapsed_inj_ms_(0ULL), start_inj_ms_(0ULL),
+      stop_inj_ms_(0ULL), end_inj_ms_(0ULL), control_time_(0.), display_(true),
       bms_off_(false), sat_(false), saturated_(false) {
   T_ = T;
   T_filt_ = T;
@@ -229,10 +229,10 @@ Sensors::Sensors(double T, double T_temp, Pins* pins, Sync* ReadSensors,
       sp.ib_bias_noa_ptr(), SHUNT_NOA_GAIN, pins->Vcn_pin, pins->Von_pin,
       using_opAmp, KF_USE_NOA);
   this->Sim = new BatterySim(ap.ds_voc_soc(), 0., 0.);
-  elapsed_inj_ = 0ULL;
-  start_inj_ = 0ULL;
-  stop_inj_ = 0ULL;
-  end_inj_ = 0ULL;
+  elapsed_inj_ms_ = 0ULL;
+  start_inj_ms_ = 0ULL;
+  stop_inj_ms_ = 0ULL;
+  end_inj_ms_ = 0ULL;
   this->ReadSensors = ReadSensors;
   this->ReadTemp = ReadTemp;
   this->Summarize = Summarize;
@@ -275,21 +275,21 @@ void Sensors::ib_choose_active_standby() {
     Ib_hdwe_f_ = Ib_amp_hdwe_f_;
     Ib_hdwe_kf_ = Ib_amp_hdwe_kf_;
     Ib_hdwe_model_ = Ib_amp_model_;
-    sample_time_ib_hdwe_ = ShuntAmp->sample_time();
-    dt_ib_hdwe_ = ShuntAmp->dt_ms();
+    sample_time_ib_hdwe_ms_ = ShuntAmp->sample_time();
+    dt_ib_hdwe_ms_ = ShuntAmp->dt_ms();
   } else if (Flt->ib_sel_stat() == -1) {
     Ib_hdwe_ = Ib_noa_hdwe_;
     Ib_hdwe_f_ = Ib_noa_hdwe_f_;
     Ib_hdwe_kf_ = Ib_noa_hdwe_kf_;
     Ib_hdwe_model_ = Ib_noa_model_;
-    sample_time_ib_hdwe_ = ShuntNoAmp->sample_time();
-    dt_ib_hdwe_ = ShuntNoAmp->dt_ms();
+    sample_time_ib_hdwe_ms_ = ShuntNoAmp->sample_time();
+    dt_ib_hdwe_ms_ = ShuntNoAmp->dt_ms();
   } else {
     Ib_hdwe_ = 0.;
     Ib_hdwe_f_ = 0.;
     Ib_hdwe_model_ = 0.;
-    sample_time_ib_hdwe_ = 0ULL;
-    dt_ib_hdwe_ = 0ULL;
+    sample_time_ib_hdwe_ms_ = 0ULL;
+    dt_ib_hdwe_ms_ = 0ULL;
   }
 }
 
@@ -307,37 +307,37 @@ void Sensors::ib_choose_hi_lo() {
                                Ib_noa_hdwe_kf_, &sel_stat);
     Ib_hdwe_model_ = scale_select(Ib_noa_model_, sel_brk_hdwe, Ib_amp_model_,
                                   Ib_noa_model_, &sel_stat);
-    sample_time_ib_hdwe_ = ShuntNoAmp->sample_time();
-    dt_ib_hdwe_ = ShuntNoAmp->dt_ms();
+    sample_time_ib_hdwe_ms_ = ShuntNoAmp->sample_time();
+    dt_ib_hdwe_ms_ = ShuntNoAmp->dt_ms();
     Flt->ib_sel_stat(sel_stat);
   } else if (Flt->ib_choice() == UsingNoa) {
     Ib_hdwe_ = Ib_noa_hdwe_;
     Ib_hdwe_f_ = Ib_noa_hdwe_f_;
     Ib_hdwe_kf_ = Ib_noa_hdwe_kf_;
     Ib_hdwe_model_ = Ib_noa_model_;
-    sample_time_ib_hdwe_ = ShuntNoAmp->sample_time();
-    dt_ib_hdwe_ = ShuntNoAmp->dt_ms();
+    sample_time_ib_hdwe_ms_ = ShuntNoAmp->sample_time();
+    dt_ib_hdwe_ms_ = ShuntNoAmp->dt_ms();
     Flt->ib_sel_stat(-1);
   } else if (Flt->ib_choice() == UsingAmp) {
     Ib_hdwe_ = Ib_amp_hdwe_;
     Ib_hdwe_f_ = Ib_amp_hdwe_f_;
     Ib_hdwe_kf_ = Ib_amp_hdwe_kf_;
     Ib_hdwe_model_ = Ib_amp_model_;
-    sample_time_ib_hdwe_ = ShuntAmp->sample_time();
-    dt_ib_hdwe_ = ShuntAmp->dt_ms();
+    sample_time_ib_hdwe_ms_ = ShuntAmp->sample_time();
+    dt_ib_hdwe_ms_ = ShuntAmp->dt_ms();
     Flt->ib_sel_stat(1);
   }
   // UsingNone: both ib sensors hard-failed. Zero the current channels (so the
   // EKF and Coulomb counter integrate 0), but keep timing alive from ShuntAmp
-  // because dt_ib_hdwe_=0 would zero T_ and corrupt now_/c_time_, stopping
+  // because dt_ib_hdwe_ms_=0 would zero T_ and corrupt now_ms_/c_time_, stopping
   // serial output.
   else {
     Ib_hdwe_ = 0.;
     Ib_hdwe_f_ = 0.;
     Ib_hdwe_kf_ = 0.;
     Ib_hdwe_model_ = 0.;
-    sample_time_ib_hdwe_ = ShuntAmp->sample_time();
-    dt_ib_hdwe_ = ShuntAmp->dt_ms();
+    sample_time_ib_hdwe_ms_ = ShuntAmp->sample_time();
+    dt_ib_hdwe_ms_ = ShuntAmp->dt_ms();
     Flt->ib_sel_stat(0);
   }
 }
@@ -349,10 +349,10 @@ void Sensors::pretty_print() {
   Serial.printf(" c_time%11.3f, s\n", c_time_);
   Serial.printf(" control_time%11.3f, s\n", control_time_);
   Serial.printf(" display %d\n", display_);
-  Serial.printf(" dt_ib%llu, ms\n", dt_ib_);
-  Serial.printf(" dt_ib_hdwe%llu, ms\n", dt_ib_hdwe_);
-  Serial.printf(" elapsed_inj%llu, ms\n", elapsed_inj_);
-  Serial.printf(" end_inj%llu, ms\n", end_inj_);
+  Serial.printf(" dt_ib_ms%llu, ms\n", dt_ib_ms_);
+  Serial.printf(" dt_ib_hdwe_ms%llu, ms\n", dt_ib_hdwe_ms_);
+  Serial.printf(" elapsed_inj_ms%llu, ms\n", elapsed_inj_ms_);
+  Serial.printf(" end_inj_ms%llu, ms\n", end_inj_ms_);
   Serial.printf(" Ib%8.4f, A\n", Ib_);
   Serial.printf(" Ib_amp%8.4f, A\n", Ib_amp_);
   Serial.printf(" Ib_amp_hdwe%8.4f, A\n", Ib_amp_hdwe_);
@@ -374,18 +374,18 @@ void Sensors::pretty_print() {
   Serial.printf(" Ib_noa_hdwe_kf%8.4f, A\n", Ib_noa_hdwe_kf_);
   Serial.printf(" Ib_noa_model%8.4f, A\n", Ib_noa_model_);
   Serial.printf(" Ib_noa_rms%8.4f, A\n", Ib_noa_rms_);
-  Serial.printf(" inst_millis%llu, ms\n", inst_millis_);
+  Serial.printf(" inst_ms%llu, ms\n", inst_ms_);
   Serial.printf(" inst_time%llu, s\n", inst_time_);
-  Serial.printf(" now%llu, ms\n", now_);
-  Serial.printf(" now_temp%llu, ms\n", now_temp_);
+  Serial.printf(" now_ms%llu, ms\n", now_ms_);
+  Serial.printf(" now_temp_ms%llu, ms\n", now_temp_ms_);
   Serial.printf(" reset %d\n", reset_);
   Serial.printf(" reset_temp %d\n", reset_temp_);
-  Serial.printf(" sample_time_ib%llu, ms\n", sample_time_ib_);
-  Serial.printf(" sample_time_ib_hdwe%llu, ms\n", sample_time_ib_hdwe_);
+  Serial.printf(" sample_time_ib_ms%llu, ms\n", sample_time_ib_ms_);
+  Serial.printf(" sample_time_ib_hdwe_ms%llu, ms\n", sample_time_ib_hdwe_ms_);
   Serial.printf(" sat %d\n", sat_);
   Serial.printf(" saturated %d\n", saturated_);
-  Serial.printf(" start_inj%llu, ms\n", start_inj_);
-  Serial.printf(" stop_inj%llu, ms\n", stop_inj_);
+  Serial.printf(" start_inj_ms%llu, ms\n", start_inj_ms_);
+  Serial.printf(" stop_inj_ms%llu, ms\n", stop_inj_ms_);
   Serial.printf(" T%9.5f, s\n", T_);
   Serial.printf(" T_filt%9.5f, s\n", T_filt_);
   Serial.printf(" T_temp%9.5f, s\n", T_temp_);
@@ -492,22 +492,22 @@ void Sensors::select_volt_and_current_and_temp(BatteryMonitor* Mon) {
     Ib_amp_ = Ib_amp_model_;
     Ib_noa_ = Ib_noa_model_;
     Vc_ = HALF_V3V3;
-    sample_time_ib_ = Sim->sample_time();
-    dt_ib_ = Sim->dt_fut_ms();
+    sample_time_ib_ms_ = Sim->sample_time_s();
+    dt_ib_ms_ = Sim->dt_fut_ms();
   } else {
     Ib_ = Ib_hdwe_;
     Ib_f_ = Ib_hdwe_f_;
     Ib_amp_ = Ib_amp_hdwe_;
     Ib_noa_ = Ib_noa_hdwe_;
     Vc_ = Vc_hdwe_;
-    sample_time_ib_ = sample_time_ib_hdwe_;
-    dt_ib_ = dt_ib_hdwe_;
+    sample_time_ib_ms_ = sample_time_ib_hdwe_ms_;
+    dt_ib_ms_ = dt_ib_hdwe_ms_;
   }
   Ib_amp_rms_ = IbAmpRMS->update(Ib_amp_);
   Ib_noa_rms_ = IbNoaRMS->update(Ib_noa_);
-  T_ = double(dt_ib_) / 1000.;
-  now_ = sample_time_ib_ - inst_millis_ + inst_time_ * 1000;
-  c_time_ = double(now_) / 1000.;
+  T_ = double(dt_ib_ms_) / 1000.;
+  now_ms_ = sample_time_ib_ms_ - inst_ms_ + inst_time_ * 1000;
+  c_time_ = double(now_ms_) / 1000.;
   Sim->assign_times(c_time_);
 
   if (sp.debug() == 62)

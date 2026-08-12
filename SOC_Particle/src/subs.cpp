@@ -422,7 +422,7 @@ void sense_synth_select(const bool reset, const bool reset_temp,
   // Log.info("  sense_synth_select:  select_all_logic");
   Sen->Flt->select_all_logic(Sen, Mon, reset);
   // Log.info("  sense_synth_select:  select_volt_and_current_and_temp");
-  // dt_ib_ and T_ calculated select_volt_and_current_and_temp (previous UBC)
+  // dt_ib_ms_ and T_ calculated select_volt_and_current_and_temp (previous UBC)
   Sen->select_volt_and_current_and_temp(Mon);
 
   // Fault snap buffer management

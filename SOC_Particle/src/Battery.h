@@ -266,13 +266,13 @@ class BatterySim : public Battery {
   double count_coulombs(Sensors* Sen, const bool reset, BatteryMonitor* Mon,
                         const bool initializing_all);
   bool cutback() { return model_cutback_; };
+  void data_of_future_past(const bool reset = false);
   double delta_q() { return *sp_delta_q_; };
   double d_delta_q_s() { return d_delta_q_s_; };
   uint32_t dt_fut_ms() { return dt_fut_ms_; };
   double dt_charge() { return dt_charge_; };
   double dt_fut() { return dt_fut_; };
-  double dt_in() { return dt_in_; };
-  uint32_t dt_long() { return sample_time_ - sample_time_z_; };
+  uint32_t dt_long() { return sample_time_s_ms_ - sample_time_s_z_ms_; };
   float hys_state() { return hys_->dv_hys(); };
   void hys_state(const float st) { hys_->dv_hys(st); };
   void hys_pretty_print() { hys_->pretty_print(0., 0., 0.); };
@@ -284,7 +284,7 @@ class BatterySim : public Battery {
   void init_hys(const float hys) { hys_->init(hys); };
   void pretty_print();
   bool saturated() { return model_saturated_; };
-  uint32_t sample_time() { return sample_time_; };
+  uint32_t sample_time_s() { return sample_time_s_ms_; };
   double voc() { return voc_; };
   double voc_stat() { return voc_stat_; };
 
@@ -296,9 +296,7 @@ class BatterySim : public Battery {
   uint32_t duty_;  // Used in Test Mode to inject Fake shunt current (0 - 255)
   double d_delta_q_s_;  // Charge rate, C/s
   double dt_charge_;  // Input update time of current available for charging, s
-  uint32_t dt_in_ms_;   // Input elapsed time of model sample, ms
   uint32_t dt_fut_ms_;  // Future delta update of model sample, ms
-  double dt_in_;  // Input update time of model sample, s
   double dt_fut_; // Future update time of model sample, s
   float ib_charge_;  // Current input avaiable for charging, A
   float ib_fut_;  // Future value of limited current, A
@@ -309,8 +307,8 @@ class BatterySim : public Battery {
   bool model_cutback_;  // Modeled current limited on saturation cutback, T=lim
   bool model_saturated_;  // Indicator of maximal cutback, T = cutback saturated
   double q_;              // Charge, C
-  uint32_t sample_time_;  // Exact moment hardware signal generation, ms
-  uint32_t sample_time_z_;  // Exact moment past hardware signal generation, ms
+  uint32_t sample_time_s_ms_;  // Exact moment hardware signal generation, ms
+  uint32_t sample_time_s_z_ms_;  // Moment past hardware signal generation, ms
   float sat_cutback_gain_;  // Gain to retard ib when voc exceeds vsat, non dim
   float sat_ib_max_;   // Current cutback to be applied to modeled ib output, A
   float sat_ib_null_;  // Current cutback value for voc=vsat, A

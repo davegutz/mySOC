@@ -266,6 +266,13 @@ void loop() {
     boot_wait = false;
   summarizing = Summarize->update(now, false) || boot_summ;
 
+  // Manage states
+  if (read) {
+    // Manage states
+    Sen->Sim->data_of_future_past(reset);
+  }
+
+  // High speed frame
   if (read) {
 // Warn if parameters have been changed but not saved
 #if IN_SERVICE
@@ -273,8 +280,6 @@ void loop() {
       sendTxBuf(String::format("WARNING: unsaved Retained parameter.  Enter 'w' to save. now dirty=%d\n", sp.dirty()), true, true);
     }
 #endif
-
-    Sen->reset(reset);
 
     // Check for really slow data capture and run EKF each read frame
     // ap.eframe_mult() =
@@ -377,5 +382,10 @@ void loop() {
   // Soft reset
   handle_soft_reset(&reset, &reset_temp, &reset_kf, &start_reset,
                     read);
+
+  // Manage states                    
+  if (read) {
+    Sen->Sim->data_of_future_past(reset);
+  }
 
 }  // loop

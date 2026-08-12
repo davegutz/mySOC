@@ -76,37 +76,30 @@ const char unit[] = version_str "_" HDWE_UNIT;
 // 6.2.1/p2/SOC_Particle.elf
 
 #define NFLT 7  // Number of saved SRAM fault data slices 10 s intervals (7)
-#define NHIS \
-  43  // Number of saved SRAM history data slices. If NFLT + NHIS too large will
-      // get compile error BACKUPSRAM, BACKUPSRAM_USER  (45)
-#define NSUM \
-  2000  // Number of saved summaries. If NFLT + NHIS + NSUM too large, will get
-        // compile error SRAM, or GUI FRAG msg (2845) or SOS 4 Bus Fault (2500)
-
+#define NHIS 43  // Number of saved SRAM history data slices. If NFLT + NHIS
+      // too large will get compile error BACKUPSRAM, BACKUPSRAM_USER  (45)
+#define NSUM 2000  // Number of saved summaries. If NFLT + NHIS + NSUM too
+                  // large, will get compile error SRAM, or GUI FRAG msg (2845)
+                  // or SOS 4 Bus Fault (2500)
 #define HDB_VB 0.05        // Half deadband to filter Vb, V (0.05)
 #define T_SAT 24           // Saturation time, sec (>21 for no SAT with Dv0.82)
 const float T_DESAT = 20;  // De-saturation time, sec
 #if !defined(TEMP_INIT_DELAY)
-#define TEMP_INIT_DELAY \
-  700  // Time after power on to start reading temp, ms (700)
+#define TEMP_INIT_DELAY 700  // Time after on to start reading temp, ms (700)
 #endif
 #define CC_DIFF_LO_SOC_SLR 4.  // Large to disable cc_diff
-#define TAU_ERR_FILT       5.  // Current sensor difference filter time constant, s (5.)
-#define IB_LO_ACTIVE_SET   0.2 // Ib low range sensor is in-range persistence, s (0.2)
-#define IB_LO_ACTIVE_RES   0.4 // Ib low range sensor is in-range reset persistence, s (0.4)
+#define TAU_ERR_FILT       5.  // Sensor difference filter time constant, s (5.)
+#define IB_LO_ACTIVE_SET   0.2 // Low range in-range persistence, s (0.2)
+#define IB_LO_ACTIVE_RES   0.4 // Low range in-range reset persistence, s (0.4)
 #define VB_MAX 17.  // Signal selection hard fault threshold, V
                     // (17. < VB_CONV_GAIN*4095)
-#define VB_MIN \
-  2.  // Signal selection hard fault threshold, V (0.  < 2. < 10 bms shutoff,
-      // reads ~3 without power when off)
-#define VC_MAX \
-  2.15  // Signal selection hard fault threshold, V (2.15, 1.85 too low)
-        // // 1.65*1.3 is max ADC reading with 1.65v ref, but see 1.9v on truck
-        // with no power, so set at 2.15v to avoid false fault on truck when off
-#define VC_MIN \
-  1.1  // Signal selection hard fault threshold, V (1.1, 1.4 too high)
-#define IB_MIN_UP \
-  0.2  // Min up charge current for come alive, BMS logic, and fault
+#define VB_MIN 2.  // Signal selection hard fault threshold, V
+                // (0.  < 2. < 10 bms shutoff, reads ~3 without power when off)
+#define VC_MAX 2.15  // Signal selection hard fault threshold, V (2.15, 1.85
+    // too low)1.65*1.3 is max ADC reading with 1.65v ref, but see 1.9v on truck
+    // with no power, so set at 2.15v to avoid false fault on truck when off
+#define VC_MIN 1.1  // Selection hard fault threshold, V (1.1, 1.4 too high)
+#define IB_MIN_UP 0.2  // Up charge current for come alive, BMS logic, and fault
 #if !defined(TB_HDWE_MAX)
 #define TB_HDWE_MAX 150.0  // Hardware electrical limit 2wire only, C (150)
 #endif
@@ -144,20 +137,20 @@ const float WRAP_LO_RES =
 const float WRAP_HI_SET =
     WRAP_LO_SET;  // Wrap high failure set time, sec (WRAP_LO_SET)
 const float WRAP_HI_RES =
-    (WRAP_HI_SET / 2.);    // Wrap high failure reset time, sec ('up 1, down 2')
-#define WRAP_HI_AMPV 0.5   // Wrap high voltage threshold amplified, V (1.5)
+    (WRAP_HI_SET / 2.);  // Wrap high failure reset time, sec ('up 1, down 2')
+#define WRAP_HI_AMPV 0.5  // Wrap high voltage threshold amplified, V (1.5)
 #define WRAP_LO_AMPV -0.5  // Wrap low voltage threshold amplified, V (-1.5)
 #define WRAP_HI_NOAV 0.8   // Wrap high voltage threshold non-amplified, V (0.8)
 #define WRAP_LO_NOAV -0.8  // Wrap low voltage threshold non-amplified, V (-0.8)
-#define WRAP_HI_SETAT_MARG 0.2   // Wrap voltage margin to saturation, V (0.2)
-#define WRAP_HI_SETAT_SLR  2.0   // Wrap voltage margin scalar when saturated (2.0)
-#define IBATT_DISAGREE_THRESH 3. // Signal selection threshold for current disagree test, A (3.)
+#define WRAP_HI_SETAT_MARG 0.2  // Wrap voltage margin to saturation, V (0.2)
+#define WRAP_HI_SETAT_SLR  2.0  // Wrap voltage margin slr when saturated (2.0)
+#define IBATT_DISAGREE_THRESH 3. // Threshold for current disagree test, A (3.)
 const float IBATT_DISAGREE_SET = (WRAP_LO_SET - 1.);
       // Signal selection current disagree fail persistence,
       // s (WRAP_LO_SET-1) // must be quicker than wrap lo
-#define IBATT_INST_DIFF_SET  0.2  // Persistence on instantaneous current difference, s (0.2)
-#define IBATT_INST_DIFF_RES  0.0  // Persistence reset on instantaneous current difference, s (0.0)
-#define IBATT_DISAGREE_RES   2.0  // Signal selection current disagree reset persistence, s (2.)
+#define IBATT_INST_DIFF_SET  0.2  // Persist instant current difference, s (0.2)
+#define IBATT_INST_DIFF_RES  0.0  // Persist reset current difference, s (0.0)
+#define IBATT_DISAGREE_RES   2.0  // Selection current disagree reset, s (2.)
 #define TAU_Q_FILT 0.5    // Quiet rate time constant, sec (0.5)
 #define MIN_Q_FILT -5.0   // Quiet filter minimum, V (-0.5)
 #define MAX_Q_FILT 5.0    // Quiet filter maximum, V (0.5)

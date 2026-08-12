@@ -701,11 +701,11 @@ BatterySim::BatterySim(const float dx_voc, const float dy_voc,
                        const float dz_voc)
     : Battery(sp.delta_q_model_ptr(), VS, dx_voc, dy_voc, dz_voc),
       Sin_inj_(nullptr), Sq_inj_(nullptr), Tri_inj_(nullptr), Cos_inj_(nullptr),
-      duty_(0UL), d_delta_q_s_(0.), dt_charge_(0.), dt_in_ms_(0UL),
+      duty_(0UL), d_delta_q_s_(0.), dt_charge_(0.),
       dt_fut_ms_(0UL),
-      dt_in_(0.), dt_fut_(0.), ib_charge_(0.), ib_fut_(0.), ib_in_(0.),
+      dt_fut_(0.), ib_charge_(0.), ib_fut_(0.), ib_in_(0.),
       ib_sat_(0.5), model_cutback_(true), model_saturated_(false),
-      q_(NOM_UNIT_CAP * 3600.), sample_time_(0UL), sample_time_z_(0UL),
+      q_(NOM_UNIT_CAP * 3600.), sample_time_s_ms_(0UL), sample_time_s_z_ms_(0UL),
       sat_cutback_gain_(1000.), sat_ib_max_(0.), sat_ib_null_(0.),
       hys_(nullptr) {
   // ChargeTransfer dynamic model for EKF
@@ -784,12 +784,10 @@ float BatterySim::calculate(Sensors* Sen, const bool dc_dc_on,
   Tb_ = Sen->Tb();
   Tb_f_ = Sen->Tb_f();
 
-  dt_in_ms_ = dt_long();
-  dt_in_ = double(dt_in_ms_) / 1000.;  // Future value
   ib_in_ = Sen->Ib_model_in() / ap.nP();  // Future value
   if (reset ) {
-    dt_fut_ms_ = dt_in_ms_;
-    dt_fut_ = dt_in_;
+    dt_fut_ms_ = dt_long();
+    dt_fut_ = double(dt_long()) / 1000.;
     ib_fut_ = ib_in_;
   }
   dt_ = max((float)dt_fut_, 1e-4f);
@@ -888,12 +886,19 @@ double BatterySim::calc_soc_voc(const double soc, const double Tb_f,
   return voc;
 }
 
+// Data of future past: update past sample time
+void BatterySim::data_of_future_past(const bool reset) {
+  if (reset)
+    sample_time_s_z_ms_ = millis();
+  else
+    sample_time_s_z_ms_ = sample_time_s_ms_;
+}
+
 // Injection model, calculate inj bias based on time since boot
 float BatterySim::calc_inj(const uint64_t now, const uint8_t type,
                            const float amp, const double freq) {
   // Sample at instant of signal injection
-  sample_time_z_ = sample_time_;
-  sample_time_ = millis();
+  sample_time_s_ms_ = millis();
 
   // Return if time 0
   if (now == 0ULL) {
@@ -1031,8 +1036,6 @@ void BatterySim::init_battery_sim(const bool reset, Sensors* Sen) {
   ib_fut_ = ib_;
   dt_fut_ms_ = dt_long();
   dt_fut_ = double(dt_fut_ms_) / 1000.;
-  dt_in_ms_ = dt_fut_ms_;
-  dt_in_ = dt_fut_;
   init_hys(0.0);
   ibs_ = hys_->ibs();
 #ifdef DEBUG_INIT
@@ -1052,8 +1055,6 @@ void BatterySim::pretty_print() {
   Serial.printf("  dt_charge%7.3f s\n", dt_charge_);
   Serial.printf("  dt_fut%7.3f s\n", dt_fut_);
   Serial.printf("  dt_fut_ms %lu ms\n", dt_fut_ms_);
-  Serial.printf("  dt_in%7.3f s\n", dt_in_);
-  Serial.printf("  dt_in_ms %lu ms\n", dt_in_ms_);
   Serial.printf("  duty %lu\n", duty_);
   Serial.printf("  dv_hys%7.3f, V\n", hys_->dv_hys());
   Serial.printf("  hys_scale%7.3f,\n", ap.hys_scale());
@@ -1065,8 +1066,8 @@ void BatterySim::pretty_print() {
   Serial.printf("  mod_cb %d\n", model_cutback_);
   Serial.printf("  mod_sat %d\n", model_saturated_);
   Serial.printf("  q%7.1f C\n", q_);
-  Serial.printf("  sample_time %lu ms\n", sample_time_);
-  Serial.printf("  sample_time_z %lu ms\n", sample_time_z_);
+  Serial.printf("  sample_time %lu ms\n", sample_time_s_ms_);
+  Serial.printf("  sample_time_z %lu ms\n", sample_time_s_z_ms_);
   Serial.printf("  sat_cb_gn%7.1f\n", sat_cutback_gain_);
   Serial.printf("  sat_ib_max%7.3f, A\n", sat_ib_max_);
   Serial.printf("  sat_ib_null%7.3f, A\n", sat_ib_null_);
