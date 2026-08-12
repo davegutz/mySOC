@@ -642,19 +642,13 @@ void print_sim_serial(const bool initializing_all, const bool reset,
     return;
   }
 
-  // const bool header_changing = (cp.last_read_debug != sp.debug());
-  // const bool changing_away = was_sim_debug && !is_sim_debug;
-
-  // if (((is_sim_debug && !header_changing) || changing_away) && cp.publishS &&
-  //     !initializing_all &&
-  //     (reset_temp || Sim->c_time() > last_c_time_sim + 0.00005)) {
   if (is_sim_debug && cp.publishS && !initializing_all &&
-      (reset_temp || Sim->c_time() > last_c_time_sim + 0.00005)) {
-    last_c_time_sim = Sim->c_time();
+      (reset_temp || Sim->c_time_s() > last_c_time_sim + 0.00005)) {
+    last_c_time_sim = Sim->c_time_s();
     sprintf(pr.buff,
             "unit_sim, %13.4f,%8.4f,%d,%10.4f,%d,%11.8f,%11.8f, "
             "%7.6f,%7.6f,%8.4f,%11.9f,",
-            Sim->c_time(), Sim->dt_pst(), CHEM,
+            Sim->c_time_s(), Sim->dt_pst(), CHEM,
             Sim->q_cap_rated_scaled(), Sim->bms_off(), Sim->Tb(), Sim->Tb_f(),
             Sim->vsat(), Sim->voc_stat(), Sim->dt_charge(), Sim->ib_pst());
     Serial.printf("%s", pr.buff);
