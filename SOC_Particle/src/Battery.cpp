@@ -482,6 +482,14 @@ double BatteryMonitor::calc_soc_voc(const double soc, const double Tb_f,
   return voc;
 }
 
+// Data of future past: update past sample time
+void BatteryMonitor::data_of_future_past(const bool reset) {
+  if (reset)
+    soc_pst_ = soc_;
+  else
+    soc_pst_ = soc_;
+}
+
 // EKF model for predict
 void BatteryMonitor::ekf_predict(double* Fx_, double* Bu_) {
   // Process model  dt_ekf_<<chem_.tau_sd
@@ -702,8 +710,8 @@ BatterySim::BatterySim(const float dx_voc, const float dy_voc,
     : Battery(sp.delta_q_model_ptr(), VS, dx_voc, dy_voc, dz_voc),
       Sin_inj_(nullptr), Sq_inj_(nullptr), Tri_inj_(nullptr), Cos_inj_(nullptr),
       duty_(0UL), d_delta_q_s_(0.), dt_charge_(0.),
-      dt_fut_ms_(0UL),
-      dt_fut_(0.), ib_charge_(0.), ib_fut_(0.), ib_in_(0.),
+      dt_pst_ms_(0UL),
+      dt_pst_(0.), ib_charge_(0.), ib_pst_(0.), ib_in_(0.),
       ib_sat_(0.5), model_cutback_(true), model_saturated_(false),
       q_(NOM_UNIT_CAP * 3600.), sample_time_s_ms_(0UL), sample_time_s_z_ms_(0UL),
       sat_cutback_gain_(1000.), sat_ib_max_(0.), sat_ib_null_(0.),
@@ -739,7 +747,7 @@ output/input.
 //  Inputs:
 //    Sen->Tb_f      Filtered battery bank temp, C
 //    Sen->Ib_model_in  Battery bank current input to model, A
-//    ib_fut_(past)     Past future value of limited current, A
+//    ib_pst_(past)     Past future value of limited current, A
 //    Sen->T            Update time, sec
 //    sat
 //    bms_off
@@ -749,7 +757,7 @@ output/input.
 //
 //  Outputs:
 //    Tb_f_               Simulated Tb, deg C
-//    ib_fut_           Simulated over-ridden by saturation, A
+//    ib_pst_           Simulated over-ridden by saturation, A
 //    vb_               Simulated vb, V
 //    sp.inj_bias       Used to inject fake shunt current, A
 
@@ -784,29 +792,29 @@ float BatterySim::calculate(Sensors* Sen, const bool dc_dc_on,
   Tb_ = Sen->Tb();
   Tb_f_ = Sen->Tb_f();
 
-  ib_in_ = Sen->Ib_model_in() / ap.nP();  // Future value
+  ib_in_ = Sen->Ib_model_in() / ap.nP();  // Past value
   if (reset ) {
-    dt_fut_ms_ = dt_long();
-    dt_fut_ = double(dt_long()) / 1000.;
-    ib_fut_ = ib_in_;
+    dt_pst_ms_ = dt_long();
+    dt_pst_ = double(dt_long()) / 1000.;
+    ib_pst_ = ib_in_;
   }
-  dt_ = max((float)dt_fut_, 1e-4f);
-  ib_ = max(min(ib_fut_, IMAX_NUM),
+  dt_ = max((float)dt_pst_, 1e-4f);
+  ib_ = max(min(ib_pst_, IMAX_NUM),
             -IMAX_NUM);  //  Past value ib_.  Overflow protection when ib_ past
                          //  value used
   vsat_ = calc_vsat();
-  double soc_lim = max(min(soc_, 1.0), -0.2);  // slightly beyond
+  double soc_lim = max(min(soc_pst_, 1.0), -0.2);  // slightly beyond
 
   // VOC-OCV model
   float dv_bias = reset ? 0.0f : ap.dv_voc_soc();
-  voc_stat_ = calc_soc_voc(soc_, Tb_f_, &dv_dsoc_) + dv_bias;
-  voc_stat_ = min(voc_stat_ + (soc_ - soc_lim) * dv_dsoc_,
+  voc_stat_ = calc_soc_voc(soc_pst_, Tb_f_, &dv_dsoc_) + dv_bias;
+  voc_stat_ = min(voc_stat_ + (soc_pst_ - soc_lim) * dv_dsoc_,
                   vsat_ * 1.2);  // slightly beyond sat but don't windup
 
   // Hysteresis model
-  hys_->calculate(ib_in_, soc_, ap.hys_scale());
+  hys_->calculate(ib_in_, soc_pst_, ap.hys_scale());
   bool init_low =
-      bms_off_ || (soc_ < (soc_min_ + HYS_SOC_MIN_MARG) && ib_ > HYS_IB_THR);
+      bms_off_ || (soc_pst_ < (soc_min_ + HYS_SOC_MIN_MARG) && ib_ > HYS_IB_THR);
   dv_hys_ = hys_->update(dt_, sat_, init_low, 0.0, ap.hys_scale(), reset);
   voc_ = voc_stat_ + dv_hys_;
   ioc_ = hys_->ioc();
@@ -847,18 +855,18 @@ float BatterySim::calculate(Sensors* Sen, const bool dc_dc_on,
 
   // Saturation logic, both full and empty.
   // Potential algebraic loop because soc is calculated based on ib
-  // that is affected by sat_ib_max_ in the next frame.  Solved by ib_fut_.
-  sat_ib_max_ = sat_ib_null_ + (1. - (soc_ + ap.ds_voc_soc())) *
+  // that is affected by sat_ib_max_ in the next frame.  Solved by ib_pst_.
+  sat_ib_max_ = sat_ib_null_ + (1. - (soc_pst_ + ap.ds_voc_soc())) *
                                    sat_cutback_gain_ *
                                    sp.cutback_gain_slr();  // Ds, Sk
   if (sp.tweak_test() || !sp.mod_ib())
     sat_ib_max_ = ib_charge_fut;  // Disable cutback when real world or when
                                   // doing tweak_test test
-  ib_fut_ = min(ib_charge_fut, sat_ib_max_);  // the feedback of ib_
+  ib_pst_ = min(ib_charge_fut, sat_ib_max_);  // the feedback of ib_
   // ib_charge_ = ib_charge_fut;  // Same time plane as volt calcs, added past
   // value.  (This allows sat logic to work)
-  dt_charge_ = dt_fut_;
-  ib_charge_ = ib_fut_;  // Same time plane as volt calcs, added past value
+  dt_charge_ = dt_pst_;
+  ib_charge_ = ib_pst_;  // Same time plane as volt calcs, added past value
 
   // if ( (q_ <= 0.) && (ib_charge_ < 0.) && sp.mod_ib() ) ib_charge_ = 0.;
   // empty  **** don't know why this was here.  cannot bms_off_ with it
@@ -888,10 +896,14 @@ double BatterySim::calc_soc_voc(const double soc, const double Tb_f,
 
 // Data of future past: update past sample time
 void BatterySim::data_of_future_past(const bool reset) {
-  if (reset)
+  if (reset) {
     sample_time_s_z_ms_ = millis();
-  else
+    soc_pst_ = soc_;
+  }
+  else {
     sample_time_s_z_ms_ = sample_time_s_ms_;
+    soc_pst_ = soc_;
+  }
 }
 
 // Injection model, calculate inj bias based on time since boot
@@ -1033,9 +1045,9 @@ void BatterySim::init_battery_sim(const bool reset, Sensors* Sen) {
   if (isnan(voc_)) voc_ = 13.;  // reset overflow
   if (isnan(ib_)) ib_ = 0.;     // reset overflow
   dv_dyn_ = vb_ - voc_;
-  ib_fut_ = ib_;
-  dt_fut_ms_ = dt_long();
-  dt_fut_ = double(dt_fut_ms_) / 1000.;
+  ib_pst_ = ib_;
+  dt_pst_ms_ = dt_long();
+  dt_pst_ = double(dt_pst_ms_) / 1000.;
   init_hys(0.0);
   ibs_ = hys_->ibs();
 #ifdef DEBUG_INIT
@@ -1053,14 +1065,14 @@ void BatterySim::pretty_print() {
   Serial.printf(" BS::BS:\n");
   Serial.printf("  d_delta_q_s%7.3f C/s\n", d_delta_q_s_);
   Serial.printf("  dt_charge%7.3f s\n", dt_charge_);
-  Serial.printf("  dt_fut%7.3f s\n", dt_fut_);
-  Serial.printf("  dt_fut_ms %lu ms\n", dt_fut_ms_);
+  Serial.printf("  dt_fut%7.3f s\n", dt_pst_);
+  Serial.printf("  dt_pst_ms %lu ms\n", dt_pst_ms_);
   Serial.printf("  duty %lu\n", duty_);
   Serial.printf("  dv_hys%7.3f, V\n", hys_->dv_hys());
   Serial.printf("  hys_scale%7.3f,\n", ap.hys_scale());
   Serial.printf("  ib%7.3f, A\n", ib_);
   Serial.printf("  ib_charge%7.3f, A\n", ib_charge_);
-  Serial.printf("  ib_fut%7.3f, A\n", ib_fut_);
+  Serial.printf("  ib_fut%7.3f, A\n", ib_pst_);
   Serial.printf("  ib_in%7.3f, A\n", ib_in_);
   Serial.printf("  ib_sat%7.3f\n", ib_sat_);
   Serial.printf("  mod_cb %d\n", model_cutback_);

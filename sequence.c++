@@ -89,6 +89,9 @@ if (read) {
 
 	// Manage states
 	Sim->data_of_future_passed(reset){
+		...
+		sample_time_s_z_ms_ = sample_time_s_ms_;
+	}
 
 	}
 
@@ -203,22 +206,22 @@ if (read) {
 				return Tb_f_;																			// FV				| FV
 			}
 			ib_in_ = Sen->Ib_model_in() / ap.nP();							// FV				| FV
-			dt_ = dt_fut_;																			// FV				| FV
-			ib_ = ib_fut_;																	// Feedback->PV | PV
-			Sen->Ib_model( ib_fut_ * ap.nP(s) ){
+			dt_ = dt_pst_;																			// FV				| FV
+			ib_ = ib_pst_;																	// Feedback->PV | PV
+			Sen->Ib_model(ib_pst_ * ap.nP(s)){
 				Ib_model_ = input;																// PV				| PV
  			}
  			 // VOC-OCV model
-			voc_stat_ = calc_soc_voc(soc_, Tb_f_, ...){
+			voc_stat_ = calc_soc_voc(soc_pst_, Tb_f_, ...){
 				lookup(soc_, Tb_f_, Y_T, X_SOC, T_VOC);
 						// soc_ = Feedback --> PV source; Tb_f = FV; voc_stat_ mixed (noted)
-			}
+			}																										// PV				| PV
 			voc_ = voc_stat_;																		// PV				| PV
 
 			// ChargeTransfer dynamic model for model
 			ib_dyn_ = ChargeTransfer_->calculate(ib_, reset, chem_.tau_ct, dt_);
 																													// PV				| PV
-			dvdyn_ =  ib_dyn_ * chem_.r_ct  + ib_ * chem_.r_0;	// PV				| PV
+			dvdyn_ =  ib_dyn_*chem_.r_ct  + ib_*chem_.r_0;	// PV				| PV
 			vb_ = voc_ + dvdyn_;																// PV				| PV
 			voc_soc_ = voc_stat_;																// PV				| PV
 
@@ -226,14 +229,14 @@ if (read) {
 			// Pass along current to charge unless bms_off
 			float ib_charge_fut = ib_in_;												// FV				| FV
 			if ( sp.mod_ib )
-				sat_ib_max_ = sat_ib_null_ + (1. - soc_)) *  sat_cutback_gain_ ;
+				sat_ib_max_ = sat_ib_null_ + (1. - soc_)*sat_cutback_gain_ ;
 																													// PV
 			else
 				 // Disable cutback when real world
 				sat_ib_max_ = ib_charge_fut;											// FV				| FV
-			ib_fut_ = min(ib_charge_fut, sat_ib_max_);					// FV				| FV
-			dt_charge_ = dt_fut_;																// FV				| FV
-			ib_charge_ = ib_fut_;																// FV				| FV
+			ib_pst_ = min(ib_charge_fut, sat_ib_max_);					// FV				| FV
+			dt_charge_ = dt_pst_;																// FV				| FV
+			ib_charge_ = ib_pst_;																// FV				| FV
 			return vb_;																					// PV 			| PV
 		} // Sen->Sim->calculate()
 
@@ -325,8 +328,8 @@ if (read) {
 				sample_time_ib_ = Sim->sample_time(){
 					return sample_time_ms_;													// FV				| n/a
 				}
-				dt_ib_ms_ = Sim->dt_fut_ms(){
-					return dt_fut_ms_;										// Feedback->PV				| n/a
+				dt_ib_ms_ = Sim->dt_pst_ms(){
+					return dt_pst_ms_;										// Feedback->PV				| n/a
 				}
 			} else {
 				Ib_ = Ib_hdwe_;																		// n/a			| FV
@@ -338,9 +341,10 @@ if (read) {
 			}
 			T_ = double(dt_ib_ms_) / 1000.;  										// PV				| FV****
 			now_ms_ = sample_time_ib_;													// FV				| FV
-			Sim->assign_times(input=double(now_ms_) / 1000.){
-				dt_fut_ = input - c_time_;												// FV				| FV
-				dt_fut_ms_ = (uint32_t)round(dt_fut_ * 1000.0);		// FV				| FV
+			c_time_ = double(now_ms_) / 1000.;									// FV				| FV
+			Sim->assign_times(input=c_time_){
+				dt_pst_ = input - c_time_;												// FV				| FV
+				dt_pst_ms_ = (uint32_t)round(dt_pst_ * 1000.0);		// FV				| FV
 				c_time_ = input;												// FV->Feedback		| FV->Feedback
 			}
 		} // select_volt_and_current_and_temp
@@ -566,9 +570,9 @@ if (read) {
 	print_...
 
 	// Manage states
-	Sen->Sim->data_of_future_passed(){
-	  sample_time_s_z_ms_ = sample_time_s_ms_;						// Feedback->FV	| n/a
-	}
+	// Sen->Sim->data_of_future_passed(){
+	  // sample_time_s_z_ms_ = sample_time_s_ms_;						// Feedback->FV	| n/a
+	// }
 
 }  // read
 }  // loop

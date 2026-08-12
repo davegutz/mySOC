@@ -48,7 +48,8 @@ Coulombs::Coulombs(double* sp_delta_q, const double q_cap_rated,
       q_capacity_(q_cap_rated), q_cap_rated_(q_cap_rated),
       q_cap_rated_scaled_(q_cap_rated), q_inf_(0.), q_min_(0.), sat_(true),
       saturated_(false), soc_(1.), soc_ekf_min_(0.), soc_inf_(0.), soc_min_(0.),
-      sp_delta_q_(sp_delta_q), tb_f_(0.), tb_f_rate_(0.), Tb_f_(0.),
+      soc_pst_(1.), sp_delta_q_(sp_delta_q), tb_f_(0.), tb_f_rate_(0.),
+      Tb_f_(0.),
       Tb_f_rate_(0.), time_neg_(0.), time_pos_(0.), chem_() {
   coul_eff_ = chem_.coul_eff * s_coul_eff;
   soc_ekf_min_ = chem_.soc_ekf_min;
@@ -122,7 +123,7 @@ void Coulombs::apply_cap_scale(const double scale) {
 void Coulombs::apply_delta_q(const double delta_q) {
   *sp_delta_q_ = delta_q;
   q_ = *sp_delta_q_ + q_capacity_;
-  soc_ = q_ / q_capacity_;
+  soc_ = soc_pst_ = q_ / q_capacity_;
   resetting_ = true;  // momentarily turn off saturation check
 }
 
@@ -131,7 +132,7 @@ void Coulombs::apply_delta_q_t(const bool reset) {
   if (!reset) return;
   q_capacity_ = calculate_capacity(tb_f_);
   q_ = q_capacity_ + *sp_delta_q_;
-  soc_ = q_ / q_capacity_;
+  soc_ = soc_pst_ = q_ / q_capacity_;
   resetting_ = true;
 }
 void Coulombs::apply_delta_q_t(const double delta_q, const double tb_f) {

@@ -148,12 +148,9 @@ void initialize_all(BatteryMonitor* Mon, Sensors* Sen, const float soc_in,
 #endif
 
   if (cp.soft_sim_hold)
-    Sen->Sim->apply_delta_q_t(
-        Sen->Sim->delta_q(),
-        Sen->Sim->Tb_f());  // applies sp.delta_q and sp.T_state
+    Sen->Sim->apply_delta_q_t(Sen->Sim->delta_q(), Sen->Sim->Tb_f());
   else
-    Sen->Sim->apply_delta_q_t(
-        Mon->delta_q(), Mon->Tb_f());  // applies sp.delta_q and sp.T_state
+    Sen->Sim->apply_delta_q_t(Mon->delta_q(), Mon->Tb_f());
 
 #ifdef DEBUG_INIT
   if (sp.debug() == -1) {

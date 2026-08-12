@@ -617,8 +617,8 @@ void print_signal_sel_serial(const bool reset, Sensors* Sen,
 // print sim for data collection
 void print_sim_header() {
   Serial.printf(
-      "unit_m,  c_time_sim,  dt_fut_s, chm_s, qcrs_s, bms_off_s,"
-      "Tb_s, Tb_f_s, vsat_s, voc_stat_s, dt_charge_s, ib_fut_s, ");
+      "unit_m,  c_time_sim,  dt_pst_s, chm_s, qcrs_s, bms_off_s,"
+      "Tb_s, Tb_f_s, vsat_s, voc_stat_s, dt_charge_s, ib_pst_s, ");
   Serial.printf(
       "dv_dyn_s, vb_s, ib_s, ib_dyn_s, dv_hys_s, ib_in_s, ib_charge_s, "
       "ioc_s, ");

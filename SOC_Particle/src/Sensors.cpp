@@ -493,7 +493,7 @@ void Sensors::select_volt_and_current_and_temp(BatteryMonitor* Mon) {
     Ib_noa_ = Ib_noa_model_;
     Vc_ = HALF_V3V3;
     sample_time_ib_ms_ = Sim->sample_time_s();
-    dt_ib_ms_ = Sim->dt_fut_ms();
+    dt_ib_ms_ = Sim->dt_pst_ms();
   } else {
     Ib_ = Ib_hdwe_;
     Ib_f_ = Ib_hdwe_f_;

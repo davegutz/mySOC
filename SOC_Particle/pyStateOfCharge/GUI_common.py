@@ -419,7 +419,7 @@ lookup = {
         ),
     ),
     "rapidTweakRegression": (
-        230,
+        235,
         slow + "Rs;W8;Xp10;" + quiet + cleanup + "Pv;<XD;",
         (
             "Should run three very large current discharge/recharge cycles without latched fail",
@@ -478,7 +478,7 @@ lookup = {
         ),
     ),
     "rapidTweakRegressionH0": (
-        230,
+        235,
         "Sh0;" + slow + "Rs;W4;Xp10;Pf;W2;" + quiet + cleanup + "Sh1;Pv;<XD;",
         (
             "Should run three very large current discharge/recharge cycles without fault",
@@ -513,7 +513,7 @@ lookup = {
         ),
     ),
     "triTweakDisch": (
-        230,
+        235,
         slow + "Rs;W4;Xp13;" + quiet + cleanup + "<XD;",
         (
             "Should run three very large current discharge/recharge cycles without fault",

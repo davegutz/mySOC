@@ -188,6 +188,7 @@ class BatteryMonitor : public Battery, public EKF_1x1 {
                               double* dv_dsoc);
   float calculate(Sensors* Sen, const bool reset, const bool reset_ekf);
   bool converged_ekf() { return ekf_conv_; };
+  void data_of_future_past(const bool reset = false);
   double delta_q_ekf() { return delta_q_ekf_; };
   double delta_q_ekf_;  // Charge deficit represented by charge, C
   float dv_dyn() { return dv_dyn_; };
@@ -254,8 +255,8 @@ class BatterySim : public Battery {
   BatterySim(const float dx_voc, const float dy_voc, const float dz_voc);
   ~BatterySim();
   void assign_times(const double input) {
-    dt_fut_ = input - c_time_;
-    dt_fut_ms_ = (uint32_t)round(dt_fut_ * 1000.0);
+    dt_pst_ = input - c_time_;
+    dt_pst_ms_ = (uint32_t)round(dt_pst_ * 1000.0);
     c_time_ = input;
   }
   float calc_inj(const uint64_t now, const uint8_t type, const float amp,
@@ -269,15 +270,15 @@ class BatterySim : public Battery {
   void data_of_future_past(const bool reset = false);
   double delta_q() { return *sp_delta_q_; };
   double d_delta_q_s() { return d_delta_q_s_; };
-  uint32_t dt_fut_ms() { return dt_fut_ms_; };
+  uint32_t dt_pst_ms() { return dt_pst_ms_; };
   double dt_charge() { return dt_charge_; };
-  double dt_fut() { return dt_fut_; };
+  double dt_fut() { return dt_pst_; };
   uint32_t dt_long() { return sample_time_s_ms_ - sample_time_s_z_ms_; };
   float hys_state() { return hys_->dv_hys(); };
   void hys_state(const float st) { hys_->dv_hys(st); };
   void hys_pretty_print() { hys_->pretty_print(0., 0., 0.); };
   float ib_charge() { return ib_charge_; };
-  float ib_fut() { return ib_fut_; };
+  float ib_fut() { return ib_pst_; };
   float ib_in() { return ib_in_; };
   float ib_s() { return ib_; };
   void init_battery_sim(const bool reset, Sensors* Sen);
@@ -296,10 +297,10 @@ class BatterySim : public Battery {
   uint32_t duty_;  // Used in Test Mode to inject Fake shunt current (0 - 255)
   double d_delta_q_s_;  // Charge rate, C/s
   double dt_charge_;  // Input update time of current available for charging, s
-  uint32_t dt_fut_ms_;  // Future delta update of model sample, ms
-  double dt_fut_; // Future update time of model sample, s
+  uint32_t dt_pst_ms_;  // Past delta update of model sample, ms
+  double dt_pst_; // Past update time of model sample, s
   float ib_charge_;  // Current input avaiable for charging, A
-  float ib_fut_;  // Future value of limited current, A
+  float ib_pst_;  // Past value of limited current, A
   float ib_in_;  // Saved value of current input, A
   float ib_sat_;  // Threshold to declare saturation
                   // This regeneratively slows

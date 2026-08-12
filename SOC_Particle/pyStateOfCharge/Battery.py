@@ -533,7 +533,7 @@ class BatteryMonitor(Battery, EKF1x1, Wrap):
         self.tau_hys_s = 0.0
         self.vb_s = 0.0
         self.q_s = 0.0
-        self.ib_fut_s = 0.0
+        self.ib_pst_s = 0.0
         self.reset_s = 0.0
         self.tau_s = 0.0
         self.tau_hys_s = 0.0
@@ -1091,7 +1091,7 @@ class BatteryMonitor(Battery, EKF1x1, Wrap):
         else:
             self.cc_dif = self.soc_ekf - self.soc
         self.dt_charge_s = sim.dt_charge
-        self.dt_fut_s = sim.dt_fut
+        self.dt_pst_s = sim.dt_fut
         self.dt_s = sim.dt
         self.chm_s = sim.chm
         self.qcrs_s = sim.q_cap_rated_scaled
@@ -1121,7 +1121,7 @@ class BatteryMonitor(Battery, EKF1x1, Wrap):
         self.ib_dyn_tau_s = sim.chemistry.tau_ct
         self.tau_hys_s = sim.tau_hys
         self.q_s = sim.q
-        self.ib_fut_s = sim.ib_fut
+        self.ib_pst_s = sim.ib_fut
         self.reset_s = sim.reset
         self.tau_s = sim.tau_hys
         self.tau_hys_s = sim.tau_hys
@@ -1209,7 +1209,7 @@ class BatterySim(Battery):
         self.reset_temp_past = self.model_saturated
         self.dt_past = 0.0
         self.dt_charge_s = 0.0
-        self.dt_fut_s = 0.0
+        self.dt_pst_s = 0.0
         self.dt_s = 0.0
         self.chm_s = 0.0
         self.qcrs_s = 0.0
@@ -1240,7 +1240,7 @@ class BatterySim(Battery):
         self.tau_hys_s = 0.0
         self.vb_s = 0.0
         self.q_s = 0.0
-        self.ib_fut_s = 0.0
+        self.ib_pst_s = 0.0
         self.reset_s = 0.0
         self.tau_s = 0.0
         self.tau_hys_s = 0.0
@@ -1251,7 +1251,7 @@ class BatterySim(Battery):
             self.d_delta_q = SN.d_delta_q_s_init
             self.delta_q = SN.delta_q_s_init
             self.ib = SN.ib_s_init
-            self.ib_fut = SN.ib_fut_s_init
+            self.ib_fut = SN.ib_pst_s_init
             self.ib_charge = SN.ib_charge_s_init
             self.ioc = SN.ioc_s_init
             if SN.run_type == "HistSim":
@@ -1405,8 +1405,8 @@ class BatterySim(Battery):
         self.ib_fut = min(ib_charge_fut, self.sat_ib_max)  # the feedback of self.ib
         # self.ib_charge = ib_charge_fut# same time plane as volt calcs.  (This prevents sat logic from working)
         self.ib_charge = self.ib_fut  # same time plane as volt calcs
-        if hasattr(SN, "dt_fut_s") and SN.dt_fut_s is not None and G.i < len(SN.dt_fut_s):
-            self.dt_fut = SN.dt_fut_s[G.i]
+        if hasattr(SN, "dt_pst_s") and SN.dt_pst_s is not None and G.i < len(SN.dt_pst_s):
+            self.dt_fut = SN.dt_pst_s[G.i]
         else:
             self.dt_fut = dt_charge
 
@@ -1492,7 +1492,7 @@ class BatterySim(Battery):
         self.time = time
         self.dt_s = self.dt if self.dt > 0.0 else (float(SN.sim_run.dt_s[0]) if (SN is not None and hasattr(getattr(SN, "sim_run", None), "dt_s")) else Battery.EKF_NOM_DT)
         self.dt_charge_s = self.dt_charge if self.dt_charge > 0.0 else (float(SN.sim_run.dt_charge_s[0]) if (SN is not None and hasattr(getattr(SN, "sim_run", None), "dt_charge_s")) else Battery.EKF_NOM_DT)
-        self.dt_fut_s = self.dt_fut if self.dt_fut > 0.0 else (float(SN.sim_run.dt_fut_s[0]) if (SN is not None and hasattr(getattr(SN, "sim_run", None), "dt_fut_s")) else Battery.EKF_NOM_DT)
+        self.dt_pst_s = self.dt_fut if self.dt_fut > 0.0 else (float(SN.sim_run.dt_pst_s[0]) if (SN is not None and hasattr(getattr(SN, "sim_run", None), "dt_pst_s")) else Battery.EKF_NOM_DT)
 
         idx = G.i
         if SN is not None and getattr(SN, "sim_run", None) is not None:
@@ -1536,7 +1536,7 @@ class BatterySim(Battery):
         self.tau_hys_s = self.tau_hys
         self.vb_s = self.vb
         self.q_s = self.q
-        self.ib_fut_s = self.ib_fut
+        self.ib_pst_s = self.ib_fut
         self.reset_s = self.reset
         self.tau_s = self.tau_hys
         self.tau_hys_s = self.tau_hys
@@ -1742,8 +1742,8 @@ class SavedS:
         self.d_delta_q_s = []
         self.ib_charge_s = []
         self.dt_charge_s = []
-        self.dt_fut_s = []
-        self.ib_fut_s = []
+        self.dt_pst_s = []
+        self.ib_pst_s = []
         self.sat_s = []
         self.ddq_s = []
         self.delta_q_s = []
@@ -1768,7 +1768,7 @@ class SavedS:
             s += "{:8.3f},".format(self.ib_s[i])
             s += "{:8.3f},".format(self.ib_dyn_s[i])
             s += "{:8.3f},".format(self.ib_in_s[i])
-            s += "{:8.3f},".format(self.ib_fut_s[i])
+            s += "{:8.3f},".format(self.ib_pst_s[i])
             s += "{:1.0f},".format(self.sat_s[i])
             s += "{:5.3f},".format(self.ddq_s[i])
             s += "{:5.3f},".format(self.delta_q_s[i])

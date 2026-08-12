@@ -74,12 +74,11 @@ class Coulombs {
   virtual float vsat() = 0;
 
  protected:
-  bool resetting_ =
-      false;  // Sticky flag to coordinate user testing of coulomb counters,
-              // T=performing an external reset of counter
-  double coul_eff_;     // Coulombic efficiency - the fraction of charging input
+  bool resetting_ = false;  // Sticky flag to coordinate user testing
+        // of coulomb counters, T=performing an external reset of counter
+  double coul_eff_;  // Coulombic efficiency - the fraction of charging input
                         // that gets turned into usable Coulombs
-  double d_delta_q_;    // Change in charge for update, C
+  double d_delta_q_;  // Change in charge for update, C
   double delta_q_abs_;  // Total charge book-kept since reset, not reset on
                         // saturation, C
   double delta_q_inf_;  // Charge since initialized, C
@@ -87,29 +86,29 @@ class Coulombs {
                         // reset on saturation, C
   double delta_q_pos_;  // Total positive charge book-kept since reset, not
                         // reset on saturation, C
-  double dt_;           // Update time, s
-  double q_;            // Present charge available to use, except q_min_, C
-  double q_capacity_;   // Saturation charge at temperature, C
-  double
-      q_cap_rated_;  // Rated capacity at t_rated_, saved for future scaling, C
+  double dt_;  // Update time, s
+  double q_;  // Present charge available to use, except q_min_, C
+  double q_capacity_;  // Saturation charge at temperature, C
+  double q_cap_rated_;  // Rated capacity at t_rated_, saved for fut scaling, C
   double q_cap_rated_scaled_;  // Applied rated capacity at t_rated_, after
                                // scaling, C
-  double q_inf_;               // Same as q_ but not reset on saturation, C
-  double q_min_;               // Floor on charge available to use, C
+  double q_inf_;  // Same as q_ but not reset on saturation, C
+  double q_min_;  // Floor on charge available to use, C
   bool sat_;  // Indication that battery is potentially saturated, T=saturated
   bool saturated_;  // Battery is confirmed saturated, T=saturated
   double soc_;  // Fraction of saturation charge (q_capacity_) available (0-1)
   double soc_ekf_min_;  // Minimum SOC for EKF operation
-  double soc_inf_;      // Fraction of saturation charge (q_capacity_) available
-                        // (-inf - inf)
+  double soc_inf_;  // Fraction of saturation charge (q_capacity_) available
+                    // (-inf - inf)
   double soc_min_;  // As battery cools, the voltage drops and there appears a
                     // minimum soc it can deliver
+  double soc_pst_;  // Past value of soc (0-1)
   double* sp_delta_q_;  // Charge since saturated, C
-  double tb_f_;         // Temperature, deg C
-  double tb_f_rate_;    // Tb rate, deg C / s
-  double Tb_f_;         // Temperature, deg C
-  double Tb_f_rate_;    // Tb rate, deg C / s
-  double time_neg_;     // Time spent accumulating delta_q_neg_, s
-  double time_pos_;     // Time spent accumulating delta_q_pos_, s
-  Chemistry chem_;      // Chemistry
+  double tb_f_;  // Temperature, deg C
+  double tb_f_rate_;  // Tb rate, deg C / s
+  double Tb_f_;  // Temperature, deg C
+  double Tb_f_rate_;  // Tb rate, deg C / s
+  double time_neg_;  // Time spent accumulating delta_q_neg_, s
+  double time_pos_;  // Time spent accumulating delta_q_pos_, s
+  Chemistry chem_;  // Chemistry
 };
