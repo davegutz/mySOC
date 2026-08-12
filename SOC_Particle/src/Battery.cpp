@@ -709,7 +709,7 @@ BatterySim::BatterySim(const float dx_voc, const float dy_voc,
                        const float dz_voc)
     : Battery(sp.delta_q_model_ptr(), VS, dx_voc, dy_voc, dz_voc),
       Sin_inj_(nullptr), Sq_inj_(nullptr), Tri_inj_(nullptr), Cos_inj_(nullptr),
-      c_time_s_(0.), duty_(0UL), d_delta_q_s_(0.), d_delta_q_sx_(0.), dt_charge_(0.),
+      c_time_s_(0.), duty_(0UL), d_delta_q_s_(0.), dt_charge_(0.),
       dt_pst_ms_(0UL), dt_pst_s_ms_(0UL), dt_pst_(0.), dt_pst_s_(0.),
       dt_s_(0.),
       ib_charge_(0.), ib_pst_(0.), ib_in_(0.),
@@ -974,13 +974,8 @@ at temperature, C resetting_      Sticky flag for initialization, T=reset
 double BatterySim::count_coulombs(Sensors* Sen, const bool reset_temp,
                                   BatteryMonitor* Mon,
                                   const bool initializing_all) {
-  d_delta_q_s_ = ib_charge_ * dt_charge_;
-  d_delta_q_sx_ = ib_charge_ * dt_charge_s_;
+  d_delta_q_s_ = ib_charge_ * dt_charge_s_;
   if (ib_charge_ > 0.) d_delta_q_s_ *= coul_eff_;
-  if (ib_charge_ > 0.) d_delta_q_sx_ *= coul_eff_;
-vif (sp.debug() == 54 || sp.debug() == 4) Serial.printf("BS::cc:  c_time_%7.4f c_time_s_%7.4f", c_time_, c_time_s_);
-if (sp.debug() == 54 || sp.debug() == 4) Serial.printf(" dt_charge_%7.4f dt_charge_s_%7.4f", dt_charge_, dt_charge_s_);
-if (sp.debug() == 54 || sp.debug() == 4) Serial.printf(" d_delta_q_s_%7.4f d_delta_q_sx_%7.4f\n", d_delta_q_s_, d_delta_q_sx_);
 
   // Rate limit temperature.  When modeling, initialize to no change
   Tb_ = Sen->Tb();
@@ -1010,7 +1005,7 @@ if (sp.debug() == 54 || sp.debug() == 4) Serial.printf(" d_delta_q_s_%7.4f d_del
   if (!reset_temp_past) {
     // Capacity changes with temperature so this effect would be double if used
     // *sp_delta_q_ += d_delta_q_s_ - chem_.dqdt*q_capacity_*Tb_f_rate_*dt_;
-    *sp_delta_q_ += d_delta_q_sx_;
+    *sp_delta_q_ += d_delta_q_s_;
     *sp_delta_q_ = max(min(*sp_delta_q_, 0.), -q_capacity_ * 1.2);
   }
   q_ = q_capacity_ + *sp_delta_q_;
@@ -1072,7 +1067,6 @@ void BatterySim::pretty_print() {
   Serial.printf(" BS::BS:\n");
   Serial.printf("  c_time_s%12.1f, s\n", c_time_s_);
   Serial.printf("  d_delta_q_s%7.3f C/s\n", d_delta_q_s_);
-  Serial.printf("  d_delta_q_sx%7.3f C/s\n", d_delta_q_sx_);
   Serial.printf("  dt_charge%7.3f s\n", dt_charge_);
   Serial.printf("  dt_charge_s%7.3f s\n", dt_charge_s_);
   Serial.printf("  dt_pst%7.3f s\n", dt_pst_);
