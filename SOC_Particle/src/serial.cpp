@@ -654,9 +654,9 @@ void print_sim_serial(const bool initializing_all, const bool reset,
     sprintf(pr.buff,
             "unit_sim, %13.4f,%8.4f,%d,%10.4f,%d,%11.8f,%11.8f, "
             "%7.6f,%7.6f,%8.4f,%11.9f,",
-            Sim->c_time(), Sim->dt_fut(), CHEM,
+            Sim->c_time(), Sim->dt_pst(), CHEM,
             Sim->q_cap_rated_scaled(), Sim->bms_off(), Sim->Tb(), Sim->Tb_f(),
-            Sim->vsat(), Sim->voc_stat(), Sim->dt_charge(), Sim->ib_fut());
+            Sim->vsat(), Sim->voc_stat(), Sim->dt_charge(), Sim->ib_pst());
     Serial.printf("%s", pr.buff);
 
     sprintf(pr.buff, "%11.9f,%11.9f,%11.9f,%11.9f,%11.9f,%11.9f,%11.9f,%11.9f,",

@@ -194,7 +194,7 @@ void initialize_all(BatteryMonitor* Mon, Sensors* Sen, const float soc_in,
     debug_m1(Mon, Sen);
   }
 #endif
-  Sen->Ib_model(Sen->Sim->ib_fut() * ap.nP());
+  Sen->Ib_model(Sen->Sim->ib_pst() * ap.nP());
 #ifdef DEBUG_INIT
   if (sp.debug() == -1) {
     Serial.printf("S.a_b3:  ");
@@ -389,7 +389,7 @@ void sense_synth_select(const bool reset, const bool reset_temp,
   //  Outputs:  Tb_hdwe, Ib_model, Vb_model, sp.inj_bias, Sim.model_saturated
   Sen->Vb_model(Sen->Sim->calculate(Sen, ap.dc_dc_on(), reset) * ap.nS() +
                 Sen->Vb_add());
-  Sen->Ib_model(Sen->Sim->ib_fut() * ap.nP());
+  Sen->Ib_model(Sen->Sim->ib_pst() * ap.nP());
   cp.model_cutback = Sen->Sim->cutback();
   cp.model_saturated = Sen->Sim->saturated();
 

@@ -256,8 +256,11 @@ class BatterySim : public Battery {
   ~BatterySim();
   void assign_times(const double input) {
     dt_pst_ = input - c_time_;
+    dt_pst_s_ = input - c_time_s_;
     dt_pst_ms_ = (uint32_t)round(dt_pst_ * 1000.0);
+    dt_pst_s_ms_ = (uint32_t)round(dt_pst_s_ * 1000.0);
     c_time_ = input;
+    c_time_s_ = input;
   }
   float calc_inj(const uint64_t now, const uint8_t type, const float amp,
                  const double freq);
@@ -267,18 +270,24 @@ class BatterySim : public Battery {
   double count_coulombs(Sensors* Sen, const bool reset, BatteryMonitor* Mon,
                         const bool initializing_all);
   bool cutback() { return model_cutback_; };
+  double c_time_s() { return c_time_s_; };
+  void c_time_s(const double c_time) { c_time_s_ = c_time; };
   void data_of_future_past(const bool reset = false);
   double delta_q() { return *sp_delta_q_; };
   double d_delta_q_s() { return d_delta_q_s_; };
+  double d_delta_q_sx() { return d_delta_q_sx_; };
   uint32_t dt_pst_ms() { return dt_pst_ms_; };
   double dt_charge() { return dt_charge_; };
-  double dt_fut() { return dt_pst_; };
-  uint32_t dt_long() { return sample_time_s_ms_ - sample_time_s_z_ms_; };
+  double dt_charge_s() { return dt_charge_s_; };
+  double dt_pst() { return dt_pst_; };
+  uint32_t dt_long() { return sample_time_s_ms_ - sample_time_s_pst_ms_; };
+  void dt_s(const float input) { dt_s_ = input; }
+  float dt_s() { return dt_s_; };
   float hys_state() { return hys_->dv_hys(); };
   void hys_state(const float st) { hys_->dv_hys(st); };
   void hys_pretty_print() { hys_->pretty_print(0., 0., 0.); };
   float ib_charge() { return ib_charge_; };
-  float ib_fut() { return ib_pst_; };
+  float ib_pst() { return ib_pst_; };
   float ib_in() { return ib_in_; };
   float ib_s() { return ib_; };
   void init_battery_sim(const bool reset, Sensors* Sen);
@@ -294,11 +303,17 @@ class BatterySim : public Battery {
   SqInj* Sq_inj_;  // Class to create square waves
   TriInj* Tri_inj_;  // Class to create triangle waves
   CosInj* Cos_inj_;  // Class to create cosine waves
+  double c_time_s_;  // Current time, s
   uint32_t duty_;  // Used in Test Mode to inject Fake shunt current (0 - 255)
   double d_delta_q_s_;  // Charge rate, C/s
+  double d_delta_q_sx_;  // Charge rate, C/s
   double dt_charge_;  // Input update time of current available for charging, s
+  double dt_charge_s_;  // Input update time current available for charging, s
   uint32_t dt_pst_ms_;  // Past delta update of model sample, ms
+  uint32_t dt_pst_s_ms_;  // Past delta update of model sample, ms
   double dt_pst_; // Past update time of model sample, s
+  double dt_pst_s_; // Past update time of model sample, s
+  float dt_s_;  // Update time, s
   float ib_charge_;  // Current input avaiable for charging, A
   float ib_pst_;  // Past value of limited current, A
   float ib_in_;  // Saved value of current input, A
@@ -309,7 +324,7 @@ class BatterySim : public Battery {
   bool model_saturated_;  // Indicator of maximal cutback, T = cutback saturated
   double q_;              // Charge, C
   uint32_t sample_time_s_ms_;  // Exact moment hardware signal generation, ms
-  uint32_t sample_time_s_z_ms_;  // Moment past hardware signal generation, ms
+  uint32_t sample_time_s_pst_ms_;  // Moment past hardware signal generation, ms
   float sat_cutback_gain_;  // Gain to retard ib when voc exceeds vsat, non dim
   float sat_ib_max_;   // Current cutback to be applied to modeled ib output, A
   float sat_ib_null_;  // Current cutback value for voc=vsat, A

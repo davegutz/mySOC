@@ -93,7 +93,7 @@ if (read) {
 	// Manage states
 	Sen->Sim->data_of_future_passed(reset){
 		...
-		sample_time_s_z_ms_ = sample_time_s_ms_;
+		sample_time_s_pst_ms_ = sample_time_s_ms_;
 	  soc_pst_ = soc_;
 	}
 	Mon->data_of_future_passed(reset){
@@ -233,14 +233,14 @@ if (read) {
 
   			// Saturation logic, both full and empty
 			// Pass along current to charge unless bms_off
-			float ib_charge_fut = ib_in_;												// FV				| FV
+			float ib_charge_pst = ib_in_;												// FV				| FV
 			if ( sp.mod_ib )
 				sat_ib_max_ = sat_ib_null_ + (1. - soc_pst_)*sat_cutback_gain_ ;
 																													// PV
 			else
 				 // Disable cutback when real world
-				sat_ib_max_ = ib_charge_fut;											// FV				| FV
-			ib_pst_ = min(ib_charge_fut, sat_ib_max_);					// FV				| FV
+				sat_ib_max_ = ib_charge_pst;											// FV				| FV
+			ib_pst_ = min(ib_charge_pst, sat_ib_max_);					// FV				| FV
 			dt_charge_ = dt_pst_;																// FV				| FV
 			ib_charge_ = ib_pst_;																// FV				| FV
 			return vb_;																					// PV 			| PV
@@ -421,7 +421,7 @@ if (read) {
 			dt_ = Sen->T(){
 				return T_;																				// PV				| FV*****
 			}
-			c_time_ = Sen->c_time_fut(){
+			c_time_ = Sen->c_time_pst(){
 				return c_time_;																		// FV				| FV
 			}
 			vb_ = Sen->vb(){
@@ -577,7 +577,7 @@ if (read) {
 
 	// Manage states
 	Sen->Sim->data_of_future_passed(...) {
-	  sample_time_s_z_ms_ = sample_time_s_ms_;						// Feedback->FV	| n/a
+	  sample_time_s_pst_ms_ = sample_time_s_ms_;						// Feedback->FV	| n/a
     soc_pst_ = soc_;
 	}
 	Mon->data_of_future_past(...) {
