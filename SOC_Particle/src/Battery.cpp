@@ -709,8 +709,8 @@ BatterySim::BatterySim(const float dx_voc, const float dy_voc,
                        const float dz_voc)
     : Battery(sp.delta_q_model_ptr(), VS, dx_voc, dy_voc, dz_voc),
       Sin_inj_(nullptr), Sq_inj_(nullptr), Tri_inj_(nullptr), Cos_inj_(nullptr),
-      c_time_s_(0.), duty_(0UL), d_delta_q_s_(0.), dt_charge_(0.),
-      dt_pst_ms_(0UL), dt_pst_s_ms_(0UL), dt_pst_(0.), dt_pst_s_(0.),
+      c_time_s_(0.), duty_(0UL), d_delta_q_s_(0.), dt_charge_s_(0.),
+      dt_pst_ms_(0UL), dt_pst_s_ms_(0UL), dt_pst_s_(0.),
       dt_s_(0.),
       ib_charge_(0.), ib_pst_(0.), ib_in_(0.),
       ib_sat_(0.5), model_cutback_(true), model_saturated_(false),
@@ -796,11 +796,10 @@ float BatterySim::calculate(Sensors* Sen, const bool dc_dc_on,
   ib_in_ = Sen->Ib_model_in() / ap.nP();  // Past value
   if (reset ) {
     dt_pst_s_ms_ = dt_pst_ms_ = dt_long();
-    dt_pst_s_ = dt_pst_ = double(dt_long()) / 1000.;
+    dt_pst_s_ = double(dt_long()) / 1000.;
     ib_pst_ = ib_in_;
   }
   c_time_s_ = Sen->c_time();
-  dt_ = max((float)dt_pst_, 1e-4f);
   dt_s_ = max((float)dt_pst_s_, 1e-4f);
   ib_ = max(min(ib_pst_, IMAX_NUM),
             -IMAX_NUM);  //  Past value ib_.  Overflow protection when ib_ past
@@ -818,7 +817,7 @@ float BatterySim::calculate(Sensors* Sen, const bool dc_dc_on,
   hys_->calculate(ib_in_, soc_pst_, ap.hys_scale());
   bool init_low =
       bms_off_ || (soc_pst_ < (soc_min_ + HYS_SOC_MIN_MARG) && ib_ > HYS_IB_THR);
-  dv_hys_ = hys_->update(dt_, sat_, init_low, 0.0, ap.hys_scale(), reset);
+  dv_hys_ = hys_->update(dt_s_, sat_, init_low, 0.0, ap.hys_scale(), reset);
   voc_ = voc_stat_ + dv_hys_;
   ioc_ = hys_->ioc();
 
@@ -840,7 +839,7 @@ float BatterySim::calculate(Sensors* Sen, const bool dc_dc_on,
 
   // ChargeTransfer dynamic model for model, reverse version to generate sensor
   // inputs
-  ib_dyn_ = ChargeTransfer_->calculate(ib_, reset, chem_.tau_ct, dt_);
+  ib_dyn_ = ChargeTransfer_->calculate(ib_, reset, chem_.tau_ct, dt_s_);
   float dvdyn =
       (ib_dyn_ * chem_.r_ct * ap.slr_res() + ib_ * chem_.r_0 * ap.slr_res());
 
@@ -866,7 +865,6 @@ float BatterySim::calculate(Sensors* Sen, const bool dc_dc_on,
     sat_ib_max_ = ib_charge_pst;  // Disable cutback when real world or when
                                   // doing tweak_test test
   ib_pst_ = min(ib_charge_pst, sat_ib_max_);  // the feedback of ib_
-  dt_charge_ = dt_pst_;
   dt_charge_s_ = dt_pst_s_;
   ib_charge_ = ib_pst_;  // Same time plane as volt calcs, added past value
 
@@ -1049,7 +1047,8 @@ void BatterySim::init_battery_sim(const bool reset, Sensors* Sen) {
   dv_dyn_ = vb_ - voc_;
   ib_pst_ = ib_;
   dt_pst_ms_ = dt_long();
-  dt_pst_ = double(dt_pst_ms_) / 1000.;
+  dt_pst_s_ms_ = dt_long();
+  dt_pst_s_ = double(dt_pst_s_ms_) / 1000.;
   init_hys(0.0);
   ibs_ = hys_->ibs();
 #ifdef DEBUG_INIT
@@ -1067,10 +1066,9 @@ void BatterySim::pretty_print() {
   Serial.printf(" BS::BS:\n");
   Serial.printf("  c_time_s%12.1f, s\n", c_time_s_);
   Serial.printf("  d_delta_q_s%7.3f C/s\n", d_delta_q_s_);
-  Serial.printf("  dt_charge%7.3f s\n", dt_charge_);
   Serial.printf("  dt_charge_s%7.3f s\n", dt_charge_s_);
-  Serial.printf("  dt_pst%7.3f s\n", dt_pst_);
-  Serial.printf("  dt_pst_ms %lu ms\n", dt_pst_ms_);
+  Serial.printf("  dt_pst_s%7.3f s\n", dt_pst_s_);
+  Serial.printf("  dt_pst_s_ms %lu ms\n", dt_pst_s_ms_);
   Serial.printf("  duty %lu\n", duty_);
   Serial.printf("  dv_hys%7.3f, V\n", hys_->dv_hys());
   Serial.printf("  hys_scale%7.3f,\n", ap.hys_scale());

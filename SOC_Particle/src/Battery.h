@@ -255,9 +255,7 @@ class BatterySim : public Battery {
   BatterySim(const float dx_voc, const float dy_voc, const float dz_voc);
   ~BatterySim();
   void assign_times(const double input) {
-    dt_pst_ = input - c_time_;
     dt_pst_s_ = input - c_time_s_;
-    dt_pst_ms_ = (uint32_t)round(dt_pst_ * 1000.0);
     dt_pst_s_ms_ = (uint32_t)round(dt_pst_s_ * 1000.0);
     c_time_ = input;
     c_time_s_ = input;
@@ -275,10 +273,9 @@ class BatterySim : public Battery {
   void data_of_future_past(const bool reset = false);
   double delta_q() { return *sp_delta_q_; };
   double d_delta_q_s() { return d_delta_q_s_; };
-  uint32_t dt_pst_ms() { return dt_pst_ms_; };
-  double dt_charge() { return dt_charge_; };
+  double dt_pst_s() { return dt_pst_s_; };
+  uint32_t dt_pst_s_ms() { return dt_pst_s_ms_; };
   double dt_charge_s() { return dt_charge_s_; };
-  double dt_pst() { return dt_pst_; };
   uint32_t dt_long() { return sample_time_s_ms_ - sample_time_s_pst_ms_; };
   void dt_s(const float input) { dt_s_ = input; }
   float dt_s() { return dt_s_; };
@@ -305,11 +302,9 @@ class BatterySim : public Battery {
   double c_time_s_;  // Current time, s
   uint32_t duty_;  // Used in Test Mode to inject Fake shunt current (0 - 255)
   double d_delta_q_s_;  // Charge rate, C/s
-  double dt_charge_;  // Input update time of current available for charging, s
   double dt_charge_s_;  // Input update time current available for charging, s
   uint32_t dt_pst_ms_;  // Past delta update of model sample, ms
   uint32_t dt_pst_s_ms_;  // Past delta update of model sample, ms
-  double dt_pst_; // Past update time of model sample, s
   double dt_pst_s_; // Past update time of model sample, s
   float dt_s_;  // Update time, s
   float ib_charge_;  // Current input avaiable for charging, A
