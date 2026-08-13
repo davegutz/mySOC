@@ -110,26 +110,26 @@ if (read) {
 		load_ib_vb_tb(){
 			// ib load-----------------------------------
 			// Sample Ib
-																								// Model temporal | Hdwe temporal
+																							// Model temporal | Hdwe temporal
 			Sen->ShuntAmp->sample(...) {
 				sample_Vo(){			
-					sample_time_z_ms_ = sample_time_ms_;					// Feedback->ZV | ZV
+					sample_time_z_ms_ = sample_time_ms_;				// Feedback->ZV | ZV
 					sample_time_ms_ = millis(){
-						return system_clock_ms;												// Source->PV	|	PV
+						return system_clock_ms;											// Source->PV	|	PV
 					}
 					Vo_read_->analogReadDebounced(...){
-						Vo_raw_ = analogRead(myPins.Vom_pin);					// Source->PV	|	PV
+						Vo_raw_ = analogRead(myPins.Vom_pin);				// Source->PV	|	PV
 					}
-					Vo_ = float(Vo_raw_) * VO_CONV_GAIN;						// PV					| PV
+					Vo_ = float(Vo_raw_) * VO_CONV_GAIN;						// PV				| PV
 				}
 				sample_Vc(){
 					Vc_read_->analogReadDebounced(...){
-						Vc_raw_ = analogRead(myPins.Vc_pin);					// Source->PV	| PV
+						Vc_raw_ = analogRead(myPins.Vc_pin);				// Source->PV	| PV
 					}
-					Vc_ = float(Vc_raw_) * VH3V3_CONV_GAIN;					// PV					| PV
+					Vc_ = float(Vc_raw_) * VH3V3_CONV_GAIN;					// PV				| PV
 				}
 				sample_combine(){
-					Vo_Vc_ = Vo_ - Vc_;															// PV					| PV
+					Vo_Vc_ = Vo_ - Vc_;															// PV				| PV
 				}
 			} // Sen->ShuntAmp->sample(...)
 
@@ -144,27 +144,46 @@ if (read) {
 			Sen->ShuntNoAmp->convert(...){
 				// ...similar to  ShuntAmp
 			}
-			Sen->Flt->vc_check(...);  // OS fault check
-			Sen->shunt_select_initial(...){
-				Ib_amp_model_ = mod_add;													// PV				| PV
-				Ib_noa_model_ = mod_add;													// PV				| PV
 
-				Ib_amp_hdwe_ = ShuntAmp->Ishunt_cal(){						// PV				| PV
-						return Ishunt_cal_ ;
+			Sen->Flt->vc_check(...);  // OS fault check
+
+			Sen->shunt_select_initial(...){
+				if (!sp.mod_ib()) {
+					mod_add = 0.;
+					hdwe_add = ... + sp.inj_bias(){ return inj_bias_ };
+																													// n/a			| ZV   ok
+				} else {
+					mod_add = ... + sp.inj_bias(){ return inj_bias_ };
+																													// ZV				| n/a   ok
+					hdwe_add = 0.;
+					...
+				}
+									// ok because exact time that mod_add is generated isn't 
+									// tracked by any logic.  xxx_model_ is considered source
+									// mod_add is ZV of an independent source. ok->consider it PV
+				Ib_amp_model_ = mod_add;	// ok->consider it PV		// PV				| PV
+				Ib_noa_model_ = mod_add;	// ok->consider it PV		// PV				| PV
+
+				Ib_amp_hdwe_ = ShuntAmp->Ishunt_cal(){
+						return Ishunt_cal_ ;													// PV				| PV
 				}
 				Ib_noa_hdwe_ = ShuntNoAmp->Ishunt_cal(){
 					// ... similar to ShuntAmp
 				}
-				Vc_hdwe_ = max(ShuntAmp->Vc(), ShuntNoAmp->Vc());// PV				| PV
-				Vc_hdwe_sum_ = ShuntAmp->Vc() + ShuntNoAmp->Vc();// PV				| PV
+				Vc_hdwe_ = max(ShuntAmp->Vc(), ShuntNoAmp->Vc());	// PV				| PV
+				...
 			}
 
-			// Assign Ib
+			Sen->ib_choose_hi_lo(){
+				Ib_hdwe_ = f(Ib_amp_hdwe_, Ib_noa_hdwe_);					// n/a			| PV
+			}
+
+			// Assign Ib for model
 			if (!sp.mod_ib()) {
 				Ib_model_in_ = Ib_hdwe_;  												// n/a	| Feedback->ZV
 			} 
 			else {
-				Ib_noise = psuedo_random_binary_noise(bits=7, seed=...);		// n/a
+				Ib_noise = psuedo_random_binary_noise(...);				// n/a 			| n/a
 				Ib_model_in_ = mod_add + Ib_noise;								// PV				| n/a
 			}
 
@@ -172,13 +191,13 @@ if (read) {
 			Sen->vb_load(myPins.Vb_pin=D12, ...){
 				Vb_raw_ = Vb_read_...;														// n/a	| Source->PV
 				...
-				Vb_hdwe_ = Vb_raw_ * VB_CONV_GAIN;								// PV		| PV
+				Vb_hdwe_ = Vb_raw_ * VB_CONV_GAIN;								// PV				| PV
 				// Note: T_ in following is UBC (past value) from previous frame
-				Vb_hdwe_f_ = VbHdweFilt->calculate(..., AMP_FILT_TAU, T_, ...);	
-																													// PV		| PV
+				Vb_hdwe_f_ = VbHdweFilt->calculate(Vb_hdwe_,..., AMP_FILT_TAU, T_, ...);	
+																													// mixed| mixed *****
 				...
 			}
-			Sen->Flt->vb_check(...);														// PV		| PV
+			Sen->Flt->vb_check(...);														// PV				| PV
 
 			// Tb load-----------------------------------
 			Sen->Tb_load(myPins.VTb_pin=D0, ...){
@@ -186,11 +205,11 @@ if (read) {
 				...
 				Tb_hdwe_ = thermistor_equation(Tb_raw_);					// n/a			| PV
 				Tb_hdwe_f_ = TbHdweFilt->calculate(..., TB_FILT, T_, ...);
-																													// n/a			| PV
+																													// n/a			| mixed***
 				...
 				Tb_model_ = NOMINAL_TB + Tb_noise();							// PV				| n/a
 				Tb_model_f_ = TbModelFilt->calculate(..., TB_FILT, T_, ...);
-																													// PV				| n/a
+																													// mixed| mixed *****
 				...
 			}
 			Sen->Flt->Tb_check(...);  //--> TB_FLT, TB_FA				// PV				| PV
@@ -201,49 +220,55 @@ if (read) {
 		...
 
 		// Sim calculation
-		Sen->Vb_model(Sen->Sim->calculate()){					// ZV for Vb_model_	| same
+		Sen->Sim->calculate()){	
 			// Inputs
- 			Tb_ = Sen->Tb(){
-				return Tb_;																				// PV				| PV
+ 			Sim::Tb_ = Sen->Tb(){
+				return Tb_;																				// ZV				| ZV
 			}
 			// Inputs
- 			Tb_f_ = Sen->Tb_f(){
-				return Tb_f_;																			// PV				| PV
+ 			Sim::Tb_f_ = Sen->Tb_f(){
+				return Tb_f_;																			// ZV				| ZV
 			}
-			ib_in_ = Sen->Ib_model_in() / ap.nP();							// PV				| PV
-			dt_ = dt_pst_;																			// PV				| PV
-			ib_ = ib_pst_;																	// Feedback->ZV | ZV
-			Sen->Ib_model(ib_pst_ * ap.nP(s)){
-				Ib_model_ = input;																// ZV				| ZV
+			Sim::ib_in_ = (Sen->Ib_model_in(){return Sen::Ib_model_in_} / ap.nP());
+																													// PV				| PV
+			Sim::dt_ = Sim::dt_pst_s_;													// ZV   		| ZV
+			Sim::ib_ = Sim::ib_pst_;												// Feedback->ZV | ZV
+			Sen->Ib_model(Sim::ib_pst_ * ap.nP(s)){
+				Sen::Ib_model_ = input;														// ZV				| ZV
  			}
  			 // VOC-OCV model
-			voc_stat_ = calc_soc_voc(soc_pst_, Tb_f_, ...){
-				lookup(soc_pst_, Tb_f_, Y_T, X_SOC, T_VOC);
-						// soc_pst_ = Feedback --> ZV source; Tb_f = PV; voc_stat_ mixed (noted)
+			Sim::voc_stat_ = calc_soc_voc(soc_pst_, Tb_f_, ...){
+				lookup(soc_pst_, Tb_f_, ...);
 			}																										// ZV				| ZV
-			voc_ = voc_stat_;																		// ZV				| ZV
+			Sim::voc_ = voc_stat_;															// ZV				| ZV
 
 			// ChargeTransfer dynamic model for model
-			ib_dyn_ = ChargeTransfer_->calculate(ib_, reset, chem_.tau_ct, dt_);
+			Sim::ib_dyn_ = ChargeTransfer_->calculate(ib_, ..., dt_);
 																													// ZV				| ZV
-			dvdyn_ =  ib_dyn_*chem_.r_ct  + ib_*chem_.r_0;	// ZV				| ZV
-			vb_ = voc_ + dvdyn_;																// ZV				| ZV
-			voc_soc_ = voc_stat_;																// ZV				| ZV
+			Sim::dvdyn_ =  Sim::ib_dyn_*chem_.r_ct  + Sim::ib_*chem_.r_0;
+																													// ZV				| ZV
+			Sim::vb_ = Sim::voc_ + Sim::dvdyn_;									// ZV				| ZV
+			Sim::voc_soc_ = Sim::voc_stat_;											// ZV				| ZV
 
-  			// Saturation logic, both full and empty
-			// Pass along current to charge unless bms_off
-			float ib_charge_pst = ib_in_;												// PV				| PV
+  		// Saturation logic, both full and empty.  Special Sim logic
+			float ib_charge_pst = Sim::ib_in_;									// PV				| PV
 			if ( sp.mod_ib )
-				sat_ib_max_ = sat_ib_null_ + (1. - soc_pst_)*sat_cutback_gain_ ;
-																													// ZV
+				Sim::sat_ib_max_ = Sim::sat_ib_null_ +
+											(1. - Sim::soc_pst_)*Sim::sat_cutback_gain_ ;
+																													// ZV				| n/a
 			else
-				 // Disable cutback when real world
-				sat_ib_max_ = ib_charge_pst;											// PV				| PV
-			ib_pst_ = min(ib_charge_pst, sat_ib_max_);					// PV				| PV
-			dt_charge_s_ = dt_pst_s_;														// PV				| PV
-			ib_charge_ = ib_pst_;																// PV				| PV
+				// Disable cutback when real world
+				Sim::sat_ib_max_ = ib_charge_pst;									// PV				| PV
+			Sim::ib_pst_ = min(ib_charge_pst, Sim::sat_ib_max_);
+																													// PV				| PV
+			Sim::dt_charge_s_ = Sim::dt_pst_s_;									// PV				| PV
+			Sim::ib_charge_ = Sim::ib_pst_;											// PV				| PV
 			return vb_;																					// ZV 			| ZV
 		} // Sen->Sim->calculate()
+
+		Sen->Vb_model(Sen->Sim->calculate()){
+			Vb_model_ = Sen->Sim->vb_;									// ZV for Vb_model_	| same
+		}
 
 		// Fault Logic, & Selection Logic - selection status and fault reset
 		...
@@ -278,7 +303,7 @@ if (read) {
 					return;
 				} else {
 					Tb_ = Tb_model_;																// PV				| PV
-					Tb_f_ = Tb_model_f_;														// PV				| PV
+					Tb_f_ = Tb_model_f_;														// mixed		| mixed
 				}
 			} else {  // Hardware Tb
 				if (Flt->Tb_fa() ...) {
@@ -298,7 +323,7 @@ if (read) {
 				if ((Flt->wrap_vb_fa() || Flt->vb_fa_lt()) ...) {
 					...
 				} else {
-					Vb_ = Vb_model_ + Vb_noise();										// PV				| n/a
+					Vb_ = Vb_model_ + Vb_noise();										// ZV				| n/a
 				}
 			} else {
 				Vb_f_ = Vb_hdwe_f_;																// n/a			| PV
@@ -329,12 +354,13 @@ if (read) {
 				sample_time_ib_ = sample_time_ib_hdwe_;						// n/a			| PV
 				dt_ib_ms_ = dt_ib_hdwe_ms_;												// n/a			| PV
 			}
-			T_ = double(dt_ib_s_ms_) / 1000.;  									// ZV				| PV****
+			T_ = double(dt_ib_ms_) / 1000.;  										// ZV				| PV****
 			now_ms_ = sample_time_ib_;													// PV				| PV
 			c_time_s = double(now_ms_) / 1000.;									// PV				| PV
 			Sim->assign_times(input=c_time_s){
 				dt_pst_s_ = input - c_time_s_;										// PV				| PV
-				dt_pst_s_ms_ = (uint32_t)round(dt_pst_ * 1000.0);	// PV				| PV
+				dt_pst_s_ms_ = (uint32_t)round(dt_pst_s_ * 1000.0);
+																													// PV				| PV
 				c_time_s_ = input;											// PV->Feedback		| PV->Feedback
 			}
 		} // select_volt_and_current_and_temp
@@ -362,7 +388,7 @@ if (read) {
 			}
 
 			// Integration.   can go to -20%
-			q_capacity_ = calculate_capacity(Tb_f_);						// PV				| PV
+			q_capacity_ = calculate_capacity(Tb_f_);						// mixed		| mixed
 			// Coulomb Counting uses Backard Euler Integration
 			d_delta_q_s_ = ib_charge_ * dt_charge_s_;						// ZV				| ZV
 			if (ib_charge_ > 0.) d_delta_q_s_ *= coul_eff_;			// ZV				| ZV
@@ -373,9 +399,9 @@ if (read) {
 				*sp_delta_q_ += d_delta_q_s_;											// ZV				| ZV
 				...
 			}
-			q_ = q_capacity_ + *sp_delta_q_;										// ZV				| ZV
+			q_ = q_capacity_ + *sp_delta_q_;										// mixed		| mixed
 			// Normalize
-			soc_ = q_ / q_capacity_;														// ZV				| ZV
+			soc_ = q_ / q_capacity_;														// mixed		| mixed
 
 			// Save and return
 			reset_temp_past = reset_temp;
@@ -384,9 +410,9 @@ if (read) {
 
 		Sen->Sim->calc_inj(...){
 			  sample_time_s_ms_ = millis();											// Source->PV	| n/a
-				inj_bias = ...;
+				inj_bias = ...;																		// Source->PV	| n/a
 			  sp.put_Inj_bias(inj_bias){
-					inj_bias_ = input;	
+					inj_bias_ = input;															// PV					| n/a
 				}
 		}
 
@@ -537,7 +563,7 @@ if (read) {
 			...
 
 			// Integration.   Can go to negative
-			q_capacity_ = calculate_capacity(Tb_f_);						// PV				| PV
+			q_capacity_ = calculate_capacity(Tb_f_);						// mixed		| mixed***
 			if (!reset_temp) *sp_delta_q_ += d_delta_q_;				// mixed		| PV****
 			q_ = q_capacity_ + *sp_delta_q_;										// mixed		| PV****
 

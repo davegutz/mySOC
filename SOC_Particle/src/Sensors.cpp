@@ -267,33 +267,6 @@ Sensors::Sensors(double T, double T_temp, Pins* pins, Sync* ReadSensors,
 }
 
 // Deliberate choice based on results and inputs
-// Inputs:  ib_sel_stat_, Ib_amp_hdwe_, Ib_noa_hdwe_, Ib_amp_model_,
-// Ib_noa_model_ Outputs:  Ib_hdwe_model_, Ib_hdwe_
-void Sensors::ib_choose_active_standby() {
-  if (Flt->ib_sel_stat() == 1) {
-    Ib_hdwe_ = Ib_amp_hdwe_;
-    Ib_hdwe_f_ = Ib_amp_hdwe_f_;
-    Ib_hdwe_kf_ = Ib_amp_hdwe_kf_;
-    Ib_hdwe_model_ = Ib_amp_model_;
-    sample_time_ib_hdwe_ms_ = ShuntAmp->sample_time();
-    dt_ib_hdwe_ms_ = ShuntAmp->dt_ms();
-  } else if (Flt->ib_sel_stat() == -1) {
-    Ib_hdwe_ = Ib_noa_hdwe_;
-    Ib_hdwe_f_ = Ib_noa_hdwe_f_;
-    Ib_hdwe_kf_ = Ib_noa_hdwe_kf_;
-    Ib_hdwe_model_ = Ib_noa_model_;
-    sample_time_ib_hdwe_ms_ = ShuntNoAmp->sample_time();
-    dt_ib_hdwe_ms_ = ShuntNoAmp->dt_ms();
-  } else {
-    Ib_hdwe_ = 0.;
-    Ib_hdwe_f_ = 0.;
-    Ib_hdwe_model_ = 0.;
-    sample_time_ib_hdwe_ms_ = 0ULL;
-    dt_ib_hdwe_ms_ = 0ULL;
-  }
-}
-
-// Deliberate choice based on results and inputs
 // Inputs:  ib_choice_, Ib_noa_hdwe_, Ib_amp_hdwe_, Ib_noa_hdwe_, Ib_amp_model_,
 // Ib_noa_model_ Outputs:  Ib_hdwe_model_, Ib_hdwe_
 void Sensors::ib_choose_hi_lo() {

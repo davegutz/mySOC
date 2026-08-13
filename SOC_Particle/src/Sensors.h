@@ -406,7 +406,6 @@ class Sensors {
   RecursiveRMSMonitorFP* IbAmpRMS;  // RMS noise monitor for amp
   RecursiveRMSMonitorFP* IbNoaRMS;  // RMS noise monitor for noa
   // Deliberate choice based on inputs and results
-  void ib_choose_active_standby();
   void ib_choose_hi_lo();  // Deliberate choice based on inputs and results
   uint64_t inst_ms_;   // millis offset to account for setup() time, ms
   uint64_t inst_time_;     // UTC Zulu at instantiation, s
