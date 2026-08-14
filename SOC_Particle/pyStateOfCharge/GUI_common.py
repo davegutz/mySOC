@@ -802,7 +802,7 @@ lookup = {
         ),
     ),
     "tLoFailModel": (
-        275,
+        285,
         modHalfInit
         + ("D^7;" + tranPrep + "XY;W10;D^-113;XQ120000;" + "D^;Rf;W50;" + cleanup + "<W50;" + quietwait + "<Pf;<XD;"),
         (
@@ -813,7 +813,7 @@ lookup = {
         ),
     ),
     "tHiFailModel": (
-        275,
+        285,
         modHalfInit
         + ("D^7;" + tranPrep + "XY;W10;D^+50;XQ120000;" + "D^;Rf;W50;" + cleanup + "<W50;" + quietwait + "<Pf;<XD;"),
         (
@@ -824,7 +824,7 @@ lookup = {
         ),
     ),
     "tLoFailHdwe": (
-        275,
+        285,
         modHalfInit230
         + (tranPrep + "XY;W10;Dt-113;XQ120000;" + "Dt;Rf;W50;" + cleanup + "<W50;" + quietwait + "<Pf;<XD;"),
         (
@@ -835,7 +835,7 @@ lookup = {
         ),
     ),
     "tHiFailHdwe": (
-        275,
+        285,
         modHalfInit230
         + (tranPrep + "XY;W10;Dt+50;XQ120000;" + "Dt;Rf;W50;" + cleanup + "<W50;" + quietwait + "<Pf;<XD;"),
         (

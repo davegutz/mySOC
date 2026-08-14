@@ -505,8 +505,6 @@ class BatteryMonitor(Battery, EKF1x1, Wrap):
             self.soc_ekf = SN.soc_ekf_init
             self.z = SN.z_init
         self.dt_s = 0.0
-        self.dt_charge_s = 0.0
-        self.dt_pst_s = 0.0
         self.chm_s = 0.0
         self.qcrs_s = 0.0
         self.qcap_s = 0.0
@@ -1092,8 +1090,6 @@ class BatteryMonitor(Battery, EKF1x1, Wrap):
             self.cc_dif = self.cc_dif_prev
         else:
             self.cc_dif = self.soc_ekf - self.soc
-        self.dt_charge_s = sim.dt_charge
-        self.dt_pst_s = sim.dt_fut
         self.dt_s = sim.dt
         self.chm_s = sim.chm
         self.qcrs_s = sim.q_cap_rated_scaled
@@ -1211,7 +1207,6 @@ class BatterySim(Battery):
         self.reset_temp_past = self.model_saturated
         self.dt_past = 0.0
         self.dt_charge_s = 0.0
-        self.dt_pst_s = 0.0
         self.dt_s = 0.0
         self.chm_s = 0.0
         self.qcrs_s = 0.0
@@ -1407,8 +1402,8 @@ class BatterySim(Battery):
         self.ib_fut = min(ib_charge_fut, self.sat_ib_max)  # the feedback of self.ib
         # self.ib_charge = ib_charge_fut# same time plane as volt calcs.  (This prevents sat logic from working)
         self.ib_charge = self.ib_fut  # same time plane as volt calcs
-        if hasattr(SN, "dt_pst_s") and SN.dt_pst_s is not None and G.i < len(SN.dt_pst_s):
-            self.dt_fut = SN.dt_pst_s[G.i]
+        if hasattr(SN, "dt_s") and SN.dt_s is not None and G.i < len(SN.dt_s):
+            self.dt_fut = SN.dt_s[G.i]
         else:
             self.dt_fut = dt_charge
 
@@ -1493,8 +1488,7 @@ class BatterySim(Battery):
             SN = getattr(self, "SN", None)
         self.time = time
         self.dt_s = self.dt if self.dt > 0.0 else (float(SN.sim_run.dt_s[0]) if (SN is not None and hasattr(getattr(SN, "sim_run", None), "dt_s")) else Battery.EKF_NOM_DT)
-        self.dt_charge_s = self.dt_charge if self.dt_charge > 0.0 else (float(SN.sim_run.dt_charge_s[0]) if (SN is not None and hasattr(getattr(SN, "sim_run", None), "dt_charge_s")) else Battery.EKF_NOM_DT)
-        self.dt_pst_s = self.dt_fut if self.dt_fut > 0.0 else (float(SN.sim_run.dt_pst_s[0]) if (SN is not None and hasattr(getattr(SN, "sim_run", None), "dt_pst_s")) else Battery.EKF_NOM_DT)
+        self.dt_s = self.dt_fut if self.dt_fut > 0.0 else (float(SN.sim_run.dt_s[0]) if (SN is not None and hasattr(getattr(SN, "sim_run", None), "dt_pst_s")) else Battery.EKF_NOM_DT)
 
         idx = G.i
         if SN is not None and getattr(SN, "sim_run", None) is not None:
@@ -1744,7 +1738,6 @@ class SavedS:
         self.d_delta_q_s = []
         self.ib_charge_s = []
         self.dt_charge_s = []
-        self.dt_pst_s = []
         self.ib_pst_s = []
         self.sat_s = []
         self.ddq_s = []

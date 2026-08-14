@@ -255,8 +255,6 @@ class BatterySim : public Battery {
   BatterySim(const float dx_voc, const float dy_voc, const float dz_voc);
   ~BatterySim();
   void assign_times(const double input) {
-    dt_pst_s_ = input - c_time_s_;
-    dt_pst_s_ms_ = (uint32_t)round(dt_pst_s_ * 1000.0);
     c_time_s_ = input;
   }
   float calc_inj(const uint64_t now, const uint8_t type, const float amp,
@@ -272,11 +270,7 @@ class BatterySim : public Battery {
   void data_of_future_past(const bool reset = false);
   double delta_q() { return *sp_delta_q_; };
   double d_delta_q_s() { return d_delta_q_s_; };
-  double dt_pst_s() { return dt_pst_s_; };
-  uint32_t dt_pst_s_ms() { return dt_pst_s_ms_; };
-  double dt_charge_s() { return dt_charge_s_; };
-  void dt_s(const float input) { dt_s_ = input; }
-  float dt_s() { return dt_s_; };
+  double dt_s() { return dt_s_; };
   float hys_state() { return hys_->dv_hys(); };
   void hys_state(const float st) { hys_->dv_hys(st); };
   void hys_pretty_print() { hys_->pretty_print(0., 0., 0.); };
@@ -288,7 +282,6 @@ class BatterySim : public Battery {
   void init_hys(const float hys) { hys_->init(hys); };
   void pretty_print();
   bool saturated() { return model_saturated_; };
-  uint32_t sample_time_s() { return sample_time_s_ms_; };
   double voc() { return voc_; };
   double voc_stat() { return voc_stat_; };
 
@@ -298,12 +291,9 @@ class BatterySim : public Battery {
   TriInj* Tri_inj_;  // Class to create triangle waves
   CosInj* Cos_inj_;  // Class to create cosine waves
   double c_time_s_;  // Current time, s
+  double dt_s_;  // Update time, s
   uint32_t duty_;  // Used in Test Mode to inject Fake shunt current (0 - 255)
   double d_delta_q_s_;  // Charge rate, C/s
-  double dt_charge_s_;  // Input update time current available for charging, s
-  uint32_t dt_pst_s_ms_;  // Past delta update of model sample, ms
-  double dt_pst_s_; // Past update time of model sample, s
-  float dt_s_;  // Update time, s
   float ib_charge_;  // Current input avaiable for charging, A
   float ib_pst_;  // Past value of limited current, A
   float ib_in_;  // Saved value of current input, A
@@ -313,8 +303,6 @@ class BatterySim : public Battery {
   bool model_cutback_;  // Modeled current limited on saturation cutback, T=lim
   bool model_saturated_;  // Indicator of maximal cutback, T = cutback saturated
   double q_;              // Charge, C
-  uint32_t sample_time_s_ms_;  // Exact moment hardware signal generation, ms
-  uint32_t sample_time_s_pst_ms_;  // Moment past hardware signal generation, ms
   float sat_cutback_gain_;  // Gain to retard ib when voc exceeds vsat, non dim
   float sat_ib_max_;   // Current cutback to be applied to modeled ib output, A
   float sat_ib_null_;  // Current cutback value for voc=vsat, A

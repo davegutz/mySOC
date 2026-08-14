@@ -706,11 +706,10 @@ BatterySim::BatterySim(const float dx_voc, const float dy_voc,
                        const float dz_voc)
     : Battery(sp.delta_q_model_ptr(), VS, dx_voc, dy_voc, dz_voc),
       Sin_inj_(nullptr), Sq_inj_(nullptr), Tri_inj_(nullptr), Cos_inj_(nullptr),
-      c_time_s_(0.), duty_(0UL), d_delta_q_s_(0.), dt_charge_s_(0.),
-      dt_pst_s_ms_(0UL), dt_pst_s_(0.), dt_s_(0.),
+      c_time_s_(0.), dt_s_(0ULL), duty_(0UL), d_delta_q_s_(0.),
       ib_charge_(0.), ib_pst_(0.), ib_in_(0.),
       ib_sat_(0.5), model_cutback_(true), model_saturated_(false),
-      q_(NOM_UNIT_CAP * 3600.), sample_time_s_ms_(0UL), sample_time_s_pst_ms_(0UL),
+      q_(NOM_UNIT_CAP * 3600.), 
       sat_cutback_gain_(1000.), sat_ib_max_(0.), sat_ib_null_(0.),
       hys_(nullptr) {
   // ChargeTransfer dynamic model for EKF
@@ -791,12 +790,10 @@ float BatterySim::calculate(Sensors* Sen, const bool dc_dc_on,
 
   ib_in_ = Sen->Ib_model_in() / ap.nP();  // Past value
   if (reset ) {
-    dt_pst_s_ms_ = sample_time_s_ms_ - sample_time_s_pst_ms_;
-    dt_pst_s_ = double(dt_pst_s_ms_) / 1000.;
     ib_pst_ = ib_in_;
   }
   c_time_s_ = Sen->c_time();
-  dt_s_ = max((float)dt_pst_s_, 1e-4f);
+  dt_s_ = Sen->T();
   ib_ = max(min(ib_pst_, IMAX_NUM),
             -IMAX_NUM);  //  Past value ib_.  Overflow protection when ib_ past
                          //  value used
@@ -861,7 +858,6 @@ float BatterySim::calculate(Sensors* Sen, const bool dc_dc_on,
     sat_ib_max_ = ib_charge_pst;  // Disable cutback when real world or when
                                   // doing tweak_test test
   ib_pst_ = min(ib_charge_pst, sat_ib_max_);  // the feedback of ib_
-  dt_charge_s_ = dt_pst_s_;
   ib_charge_ = ib_pst_;  // Same time plane as volt calcs, added past value
 
   // if ( (q_ <= 0.) && (ib_charge_ < 0.) && sp.mod_ib() ) ib_charge_ = 0.;
@@ -892,16 +888,12 @@ double BatterySim::calc_soc_voc(const double soc, const double Tb_f,
 
 // Data of future past: update past sample time
 void BatterySim::data_of_future_past(const bool reset) {
-    sample_time_s_pst_ms_ = millis();
     soc_pst_ = soc_;
 }
 
 // Injection model, calculate inj bias based on time since boot
 float BatterySim::calc_inj(const uint64_t now, const uint8_t type,
                            const float amp, const double freq) {
-  // Sample at instant of signal injection
-  sample_time_s_ms_ = millis();
-
   // Return if time 0
   if (now == 0ULL) {
     duty_ = 0UL;
@@ -962,7 +954,7 @@ at temperature, C resetting_      Sticky flag for initialization, T=reset
 double BatterySim::count_coulombs(Sensors* Sen, const bool reset_temp,
                                   BatteryMonitor* Mon,
                                   const bool initializing_all) {
-  d_delta_q_s_ = ib_charge_ * dt_charge_s_;
+  d_delta_q_s_ = ib_charge_ * Sen->T();
   if (ib_charge_ > 0.) d_delta_q_s_ *= coul_eff_;
 
   // Rate limit temperature.  When modeling, initialize to no change
@@ -1036,8 +1028,6 @@ void BatterySim::init_battery_sim(const bool reset, Sensors* Sen) {
   if (isnan(ib_)) ib_ = 0.;     // reset overflow
   dv_dyn_ = vb_ - voc_;
   ib_pst_ = ib_;
-  dt_pst_s_ms_ = sample_time_s_ms_ - sample_time_s_pst_ms_;
-  dt_pst_s_ = double(dt_pst_s_ms_) / 1000.;
   init_hys(0.0);
   ibs_ = hys_->ibs();
 #ifdef DEBUG_INIT
@@ -1055,9 +1045,6 @@ void BatterySim::pretty_print() {
   Serial.printf(" BS::BS:\n");
   Serial.printf("  c_time_s%12.1f, s\n", c_time_s_);
   Serial.printf("  d_delta_q_s%7.3f C/s\n", d_delta_q_s_);
-  Serial.printf("  dt_charge_s%7.3f s\n", dt_charge_s_);
-  Serial.printf("  dt_pst_s%7.3f s\n", dt_pst_s_);
-  Serial.printf("  dt_pst_s_ms %lu ms\n", dt_pst_s_ms_);
   Serial.printf("  duty %lu\n", duty_);
   Serial.printf("  dv_hys%7.3f, V\n", hys_->dv_hys());
   Serial.printf("  hys_scale%7.3f,\n", ap.hys_scale());
@@ -1069,8 +1056,6 @@ void BatterySim::pretty_print() {
   Serial.printf("  mod_cb %d\n", model_cutback_);
   Serial.printf("  mod_sat %d\n", model_saturated_);
   Serial.printf("  q%7.1f C\n", q_);
-  Serial.printf("  sample_time %lu ms\n", sample_time_s_ms_);
-  Serial.printf("  sample_time_z %lu ms\n", sample_time_s_pst_ms_);
   Serial.printf("  sat_cb_gn%7.1f\n", sat_cutback_gain_);
   Serial.printf("  sat_ib_max%7.3f, A\n", sat_ib_max_);
   Serial.printf("  sat_ib_null%7.3f, A\n", sat_ib_null_);

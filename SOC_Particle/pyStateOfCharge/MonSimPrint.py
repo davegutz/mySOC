@@ -684,7 +684,6 @@ def print_soc_s_RunSim(SN, i_temp, t, mon, sim, calc_temp, i_ekf, calc_ekf, df=F
         h = (i_hdr == 1)
         print_col_leads(h, df, t, SN, mon, sim, i_temp, calc_temp, i_ekf, calc_ekf)
 
-        print_pair(SN.sim_run.dt_pst_s[G.i], sim.dt_pst_s, 12, 4, 'dt_pst_s', h, df)
         print_pair(SN.mon_run.dt[G.i], mon.dt, 12, 4, 'dt', h, df)
         print_pair(SN.sim_run.dt_charge_s[G.i], sim.dt_charge, 12, 4, 'dt_charge_s', h, df)
         if hasattr(SN.sim_run, "dt_s"):

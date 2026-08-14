@@ -98,7 +98,6 @@ if (read) {
 
 	// Manage states
 	Sen->Sim->data_of_future_past(reset){
-		sample_time_s_pst_ms_ = sample_time_s_ms_;				// Feedback->ZV | ZV
 	  soc_pst_ = soc_;																	// Feedback->ZV | ZV
 	}
 	Mon->data_of_future_passed(reset){
@@ -107,15 +106,20 @@ if (read) {
 
 	// Read sensors, model signals, select between them, synthesize injection
   sense_synth_select(...) {
-		load_ib_vb_tb(){
+		get_time() {
+			sample_time_z_ms_ = sample_time_ms_;						// Feedback->ZV | ZV
+			sample_time_ms_ = millis();											// Source->PV		|	PV
+			dt_ms_ = sample_time_ms_ - sample_time_z_ms_;				// PV				| PV
+			T_ = float(dt_ms_) / 1000.;													// PV				| PV
+			now_ms_ = sample_time_ms_ - inst_ms_ + inst_time_ * 1000;
+																													// PV				| PV
+			c_time_ = double(now_ms_) / 1000.;									// PV				| PV
+		}
+		load_ib_vb_tb() {
 			// ib load-----------------------------------
 			// Sample Ib
 			Sen->ShuntAmp->sample(...) {
 				sample_Vo(){			
-					sample_time_z_ms_ = sample_time_ms_;				// Feedback->ZV | ZV
-					sample_time_ms_ = millis(){
-						return system_clock_ms;											// Source->PV	|	PV
-					}
 					Vo_read_->analogReadDebounced(...){
 						Vo_raw_ = analogRead(myPins.Vom_pin);				// Source->PV	|	PV
 					}
@@ -227,7 +231,6 @@ if (read) {
 			}
 			Sim::ib_in_ = (Sen->Ib_model_in(){return Sen::Ib_model_in_} / ap.nP());
 																													// PV				| PV
-			Sim::dt_ = Sim::dt_pst_s_;													// ZV   		| ZV
 			Sim::ib_ = Sim::ib_pst_;												// Feedback->ZV | ZV
 			Sen->Ib_model(Sim::ib_pst_ * ap.nP(s)){
 				Sen::Ib_model_ = input;														// ZV				| ZV
@@ -257,7 +260,6 @@ if (read) {
 				Sim::sat_ib_max_ = ib_charge_pst;									// PV				| PV
 			Sim::ib_pst_ = min(ib_charge_pst, Sim::sat_ib_max_);
 																													// PV				| PV
-			Sim::dt_charge_s_ = Sim::dt_pst_s_;									// PV				| PV
 			Sim::ib_charge_ = Sim::ib_pst_;											// PV				| PV
 			return vb_;																					// ZV 			| ZV
 		} // Sen->Sim->calculate()
@@ -283,7 +285,7 @@ if (read) {
 																													// PV				| PV
 			}
 			dt_ib_hdwe_ms_ = ShuntNoAmp->dt_ms(){
-				return sample_time_ms_ - sample_time_z_ms_;
+				return dt_ms_;
 																													// PV				| PV
 			}
 
@@ -326,20 +328,6 @@ if (read) {
   		}
 
 			// ib select
-			update_dt() {
-			  if (sp.mod_ib()) {
-  			  sample_time_ib_ms_ = Sim->sample_time_s(){
-						return sample_time_s_ms_;							//
-					};
-					dt_ib_ms_ = Sim->dt_pst_s_ms(){
-						return dt_pst_s_ms_;								// Feedback->ZV				| n/a
-					}
-  			} else {
-    			sample_time_ib_ms_ = sample_time_ib_hdwe_ms_;
-    			dt_ib_ms_ = dt_ib_hdwe_ms_;											// PV				| PV
-			  }
-  			T_ = double(dt_ib_ms_) / 1000.;
-			}
 			if (sp.mod_ib()) {
 				Ib_ = Ib_hdwe_model_;															// PV				| n/a
 				Ib_amp_ = Ib_amp_model_;													// PV				| n/a
@@ -354,9 +342,6 @@ if (read) {
 			now_ms_ = sample_time_ib_ms_ + ...;									// PV				| PV
 			c_time_s_ = double(now_ms_) / 1000.;								// PV				| PV
 			Sim->assign_times(input=c_time_s){
-				dt_pst_s_ = input - c_time_s_;										// PV				| PV
-				dt_pst_s_ms_ = (uint32_t)round(dt_pst_s_ * 1000.0);
-																								// PV->Feedback		| PV->Feedback
 				c_time_s_ = input;											// PV->Feedback		| PV->Feedback
 			}
 		} // select_volt_and_current_and_temp
@@ -386,7 +371,7 @@ if (read) {
 			// Integration.   can go to -20%
 			q_capacity_ = calculate_capacity(Tb_f_);						// mixed		| mixed
 			// Coulomb Counting uses Backard Euler Integration
-			d_delta_q_s_ = ib_charge_ * dt_charge_s_;						// ZV				| ZV
+			d_delta_q_s_ = ib_charge_ * dt_s_;						// ZV				| ZV
 			if (ib_charge_ > 0.) d_delta_q_s_ *= coul_eff_;			// ZV				| ZV
 			if (reset_temp) {
 				*sp_delta_q_ = 0.;
@@ -422,7 +407,6 @@ if (read) {
 
 		// Injection bias
 		Sen->Sim->calc_inj(...){
-			  sample_time_s_ms_ = millis();											// Source->PV	| n/a
 				inj_bias = ...;																		// Source->PV	| n/a
 			  sp.put_Inj_bias(inj_bias){
 					inj_bias_ = input;															// PV					| n/a
@@ -605,7 +589,6 @@ if (read) {
 
 	// Manage states
 	Sen->Sim->data_of_future_passed(...) {
-	  sample_time_s_pst_ms_ = sample_time_s_ms_;				// PV->Feedback		| n/a
     soc_pst_ = soc_;
 	}
 	Mon->data_of_future_past(...) {

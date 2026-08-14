@@ -157,8 +157,7 @@ class Sensors:
             self.ib_dyn_s = self.sim_run.ib_dyn_s
             self.dv_dyn_s = self.sim_run.dv_dyn_s
             self.dt_s = self.sim_run.dt_s if hasattr(self.sim_run, "dt_s") else self.mon_run.dt
-            self.dt_charge_s = self.sim_run.dt_charge_s
-            self.dt_pst_s = self.sim_run.dt_pst_s
+            # self.dt_charge_s = self.sim_run.dt_charge_s
             self.d_delta_q_s_init = 0.0
             self.delta_q_s_init = self.sim_run.delta_q_s[0] if hasattr(self.sim_run, "delta_q_s") and len(self.sim_run.delta_q_s) > 0 else 0.0
             self.Tb_model_f_fut = self.mon_run.Tb_model_f[1]
@@ -188,7 +187,6 @@ class Sensors:
 
             self.dt_s = self.sim_run.dt_s if hasattr(self.sim_run, "dt_s") else self.mon_run.dt
             self.dt_charge_s = self.sim_run.dt_charge_s
-            self.dt_pst_s = self.sim_run.dt_pst_s
             if not hasattr(self.mon_run, "ibmm"):
                 self.mon_run.ibmm = np.copy(self.mon_run.ib_amp_hdwe_f)
             if not hasattr(self.mon_run, "ib_noa_model"):
@@ -401,7 +399,6 @@ class Sensors:
         #     if not rp.modeling_ib:
         #         mon.dt = mon_run.dt[i]  # hardware mode: present frame
         #     else:
-        #         dt_val = getattr(mon, "dt_pst_s", 0.0)
         #         mon.dt = dt_val if dt_val > 0.0 else mon_run.dt[i]  # model mode: present frame
         self.temp_load_and_filter(mon_run, mon, Battery_, rp, i, reset=reset)
         self.select_temp(mon_run, mon, Battery_, rp, i, reset=reset)

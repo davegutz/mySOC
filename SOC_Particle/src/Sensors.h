@@ -117,7 +117,6 @@ class Shunt {
   // operators
   // functions
   bool bare_shunt() { return (bare_shunt_); };
-  uint64_t dt_ms() { return sample_time_ms_ - sample_time_z_ms_; };  // ms
   void convert(const bool disconnect, const bool reset, Sensors* Sen);
   float Ishunt_cal() { return Ishunt_cal_; };
   float ishunt_cal() { return Ishunt_cal_ / ap.nP(); };
@@ -129,12 +128,11 @@ class Shunt {
   void print_serial_header(const char suffix);
   void print_serial();
   void pretty_print();
-  void sample(const bool reset_kf);
+  void sample(const bool reset_kf, const double T);
   void sample_combine();
-  void sample_filter_kf(const bool reset_kf);
+  void sample_filter_kf(const bool reset_kf, const double T);
   void sample_Vc();
   void sample_Vo();
-  uint64_t sample_time() { return sample_time_ms_; };
   float vshunt() { return vshunt_; };
   int16_t vshunt_int() { return vshunt_int_; };
   float Vc() { return Vc_; };
@@ -158,8 +156,6 @@ class Shunt {
   float* sp_ib_bias_;  // Global bias, A
   float* sp_ib_scale_;  // Global scale, A
   bool reset_;  // Status of reset command input
-  uint64_t sample_time_ms_;  // Exact moment of hardware sample, ms
-  uint64_t sample_time_z_ms_;  // Exact moment of past hardware sample, ms
   bool dscn_cmd_;  // User command to ignore hardware, T=ignore
   uint8_t vc_pin_;  // Common voltage pin
   uint8_t vo_pin_;  // Output voltage pin
@@ -280,6 +276,7 @@ class Sensors {
   float Vc_rms() { return Vc_rms_; }
   void Wb(const float input) { Wb_ = input; }
   float Wb() { return Wb_; }
+  void get_time();
   void now_ms(const uint64_t input) { now_ms_ = input; }
   uint64_t now_ms() { return now_ms_; }
   uint64_t now_temp() { return now_temp_ms_; }
@@ -402,8 +399,6 @@ class Sensors {
   ScaleBrk* sel_brk_hdwe;  // Active/active scale break
  protected:
   LagExp* AmpFilt;                  // Noise filter for calibration
-  uint64_t dt_ib_ms_;                  // Delta update of selected Ib sample, ms
-  uint64_t dt_ib_hdwe_ms_;             // Delta update of Ib sample, ms
   RecursiveRMSMonitorFP* IbAmpRMS;  // RMS noise monitor for amp
   RecursiveRMSMonitorFP* IbNoaRMS;  // RMS noise monitor for noa
   // Deliberate choice based on inputs and results
@@ -417,8 +412,6 @@ class Sensors {
   PRBS_7* Prbn_Ib_noa_;    // Ib non-amplified sensor noise generator model only
   bool reset_temp_;  // Keep track of temperature reset, stored for plotting,
                      // T=reset
-  uint64_t sample_time_ib_ms_;       // Exact moment of selected Ib sample, ms
-  uint64_t sample_time_ib_hdwe_ms_;  // Exact moment of Ib sample, ms
   LagExp* SelFiltCal;             // Noise filter for calibration
   LagExp* TbHdweFilt;             // Noise filter for calibration
   LagExp* TbModelFilt;            // Noise filter for calibration
@@ -483,10 +476,10 @@ class Sensors {
   float Vb_rms_;          // Battery bank voltage noise RMS, V
   float Vc_rms_;          // Battery bank voltage noise RMS, V
   float Wb_;  // Sensed battery bank power, use to compare to other shunts, W
-  uint64_t now_ms_;          // Time at sample, ms
-  uint64_t now_temp_ms_;     // Time at sample, ms
-  double c_time_;          // Decimal time, seconds since 1/1/2021
-  double T_;              // Update time, s
+  uint64_t now_ms_;  // Time at sample, ms
+  uint64_t now_temp_ms_;  // Time at sample, ms
+  double c_time_;  // Decimal time, seconds since 1/1/2021
+  double T_;  // Update time, s
   bool reset_;            // Reset flag, T = reset
   double T_filt_;         // Filter update time, s
   double T_temp_;         // Temperature update time, s
@@ -500,4 +493,7 @@ class Sensors {
                     // switched by battery management system?
   bool sat_;        // Battery potential saturation status based on Temp and VOC
   bool saturated_;  // Battery confirmed saturation status based on Temp and VOC
+  uint64_t sample_time_ms_;
+  uint64_t sample_time_z_ms_;
+  uint64_t dt_ms_;
 };

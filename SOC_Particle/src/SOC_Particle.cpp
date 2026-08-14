@@ -152,8 +152,8 @@ BleCharacteristic rxCharacteristic("rx",
                                    NULL);
 BleCharacteristic txCharacteristic("tx", BleCharacteristicProperty::NOTIFY,
                                    txUuid, serviceUuid);
-uint64_t millis_flip = millis();  // Timekeeping
-uint64_t last_sync = millis();    // Timekeeping
+uint64_t flip_ms = millis();  // Timekeeping
+uint64_t last_sync_ms = millis();    // Timekeeping
 
 int num_timeouts = 0;        // Number of Particle.connect() needed to unfreeze
 String hm_string = "00:00";  // time, hh:mm
@@ -183,7 +183,7 @@ void setup() {
 
   // Determine millis() at turn of Time.now   Used to improve accuracy of
   // timing.
-  sync_time(millis(), &last_sync, &millis_flip);
+  sync_time(millis(), &last_sync_ms, &flip_ms);
 
   // Enable and print stored history
   System.enableFeature(FEATURE_RETAINED_MEMORY);
@@ -206,8 +206,8 @@ void setup() {
 // Loop
 void loop() {
   // Synchronization
-  static uint64_t now = (uint64_t)millis();
-  now = (uint64_t)millis();
+  static uint64_t now_ms = (uint64_t)millis();
+  now_ms = (uint64_t)millis();
   bool chitchat = false;
   static Sync* Talk = new Sync(TALK_DELAY_MS);
 #if IN_SERVICE
@@ -246,25 +246,25 @@ void loop() {
   ///loop////////////////////////////////////////
 
   // Synchronize
-  if (now - last_sync > ONE_DAY_MS || reset)
-    sync_time(now, &last_sync, &millis_flip);
+  if (now_ms - last_sync_ms > ONE_DAY_MS || reset)
+    sync_time(now_ms, &last_sync_ms, &flip_ms);
   Sen->control_time(double(Sen->now_ms()) / 1000.);
   char buffer[32];
   time_long_2_str(time_now, buffer);
   hm_string = String(buffer);
-  read_temp = ReadTemp->update(now, reset);
-  read = ReadSensors->update(now, reset);
-  chitchat = Talk->update(now, reset);
+  read_temp = ReadTemp->update(now_ms, reset);
+  read = ReadSensors->update(now_ms, reset);
+  chitchat = Talk->update(now_ms, reset);
   elapsed = ReadSensors->now_ms() - start;
   elapsed_reset = ReadSensors->now_ms() - start_reset;
-  display_and_remember = DisplayUserSync->update(now, reset);
+  display_and_remember = DisplayUserSync->update(now_ms, reset);
   bool boot_summ =
       boot_wait &&
       (elapsed >= SUMMARY_WAIT_MS / (SUMMARY_DELAY_MS / ap.sum_delay())) &&
       !sp.modeling();
   if (elapsed >= SUMMARY_WAIT_MS / (SUMMARY_DELAY_MS / ap.sum_delay()))
     boot_wait = false;
-  summarizing = Summarize->update(now, false) || boot_summ;
+  summarizing = Summarize->update(now_ms, false) || boot_summ;
 
   // Manage states
   if (read) {
@@ -277,7 +277,7 @@ void loop() {
   if (read) {
 // Warn if parameters have been changed but not saved
 #if IN_SERVICE
-    if (NoSaveWarn->update(now, reset) && sp.dirty()) {
+    if (NoSaveWarn->update(now_ms, reset) && sp.dirty()) {
       sendTxBuf(String::format("WARNING: unsaved Retained parameter."
         "  Enter 'w' to save. now dirty=%d\n", sp.dirty()), true, true);
     }
@@ -300,7 +300,7 @@ void loop() {
     // Inputs:  sp.mon_chm, Sen->Ib, Sen->Vb, Sen->Tb_f
     // States:  Mon.soc
     // Outputs: tcharge_wt, tcharge_ekf
-    monitor(reset, reset_temp, cp.ekf_reset, now, Is_sat_delay, Mon, Sen);
+    monitor(reset, reset_temp, cp.ekf_reset, now_ms, Is_sat_delay, Mon, Sen);
 
     // Re-init Coulomb Counter to EKF if it is different than EKF or if never
     // saturated

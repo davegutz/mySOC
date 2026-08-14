@@ -73,7 +73,7 @@ def get_modeling(mr, mod_force=None):
 def sync_to_mon_or_sim(mr, sr, t_mx=None):
     if sr is not None and len(sr.time) < len(mr.time):
         time = sr.time
-        dtime = sr.dt_pst_s
+        dtime = sr.dt_s
     else:
         time = mr.time
         dtime = mr.dt
@@ -301,7 +301,7 @@ def replicate(OPT: UserOptions):
         else:
             _chm_s = OPT.Bsim
 
-        sim_dt_in = 0.1 if G.i == 0 else SN.dt_pst_s[max(G.i - 1, 0)]
+        sim_dt_in = 0.1 if G.i == 0 else SN.dt_s[max(G.i - 1, 0)]
         sim.calculate(
             _chm_s,
             Tb_s[G.i],
@@ -309,7 +309,7 @@ def replicate(OPT: UserOptions):
             vb_,
             ib_in_s,
             sim_dt_in,
-            SN.dt_charge_s[G.i],
+            SN.dt_s[G.i],
             reset,
             None,
             None,

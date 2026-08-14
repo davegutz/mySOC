@@ -55,7 +55,7 @@ void sample_burst(Pins* myPins, Sensors* Sen) {
       Sen->ShuntNoAmp->sample_Vo();
       Sen->ShuntNoAmp->sample_Vc();
       Sen->ShuntNoAmp->sample_combine();
-      Sen->ShuntNoAmp->sample_filter_kf(false);
+      Sen->ShuntNoAmp->sample_filter_kf(false, 0.);
       Serial.printf("cx_u, %8.6f, %8.6f, %8.6f,\n",
                     (local_micros - local_micros_init) * 1e-6,
                     Sen->ShuntNoAmp->Vo_Vc(), Sen->ShuntNoAmp->Vo_Vc_kf());
@@ -284,12 +284,13 @@ void initialize_all(BatteryMonitor* Mon, Sensors* Sen, const float soc_in,
 // the same Outputs:   Sen->Ib_model_in, Sen->Ib_hdwe,
 void load_ib_vb_tb(const bool reset, const bool reset_temp, const bool reset_kf,
                    Sensors* Sen, Pins* myPins, BatteryMonitor* Mon) {
+
   // Load shunts Ib
   // Outputs:  Sen->Ib_model_in, Sen->Ib_hdwe, Sen->Vb, Sen->Wb
   // Sample Ib
   if (reset_kf) sendTxBuf(" SOC_Particle:  reseting kfs\n", true, IN_SERVICE);
-  Sen->ShuntAmp->sample(reset_kf);
-  Sen->ShuntNoAmp->sample(reset_kf);
+  Sen->ShuntAmp->sample(reset_kf, Sen->T());
+  Sen->ShuntNoAmp->sample(reset_kf, Sen->T());
   Sen->ShuntAmp->convert(sp.mod_ib_amp_dscn(), reset_kf, Sen);
   Sen->ShuntNoAmp->convert(sp.mod_ib_noa_dscn(), reset_kf, Sen);
   Sen->Flt->vc_check(Sen, Mon, VC_MIN, VC_MAX, reset);
@@ -371,8 +372,10 @@ void sense_synth_select(const bool reset, const bool reset_temp,
   bool storing_fault_data = (now - last_snap) > SNAP_WAIT;
   if (storing_fault_data || reset) last_snap = now;
 
-  // Load Ib, Vb, and Tb
-  // Outputs: Sen->Ib_model_in, Sen->Ib, Sen->Vb, Sen->Tb
+  // Load Time, Ib, Vb, and Tb
+  // Outputs: Sen->T, Sen->Ib_model_in, Sen->Ib, Sen->Vb, Sen->Tb
+  // Read time and calculate T
+  Sen->get_time();
   load_ib_vb_tb(reset, reset_temp, reset_kf, Sen, myPins, Mon);
 
   // Sim initialize as needed from memory
@@ -419,7 +422,6 @@ void sense_synth_select(const bool reset, const bool reset_temp,
   // Log.info("  sense_synth_select:  select_all_logic");
   Sen->Flt->select_all_logic(Sen, Mon, reset);
   // Log.info("  sense_synth_select:  select_volt_and_current_and_temp");
-  // dt_ib_ms_ and T_ calculated select_volt_and_current_and_temp (previous UBC)
   Sen->select_volt_and_current_and_temp(Mon);
 
   // Fault snap buffer management

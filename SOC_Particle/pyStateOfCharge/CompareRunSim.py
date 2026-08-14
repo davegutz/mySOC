@@ -300,8 +300,6 @@ def compare_run_sim(
             print("save_struct_to_csv: no filename available, skipping CSV export")
         else:
             # Shift time in sim_ver; soc_s is computed at G.i but save_s() records at t[G.i-1]
-            # sim_ver = shift_time(sim_ver, 1)
-            # sim_ver = shift_time(sim_ver, 1, fields=("dt_pst_s",))
             for obj, struct_name in (
                 (mon_run, "mon_run"),
                 (mon_ver, "mon_ver"),
