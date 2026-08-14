@@ -354,7 +354,7 @@ if (read) {
 				Ib_noa_ = Ib_noa_hdwe_;														// n/a			| PV
 				Vc_ = Vc_hdwe_;																		// n/a			| PV
 			}
-			now_ms_ = sample_time_ib_;													// PV				| PV
+			now_ms_ = sample_time_ib_ms_ + ...;									// PV				| PV
 			c_time_s = double(now_ms_) / 1000.;									// PV				| PV
 			Sim->assign_times(input=c_time_s){
 				dt_pst_s_ = input - c_time_s_;										// PV				| PV
@@ -407,13 +407,29 @@ if (read) {
 			return soc_;																				// ZV				| ZV
 		}  // Sen->Sim->count_coulombs
 
+
+		// Injection test executive
+		if ((Sen->start_inj(){ return start_inj_ms_; } <= Sen->now(){return now_ms_;}) &&
+				(Sen->now(){return now_ms_;} <= Sen->end_inj(){ return end_inj_ms_; }) &&
+				(Sen->now(){return now_ms_;} > 0ULL))  // in range, test in progress
+		{
+			// Shift times because sampling is asynchronous: improve repeatibility
+			...
+
+			// Put a stop to this but retain sp.amp_ to scale fault and history
+			// printouts properly
+			...
+
+		} // injection test executive
+
+		// Injection bias
 		Sen->Sim->calc_inj(...){
 			  sample_time_s_ms_ = millis();											// Source->PV	| n/a
 				inj_bias = ...;																		// Source->PV	| n/a
 			  sp.put_Inj_bias(inj_bias){
 					inj_bias_ = input;															// PV					| n/a
 				}
-		}
+		}  // Injection bias
 
 	}  // sense_synth_select
 
