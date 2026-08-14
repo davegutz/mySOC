@@ -484,9 +484,6 @@ double BatteryMonitor::calc_soc_voc(const double soc, const double Tb_f,
 
 // Data of future past: update past sample time
 void BatteryMonitor::data_of_future_past(const bool reset) {
-  if (reset)
-    soc_pst_ = soc_;
-  else
     soc_pst_ = soc_;
 }
 
@@ -710,7 +707,7 @@ BatterySim::BatterySim(const float dx_voc, const float dy_voc,
     : Battery(sp.delta_q_model_ptr(), VS, dx_voc, dy_voc, dz_voc),
       Sin_inj_(nullptr), Sq_inj_(nullptr), Tri_inj_(nullptr), Cos_inj_(nullptr),
       c_time_s_(0.), duty_(0UL), d_delta_q_s_(0.), dt_charge_s_(0.),
-      dt_pst_ms_(0UL), dt_pst_s_ms_(0UL), dt_pst_s_(0.), dt_s_(0.),
+      dt_pst_s_ms_(0UL), dt_pst_s_(0.), dt_s_(0.),
       ib_charge_(0.), ib_pst_(0.), ib_in_(0.),
       ib_sat_(0.5), model_cutback_(true), model_saturated_(false),
       q_(NOM_UNIT_CAP * 3600.), sample_time_s_ms_(0UL), sample_time_s_pst_ms_(0UL),
@@ -794,8 +791,8 @@ float BatterySim::calculate(Sensors* Sen, const bool dc_dc_on,
 
   ib_in_ = Sen->Ib_model_in() / ap.nP();  // Past value
   if (reset ) {
-    dt_pst_s_ms_ = dt_pst_ms_ = dt_long();
-    dt_pst_s_ = double(dt_long()) / 1000.;
+    dt_pst_s_ms_ = sample_time_s_ms_ - sample_time_s_pst_ms_;
+    dt_pst_s_ = double(dt_pst_s_ms_) / 1000.;
     ib_pst_ = ib_in_;
   }
   c_time_s_ = Sen->c_time();
@@ -895,14 +892,8 @@ double BatterySim::calc_soc_voc(const double soc, const double Tb_f,
 
 // Data of future past: update past sample time
 void BatterySim::data_of_future_past(const bool reset) {
-  if (reset) {
     sample_time_s_pst_ms_ = millis();
     soc_pst_ = soc_;
-  }
-  else {
-    sample_time_s_pst_ms_ = sample_time_s_ms_;
-    soc_pst_ = soc_;
-  }
 }
 
 // Injection model, calculate inj bias based on time since boot
@@ -1045,8 +1036,7 @@ void BatterySim::init_battery_sim(const bool reset, Sensors* Sen) {
   if (isnan(ib_)) ib_ = 0.;     // reset overflow
   dv_dyn_ = vb_ - voc_;
   ib_pst_ = ib_;
-  dt_pst_ms_ = dt_long();
-  dt_pst_s_ms_ = dt_long();
+  dt_pst_s_ms_ = sample_time_s_ms_ - sample_time_s_pst_ms_;
   dt_pst_s_ = double(dt_pst_s_ms_) / 1000.;
   init_hys(0.0);
   ibs_ = hys_->ibs();

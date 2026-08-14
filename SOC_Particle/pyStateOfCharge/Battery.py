@@ -505,6 +505,8 @@ class BatteryMonitor(Battery, EKF1x1, Wrap):
             self.soc_ekf = SN.soc_ekf_init
             self.z = SN.z_init
         self.dt_s = 0.0
+        self.dt_charge_s = 0.0
+        self.dt_pst_s = 0.0
         self.chm_s = 0.0
         self.qcrs_s = 0.0
         self.qcap_s = 0.0

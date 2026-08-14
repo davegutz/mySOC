@@ -459,26 +459,22 @@ void Sensors::select_volt_and_current_and_temp(BatteryMonitor* Mon) {
   Vc_rms_ = VcRMS->update(Vc_);
 
   // ib
+  update_dt();  // Re-verify dt and T_ 
   if (sp.mod_ib()) {
     Ib_ = Ib_hdwe_model_;
     Ib_f_ = Ib_;
     Ib_amp_ = Ib_amp_model_;
     Ib_noa_ = Ib_noa_model_;
     Vc_ = HALF_V3V3;
-    sample_time_ib_ms_ = Sim->sample_time_s();
-    dt_ib_ms_ = Sim->dt_pst_s_ms();
   } else {
     Ib_ = Ib_hdwe_;
     Ib_f_ = Ib_hdwe_f_;
     Ib_amp_ = Ib_amp_hdwe_;
     Ib_noa_ = Ib_noa_hdwe_;
     Vc_ = Vc_hdwe_;
-    sample_time_ib_ms_ = sample_time_ib_hdwe_ms_;
-    dt_ib_ms_ = dt_ib_hdwe_ms_;
   }
   Ib_amp_rms_ = IbAmpRMS->update(Ib_amp_);
   Ib_noa_rms_ = IbNoaRMS->update(Ib_noa_);
-  T_ = double(dt_ib_ms_) / 1000.;
   now_ms_ = sample_time_ib_ms_ - inst_ms_ + inst_time_ * 1000;
   c_time_ = double(now_ms_) / 1000.;
   Sim->assign_times(c_time_);
@@ -744,6 +740,18 @@ void Sensors::Tb_print() {
       Tb_model_f_rate_, Tb_model_f_rstate_, Tb_model_f_lstate_, Flt->Tb_flt(),
       Flt->Tb_fa());
   Serial.printf("Tb_print:  Tb_%7.3f Tb_f_%7.3f \n\n", Tb_, Tb_f_);
+}
+
+// Method to update frame delta-time early in the pass                                                
+void Sensors::update_dt() {
+  if (sp.mod_ib()) {
+    sample_time_ib_ms_ = Sim->sample_time_s();
+    dt_ib_ms_ = Sim->dt_pst_s_ms();
+  } else {
+    sample_time_ib_ms_ = sample_time_ib_hdwe_ms_;
+    dt_ib_ms_ = dt_ib_hdwe_ms_;
+  }
+  T_ = double(dt_ib_ms_) / 1000.;
 }
 
 // Load analog voltage

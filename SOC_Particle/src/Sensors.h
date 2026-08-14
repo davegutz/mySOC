@@ -387,6 +387,7 @@ class Sensors {
   float Tb_noise();
   void Tb_load(const uint16_t vb_pin, const bool reset);  // Analog read of Tb
   void Tb_print();                                        // Print Tb result
+  void update_dt();
 
   // Battery select unit voltage, V
   float vb() { return Vb_ / ap.nS(); };

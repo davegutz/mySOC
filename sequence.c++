@@ -87,7 +87,9 @@ Sim = class BatterySim;
 /* Key:
 ZV = past value
 PV = present value
+Values for loc in far right columns						// Model temporal | Hdwe temporal
 */
+
 
 // Loop
 loop() {
@@ -95,22 +97,19 @@ read = wait_for_update(READ_DELAY);
 if (read) {
 
 	// Manage states
-	Sen->Sim->data_of_future_passed(reset){
-		...
+	Sen->Sim->data_of_future_past(reset){
 		sample_time_s_pst_ms_ = sample_time_s_ms_;
 	  soc_pst_ = soc_;
 	}
 	Mon->data_of_future_passed(reset){
 	  soc_pst_ = soc_;
-	  ...
 	}
 
- 	// Read sensors, model signals, select between them, synthesize injection
+	// Read sensors, model signals, select between them, synthesize injection
   sense_synth_select(...) {
 		load_ib_vb_tb(){
 			// ib load-----------------------------------
 			// Sample Ib
-																							// Model temporal | Hdwe temporal
 			Sen->ShuntAmp->sample(...) {
 				sample_Vo(){			
 					sample_time_z_ms_ = sample_time_ms_;				// Feedback->ZV | ZV
@@ -285,11 +284,9 @@ if (read) {
 				Ib_hdwe_model_ = scale_select(	Ib_noa_model_, 	sel_brk_hdwe,
 											Ib_amp_model_, 	Ib_noa_model_, ...);
 																													// PV				| PV
-				sample_time_ib_hdwe_ = ShuntNoAmp->sample_time(){
-							return sample_time_ms_;											// PV				| PV
 				}
 				dt_ib_hdwe_ms_ = ShuntNoAmp->dt_ms(){
-					return return sample_time_ms_ - sample_time_z_ms_;
+					return sample_time_ms_ - sample_time_z_ms_;
 																													// PV				| PV
 				}
 			}
@@ -335,26 +332,29 @@ if (read) {
   		}
 
 			// ib
+			update_dt() {
+			  if (sp.mod_ib()) {
+  			  sample_time_ib_ms_ = Sim->sample_time_s();
+					dt_ib_ms_ = Sim->dt_pst_s_ms(){
+						return dt_pst_s_ms_;									// Feedback->ZV				| n/a
+					}
+  			} else {
+    			sample_time_ib_ms_ = sample_time_ib_hdwe_ms_;
+    			dt_ib_ms_ = dt_ib_hdwe_ms_;
+			  }
+  			T_ = double(dt_ib_ms_) / 1000.;
+			}
 			if (sp.mod_ib()) {
 				Ib_ = Ib_hdwe_model_;															// PV				| n/a
 				Ib_amp_ = Ib_amp_model_;													// PV				| n/a
 				Ib_noa_ = Ib_noa_model_;													// PV				| n/a
 				Vc_ = HALF_V3V3;
-				sample_time_ib_ = Sim->sample_time(){
-					return sample_time_ms_;													// PV				| n/a
-				}
-				dt_ib_ms_ = Sim->dt_pst_s_ms(){
-					return dt_pst_s_ms_;									// Feedback->ZV				| n/a
-				}
 			} else {
 				Ib_ = Ib_hdwe_;																		// n/a			| PV
 				Ib_amp_ = Ib_amp_hdwe_;														// n/a			| PV
 				Ib_noa_ = Ib_noa_hdwe_;														// n/a			| PV
 				Vc_ = Vc_hdwe_;																		// n/a			| PV
-				sample_time_ib_ = sample_time_ib_hdwe_;						// n/a			| PV
-				dt_ib_ms_ = dt_ib_hdwe_ms_;												// n/a			| PV
 			}
-			T_ = double(dt_ib_ms_) / 1000.;  										// ZV				| PV****
 			now_ms_ = sample_time_ib_;													// PV				| PV
 			c_time_s = double(now_ms_) / 1000.;									// PV				| PV
 			Sim->assign_times(input=c_time_s){

@@ -275,7 +275,6 @@ class BatterySim : public Battery {
   double dt_pst_s() { return dt_pst_s_; };
   uint32_t dt_pst_s_ms() { return dt_pst_s_ms_; };
   double dt_charge_s() { return dt_charge_s_; };
-  uint32_t dt_long() { return sample_time_s_ms_ - sample_time_s_pst_ms_; };
   void dt_s(const float input) { dt_s_ = input; }
   float dt_s() { return dt_s_; };
   float hys_state() { return hys_->dv_hys(); };
@@ -302,7 +301,6 @@ class BatterySim : public Battery {
   uint32_t duty_;  // Used in Test Mode to inject Fake shunt current (0 - 255)
   double d_delta_q_s_;  // Charge rate, C/s
   double dt_charge_s_;  // Input update time current available for charging, s
-  uint32_t dt_pst_ms_;  // Past delta update of model sample, ms
   uint32_t dt_pst_s_ms_;  // Past delta update of model sample, ms
   double dt_pst_s_; // Past update time of model sample, s
   float dt_s_;  // Update time, s

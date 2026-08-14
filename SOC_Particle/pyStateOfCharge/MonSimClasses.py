@@ -397,6 +397,12 @@ class Sensors:
     def calc_temp_pass_2(self, mon_run, mon, Battery_, rp, i=None, dt=None, reset=None):
         if dt is not None:
             mon.dt = dt
+        # else:
+        #     if not rp.modeling_ib:
+        #         mon.dt = mon_run.dt[i]  # hardware mode: present frame
+        #     else:
+        #         dt_val = getattr(mon, "dt_pst_s", 0.0)
+        #         mon.dt = dt_val if dt_val > 0.0 else mon_run.dt[i]  # model mode: present frame
         self.temp_load_and_filter(mon_run, mon, Battery_, rp, i, reset=reset)
         self.select_temp(mon_run, mon, Battery_, rp, i, reset=reset)
         self.assign_tb(mon.Tb, mon.Tb_f, mon.Tb_f_rate)
