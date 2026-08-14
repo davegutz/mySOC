@@ -284,18 +284,17 @@ if (read) {
 				Ib_hdwe_model_ = scale_select(	Ib_noa_model_, 	sel_brk_hdwe,
 											Ib_amp_model_, 	Ib_noa_model_, ...);
 																													// PV				| PV
-				}
-				dt_ib_hdwe_ms_ = ShuntNoAmp->dt_ms(){
-					return sample_time_ms_ - sample_time_z_ms_;
+			}
+			dt_ib_hdwe_ms_ = ShuntNoAmp->dt_ms(){
+				return sample_time_ms_ - sample_time_z_ms_;
 																													// PV				| PV
-				}
 			}
 
 			// Tb select
 			if (sp.mod_tb()) {  // Model Tb
 				if (Flt->Tb_fa() ...) {
 					....
-	    	} else if (Flt->Tb_flt() ...) {
+				} else if (Flt->Tb_flt() ...) {
 					...
 					return;
 				} else {
