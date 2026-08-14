@@ -209,19 +209,19 @@ void loop() {
   static uint64_t now = (uint64_t)millis();
   now = (uint64_t)millis();
   bool chitchat = false;
-  static Sync* Talk = new Sync(TALK_DELAY);
+  static Sync* Talk = new Sync(TALK_DELAY_MS);
 #if IN_SERVICE
-  static Sync* NoSaveWarn = new Sync(NO_SAVE_WARN);
+  static Sync* NoSaveWarn = new Sync(NO_SAVE_WARN_MS);
 #endif
   bool read = false;
-  static Sync* ReadSensors = new Sync(READ_DELAY);
+  static Sync* ReadSensors = new Sync(READ_DELAY_MS);
   bool read_temp = false;
-  static Sync* ReadTemp = new Sync(TEMP_DELAY);
+  static Sync* ReadTemp = new Sync(TEMP_DELAY_MS);
   bool display_and_remember;
-  static Sync* DisplayUserSync = new Sync(DISPLAY_USER_DELAY);
+  static Sync* DisplayUserSync = new Sync(DISPLAY_USER_DELAY_MS);
   bool summarizing;
   static bool boot_wait = true;  // waiting for a while before summarizing
-  static Sync* Summarize = new Sync(SUMMARY_DELAY);
+  static Sync* Summarize = new Sync(SUMMARY_DELAY_MS);
   uint64_t elapsed = 0;
   uint64_t elapsed_reset = 0;
   static bool reset = true;
@@ -246,23 +246,23 @@ void loop() {
   ///loop////////////////////////////////////////
 
   // Synchronize
-  if (now - last_sync > ONE_DAY_MILLIS || reset)
+  if (now - last_sync > ONE_DAY_MS || reset)
     sync_time(now, &last_sync, &millis_flip);
-  Sen->control_time(double(Sen->now()) / 1000.);
+  Sen->control_time(double(Sen->now_ms()) / 1000.);
   char buffer[32];
   time_long_2_str(time_now, buffer);
   hm_string = String(buffer);
   read_temp = ReadTemp->update(now, reset);
   read = ReadSensors->update(now, reset);
   chitchat = Talk->update(now, reset);
-  elapsed = ReadSensors->now() - start;
-  elapsed_reset = ReadSensors->now() - start_reset;
+  elapsed = ReadSensors->now_ms() - start;
+  elapsed_reset = ReadSensors->now_ms() - start_reset;
   display_and_remember = DisplayUserSync->update(now, reset);
   bool boot_summ =
       boot_wait &&
-      (elapsed >= SUMMARY_WAIT / (SUMMARY_DELAY / ap.sum_delay())) &&
+      (elapsed >= SUMMARY_WAIT_MS / (SUMMARY_DELAY_MS / ap.sum_delay())) &&
       !sp.modeling();
-  if (elapsed >= SUMMARY_WAIT / (SUMMARY_DELAY / ap.sum_delay()))
+  if (elapsed >= SUMMARY_WAIT_MS / (SUMMARY_DELAY_MS / ap.sum_delay()))
     boot_wait = false;
   summarizing = Summarize->update(now, false) || boot_summ;
 
@@ -278,13 +278,14 @@ void loop() {
 // Warn if parameters have been changed but not saved
 #if IN_SERVICE
     if (NoSaveWarn->update(now, reset) && sp.dirty()) {
-      sendTxBuf(String::format("WARNING: unsaved Retained parameter.  Enter 'w' to save. now dirty=%d\n", sp.dirty()), true, true);
+      sendTxBuf(String::format("WARNING: unsaved Retained parameter."
+        "  Enter 'w' to save. now dirty=%d\n", sp.dirty()), true, true);
     }
 #endif
 
     // Check for really slow data capture and run EKF each read frame
     // ap.eframe_mult() =
-    // max(int(float(READ_DELAY)*float(EKF_EFRAME_MULT)/
+    // max(int(float(READ_DELAY_MS)*float(EKF_EFRAME_MULT)/
     // float(ReadSensors->delay())+0.9999), 1);
 
     update_publish_frame();
@@ -292,7 +293,7 @@ void loop() {
     // Read sensors, model signals, select between them, synthesize injection
     // signals on current Inputs:  sp.config, sp.sim_chm Outputs: Sen->Ib,
     // Sen->Vb, sp.inj_bias, Sen->Tb / Tb_f
-    sense_synth_select(reset, reset_temp, reset_kf, ReadSensors->now(), elapsed,
+    sense_synth_select(reset, reset_temp, reset_kf, ReadSensors->now_ms(), elapsed,
                        myPins, Mon, Sen);
 
     // Calculate Ah remaining
@@ -313,7 +314,7 @@ void loop() {
 
     // Publish for variable print rate
     if (cp.publishS) {
-      assign_publist(&pp.pubList, ReadSensors->now(), unit, hm_string, Sen,
+      assign_publist(&pp.pubList, ReadSensors->now_ms(), unit, hm_string, Sen,
                      num_timeouts, Mon);
       static bool wrote_last_time = false;
       if (wrote_last_time)
@@ -375,7 +376,7 @@ void loop() {
         false;
     if (reset_temp) sendTxBuf("*", true, IN_SERVICE);
   }
-  if (read_temp && elapsed_reset > TEMP_DELAY && reset_temp) {
+  if (read_temp && elapsed_reset > TEMP_DELAY_MS && reset_temp) {
     sendTxBuf("...temp init complete\n", true, IN_SERVICE);
     reset_temp = false;
   }

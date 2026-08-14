@@ -251,9 +251,9 @@ Sensors::Sensors(double T, double T_temp, Pins* pins, Sync* ReadSensors,
                        NOM_UNIT_CAP * ap.nS() * ap.nP());
   SelFiltCal = new LagExp(T, AMP_FILT_TAU, -NOM_UNIT_CAP * ap.nS() * ap.nP(),
                           NOM_UNIT_CAP * ap.nS() * ap.nP());
-  TbHdweFilt = new LagExp(double(READ_DELAY) / 1000., ap.Tb_filt(), TB_HDWE_MIN,
+  TbHdweFilt = new LagExp(double(READ_DELAY_MS) / 1000., ap.Tb_filt(), TB_HDWE_MIN,
                           TB_HDWE_MAX);
-  TbModelFilt = new LagExp(double(READ_DELAY) / 1000., ap.Tb_filt(),
+  TbModelFilt = new LagExp(double(READ_DELAY_MS) / 1000., ap.Tb_filt(),
                            TB_HDWE_MIN, TB_HDWE_MAX);
   VbFilt = new LagExp(T, AMP_FILT_TAU, 0., NOMINAL_VB * 2.5);
   Vb_read_ = new AnalogReadP2(pins->Vb_pin);
@@ -404,7 +404,7 @@ void Sensors::select_volt_and_current_and_temp(BatteryMonitor* Mon) {
   ib_choose_hi_lo();
 
   // Final assignments
-  // Tb
+  // Tb select
   if (sp.mod_tb()) {
     if (Flt->Tb_fa() && !ap.fake_faults()) {
       Tb_ = NOMINAL_TB;
@@ -439,7 +439,7 @@ void Sensors::select_volt_and_current_and_temp(BatteryMonitor* Mon) {
     }
   }
 
-  // vb
+  // vb select
   if (sp.mod_vb()) {
     Vb_f_ = Vb_;
     if ((Flt->wrap_vb_fa() || Flt->vb_fa_lt()) && !ap.fake_faults()) {
@@ -458,7 +458,7 @@ void Sensors::select_volt_and_current_and_temp(BatteryMonitor* Mon) {
   Vb_rms_ = VbRMS->update(Vb_);
   Vc_rms_ = VcRMS->update(Vc_);
 
-  // ib
+  // ib select
   update_dt();  // Re-verify dt and T_ 
   if (sp.mod_ib()) {
     Ib_ = Ib_hdwe_model_;
@@ -764,6 +764,7 @@ void Sensors::vb_load(const uint16_t vb_pin, const bool reset) {
     Vb_hdwe_ = float(Vb_raw_) * VB_CONV_GAIN * ap.Vb_scale() + float(VB_A) +
                sp.Vb_bias_hdwe();
 #endif
+    // T_ stale.  Ok Vb_hdwe_f_ no critical use
     Vb_hdwe_f_ = VbFilt->calculate(Vb_hdwe_, reset, AMP_FILT_TAU, T_);
   } else {
     Vb_raw_ = 0;

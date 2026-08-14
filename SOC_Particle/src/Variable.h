@@ -58,9 +58,6 @@ class Variable {
 
   ~Variable() {}
 
-  fptr app_;
-  fptr app() { return app_; }
-  // void app(fptr ptr) { app_ = ptr; }
   String code() { return code_; }
   const char* description() { return description_.c_str(); }
   bool success() { return success_; }

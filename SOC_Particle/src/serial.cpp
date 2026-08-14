@@ -115,7 +115,7 @@ void print_battery_header() {
       "sp_s_cap_sim, sp_vsat_add, TAU_ERR_FILT, TAU_Y_FILT, TB_FILT,");
   Serial.printf(
       "TB_MAX, TB_MIN, TB_HDWE_MAX, TB_HDWE_MIN, TCHARGE_DISPLAY_DEADBAND, "
-      "TEMP_DELAY, TMAX_FILT, T_RLIM, VB_DC_DC, VB_MAX, VB_MIN, ");
+      "TEMP_DELAY_MS, TMAX_FILT, T_RLIM, VB_DC_DC, VB_MAX, VB_MIN, ");
   Serial.printf(
       "VOC_STAT_FILT, WN_Y_FILT, WRAP_ERR_FILT, WRAP_HI_AMPV, WRAP_HI_NOAV, "
       "WRAP_HI_RES, WRAP_HI_SET, WRAP_HI_SETAT_MARG,");
@@ -183,7 +183,7 @@ void print_battery_serial() {
 
   sprintf(pr.buff, "%10.7f,%ld,%10.7f,%10.7f,%10.7f,%10.7f,%10.7f,%10.7f,\
   %10.7f,",
-          TCHARGE_DISPLAY_DEADBAND, TEMP_DELAY, TMAX_FILT, T_RLIM, VB_DC_DC,
+          TCHARGE_DISPLAY_DEADBAND, TEMP_DELAY_MS, TMAX_FILT, T_RLIM, VB_DC_DC,
           VB_MAX, VB_MIN, VOC_STAT_FILT, WN_Y_FILT);
   Serial.printf("%s", pr.buff);
 
@@ -336,8 +336,8 @@ void print_rapid_header() {
 
 void print_rapid_serial(const bool reset, Publish* pubList, Sensors* Sen,
                         BatteryMonitor* Mon) {
-  static uint64_t rap_now_past = Sen->now();
-  uint64_t now_rap = Sen->now();
+  static uint64_t rap_now_past = Sen->now_ms();
+  uint64_t now_rap = Sen->now_ms();
   double dt_rap = double(now_rap - rap_now_past) / 1e3;
   rap_now_past = now_rap;
   sprintf(pr.buff,
@@ -426,7 +426,7 @@ void print_shunt_header(Sensors* Sen) {
 void print_shunt_serial(const bool reset, Sensors* Sen) {
   static double last_c_time_sh = 0.;
   if ((sp.debug() == 2 || sp.debug() == 6) && cp.publishS) {
-    double c_time = double(Sen->now()) / 1000.;
+    double c_time = double(Sen->now_ms()) / 1000.;
     if (!reset && c_time <= last_c_time_sh + 0.00005) return;
     last_c_time_sh = c_time;
 

@@ -280,8 +280,8 @@ class Sensors {
   float Vc_rms() { return Vc_rms_; }
   void Wb(const float input) { Wb_ = input; }
   float Wb() { return Wb_; }
-  void now(const uint64_t input) { now_ms_ = input; }
-  uint64_t now() { return now_ms_; }
+  void now_ms(const uint64_t input) { now_ms_ = input; }
+  uint64_t now_ms() { return now_ms_; }
   uint64_t now_temp() { return now_temp_ms_; }
   void T(const double input) { T_ = input; }
   double T() { return T_; }

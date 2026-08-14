@@ -58,7 +58,7 @@ const float EKF_T_RES = (EKF_T_CONV / 2.);  // EKF reset (up 1, down 2')
 #define NOM_DT 0.1  // Nominal update, s (init val; actual value varies)
 #define EKF_NOM_DT 0.1  // EKF nominal update, s (init; actual value varies)
 #if !defined(EKF_EFRAME_MULT)  // allow override in config file
-#define EKF_EFRAME_MULT 20  // consistent with READ_DELAY (20 for 100) ED
+#define EKF_EFRAME_MULT 20  // consistent with READ_DELAY_MS (20 for 100) ED
 #endif
 #define DF2 1.2  // Thresh to reset Coul Counter if diff from ekf, frac (0.20)
 #define TAU_Y_FILT 5.  // EKF y-filter time constant, sec (5.)

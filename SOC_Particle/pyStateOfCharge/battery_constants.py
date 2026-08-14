@@ -134,7 +134,7 @@ class BatteryConstants:
     D_SOC_S = 0.0  # Bias on soc to voc-soc lookup to simulate error in estimation, esp cold battery near 0 C
     NOM_UNIT_CAP =  108.4
     ap_nP = 1.
-    TEMP_DELAY = 0.6
+    TEMP_DELAY_MS = 0.6
 
 
 # noinspection PyPep8Naming
@@ -171,6 +171,6 @@ def apply_off_nominal_battery(Battery_, Battery_off_dict):
         for key in dir(Battery_):
             if key in Battery_off_dict and not key.startswith("__"):
                 val = Battery_off_dict[key]
-                if key == "TEMP_DELAY" and val > 10.0:
+                if key == "TEMP_DELAY_MS" and val > 10.0:
                     val /= 1000.0
                 setattr(Battery_, key, val)

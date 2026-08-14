@@ -35,8 +35,6 @@
 // Sensors
 #include "Sensors.h"
 
-const size_t UART_TX_BUF_SIZE = 20;
-
 extern SavedPars sp;    // Various parameters to be static at system level and
                         // saved through power cycle
 extern PublishPars pp;  // For publishing

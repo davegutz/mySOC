@@ -342,13 +342,13 @@ float BatteryMonitor::calculate(Sensors* Sen, const bool reset_temp,
   cp.ekf_executing = false;
   if (eframe_ == 0 || reset_ekf) {
     cp.ekf_executing = true;
-    static uint64_t ekf_now_past = Sen->now();
+    static uint64_t ekf_now_past = Sen->now_ms();
     float ddq_dt = ib_charge_ekf;
 
     // Freeze EKF with voltage fault or bms_off
     freeze_ekf_ = Sen->Flt->vb_fa_lt() || bms_off_;
 
-    now_ekf_ = Sen->now();
+    now_ekf_ = Sen->now_ms();
     dt_ekf_ = float(now_ekf_ - ekf_now_past) / 1e3;
     ekf_now_past = now_ekf_;
     if (ddq_dt > 0. && !sp.tweak_test()) ddq_dt *= coul_eff_;

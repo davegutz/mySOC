@@ -154,10 +154,10 @@ bool recall_X(const char letter_1, BatteryMonitor* Mon, Sensors* Sen) {
       break;
 
     case ('R'):  // XR:  Start injection now
-      if (Sen->now() > TEMP_INIT_DELAY) {
-        Sen->start_inj(ap.wait_inj() + Sen->now());
+      if (Sen->now_ms() > TEMP_INIT_DELAY_MS) {
+        Sen->start_inj(ap.wait_inj() + Sen->now_ms());
         Sen->stop_inj(ap.wait_inj() +
-                      (Sen->now() +
+                      (Sen->now_ms() +
                        min((uint64_t)(ap.cycles_inj() /
                                       max(sp.freq() / (2. * PI), 1e-6) * 1000.),
                            ULLONG_MAX)));
@@ -165,13 +165,13 @@ bool recall_X(const char letter_1, BatteryMonitor* Mon, Sensors* Sen) {
         Serial.printf(
             "**\n*** RUN: at %s, %7.3f cycles %s to %s with %ld wait and %ld "
             "tail; freq%7.3f cycles%7.3f amp%7.3f type%2d \n\n",
-            toString(Sen->now()).c_str(), ap.cycles_inj(),
+            toString(Sen->now_ms()).c_str(), ap.cycles_inj(),
             toString(Sen->start_inj()).c_str(),
             toString(Sen->stop_inj()).c_str(), ap.wait_inj(), ap.tail_inj(),
             sp.freq(), ap.cycles_inj(), sp.Amp(ap.nP()), sp.type());
       } else
         Serial.printf("Wait%5.1fs for init\n",
-                      float(TEMP_INIT_DELAY - Sen->now()) / 1000.f);
+                      float(TEMP_INIT_DELAY_MS - Sen->now_ms()) / 1000.f);
       break;
 
     case ('S'):  // XS:  Stop injection now
@@ -228,7 +228,7 @@ bool recall_X(const char letter_1, BatteryMonitor* Mon, Sensors* Sen) {
       break;
 
     case ('Y'):  // XY  display a time sYnch message
-      Serial.printf("SYNC,%7.3f\n", double(Sen->now()) / 1000.f);
+      Serial.printf("SYNC,%7.3f\n", double(Sen->now_ms()) / 1000.f);
       break;
 
     default:

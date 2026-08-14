@@ -477,7 +477,7 @@ def replicate(OPT: UserOptions):
                 f"\n\n************** Data integrity degraded by skip.  "
                 "A digit could have been inserted anywhere in data.  Break."
             )
-            print(f"\nCheck for W too short before vv4 or TEMP_INIT_DELAY or TEMP_DELAY too long in SOC_Particle.ino")
+            print(f"\nCheck for W too short before vv4 or TEMP_INIT_DELAY or TEMP_DELAY_MS too long inSOC_Particle.ino")
             print(
                 "   now {:5.3f}".format(now),
                 "   time_end {:5.3f}\n\n".format(t[-1]),

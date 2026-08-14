@@ -98,11 +98,11 @@ if (read) {
 
 	// Manage states
 	Sen->Sim->data_of_future_past(reset){
-		sample_time_s_pst_ms_ = sample_time_s_ms_;
-	  soc_pst_ = soc_;
+		sample_time_s_pst_ms_ = sample_time_s_ms_;				// Feedback->ZV | ZV
+	  soc_pst_ = soc_;																	// Feedback->ZV | ZV
 	}
 	Mon->data_of_future_passed(reset){
-	  soc_pst_ = soc_;
+	  soc_pst_ = soc_;																	// Feedback->ZV | ZV
 	}
 
 	// Read sensors, model signals, select between them, synthesize injection
@@ -191,9 +191,6 @@ if (read) {
 				Vb_raw_ = Vb_read_...;														// n/a	| Source->PV
 				...
 				Vb_hdwe_ = Vb_raw_ * VB_CONV_GAIN;								// PV				| PV
-				// Note: T_ in following is UBC (past value) from previous frame
-				Vb_hdwe_f_ = VbHdweFilt->calculate(Vb_hdwe_,..., AMP_FILT_TAU, T_, ...);	
-																													// mixed| mixed *****
 				...
 			}
 			Sen->Flt->vb_check(...);														// PV				| PV
@@ -315,14 +312,12 @@ if (read) {
 
 			// vb select
 			if (sp.mod_vb()) {  // Model vb
-				Vb_f_ = Vb_;																			// ZV				| n/a
 				if ((Flt->wrap_vb_fa() || Flt->vb_fa_lt()) ...) {
 					...
 				} else {
 					Vb_ = Vb_model_ + Vb_noise();										// ZV				| n/a
 				}
 			} else {
-				Vb_f_ = Vb_hdwe_f_;																// n/a			| PV
 				if ((Flt->wrap_vb_fa() || Flt->vb_fa_lt()) ...)) {
 					...
 				} else {
@@ -330,16 +325,18 @@ if (read) {
 				}
   		}
 
-			// ib
+			// ib select
 			update_dt() {
 			  if (sp.mod_ib()) {
-  			  sample_time_ib_ms_ = Sim->sample_time_s();
+  			  sample_time_ib_ms_ = Sim->sample_time_s(){
+						return sample_time_s_ms_;							//
+					};
 					dt_ib_ms_ = Sim->dt_pst_s_ms(){
-						return dt_pst_s_ms_;									// Feedback->ZV				| n/a
+						return dt_pst_s_ms_;								// Feedback->ZV				| n/a
 					}
   			} else {
     			sample_time_ib_ms_ = sample_time_ib_hdwe_ms_;
-    			dt_ib_ms_ = dt_ib_hdwe_ms_;
+    			dt_ib_ms_ = dt_ib_hdwe_ms_;											// PV				| PV
 			  }
   			T_ = double(dt_ib_ms_) / 1000.;
 			}
@@ -355,11 +352,11 @@ if (read) {
 				Vc_ = Vc_hdwe_;																		// n/a			| PV
 			}
 			now_ms_ = sample_time_ib_ms_ + ...;									// PV				| PV
-			c_time_s = double(now_ms_) / 1000.;									// PV				| PV
+			c_time_s_ = double(now_ms_) / 1000.;								// PV				| PV
 			Sim->assign_times(input=c_time_s){
 				dt_pst_s_ = input - c_time_s_;										// PV				| PV
 				dt_pst_s_ms_ = (uint32_t)round(dt_pst_s_ * 1000.0);
-																													// PV				| PV
+																								// PV->Feedback		| PV->Feedback
 				c_time_s_ = input;											// PV->Feedback		| PV->Feedback
 			}
 		} // select_volt_and_current_and_temp
@@ -409,12 +406,13 @@ if (read) {
 
 
 		// Injection test executive
-		if ((Sen->start_inj(){ return start_inj_ms_; } <= Sen->now(){return now_ms_;}) &&
-				(Sen->now(){return now_ms_;} <= Sen->end_inj(){ return end_inj_ms_; }) &&
-				(Sen->now(){return now_ms_;} > 0ULL))  // in range, test in progress
+		if ((Sen->start_inj(){ return start_inj_ms_(pst); } <= Sen->now_ms(){return now_ms_;}) &&
+				(Sen->now_ms(){return now_ms_;} <= Sen->end_inj(){ return end_inj_ms_; }) &&
+				(Sen->now_ms(){return now_ms_;} > 0ULL))  // in range, test in progress
 		{
 			// Shift times because sampling is asynchronous: improve repeatibility
 			...
+
 
 			// Put a stop to this but retain sp.amp_ to scale fault and history
 			// printouts properly
@@ -502,13 +500,13 @@ if (read) {
 			cp.ekf_executing = false;
 			if (eframe_ == 0 || reset_ekf) {
 				cp.ekf_executing = true;
-				static uint64_t ekf_now_past = Sen->now();
+				static uint64_t ekf_now_past = Sen->now_ms();
 				float ddq_dt = ib_charge_ekf;
 
 				// Freeze EKF with voltage fault or bms_off
 				freeze_ekf_ = Sen->Flt->vb_fa_lt() || bms_off_;
 
-				now_ekf_ = Sen->now();
+				now_ekf_ = Sen->now_ms();
 				dt_ekf_ = float(now_ekf_ - ekf_now_past) / 1e3;
 				ekf_now_past = now_ekf_;
 				if (	ddq_dt > 0. && !sp.tweak_test()) ddq_dt *= coul_eff_;
@@ -600,9 +598,14 @@ if (read) {
 	// Print
 	print_...
 
+	// Talk
+	Sen->start_inj(Sen->now{}{return now_ms_;}) {
+		start_inj_ms_(pst) = now_ms_;
+	}
+
 	// Manage states
 	Sen->Sim->data_of_future_passed(...) {
-	  sample_time_s_pst_ms_ = sample_time_s_ms_;						// Feedback->PV	| n/a
+	  sample_time_s_pst_ms_ = sample_time_s_ms_;				// PV->Feedback		| n/a
     soc_pst_ = soc_;
 	}
 	Mon->data_of_future_past(...) {

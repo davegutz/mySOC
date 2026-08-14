@@ -135,9 +135,9 @@ void VolatilePars::initialize() {
   V_[n_++] = (init_sim_soc_p = new FloatV("  ", "Cm", NULL, "Init sim to this", "soc", -0.5, 1.1, &init_sim_soc_, 1));              // Cm
   V_[n_++] = (samp_points_p = new ULongV("  ", "Cx", NULL, "Number of samples", "uintl", 0UL, 1000000UL, &samp_points_, 0));        // Cx
   V_[n_++] = (print_mult_p = new Uint8tV("  ", "DP", NULL, "Print mult x Dr", "uint", 1, UINT8_MAX, &print_mult_, DP_MULT));        // DP
-  V_[n_++] = (read_delay_p = new ULongV("  ", "Dr", NULL, "Minor frame", "ms", 1UL, 1000000UL, &read_delay_ms_, READ_DELAY));          // Dr
-  V_[n_++] = (talk_delay_p = new ULongV("  ", "D>", NULL, "Talk frame", "ms", 1UL, 120000UL, &talk_delay_ms_, TALK_DELAY));            // D>
-  V_[n_++] = (sum_delay_p = new ULongV("  ", "Dh", NULL, "Summary frame", "ms", 1000UL, SUMMARY_DELAY, &sum_delay_, SUMMARY_DELAY));// Dh
+  V_[n_++] = (read_delay_p = new ULongV("  ", "Dr", NULL, "Minor frame", "ms", 1UL, 1000000UL, &read_delay_ms_, READ_DELAY_MS));          // Dr
+  V_[n_++] = (talk_delay_p = new ULongV("  ", "D>", NULL, "Talk frame", "ms", 1UL, 120000UL, &talk_delay_ms_, TALK_DELAY_MS));            // D>
+  V_[n_++] = (sum_delay_p = new ULongV("  ", "Dh", NULL, "Summary frame", "ms", 1000UL, SUMMARY_DELAY_MS, &sum_delay_, SUMMARY_DELAY_MS));// Dh
   V_[n_++] = (eframe_mult_p = new Uint8tV("  ", "ED", NULL, "EKF frame rate x Dr", "uint", 1, UINT8_MAX, &eframe_mult_, EKF_EFRAME_MULT));  // ED
   V_[n_++] = (slr_res_p = new FloatV("  ", "Sr", NULL, "Scalar Randles R0", "slr", 0, 100, &slr_res_, 1));                          // Sr
   V_[n_++] = (s_t_sat_p = new FloatV("  ", "Xs", NULL, "Scalar on T_SAT", "slr", 0, 100, &s_t_sat_, 1));                            // Xs

@@ -439,7 +439,7 @@ void sense_synth_select(const bool reset, const bool reset_temp,
       sp.put_Iflt(sp.iflt() + 1);
       if (sp.iflt() > sp.nflt() - 1) sp.put_Iflt(0);  // wrap buffer
       Flt_st fault_snap;
-      fault_snap.assign_unfilt(Sen->now(), Mon, Sen);
+      fault_snap.assign_unfilt(Sen->now_ms(), Mon, Sen);
       sp.put_fault(fault_snap, sp.iflt());
     } else if (fails_repeated < 4) {
       Serial.printf("preserving fault buffer\n");
@@ -456,23 +456,23 @@ void sense_synth_select(const bool reset, const bool reset_temp,
   Sen->Sim->count_coulombs(Sen, reset_temp, Mon, false);
 
   // Injection test
-  if ((Sen->start_inj() <= Sen->now()) && (Sen->now() <= Sen->end_inj()) &&
-      (Sen->now() > 0ULL))  // in range, test in progress
+  if ((Sen->start_inj() <= Sen->now_ms()) && (Sen->now_ms() <= Sen->end_inj()) &&
+      (Sen->now_ms() > 0ULL))  // in range, test in progress
   {
     // Shift times because sampling is asynchronous: improve repeatibility
     if (Sen->elapsed_inj() == 0ULL) {
-      Sen->end_inj(Sen->end_inj() + Sen->now() - Sen->start_inj());
-      Sen->stop_inj(Sen->stop_inj() + Sen->now() - Sen->start_inj());
-      Sen->start_inj(Sen->now());
-      Serial.printf("SYNC,%7.3f\n", double(Sen->now()) / 1000.);
+      Sen->end_inj(Sen->end_inj() + Sen->now_ms() - Sen->start_inj());
+      Sen->stop_inj(Sen->stop_inj() + Sen->now_ms() - Sen->start_inj());
+      Sen->start_inj(Sen->now_ms());
+      Serial.printf("SYNC,%7.3f\n", double(Sen->now_ms()) / 1000.);
     }
 
-    Sen->elapsed_inj(Sen->now() - Sen->start_inj() +
+    Sen->elapsed_inj(Sen->now_ms() - Sen->start_inj() +
                      1UL);  // Shift by 1 because using ==0 as reset button
 
     // Put a stop to this but retain sp.amp_ to scale fault and history
     // printouts properly
-    if (Sen->now() > Sen->stop_inj()) {
+    if (Sen->now_ms() > Sen->stop_inj()) {
       sp.put_Inj_bias(0);
       sp.put_Type(0);
     }
@@ -749,7 +749,7 @@ void manage_summaries(const bool boot_wait, const bool summarizing,
     sp.put_Ihis(sp.ihis() + 1);
     if (sp.ihis() > (sp.nhis() - 1)) sp.put_Ihis(0);
     Flt_st hist_snap, hist_bounced;
-    hist_snap.assign(Sen->now(), Mon, Sen);
+    hist_snap.assign(Sen->now_ms(), Mon, Sen);
     hist_bounced = sp.put_history(hist_snap, sp.ihis());
 
     sp.put_Isum(sp.isum() + 1);

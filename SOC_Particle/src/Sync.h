@@ -47,7 +47,7 @@ class Sync {
     updateTimeInput_ = float(delay_) / 1000.f;
     last_ = now;
   }
-  uint64_t now() { return (now_ms_); }
+  uint64_t now_ms() { return (now_ms_); }
 
  private:
   uint64_t delay_;

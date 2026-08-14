@@ -40,19 +40,15 @@ all
 const char unit[] = version_str "_" HDWE_UNIT;
 
 // Constants always defined
-#define ONE_DAY_MILLIS \
-  86400000UL              // Number of milliseconds in one day (24*60*60*1000)
-#define TALK_DELAY 313UL  // Talk wait, ms (313UL = 0.313 sec)
-#define NO_SAVE_WARN \
-  30000UL  // Unsaved retained param warning interval, ms (30000UL = 30 sec)
-#define READ_DELAY 100UL  // Sensor read wait, ms (100UL = 0.1 sec) Dr
-#define TEMP_DELAY 600UL  // Sensor read wait, ms (600UL = 0.6 sec)
-#define SUMMARY_DELAY \
-  1800000UL  // Battery state tracking and reporting, ms (1800000UL = 30 min) Dh
-#define SUMMARY_WAIT \
-  60000UL  // Summarize alive time before first save, ms (60000UL = 1 min) Dh
-#define DISPLAY_USER_DELAY 1200UL  // User display update (1200UL = 1.2 sec)
-#define DP_MULT 1                  // Multiples of read to capture data DP
+#define ONE_DAY_MS 86400000UL  // Milliseconds in one day (24*60*60*1000)
+#define TALK_DELAY_MS 313UL  // Talk wait, ms (0.313 sec)
+#define NO_SAVE_WARN_MS 30000UL  // Unsaved warning interval, ms (30 sec)
+#define READ_DELAY_MS 100UL  // Sensor read wait, ms (0.1 sec)               Dr
+#define TEMP_DELAY_MS 600UL  // Sensor read wait, ms (0.6 sec)
+#define SUMMARY_DELAY_MS 1800000UL  // Battery tracking and reporting, ms    Dh
+#define SUMMARY_WAIT_MS 60000UL  // Alive time before first summary, ms (6 s)Dh
+#define DISPLAY_USER_DELAY_MS 1200UL  // User display update, ms (1.2 sec)
+#define DP_MULT 1                  // Multiples of read to capture data      DP
 #define VB_S 1.0                   // Vb sense scalar (1.0)
 #define VB_A 0.0                   // Vb sense adder, V (0)
 #define PHOTON_ADC_COUNT 4096      // Photon ADC range, counts (4096)
@@ -84,8 +80,8 @@ const char unit[] = version_str "_" HDWE_UNIT;
 #define HDB_VB 0.05        // Half deadband to filter Vb, V (0.05)
 #define T_SAT 24           // Saturation time, sec (>21 for no SAT with Dv0.82)
 const float T_DESAT = 20;  // De-saturation time, sec
-#if !defined(TEMP_INIT_DELAY)
-#define TEMP_INIT_DELAY 700  // Time after on to start reading temp, ms (700)
+#if !defined(TEMP_INIT_DELAY_MS)
+#define TEMP_INIT_DELAY_MS 700  // Time after on to start reading temp, ms (700)
 #endif
 #define CC_DIFF_LO_SOC_SLR 4.  // Large to disable cc_diff
 #define TAU_ERR_FILT       5.  // Sensor difference filter time constant, s (5.)
@@ -465,4 +461,4 @@ const float VTB_CONV_GAIN =
 
 // Time scalar for modifying fault logic time delays when deliberately running
 // slowly for regression testing
-const double NOM_READ_DELAY_S = double(READ_DELAY) / 1000.;
+const double NOM_READ_DELAY_S = double(READ_DELAY_MS) / 1000.;

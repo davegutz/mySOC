@@ -79,22 +79,22 @@ bool followup(const char letter_0, const char letter_1, BatteryMonitor* Mon,
             'h'):  //   Dh<>:  Summary sample time input  Not sure this section
                    //   needed since nominalizing capability added 11/2025
           if (ap.sum_delay_p->success())
-            Sen->Summarize->delay(max(ap.read_delay(), ap.sum_delay()),
-                                  Sen->now());  // validated
+            Sen->Summarize->delay(max(ap.read_delay_ms(), ap.sum_delay()),
+                                  Sen->now_ms());  // validated
           else if (ap.value_str() == "0" || ap.value_str() == "") {
             Serial.printf("setting NOMINAL instead\n");
             ap.sum_delay_p->set_nominal();
-            Sen->Summarize->delay(max(ap.read_delay(), ap.sum_delay()),
-                                  Sen->now());
+            Sen->Summarize->delay(max(ap.read_delay_ms(), ap.sum_delay()),
+                                  Sen->now_ms());
           }
           break;
 
         case ('r'):  //   Dr<>:  READ sample time input
           if (ap.read_delay_p->success()) {
-            Sen->ReadSensors->delay(ap.read_delay());  // validated
+            Sen->ReadSensors->delay(ap.read_delay_ms());  // validated
             Sen->Summarize->delay(
-                max(ap.read_delay(), ap.sum_delay()));  // validated
-            cp.ts = ap.read_delay() / NOM_READ_DELAY_S / 1000.;
+                max(ap.read_delay_ms(), ap.sum_delay()));  // validated
+            cp.ts = ap.read_delay_ms() / NOM_READ_DELAY_S / 1000.;
           }
           break;
 
@@ -122,7 +122,7 @@ bool followup(const char letter_0, const char letter_1, BatteryMonitor* Mon,
 
         case ('>'):  //   D><>:  TALK sample time input
           if (ap.talk_delay_p->success())
-            Sen->Talk->delay(ap.talk_delay());  // validated
+            Sen->Talk->delay(ap.talk_delay_ms());  // validated
           break;
       }
       break;

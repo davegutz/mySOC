@@ -207,8 +207,8 @@ class VolatilePars : public Parameters {
   void q_std(const float input) { q_std_ = input; }
   float r_std() { return r_std_; }
   void r_std(const float input) { r_std_ = input; }
-  uint32_t read_delay() { return read_delay_ms_; }
-  void read_delay(const uint32_t input) { read_delay_ms_ = input; }
+  uint32_t read_delay_ms() { return read_delay_ms_; }
+  void read_delay_ms(const uint32_t input) { read_delay_ms_ = input; }
   float s_cap_mon() { return s_cap_mon_; }
   void s_cap_mon(const float input) { s_cap_mon_ = input; }
   float s_cap_sim() { return s_cap_sim_; }
@@ -223,8 +223,8 @@ class VolatilePars : public Parameters {
   void sum_delay(const uint32_t input) { sum_delay_ = input; }
   uint32_t tail_inj() { return tail_inj_ms_; }
   void tail_inj(const uint32_t input) { tail_inj_ms_ = input; }
-  uint32_t talk_delay() { return talk_delay_ms_; }
-  void talk_delay(const uint32_t input) { talk_delay_ms_ = input; }
+  uint32_t talk_delay_ms() { return talk_delay_ms_; }
+  void talk_delay_ms(const uint32_t input) { talk_delay_ms_ = input; }
   float Tb_bias_model() { return Tb_bias_model_; }
   void Tb_bias_model(const float input) { Tb_bias_model_ = input; }
   float Tb_filt() { return Tb_filt_; }
