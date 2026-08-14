@@ -266,13 +266,6 @@ void loop() {
     boot_wait = false;
   summarizing = Summarize->update(now_ms, false) || boot_summ;
 
-  // Manage states
-  if (read) {
-    // Manage states
-    Sen->Sim->data_of_future_past(reset);
-    Mon->data_of_future_past(reset);
-  }
-
   // High speed frame
   if (read) {
 // Warn if parameters have been changed but not saved

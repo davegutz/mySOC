@@ -96,14 +96,6 @@ loop() {
 read = wait_for_update(READ_DELAY);
 if (read) {
 
-	// Manage states
-	Sen->Sim->data_of_future_past(reset){
-	  soc_pst_ = soc_;																	// Feedback->ZV | ZV
-	}
-	Mon->data_of_future_passed(reset){
-	  soc_pst_ = soc_;																	// Feedback->ZV | ZV
-	}
-
 	// Read sensors, model signals, select between them, synthesize injection
   sense_synth_select(...) {
 		get_time() {
@@ -153,11 +145,11 @@ if (read) {
 			Sen->shunt_select_initial(...){
 				if (!sp.mod_ib()) {
 					mod_add = 0.;
-					hdwe_add = ... + sp.inj_bias(){ return inj_bias_ };
+					hdwe_add = ... + sp.inj_bias(){ return inj_bias_pst_ };
 																													// n/a			| ZV   ok
 				} else {
-					mod_add = ... + sp.inj_bias(){ return inj_bias_ };
-																													// ZV				| n/a   ok
+					mod_add = ... + sp.inj_bias(){ return inj_bias_pst_ };
+																									// Feedback->ZV			| n/a   ok
 					hdwe_add = 0.;
 					...
 				}
@@ -205,11 +197,11 @@ if (read) {
 				...
 				Tb_hdwe_ = thermistor_equation(Tb_raw_);					// n/a			| PV
 				Tb_hdwe_f_ = TbHdweFilt->calculate(..., TB_FILT, T_, ...);
-																													// n/a			| mixed***
+																													// n/a			| PV
 				...
 				Tb_model_ = NOMINAL_TB + Tb_noise();							// PV				| n/a
 				Tb_model_f_ = TbModelFilt->calculate(..., TB_FILT, T_, ...);
-																													// mixed| mixed *****
+																													// PV				| PV
 				...
 			}
 			Sen->Flt->Tb_check(...);  //--> TB_FLT, TB_FA				// PV				| PV
@@ -258,14 +250,14 @@ if (read) {
 			else
 				// Disable cutback when real world
 				Sim::sat_ib_max_ = ib_charge_pst;									// PV				| PV
-			Sim::ib_pst_ = min(ib_charge_pst, Sim::sat_ib_max_);
+			Sim::ib_charge_ = min(ib_charge_pst, Sim::sat_ib_max_);
 																													// PV				| PV
-			Sim::ib_charge_ = Sim::ib_pst_;											// PV				| PV
+			Sim::ib_pst_ = Sim::ib_charge_;					// PV->Feedback	| // PV->Feedback
 			return vb_;																					// ZV 			| ZV
 		} // Sen->Sim->calculate()
 
 		Sen->Vb_model(Sen->Sim->calculate()){
-			Vb_model_ = Sen->Sim->vb_;									// ZV for Vb_model_	| same
+			Vb_model_ = Sen->Sim->vb_;													// ZV 			| ZV
 		}
 
 		// Fault Logic, & Selection Logic - selection status and fault reset
@@ -298,7 +290,7 @@ if (read) {
 					return;
 				} else {
 					Tb_ = Tb_model_;																// PV				| PV
-					Tb_f_ = Tb_model_f_;														// mixed		| mixed
+					Tb_f_ = Tb_model_f_;														// PV				| PV
 				}
 			} else {  // Hardware Tb
 				if (Flt->Tb_fa() ...) {
@@ -320,7 +312,7 @@ if (read) {
 					Vb_ = Vb_model_ + Vb_noise();										// ZV				| n/a
 				}
 			} else {
-				if ((Flt->wrap_vb_fa() || Flt->vb_fa_lt()) ...)) {
+				if ((Flt->wrap_vb_fa() || Flt->vb_fa_lt()) ...) {
 					...
 				} else {
 					Vb_ = Vb_hdwe_;																	// n/a			| PV
@@ -356,7 +348,8 @@ if (read) {
 				return Tb_f_;																			// PV				| PV
 			}
 
-			// Saturation and re-init.   Goal is to set q_capacity and hold it so remember
+			// Saturation and re-init.   Goal is to set q_capacity and hold it so
+			// remember
 			// last saturation status
 			static bool reset_temp_past = reset_temp; 
 							// needed because model called first in reset_temp path; need
@@ -369,20 +362,20 @@ if (read) {
 			}
 
 			// Integration.   can go to -20%
-			q_capacity_ = calculate_capacity(Tb_f_);						// mixed		| mixed
+			q_capacity_ = calculate_capacity(Tb_f_);						// PV				| PV
 			// Coulomb Counting uses Backard Euler Integration
-			d_delta_q_s_ = ib_charge_ * dt_s_;						// ZV				| ZV
+			d_delta_q_s_ = ib_charge_ * dt_s_;									// ZV				| ZV
 			if (ib_charge_ > 0.) d_delta_q_s_ *= coul_eff_;			// ZV				| ZV
 			if (reset_temp) {
 				*sp_delta_q_ = 0.;
 			}
 			if (!reset_temp_past) {
-				*sp_delta_q_ += d_delta_q_s_;											// ZV				| ZV
+				*sp_delta_q_ += d_delta_q_s_;											// PV				| PV
 				...
 			}
-			q_ = q_capacity_ + *sp_delta_q_;										// mixed		| mixed
+			q_ = q_capacity_ + *sp_delta_q_;										// PV				| PV
 			// Normalize
-			soc_ = q_ / q_capacity_;														// mixed		| mixed
+			soc_ = q_ / q_capacity_;														// PV				| PV
 
 			// Save and return
 			reset_temp_past = reset_temp;
@@ -427,7 +420,7 @@ if (read) {
 																													// PV				| PV
 			}
 			dt_ = Sen->T(){
-				return T_;																				// ZV				| PV*****
+				return T_;																				// PV				| PV
 			}
 			c_time_ = Sen->c_time_pst(){
 				return c_time_;																		// PV				| PV
@@ -473,12 +466,13 @@ if (read) {
 			... // not used
 
 			// voc(soc) table
+			// soc_pst_ = Feedback->ZV; Tb_f = PV; voc_stat_ mixed (noted). Neglect
+			// Tb_f information loss:  very slow signal very slow filter
 			voc_stat_ = calc_soc_voc(soc_pst_, Tb_f_, ...);			// ZV				| ZV
-						// soc_pst_ = Feedback->ZV; Tb_f = PV; voc_stat_ mixed (noted)
 			voc_ = voc_stat_;																		// ZV				| ZV
 
 			// Reversionary model
-			vb_model_rev_ = voc_soc_ + dv_dyn_;									// ZV				| mixed
+			vb_model_rev_ = voc_soc_ + dv_dyn_;									// ZV				| ZV
 
 			// EKF 1x1
 			cp.ekf_executing = false;
@@ -529,9 +523,9 @@ if (read) {
 			tcharge_ekf = time_to_completion(soc_ekf_, ib_charge_)
 
 			// Past value for synchronization with vb_, only when modeling
-			ib_past_ = ib_;															// PV for feedback	| same
+			ib_past_ = ib_;														`// PV->Feedback	| PV->Feedback
 
-			return vb_model_rev_;																// ZV				| mixed
+			return vb_model_rev_;																// ZV				| zV
 		}  // Mon->calculate
 
 		// Debounce saturation calculation done in ekf using voc model
@@ -545,7 +539,7 @@ if (read) {
 																		Sen->sat(), Sen->saturated()) {
 			// Inputs
 			dt_ = Sen->T(){
-				return T_;																				// ZV				| PV****
+				return T_;																				// PV				| PV
 			}
 			Tb_f_ = Sen->Tb_f(){
 				return Tb_f_;																			// PV				| PV
@@ -553,30 +547,30 @@ if (read) {
 			charge_curr = Mon.ib_charge(){
 				return ib_;																				// PV				| PV
 			}
-			d_delta_q_ = charge_curr * dt_;											// mixed		| PV****
+			d_delta_q_ = charge_curr * dt_;											// PV				| PV
 
 			// State change
-			double d_delta_q_inf = d_delta_q_;									// mixed		| PV****
+			delta_q_ += d_delta_q_;															// PV				|PV
 			...
 
 			// Integration.   Can go to negative
-			q_capacity_ = calculate_capacity(Tb_f_);						// mixed		| mixed***
-			if (!reset_temp) *sp_delta_q_ += d_delta_q_;				// mixed		| PV****
-			q_ = q_capacity_ + *sp_delta_q_;										// mixed		| PV****
+			q_capacity_ = calculate_capacity(Tb_f_);						// PV				|PV
+			if (!reset_temp) *sp_delta_q_ += d_delta_q_;				// PV				|PV
+			q_ = q_capacity_ + *sp_delta_q_;										// PV				|PV
 
 			// Normalize
-			soc_ = q_ / q_capacity_;														// mixed		| PV****
+			soc_ = q_ / q_capacity_;														// PV				|PV
 
-			return soc_;																				// mixed		| PV****
+			return soc_;																				// PV				|PV
 		}  // Mon->count_coulombs
 
 		// Charge charge time for display
 		Mon->calc_charge_time(
-									Mon->q(){ return q_;},							// mixed		| PV****	|
-									Mon->q_capacity(){return q_capacity_},// mixed 	| PV****	|
-									Sen->ib(){ return ib_ },						// PV 			| PV			|
-									Mon->soc(){ return soc_});					// mixed		| PV****	v
-																													=	// mixed		| PV****
+									Mon->q(){ return q_;},										// PV				| PV |
+									Mon->q_capacity(){return q_capacity_},		// PV				| PV |
+									Sen->ib(){ return ib_ },									// PV 			| PV |
+									Mon->soc(){ return soc_});								// PV 			| PV v
+																													=	// PV				|   PV
 	}  // monitor
 
 	// Print
@@ -590,6 +584,7 @@ if (read) {
 	// Manage states
 	Sen->Sim->data_of_future_passed(...) {
     soc_pst_ = soc_;
+		inj_bias_pst_ = inj_bias_;
 	}
 	Mon->data_of_future_past(...) {
  		...

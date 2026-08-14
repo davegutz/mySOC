@@ -857,8 +857,8 @@ float BatterySim::calculate(Sensors* Sen, const bool dc_dc_on,
   if (sp.tweak_test() || !sp.mod_ib())
     sat_ib_max_ = ib_charge_pst;  // Disable cutback when real world or when
                                   // doing tweak_test test
-  ib_pst_ = min(ib_charge_pst, sat_ib_max_);  // the feedback of ib_
-  ib_charge_ = ib_pst_;  // Same time plane as volt calcs, added past value
+  ib_charge_ = min(ib_charge_pst, sat_ib_max_);
+  ib_pst_ = ib_charge_;
 
   // if ( (q_ <= 0.) && (ib_charge_ < 0.) && sp.mod_ib() ) ib_charge_ = 0.;
   // empty  **** don't know why this was here.  cannot bms_off_ with it
