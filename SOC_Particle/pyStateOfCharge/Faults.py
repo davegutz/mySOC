@@ -230,8 +230,10 @@ class Looparound:
         self.vb = self.Mon.vb_past
         self.voc_soc = self.Mon.voc_soc
         if rp.modeling_vb or rp.modeling_ib:
-            dt_into_ct = self.dt_past
-            dt_into_wrap = self.dt_past
+            dt_into_ct = self.dt
+            dt_into_wrap = self.dt
+            # dt_into_ct = self.dt_past
+            # dt_into_wrap = self.dt_past
             ib_into_ct = self.ib_past2
         else:
             dt_into_ct = self.dt

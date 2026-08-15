@@ -301,7 +301,8 @@ def replicate(OPT: UserOptions):
         else:
             _chm_s = OPT.Bsim
 
-        sim_dt_in = 0.1 if G.i == 0 else SN.dt_s[max(G.i - 1, 0)]
+        # sim_dt_in = 0.1 if G.i == 0 else SN.dt_s[max(G.i - 1, 0)]
+        sim_dt_in = 0.1 if G.i == 0 else SN.dt_s[G.i]
         sim.calculate(
             _chm_s,
             Tb_s[G.i],

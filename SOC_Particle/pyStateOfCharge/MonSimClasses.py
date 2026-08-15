@@ -440,22 +440,13 @@ class Sensors:
 
     def temp_load_and_filter(self, mon_run, mon, Battery_, rp, i, reset=None):
         curr_reset = reset if reset is not None else mon.reset
+        dt_earlier = mon_run.dt[i] if hasattr(mon_run, "dt") else mon.dt
         if hasattr(mon_run, "Tb_hdwe_f"):
             mon.Tb_hdwe_f = self.TbSenseFilt.calculate_tau_seeded(
                 mon.Tb_hdwe,
                 mon_run.Tb_hdwe_f[i],
                 curr_reset or mon.Tb_fa,
-                mon.dt,
-                Battery_.TB_FILT,
-                rmax=Battery_.T_RLIM,
-                rmin=-Battery_.T_RLIM,
-            )
-        else:
-            mon.Tb_hdwe_f = self.TbSenseFilt.calculate_tau_seeded(
-                mon.Tb_hdwe,
-                mon.Tb_hdwe,
-                curr_reset or mon.Tb_fa,
-                mon.dt,
+                dt_earlier,
                 Battery_.TB_FILT,
                 rmax=Battery_.T_RLIM,
                 rmin=-Battery_.T_RLIM,
@@ -472,7 +463,8 @@ class Sensors:
                     mon.Tb_model,
                     mon_run.Tb_model_f[i],
                     curr_reset or mon.Tb_fa,
-                    mon.dt,
+                    dt_earlier,
+                    # <--- Applied here
                     Battery_.TB_FILT,
                     rmax=Battery_.T_RLIM,
                     rmin=-Battery_.T_RLIM,
@@ -484,7 +476,8 @@ class Sensors:
                     mon.Tb_model,
                     mon_run.Tb_model_f[i],
                     curr_reset or mon.Tb_fa,
-                    mon.dt,
+                    dt_earlier,
+                    # <--- AND applied here in the else branch!
                     Battery_.TB_FILT,
                     rmax=Battery_.T_RLIM,
                     rmin=-Battery_.T_RLIM,
@@ -496,7 +489,8 @@ class Sensors:
                 mon.Tb_model,
                 mon.Tb_model,
                 curr_reset or mon.Tb_fa,
-                mon.dt,
+                dt_earlier,
+                # <--- AND applied here!
                 Battery_.TB_FILT,
                 rmax=Battery_.T_RLIM,
                 rmin=-Battery_.T_RLIM,

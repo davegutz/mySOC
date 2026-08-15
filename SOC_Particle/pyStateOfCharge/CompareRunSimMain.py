@@ -45,7 +45,7 @@ def main():  # Example usage.  ok on 20260217
         time_end = None
         compare_run_ver = True
         shift_soc_s = True
-        plots = False
+        plots = True
         use_mon_soc_ = False
         verbose = False
         scale_batt = 1.0
