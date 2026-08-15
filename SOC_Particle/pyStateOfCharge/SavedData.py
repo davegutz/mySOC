@@ -84,6 +84,14 @@ class SavedData:
                     while self.zero_end < len(self.ib) and abs(self.ib[self.zero_end]) < zero_thr:
                         self.zero_end += 1
                     self.zero_end -= 1  # backup one
+                    # Ensure elapsed time prior to t=0 is > TEMP_DELAY_MS if possible
+                    temp_delay_s = 2.0
+                    while (
+                        self.zero_end + 1 < len(self.ib)
+                        and abs(self.ib[self.zero_end + 1]) < zero_thr
+                        and (self.time[self.zero_end] - self.time[0]) < temp_delay_s
+                    ):
+                        self.zero_end += 1
                     if self.zero_end == len(self.ib) - 1:
                         print(Colors.fg.yellow, f"\nWARNING:  Likely ib is zero throughout the data\n", Colors.reset)
                         self.zero_end = 2

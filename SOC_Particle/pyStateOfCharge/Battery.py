@@ -613,11 +613,13 @@ class BatteryMonitor(Battery, EKF1x1, Wrap):
         self.cc_dif_prev = self.soc_ekf - self.soc
         self.reset = reset
         if reset:
-            self.start_reset_time = SN.mon_run.time[G.i]
+            if not getattr(self, "reset_past", False) or not hasattr(self, "start_reset_time"):
+                self.start_reset_time = SN.mon_run.time[G.i]
             self.reset_temp = True
         else:
             elapsed_reset = SN.mon_run.time[G.i] - getattr(self, "start_reset_time", SN.mon_run.time[0])
             self.reset_temp = (elapsed_reset < Battery.TEMP_DELAY_MS)
+        self.reset_past = reset
         self.Tb = Tb
         self.Tb_f = Tb_f
         self.vb = vb
