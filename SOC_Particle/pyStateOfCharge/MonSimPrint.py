@@ -668,11 +668,6 @@ def print_soc_s_RunSim(SN, i_temp, t, mon, sim, calc_temp, i_ekf, calc_ekf, df=F
     if mon.ib_charge > 0:
         i_dt_old *= mon.chemistry.coul_eff
         i_dt_new *= mon.chemistry.coul_eff
-    i_dt_old_s = SN.sim_run.dt_charge_s[G.i] * SN.sim_run.ib_charge_s[G.i]
-    i_dt_new_s = sim.dt_charge * sim.ib_charge
-    if sim.ib_charge > 0:
-        i_dt_old_s *= sim.chemistry.coul_eff
-        i_dt_new_s *= sim.chemistry.coul_eff
     if mon.reset:
         set_color(Colors.fg.red)
     elif sim.reset_temp_past:
@@ -685,9 +680,8 @@ def print_soc_s_RunSim(SN, i_temp, t, mon, sim, calc_temp, i_ekf, calc_ekf, df=F
         print_col_leads(h, df, t, SN, mon, sim, i_temp, calc_temp, i_ekf, calc_ekf)
 
         print_pair(SN.mon_run.dt[G.i], mon.dt, 12, 4, 'dt', h, df)
-        print_pair(SN.sim_run.dt_charge_s[G.i], sim.dt_charge, 12, 4, 'dt_charge_s', h, df)
         if hasattr(SN.sim_run, "dt_s"):
-            print_pair(SN.sim_run.dt_s[G.i], sim.dt, 12, 4, 'dt_s', h, df)
+            print_pair(SN.sim_run.dt_s[G.i], sim.dt_s, 12, 4, 'dt_s', h, df)
         print_pair(SN.mon_run.ib[G.i], mon.ib, 14, 5, 'ib', h, df)
         print_pair(SN.sim_run.ib_s[G.i], mon.ib_s, 14, 5, 'ib_s', h, df)
         print_pair(SN.sim_run.ib_in_s[G.i], mon.ib_in_s, 16, 7, 'ib_in_s', h, df)
@@ -714,7 +708,6 @@ def print_soc_s_RunSim(SN, i_temp, t, mon, sim, calc_temp, i_ekf, calc_ekf, df=F
         print_pair(i_dt_old, i_dt_new, 14, 7, 'i * dt * coul_eff', h, df)
         print_pair(SN.mon_run.delta_q[G.i], mon.delta_q, 16, 6, 'delq', h, df)
         print_pair(SN.mon_run.soc[G.i], mon.soc, 13, 9, 'soc', h, df)
-        print_pair(i_dt_old_s, i_dt_new_s, 14, 7, 'i * dt_s * coul_eff', h, df)
         print_pair(SN.sim_run.d_delta_q_s[G.i], sim.d_delta_q_s, 14, 7, 'd_delq_s', h, df)
         print_pair(SN.sim_run.delta_q_s[G.i], sim.delta_q_s, 16, 6, 'delq_s', h, df)
         print_pair(SN.sim_run.soc_s[G.i], sim.soc, 13, 9, 'soc_s', h, df)

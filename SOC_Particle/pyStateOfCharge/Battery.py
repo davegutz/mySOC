@@ -1199,7 +1199,6 @@ class BatterySim(Battery):
         )
         self.d_delta_q = 0.0  # Charging rate, Coulombs/sec
         self.dt_charge = Battery.EKF_NOM_DT  # Update time at charge current time frame, s
-        self.dt_fut = Battery.EKF_NOM_DT  # Update time at charge current time frame, s
         self.ib_charge = 0.0  # Charge current, A
         self.SN = SN
         self.c_time = 0.0
@@ -1328,7 +1327,6 @@ class BatterySim(Battery):
         self.Tb = Tb
         self.dt_past = self.dt
         self.dt = dt
-        self.dt_fut = dt
         self.dt_charge = dt_charge
         self.ib_in = ib
         if self.reset and SN.sim_run.bms_off_s[0]:
@@ -1404,10 +1402,6 @@ class BatterySim(Battery):
         self.ib_fut = min(ib_charge_fut, self.sat_ib_max)  # the feedback of self.ib
         # self.ib_charge = ib_charge_fut# same time plane as volt calcs.  (This prevents sat logic from working)
         self.ib_charge = self.ib_fut  # same time plane as volt calcs
-        if hasattr(SN, "dt_s") and SN.dt_s is not None and G.i < len(SN.dt_s):
-            self.dt_fut = SN.dt_s[G.i]
-        else:
-            self.dt_fut = dt_charge
 
         # empty  **** don't know why this was here.  cannot bms_off_ empty because that causes weird interaction with
         # bms logic and also doesn't make sense to have a different empty cutoff when modeling.  If there is a need for
@@ -1490,7 +1484,6 @@ class BatterySim(Battery):
             SN = getattr(self, "SN", None)
         self.time = time
         self.dt_s = self.dt if self.dt > 0.0 else (float(SN.sim_run.dt_s[0]) if (SN is not None and hasattr(getattr(SN, "sim_run", None), "dt_s")) else Battery.EKF_NOM_DT)
-        self.dt_s = self.dt_fut if self.dt_fut > 0.0 else (float(SN.sim_run.dt_s[0]) if (SN is not None and hasattr(getattr(SN, "sim_run", None), "dt_pst_s")) else Battery.EKF_NOM_DT)
 
         idx = G.i
         if SN is not None and getattr(SN, "sim_run", None) is not None:

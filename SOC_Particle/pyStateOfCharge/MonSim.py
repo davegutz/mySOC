@@ -193,7 +193,6 @@ def replicate(OPT: UserOptions):
     i_ekf = -1
     i_temp = -1
     T = OPT.mon_run.dt[0]
-    Tpast = T
     hdr = None
     sat_s_init = None
 
@@ -212,7 +211,6 @@ def replicate(OPT: UserOptions):
         if G.i != 0:
             candidate_dt = t[G.i] - t[G.i - 1]  # update
             if candidate_dt > 1e-6:
-                Tpast = T
                 T = dt[G.i]
 
         # Get temperature data
@@ -443,9 +441,8 @@ def replicate(OPT: UserOptions):
 
         # Save plot info
         mon.save(t[G.i], T, mon.soc, sim.voc, SN, rp, sim)
+        sim.save(t[G.i], T)
         sim.save_s(t[G.i], SN=SN)
-        sim.save(t[G.i], Tpast)
-        Tpast = T
 
         # Print initial
         if G.i == 0 and OPT.verbose:
