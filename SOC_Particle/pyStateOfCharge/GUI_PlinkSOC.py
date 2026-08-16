@@ -325,7 +325,10 @@ def should_skip_battery_case(battery: str, case_name: str) -> bool:
     b_norm = battery.lower().strip()
     c_name = case_name.upper()
 
-    if ("CHG" in c_name or "CH" in c_name) and b_norm not in ("ch", "chg"):
+    has_chg = "CHG" in c_name
+    has_ch = ("CH" in c_name) and ("DISCH" not in c_name)
+
+    if (has_chg or has_ch) and b_norm not in ("ch", "chg"):
         return True
 
     if "BB" in c_name and b_norm != "bb":

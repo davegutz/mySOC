@@ -625,9 +625,9 @@ class BatteryMonitor(Battery, EKF1x1, Wrap):
         self.vb = vb
         self.ib_in = ib
         self.dt = dt
-        self.ib_amp_hdwe = SN.mon_run.ib_amp_hdwe[G.i]
+        self.ib_amp_hdwe = float(SN.mon_run.ib_amp_hdwe[G.i])
         self.ib_amp_model = SN.ib_amp_model[G.i]
-        self.ib_noa_hdwe = SN.mon_run.ib_noa_hdwe[G.i]
+        self.ib_noa_hdwe = float(SN.mon_run.ib_noa_hdwe[G.i])
         self.ib_noa_model = SN.mon_run.ib_noa_model[G.i]
         if getattr(SN.mon_run, "vb_model", None) is not None:
             self.vb_model = SN.mon_run.vb_model[G.i]
@@ -641,8 +641,14 @@ class BatteryMonitor(Battery, EKF1x1, Wrap):
             self.ib_amp = self.ib_amp_model
             self.ib_noa = self.ib_noa_model
         else:
-            self.ib_amp = self.ib_amp_hdwe
-            self.ib_noa = self.ib_noa_hdwe
+            if hasattr(SN.mon_run, "ib_amp") and getattr(SN.mon_run, "ib_amp", None) is not None:
+                self.ib_amp = float(SN.mon_run.ib_amp[G.i])
+            else:
+                self.ib_amp = self.ib_amp_hdwe
+            if hasattr(SN.mon_run, "ib_noa") and getattr(SN.mon_run, "ib_noa", None) is not None:
+                self.ib_noa = float(SN.mon_run.ib_noa[G.i])
+            else:
+                self.ib_noa = self.ib_noa_hdwe
         self.ib_hdwe = SN.mon_run.ib_h[G.i]
         if self.chm != chem:
             self.chemistry.assign_all_mod(chem, unit=self.unit)
@@ -700,17 +706,23 @@ class BatteryMonitor(Battery, EKF1x1, Wrap):
                         f"vb_rising {self.chemistry.vb_rising} bms_off {self.bms_off} "
                         f"voltage_low {self.voltage_low} \n\n"
                     )
-        bms_charging = self.ib > Battery.IB_MIN_UP
+        bms_charging = (self.ib_amp if hasattr(self, "ib_amp") and self.ib_amp is not None else self.ib) > Battery.IB_MIN_UP
         if not self.reset:
-            self.bms_off = (self.Tb_f <= self.chemistry.low_t and not self.Tb_flt) or (
-                SN.mon_run.ib_really_quiet is not None
-                and SN.mon_run.ib_really_quiet[G.i]
-                and self.voltage_low
-                and not rp.tweak_test
-            )  # KISS
-        self.ib_charge = self.ib
+            if hasattr(SN.mon_run, "bms_off") and getattr(SN.mon_run, "bms_off", None) is not None and G.i < len(SN.mon_run.bms_off):
+                self.bms_off = bool(SN.mon_run.bms_off[G.i] > 0.0)
+            else:
+                self.bms_off = (self.Tb_f <= self.chemistry.low_t and not self.Tb_flt) or (
+                    SN.mon_run.ib_really_quiet is not None
+                    and SN.mon_run.ib_really_quiet[G.i]
+                    and self.voltage_low
+                    and not rp.tweak_test
+                )  # KISS
+        if (self.bms_off and self.voltage_low) and hasattr(self, "ib_amp") and self.ib_amp is not None and self.ib_amp != 0.0:
+            self.ib_charge = self.ib_amp
+        else:
+            self.ib_charge = self.ib
         self.ib_charge_ekf = self.ib_charge
-        if self.bms_off and not bms_charging:
+        if self.bms_off and not bms_charging and rp.modeling_vb:
             self.ib_charge = 0.0
         if self.bms_off and self.voltage_low:
             self.ib = 0.0
@@ -747,12 +759,8 @@ class BatteryMonitor(Battery, EKF1x1, Wrap):
         # Hysteresis model
         self.dv_hys = 0.0
         self.voc_stat = self.voc - self.dv_hys
-        if reset:
-            if rp.modeling_vb:
-                self.voc_stat, self.dv_dsoc = self.calc_soc_voc(self.soc, self.Tb_f)
-                self.voc = self.voc_stat
-            else:
-                self.voc_stat = self.voc
+        if reset and not rp.modeling_vb:
+            self.voc_stat = self.voc
         self.ioc = self.ib
 
         # EKF 1x1
