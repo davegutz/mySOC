@@ -202,6 +202,8 @@ def ult_1(S: PlotOptions, fig_files=None, fig_list=None):
     # SAT = 8, off = 9, accy = 10, time_long = 11, Count};
     plt.legend(loc=1)
     plt.subplot(335)
+    plq(plt, S.sr, "time", S.sr, "cutback_s", add=+6, color="blue", linestyle="-")
+    plq(plt, S.sv, "time", S.sv, "cutback_s", add=+6, color="red", linestyle="--")
     plq(plt, S.mr, "time", S.mr, "bms_off", add=+4, color="green", linestyle="-")
     plq(plt, S.mv, "time", S.mv, "bms_off", add=+4, color="red", linestyle="--")
     if S.sr is not None:

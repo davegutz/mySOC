@@ -126,6 +126,7 @@ def print_col_leads(h, df, t, SN, mon, sim, i_temp, calc_temp, i_ekf, calc_ekf):
     print_pair(calc_ekf, None, 2, 0, 'ce', h, df)
     print_pair(SN.mon_run.sat[G.i], mon.sat, 2, 0, 'sa', h, df)
     print_pair(SN.sim_run.sat_s[G.i], sim.sat, 2, 0, 'sa_s', h, df)
+    print_pair(SN.sim_run.cutback_s[G.i], sim.cutback_s, 2, 0, 'cb_s', h, df)
 
 
 # noinspection PyPep8Naming

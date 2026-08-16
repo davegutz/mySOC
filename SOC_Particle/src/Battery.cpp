@@ -708,7 +708,7 @@ BatterySim::BatterySim(const float dx_voc, const float dy_voc,
       Sin_inj_(nullptr), Sq_inj_(nullptr), Tri_inj_(nullptr), Cos_inj_(nullptr),
       c_time_s_(0.), dt_s_(0ULL), duty_(0UL), d_delta_q_s_(0.),
       ib_charge_(0.), ib_pst_(0.), ib_in_(0.),
-      ib_sat_(0.5), model_cutback_(true), model_saturated_(false),
+      ib_sat_(0.5), cut_s_(true), sat_s_(false),
       q_(NOM_UNIT_CAP * 3600.), 
       sat_cutback_gain_(1000.), sat_ib_max_(0.), sat_ib_null_(0.),
       hys_(nullptr) {
@@ -720,9 +720,8 @@ BatterySim::BatterySim(const float dx_voc, const float dy_voc,
   Tri_inj_ = new TriInj();
   Cos_inj_ = new CosInj();
   sat_ib_null_ = 0.;  // Current cutback value for soc=1, A
-  sat_cutback_gain_ =
-      1000.;  // Gain to retard ib when soc approaches 1, dimensionless
-  model_saturated_ = false;
+  sat_cutback_gain_ = 1000.;  // Gain to retard ib when soc approaches 1
+  sat_s_ = false;
   ib_sat_ = 0.5;  // deadzone for cutback actuation, A
   ib_charge_ = 0.;
   hys_ = new Hysteresis(&chem_);
@@ -787,17 +786,28 @@ float BatterySim::calculate(Sensors* Sen, const bool dc_dc_on,
   // Inputs
   Tb_ = Sen->Tb();
   Tb_f_ = Sen->Tb_f();
-
+  c_time_s_ = Sen->c_time();
+  dt_s_ = Sen->T();
   ib_in_ = Sen->Ib_model_in() / ap.nP();  // Past value
+
+  // Saturation logic, both full and empty.
+  sat_ib_max_ = sat_ib_null_ + (1. - (soc_pst_ + ap.ds_voc_soc())) *
+                                   sat_cutback_gain_ *
+                                   sp.cutback_gain_slr();  // Ds, Sk
+  if (sp.tweak_test() || !sp.mod_ib()) {
+    // pass
+  } else {
+    ib_in_ = min(ib_in_, sat_ib_max_);
+  }    
+  vsat_ = calc_vsat();
+
+  // 
   if (reset ) {
     ib_pst_ = ib_in_;
   }
-  c_time_s_ = Sen->c_time();
-  dt_s_ = Sen->T();
-  ib_ = max(min(ib_pst_, IMAX_NUM),
-            -IMAX_NUM);  //  Past value ib_.  Overflow protection when ib_ past
-                         //  value used
-  vsat_ = calc_vsat();
+  ib_ = max(min(ib_pst_,  // Saturation
+             IMAX_NUM),   // Overflow
+            -IMAX_NUM);   // Overflow
   double soc_lim = max(min(soc_pst_, 1.0), -0.2);  // slightly beyond
 
   // VOC-OCV model
@@ -848,24 +858,13 @@ float BatterySim::calculate(Sensors* Sen, const bool dc_dc_on,
   }
   dv_dyn_ = vb_ - voc_;
 
-  // Saturation logic, both full and empty.
-  // Potential algebraic loop because soc is calculated based on ib
-  // that is affected by sat_ib_max_ in the next frame.  Solved by ib_pst_.
-  sat_ib_max_ = sat_ib_null_ + (1. - (soc_pst_ + ap.ds_voc_soc())) *
-                                   sat_cutback_gain_ *
-                                   sp.cutback_gain_slr();  // Ds, Sk
-  if (sp.tweak_test() || !sp.mod_ib())
-    sat_ib_max_ = ib_charge_pst;  // Disable cutback when real world or when
-                                  // doing tweak_test test
-  ib_charge_ = min(ib_charge_pst, sat_ib_max_);
+  ib_charge_ = ib_charge_pst;
   ib_pst_ = ib_charge_;
 
-  // if ( (q_ <= 0.) && (ib_charge_ < 0.) && sp.mod_ib() ) ib_charge_ = 0.;
-  // empty  **** don't know why this was here.  cannot bms_off_ with it
-
-  model_cutback_ = (voc_stat_ > vsat_) && (ib_charge_ == sat_ib_max_);
-  model_saturated_ = model_cutback_ && (ib_charge_ < ib_sat_);
-  Coulombs::sat_ = model_saturated_;
+  // Indicators
+  cut_s_ = (voc_stat_ > vsat_) && (ib_charge_ == sat_ib_max_);
+  sat_s_ = cut_s_ && (ib_charge_ < ib_sat_);
+  Coulombs::sat_ = sat_s_;
 
   return vb_;
 }
@@ -971,7 +970,7 @@ double BatterySim::count_coulombs(Sensors* Sen, const bool reset_temp,
   if (!sp.mod_vb())  // Real world init to track Monitor
   {
     if (Mon->sat() || reset_temp_past) apply_delta_q(Mon->delta_q());
-  } else if (model_saturated_)  // Modeling initializes on reset_temp to
+  } else if (sat_s_)  // Modeling initializes on reset_temp to
                                 // Tb=RATED_TEMP
   {
     if (reset_temp) {
@@ -999,10 +998,10 @@ double BatterySim::count_coulombs(Sensors* Sen, const bool reset_temp,
     sendTxBuf(String::format(
                   "BM::CC: cc %7.3f dt%9.6f dq_T%9.2f, coul_eff%7.3f d_delta_q "
                   "%9.2f sp_delta_q %9.2f q %9.2f mod_vb %d, "
-                  "model_saturated_%d, reset_temp_past %d,\n",
+                  "sat_s_%d, reset_temp_past %d,\n",
                   ib_charge_, dt_, -chem_.dqdt * q_capacity_ * Tb_f_rate_ * dt_,
                   coul_eff_, d_delta_q_s_, *sp_delta_q_, q_, sp.mod_vb(),
-                  model_saturated_, reset_temp_past),
+                  sat_s_, reset_temp_past),
               true, IN_SERVICE);
 
   // Save and return
@@ -1044,6 +1043,7 @@ void BatterySim::pretty_print() {
   this->Battery::pretty_print();
   Serial.printf(" BS::BS:\n");
   Serial.printf("  c_time_s%12.1f, s\n", c_time_s_);
+  Serial.printf("  cutback%2d, s\n", cut_s_);
   Serial.printf("  d_delta_q_s%7.3f C/s\n", d_delta_q_s_);
   Serial.printf("  duty %lu\n", duty_);
   Serial.printf("  dv_hys%7.3f, V\n", hys_->dv_hys());
@@ -1053,11 +1053,11 @@ void BatterySim::pretty_print() {
   Serial.printf("  ib_pst%7.3f, A\n", ib_pst_);
   Serial.printf("  ib_in%7.3f, A\n", ib_in_);
   Serial.printf("  ib_sat%7.3f\n", ib_sat_);
-  Serial.printf("  mod_cb %d\n", model_cutback_);
-  Serial.printf("  mod_sat %d\n", model_saturated_);
+  Serial.printf("  mod_cb %d\n", cut_s_);
+  Serial.printf("  mod_sat %d\n", sat_s_);
   Serial.printf("  q%7.1f C\n", q_);
   Serial.printf("  sat_cb_gn%7.1f\n", sat_cutback_gain_);
-  Serial.printf("  sat_ib_max%7.3f, A\n", sat_ib_max_);
+  Serial.printf("  sat_ib_max%9.3f, A\n", sat_ib_max_);
   Serial.printf("  sat_ib_null%7.3f, A\n", sat_ib_null_);
   Serial.printf(" *ap_s_cap_sim%7.3f Slr\n", ap.s_cap_sim());
   hys_->pretty_print(0., 0., 0.);

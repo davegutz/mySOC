@@ -617,14 +617,14 @@ void print_signal_sel_serial(const bool reset, Sensors* Sen,
 // print sim for data collection
 void print_sim_header() {
   Serial.printf(
-      "unit_m,  c_time_sim,  dt_s, chm_s, qcrs_s, bms_off_s,"
-      "Tb_s, Tb_f_s, vsat_s, voc_stat_s, ib_pst_s, ");
+      "unit_m,  c_time_sim,  dt_s, chm_s, qcrs_s, bms_off_s, "
+      "Tb_s, Tb_f_s, vsat_s, voc_stat_s, ib_pst_s, cutback_s, ");
   Serial.printf(
       "dv_dyn_s, vb_s, ib_s, ib_dyn_s, dv_hys_s, ib_in_s, ib_charge_s, "
       "ioc_s, ");
   Serial.printf("sat_s, delta_q_s, qcap_s, soc_s, reset_s, d_delta_q_s, ");
   Serial.printf("ib_dyn_T_s, ib_dyn_tau_s, ib_dyn_rstate_s, ib_dyn_lstate_s, ");
-  Serial.printf("voltage_low_s,");
+  Serial.printf("voltage_low_s, sat_ib_max_s,");
   Serial.printf("\n");
 }
 
@@ -647,10 +647,10 @@ void print_sim_serial(const bool initializing_all, const bool reset,
     last_c_time_sim = Sim->c_time_s();
     sprintf(pr.buff,
             "unit_sim, %13.4f,%8.4f,%d,%10.4f,%d,%11.8f,%11.8f, "
-            "%7.6f,%7.6f,%11.9f,",
+            "%7.6f,%7.6f,%11.9f,%2d,",
             Sim->c_time_s(), Sim->dt_s(), CHEM,
             Sim->q_cap_rated_scaled(), Sim->bms_off(), Sim->Tb(), Sim->Tb_f(),
-            Sim->vsat(), Sim->voc_stat(), Sim->ib_pst());
+            Sim->vsat(), Sim->voc_stat(), Sim->ib_pst(), Sim->cutback());
     Serial.printf("%s", pr.buff);
 
     sprintf(pr.buff, "%11.9f,%11.9f,%11.9f,%11.9f,%11.9f,%11.9f,%11.9f,%11.9f,",
@@ -663,12 +663,11 @@ void print_sim_serial(const bool initializing_all, const bool reset,
             reset_temp, Sim->d_delta_q_s());
     Serial.printf("%s", pr.buff);
 
-    sprintf(pr.buff, "%9.6f,%9.6f,%9.6f,%9.6f,", Sim->chargeTransfer_T(),
+    sprintf(pr.buff, "%9.6f,%9.6f,%9.6f,%9.6f,%2d,%9.6f,",
+            Sim->chargeTransfer_T(),
             Sim->chargeTransfer_tau(), Sim->chargeTransfer_rstate(),
-            Sim->chargeTransfer_lstate());
-    Serial.printf("%s", pr.buff);
-
-    sprintf(pr.buff, "%d,", Sim->voltage_low());
+            Sim->chargeTransfer_lstate(), Sim->voltage_low(),
+            Sim->sat_ib_max());
     Serial.printf("%s", pr.buff);
 
     Serial.printf("\n");

@@ -264,7 +264,7 @@ class BatterySim : public Battery {
   float calculate(Sensors* Sen, const bool dc_dc_on, const bool reset);
   double count_coulombs(Sensors* Sen, const bool reset, BatteryMonitor* Mon,
                         const bool initializing_all);
-  bool cutback() { return model_cutback_; };
+  bool cutback() { return cut_s_; };
   double c_time_s() { return c_time_s_; };
   void c_time_s(const double c_time) { c_time_s_ = c_time; };
   void data_of_future_past(const bool reset = false);
@@ -275,13 +275,14 @@ class BatterySim : public Battery {
   void hys_state(const float st) { hys_->dv_hys(st); };
   void hys_pretty_print() { hys_->pretty_print(0., 0., 0.); };
   float ib_charge() { return ib_charge_; };
+  float sat_ib_max() { return sat_ib_max_; };
   float ib_pst() { return ib_pst_; };
   float ib_in() { return ib_in_; };
   float ib_s() { return ib_; };
   void init_battery_sim(const bool reset, Sensors* Sen);
   void init_hys(const float hys) { hys_->init(hys); };
   void pretty_print();
-  bool saturated() { return model_saturated_; };
+  bool saturated() { return sat_s_; };
   double voc() { return voc_; };
   double voc_stat() { return voc_stat_; };
 
@@ -300,8 +301,8 @@ class BatterySim : public Battery {
   float ib_sat_;  // Threshold to declare saturation
                   // This regeneratively slows
                   // down charging so if too small takes too long, A
-  bool model_cutback_;  // Modeled current limited on saturation cutback, T=lim
-  bool model_saturated_;  // Indicator of maximal cutback, T = cutback saturated
+  bool cut_s_;  // Modeled current limited on saturation cutback, T=lim
+  bool sat_s_;  // Indicator of maximal cutback, T = cutback saturated
   double q_;              // Charge, C
   float sat_cutback_gain_;  // Gain to retard ib when voc exceeds vsat, non dim
   float sat_ib_max_;   // Current cutback to be applied to modeled ib output, A

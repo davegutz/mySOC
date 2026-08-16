@@ -581,10 +581,10 @@ def gp_3_tune(S: PlotOptions, fig_files=None, fig_list=None):
         linestyle=":",
         warn=not S.run_is_stdy and not S.run_is_run,
     )
-    if hasattr(S.sr, "model_saturated"):
-        plq(plt, S.sr, "time", S.sr, "model_saturated", add=-0.5, color="blue", linestyle="-.")
-    if hasattr(S.sv, "model_saturated"):
-        plq(plt, S.sv, "time", S.sv, "model_saturated", add=-0.5, color="cyan", linestyle=":")
+    if hasattr(S.sr, "sat_s"):
+        plq(plt, S.sr, "time", S.sr, "sat_s", add=-0.5, color="blue", linestyle="-.")
+    if hasattr(S.sv, "sat_s"):
+        plq(plt, S.sv, "time", S.sv, "sat_s", add=-0.5, color="cyan", linestyle=":")
     plt.xlabel("sec")
     plt.legend(loc=3)
     plt.subplot(339)

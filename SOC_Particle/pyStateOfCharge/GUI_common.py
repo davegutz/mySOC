@@ -102,6 +102,7 @@ sel_list = [
     "slowTweakRegression",
     "satSitBB",
     "satSitCHG",
+    "cutback",
 ]
 sel_list1 = [
     "flatSit",
@@ -882,6 +883,14 @@ lookup = {
         ),
     ),
     "nvm": (25, off_r + "W5" + restore_r, ("Adjst all and cycle power", "To evaluate type PR")),
+    "cutback": (
+        60,
+        "Xm247;Ca0.96;Ds=0.039;" + tranPrep + sc50 + "XQ6000;" + "W2;DI;W10;" + quiet + cleanup + "<XD;",
+        (
+            "Should run one step transient to engage cutback",
+            "",
+        ),
+    ),
 }
 
 # Lookup keys for which compare_run_sim should be called with shift_soc_s=False

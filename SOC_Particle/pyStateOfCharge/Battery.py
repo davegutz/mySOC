@@ -1179,8 +1179,8 @@ class BatterySim(Battery):
         self.sat_cutback_gain = (
             1000.0 * Battery.sp_cutback_gain_slr
         )  # Gain to retard ib when soc approaches 1, dimensionless
-        self.model_cutback = False  # Indicate current being limited on saturation cutback, T = cutback limited
-        self.model_saturated = False  # Indicator of maximal cutback, T = cutback saturated
+        self.cutback_s = False  # Indicate current being limited on saturation cutback, T = cutback limited
+        self.sat_s = False  # Indicator of maximal cutback, T = cutback saturated
         self.ib_sat = 0.5  # Threshold to declare saturation.  This regeneratively slows down charging so if too
         # small takes too long, A
         self.s_cap = scale  # Rated capacity scalar
@@ -1213,7 +1213,7 @@ class BatterySim(Battery):
         self.c_time_sim = 0.0
         self.saved_s = SavedS("ver_s")  # for plots and prints
         self.ib_fut = 0.0  # Future value of limited current, A
-        self.reset_temp_past = self.model_saturated
+        self.reset_temp_past = self.sat_s
         self.dt_past = 0.0
         self.dt_charge_s = 0.0
         self.dt_s = 0.0
@@ -1279,11 +1279,11 @@ class BatterySim(Battery):
             self.sat_cutback_gain
         )
         s += (
-            "  model_cutback =         {:d}  // Indicate that modeled current being limited on"
-            " saturation cutback, T = cutback limited\n".format(self.model_cutback)
+            "  cutback_s =         {:d}  // Indicate that modeled current being limited on"
+            " saturation cutback, T = cutback limited\n".format(self.cutback_s)
         )
-        s += "  model_saturated =       {:f}  // Indicator of maximal cutback, T = cutback saturated\n".format(
-            self.model_saturated
+        s += "  sat_s =       {:f}  // Indicator of maximal cutback, T = cutback saturated\n".format(
+            self.sat_s
         )
         s += (
             "  ib_sat =          {:7.3f}  // Threshold to declare saturation.  This regeneratively slows"
@@ -1343,8 +1343,18 @@ class BatterySim(Battery):
         self.mod = rp.modeling
         soc_lim = max(min(soc, 1.0), -0.2)  # dag 9/3/2022
 
+        # Saturation logic, both full and empty
+        self.sat_ib_max = (
+            self.sat_ib_null
+            + (1 - (self.soc + Battery.ap_ds_voc_soc)) * self.sat_cutback_gain * Battery.sp_cutback_gain_slr
+        )
+        if rp.tweak_test or (not rp.modeling_ib):
+            pass
+        else:
+            self.ib_in = min(self.ib_in, self.sat_ib_max)  # the feedback of self.ib
+
         # VOC-OCV model
-        self.voc_stat, self.dv_dsoc = self.calc_soc_voc(soc + Battery.D_SOC_S, self.Tb_f)
+        self.voc_stat, self.dv_dsoc = self.calc_soc_voc(soc + Battery.ap_ds_voc_soc, self.Tb_f)
         if not self.reset:
             self.voc_stat += Battery.ap_dv_voc_soc
         # slightly beyond but don't windup
@@ -1356,7 +1366,7 @@ class BatterySim(Battery):
             self.soc < (self.soc_min + Battery.HYS_SOC_MIN_MARG) and self.ib > Battery.HYS_IB_THR
         )
         self.dv_hys, self.tau_hys = self.hys.update(
-            self.dt, init_high=self.model_saturated, init_low=init_low, e_wrap=0.0, chem=self.chm
+            self.dt, init_high=self.sat_s, init_low=init_low, e_wrap=0.0, chem=self.chm
         )
         self.voc = self.voc_stat + self.dv_hys
         self.voc_soc = self.voc_stat
@@ -1401,28 +1411,14 @@ class BatterySim(Battery):
             self.chemistry.dvoc_dt,
             vsat_add=Battery.sp_vsat_add,
         )
-        self.sat_ib_max = (
-            self.sat_ib_null
-            + (1 - self.soc - Battery.ap_ds_voc_soc) * self.sat_cutback_gain * Battery.sp_cutback_gain_slr
-        )
-        if rp.tweak_test or (not rp.modeling_ib):
-            self.sat_ib_max = ib_charge_fut
-        self.ib_fut = min(ib_charge_fut, self.sat_ib_max)  # the feedback of self.ib
-        # self.ib_charge = ib_charge_fut# same time plane as volt calcs.  (This prevents sat logic from working)
+        self.ib_fut = ib_charge_fut  # the feedback of self.ib
         self.ib_charge = self.ib_fut  # same time plane as volt calcs
 
-        # empty  **** don't know why this was here.  cannot bms_off_ empty because that causes weird interaction with
-        # bms logic and also doesn't make sense to have a different empty cutoff when modeling.  If there is a need for
-        # an empty cutoff, should be based on voltage not current.  So removing for now.  Can revisit if needed.
-        # if self.mod > 0.:
-        #     if (self.q <= 0.) & (self.ib_charge < 0.):
-        #         # print("q", self.q, "empty")
-        #         self.ib_charge = 0.  # empty
-        self.model_cutback = (self.voc_stat > self.vsat) & (self.ib_fut == self.sat_ib_max)
-        self.model_saturated = self.model_cutback & (self.ib_fut < self.ib_sat)
+        self.cutback_s = (self.voc_stat > self.vsat) & (abs(self.ib_fut - self.sat_ib_max) < 1e-4)
+        self.sat_s = self.cutback_s & (self.ib_fut < self.ib_sat)
         if self.reset and SN.mon_run.saturated[0] is not None:
-            self.model_saturated = SN.mon_run.saturated[0]
-        self.sat = self.model_saturated
+            self.sat_s = SN.mon_run.saturated[0]
+        self.sat = self.sat_s
 
         return self.vb
 
@@ -1459,7 +1455,7 @@ class BatterySim(Battery):
                     self.apply_delta_q_brief(mon_delta_q)
                 else:
                     self.apply_delta_q_brief(SN.delta_q_s[G.i])
-        elif self.model_saturated and reset_temp:
+        elif self.sat_s and reset_temp:
             self.delta_q = 0.0
 
         # one pass flag
