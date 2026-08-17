@@ -212,6 +212,7 @@ def replicate(OPT: UserOptions):
             candidate_dt = t[G.i] - t[G.i - 1]  # update
             if candidate_dt > 1e-6:
                 T = dt[G.i]
+        sim.soc_pst = sim.soc
 
         # Get temperature data
         if hasattr(OPT.mon_run, "time_t"):
@@ -314,7 +315,7 @@ def replicate(OPT: UserOptions):
             None,
             SN,
             OPT,
-            soc_pst=sim.soc,
+            soc_pst=sim.soc_pst,
             q_capacity=sim.q_capacity,
             rp=rp,
             saturated_init=sat_s_init,

@@ -50,45 +50,45 @@ void benign_zero(BatteryMonitor* Mon, Sensors* Sen)  // BZ
   cp.cmd_summarize();  // Hs
 
   // Model
-  ap.slr_res(1);                              // Sr 1
+  ap.slr_res_p->print_adj_print(1.f);          // Sr 1
   sp.cutback_gain_slr_p->print_adj_print(1);  // Sk 1
-  ap.hys_state(0);                            // SH 0
+  ap.hys_state_p->print_adj_print(0.f);        // SH 0
 
   // Injection
-  ap.ib_amp_add(0);       // Dm 0
-  ap.ib_noa_add(0);       // Dn 0
-  sp.ib_bias_all(0.f);    // DI 0
-  ap.vb_add(NOM_VB_ADD);  // Dv 0
-  ap.ds_voc_soc(NOM_DS);  // Ds 0
+  ap.ib_amp_add_p->print_adj_print(0.f);       // Dm 0
+  ap.ib_noa_add_p->print_adj_print(0.f);       // Dn 0
+  sp.ib_bias_all_p->print_adj_print(0.f);      // DI 0
+  ap.vb_add_p->print_adj_print(NOM_VB_ADD);    // Dv 0
+  // ap.ds_voc_soc_p->print_adj_print(NOM_DS);    // Ds 0
   Sen->Sim->put_dx_voc(ap.ds_voc_soc());
 
-  ap.Tb_bias_model(TEMP_BIAS);                        // D^
-  ap.dv_voc_soc(NOM_DY);                              // Dy
-  ap.vc_add(NOM_VC_ADD);                              // D3
-  ap.ib_amp_max((IB_ABS_MAX_AMP / NP / SIZE_MARG));   // Mm 0
-  ap.ib_amp_min(-(IB_ABS_MAX_AMP / NP / SIZE_MARG));  // Mn 0
-  ap.ib_noa_max((IB_ABS_MAX_NOA / NP / SIZE_MARG));   // Nm 0
-  ap.ib_noa_min(-(IB_ABS_MAX_NOA / NP / SIZE_MARG));  // Nn 0
+  ap.Tb_bias_model_p->print_adj_print(TEMP_BIAS);                       // D^
+  ap.dv_voc_soc_p->print_adj_print(NOM_DY);                             // Dy
+  ap.vc_add_p->print_adj_print(NOM_VC_ADD);                             // D3
+  ap.ib_max_amp_p->print_adj_print(IB_ABS_MAX_AMP / NP / SIZE_MARG);    // Mm 0
+  ap.ib_min_amp_p->print_adj_print(-(IB_ABS_MAX_AMP / NP / SIZE_MARG)); // Mn 0
+  ap.ib_max_noa_p->print_adj_print(IB_ABS_MAX_NOA / NP / SIZE_MARG);    // Nm 0
+  ap.ib_min_noa_p->print_adj_print(-(IB_ABS_MAX_NOA / NP / SIZE_MARG)); // Nn 0
 
   // Noise
-  ap.Tb_noise_amp(TB_NOISE);          // DT 0
-  ap.Vb_noise_amp(VB_NOISE);          // DV 0
-  ap.Ib_amp_noise_amp(IB_AMP_NOISE);  // DM 0
-  ap.Ib_noa_noise_amp(IB_NOA_NOISE);  // DN 0
+  ap.Tb_noise_amp_p->print_adj_print(TB_NOISE);          // DT 0
+  ap.Vb_noise_amp_p->print_adj_print(VB_NOISE);          // DV 0
+  ap.Ib_amp_noise_amp_p->print_adj_print(IB_AMP_NOISE);  // DM 0
+  ap.Ib_noa_noise_amp_p->print_adj_print(IB_NOA_NOISE);  // DN 0
 
   // EKF
   // ap.eframe_mult() = max(min(EKF_EFRAME_MULT, UINT8_MAX), 0); // ED
 
   // Fault logic
-  ap.ib_diff_slr(1);          // Fd 1
-  ap.fake_faults(0);          // Ff 0
-  sp.put_ib_force(IB_FORCE);  // si / Ff IB_FORCE
-  ap.ewhi_slr(FI_NOM);        // Fi
-  ap.ewlo_slr(FO_NOM);        // Fo
-  ap.ib_quiet_slr(1);         // Fq 1
-  ap.disab_ib_fa(0);          // FI 0
-  ap.disab_tb_fa(0);          // FT 0
-  ap.disab_vb_fa_lt(0);       // FV 0
+  ap.ib_diff_slr_p->print_adj_print(1.f);         // Fd 1
+  ap.fake_faults_p->print_adj_print(false);       // Ff 0
+  sp.ib_force_p->print_adj_print(IB_FORCE);       // si / Ff IB_FORCE
+  ap.ewhi_slr_p->print_adj_print(FI_NOM);         // Fi
+  ap.ewlo_slr_p->print_adj_print(FO_NOM);         // Fo
+  ap.ib_quiet_slr_p->print_adj_print(1.f);        // Fq 1
+  ap.disab_ib_fa_p->print_adj_print(false);       // FI 0
+  ap.disab_tb_fa_p->print_adj_print(false);       // FT 0
+  ap.dis_vb_fa_lt_p->print_adj_print(false);      // FV 0
 }
 
 // Prioritize commands to describe.  asap_str queue almost always run.  Others

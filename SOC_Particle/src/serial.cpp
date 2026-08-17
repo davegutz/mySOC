@@ -663,7 +663,7 @@ void print_sim_serial(const bool initializing_all, const bool reset,
             reset_temp, Sim->d_delta_q_s());
     Serial.printf("%s", pr.buff);
 
-    sprintf(pr.buff, "%9.6f,%9.6f,%9.6f,%9.6f,%2d,%9.6f,",
+    sprintf(pr.buff, "%9.6f,%9.6f,%9.6f,%9.6f,%2d,%11.9f,",
             Sim->chargeTransfer_T(),
             Sim->chargeTransfer_tau(), Sim->chargeTransfer_rstate(),
             Sim->chargeTransfer_lstate(), Sim->voltage_low(),

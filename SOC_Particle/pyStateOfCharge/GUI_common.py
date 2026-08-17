@@ -230,7 +230,7 @@ synced_slow_pulse = "Dr800;D>800;ED1;DP1;Sh0;"
 slow = synced_slow_pulse
 quiet = "vv0;Dr;DP;D>;Dh;"
 quietwait = "<vv0;Dr;DP;D>;Dh;"
-cleanup = "Hd;Pf;<HR;<Rf;<Pd;"
+cleanup = "BZ;Hd;Pf;<HR;<Rf;<Pd;"
 tempCleanup = "Rf; "
 time_stamp = "XY;Pd;"
 zeroPrepHdweNoVb = "HR;Dh1000;W34;Fi2;Fo2;Rs;W34;"
@@ -884,7 +884,7 @@ lookup = {
     ),
     "nvm": (25, off_r + "W5" + restore_r, ("Adjst all and cycle power", "To evaluate type PR")),
     "cutback": (
-        65,
+        70,
         "Xm247;Ca0.96;Ds=0.039;" + tranPrep + sc50 + "XQ6000;" + "W2;DI;W10;" + quiet + cleanup + "<XD;",
         (
             "Should run one step transient to engage cutback",

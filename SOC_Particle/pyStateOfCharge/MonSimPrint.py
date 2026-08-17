@@ -379,7 +379,6 @@ def print_cutback_RunSim(SN, i_temp, i_ekf, t, mon, sim, calc_temp, calc_ekf, df
     else:
         set_color(Colors.reset)
 
-    modeling = rp.get_modeling(SN.mon_run)
     rp.modeling = rp.add_modeling(SN.mon_run.mod_data[G.i])
     tweak_test = rp.tweak_test
 
