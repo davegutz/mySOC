@@ -124,7 +124,7 @@ void print_battery_header() {
       "WRAP_SOC_HI_OFF, WRAP_SOC_HI_SLR,");
   Serial.printf(
       "WRAP_SOC_LO_OFF_ABS, WRAP_SOC_LO_OFF_REL, WRAP_SOC_LO_SLR, "
-      "WRAP_SOC_MOD_OFF, ZETA_Y_FILT,WRAP_HI_SETAT_SLR,");
+      "WRAP_SOC_MOD_OFF, ZETA_Y_FILT,WRAP_HI_SETAT_SLR,SAT_CUTBACK_GAIN,");
   Serial.printf("\n");
 }
 
@@ -197,8 +197,8 @@ void print_battery_serial() {
           WRAP_SOC_HI_SLR, WRAP_SOC_LO_OFF_ABS, WRAP_SOC_LO_OFF_REL);
   Serial.printf("%s", pr.buff);
 
-  sprintf(pr.buff, "%10.7f,%10.7f,%10.7f,%10.7f, ", WRAP_SOC_LO_SLR,
-          WRAP_SOC_MOD_OFF, ZETA_Y_FILT, WRAP_HI_SETAT_SLR);
+  sprintf(pr.buff, "%10.7f,%10.7f,%10.7f,%10.7f,%10.7f, ", WRAP_SOC_LO_SLR,
+          WRAP_SOC_MOD_OFF, ZETA_Y_FILT, WRAP_HI_SETAT_SLR, SAT_CUTBACK_GAIN);
   Serial.printf("%s", pr.buff);
 
   Serial.printf("\n");

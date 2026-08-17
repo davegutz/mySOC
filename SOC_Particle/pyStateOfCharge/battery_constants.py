@@ -86,6 +86,7 @@ class BatteryConstants:
     NP = None
     NS = None
     RATED_TEMP = None
+    SAT_CUTBACK_GAIN = None
     SHUNT_AMP_GAIN = None
     SHUNT_NOA_GAIN = None
     skip_battery = None

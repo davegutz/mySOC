@@ -436,6 +436,9 @@ const float QUIET_RES(QUIET_SET /
 #if !defined(IN_SERVICE)
 #define IN_SERVICE true  // In service flag for testing (true)
 #endif
+#if !defined(SAT_CUTBACK_GAIN)
+#define SAT_CUTBACK_GAIN 1000.  // Gain to retard ib when sat, dimensionless
+#endif
 
 // Conversion gains
 constexpr double H_CELL_MAX = 15.;

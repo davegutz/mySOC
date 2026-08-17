@@ -710,7 +710,7 @@ BatterySim::BatterySim(const float dx_voc, const float dy_voc,
       ib_charge_(0.), ib_pst_(0.), ib_in_(0.),
       ib_sat_(0.5), cut_s_(true), sat_s_(false),
       q_(NOM_UNIT_CAP * 3600.), 
-      sat_cutback_gain_(1000.), sat_ib_max_(0.), sat_ib_null_(0.),
+      sat_cutback_gain_(SAT_CUTBACK_GAIN), sat_ib_max_(0.), sat_ib_null_(0.),
       hys_(nullptr) {
   // ChargeTransfer dynamic model for EKF
   // Resistance values add up to same resistance loss as matched to installed
@@ -720,7 +720,6 @@ BatterySim::BatterySim(const float dx_voc, const float dy_voc,
   Tri_inj_ = new TriInj();
   Cos_inj_ = new CosInj();
   sat_ib_null_ = 0.;  // Current cutback value for soc=1, A
-  sat_cutback_gain_ = 1000.;  // Gain to retard ib when soc approaches 1
   sat_s_ = false;
   ib_sat_ = 0.5;  // deadzone for cutback actuation, A
   ib_charge_ = 0.;

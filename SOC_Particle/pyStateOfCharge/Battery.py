@@ -45,7 +45,6 @@ from battery_constants import BatteryConstants
 
 class Retained:
     def __init__(self):
-        self.cutback_gain_scalar = Battery.sp_cutback_gain_slr
         self.delta_q = 0.0
         self.modeling = 0
         self.modeling_ib = False
@@ -1183,10 +1182,8 @@ class BatterySim(Battery):
         self.sat_ib_max = 0.0  # Current cutback to be applied to modeled ib output, A
         # self.sat_ib_null = 0.1*Battery.NOM_UNIT_CAP  # Current cutback value for voc=vsat, A
         self.sat_ib_null = 0.0  # Current cutback value for soc=1, A
-        # self.sat_cutback_gain = 4.8  # Gain to retard ib when voc exceeds vsat, dimensionless
-        self.sat_cutback_gain = (
-            1000.0 * Battery.sp_cutback_gain_slr
-        )  # Gain to retard ib when soc approaches 1, dimensionless
+        self.sat_cutback_gain = Battery.SAT_CUTBACK_GAIN  # Gain to retard ib when soc approaches 1, dimensionless
+        self.cutback_gain_slr = Battery.sp_cutback_gain_slr  # scalar
         self.cutback_s = False  # Indicate current being limited on saturation cutback, T = cutback limited
         self.sat_s = False  # Indicator of maximal cutback, T = cutback saturated
         self.ib_sat = 0.5  # Threshold to declare saturation.  This regeneratively slows down charging so if too
@@ -1350,7 +1347,7 @@ class BatterySim(Battery):
         # Saturation logic, both full and empty
         self.sat_ib_max = (
             self.sat_ib_null
-            + (1 - (self.soc_pst + Battery.ap_ds_voc_soc)) * self.sat_cutback_gain * Battery.sp_cutback_gain_slr
+            + (1 - (self.soc_pst + Battery.ap_ds_voc_soc)) * self.sat_cutback_gain * self.cutback_gain_slr
         )
         if rp.tweak_test or (not rp.modeling_ib):
             pass
