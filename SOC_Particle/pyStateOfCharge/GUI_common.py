@@ -884,7 +884,7 @@ lookup = {
     ),
     "nvm": (25, off_r + "W5" + restore_r, ("Adjst all and cycle power", "To evaluate type PR")),
     "cutback": (
-        60,
+        65,
         "Xm247;Ca0.96;Ds=0.039;" + tranPrep + sc50 + "XQ6000;" + "W2;DI;W10;" + quiet + cleanup + "<XD;",
         (
             "Should run one step transient to engage cutback",

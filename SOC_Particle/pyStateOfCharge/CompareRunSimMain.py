@@ -45,12 +45,12 @@ def main():  # Example usage.  ok on 20260217
         time_end = None
         compare_run_ver = True
         shift_soc_s = True
-        plots = True
+        plots = False
         use_mon_soc_ = False
         verbose = False
         scale_batt = 1.0
         slr_hys_sim = 1.0
-        request_history = 3
+        request_history = 11
         init_time = None
         time_shift = None
         strict_overplot = True

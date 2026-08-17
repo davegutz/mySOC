@@ -61,6 +61,15 @@ class Retained:
         self.modeling_Tb = bool(0b0001 & int(self.modeling))
         return self.modeling
 
+    def get_modeling(self, mr, mod_force=None):
+        if mod_force is not None:
+            return mod_force * np.ones(len(mr.time))
+        if hasattr(mr, "mod_data"):
+            modeling_ = mr.mod_data
+        else:
+            modeling_ = 255 * np.ones(len(mr.time))
+        return modeling_
+
 
 def calculate_capacity(q_cap_rated_scaled=None, dqdt=None, tb_f=None, t_rated=None):
     q_cap = q_cap_rated_scaled * (1.0 + dqdt * (tb_f - t_rated))
@@ -829,7 +838,6 @@ class BatteryMonitor(Battery, EKF1x1, Wrap):
         self.voc_ekf = self.hx
         self.ib_past = self.ib
         self.vb_past = self.vb
-        self.dt_past = self.dt
 
         return self.vb_model_rev
 
@@ -1129,7 +1137,7 @@ class BatteryMonitor(Battery, EKF1x1, Wrap):
         self.ib_dyn_tau_s = sim.chemistry.tau_ct
         self.tau_hys_s = sim.tau_hys
         self.q_s = sim.q
-        self.ib_pst_s = sim.ib_fut
+        self.ib_pst_s = sim.ib_pst
         self.reset_s = sim.reset
         self.tau_s = sim.tau_hys
         self.tau_hys_s = sim.tau_hys
@@ -1212,9 +1220,9 @@ class BatterySim(Battery):
         self.c_time = 0.0
         self.c_time_sim = 0.0
         self.saved_s = SavedS("ver_s")  # for plots and prints
-        self.ib_fut = 0.0  # Future value of limited current, A
+        self.ib_pst = 0.0  # Future value of limited current, A
+        self.soc_pst = 1.
         self.reset_temp_past = self.sat_s
-        self.dt_past = 0.0
         self.dt_charge_s = 0.0
         self.dt_s = 0.0
         self.chm_s = 0.0
@@ -1257,7 +1265,7 @@ class BatterySim(Battery):
             self.d_delta_q = SN.d_delta_q_s_init
             self.delta_q = SN.delta_q_s_init
             self.ib = SN.ib_s_init
-            self.ib_fut = SN.ib_pst_s_init
+            self.ib_pst = SN.ib_pst_s_init
             self.ib_charge = SN.ib_charge_s_init
             self.ioc = SN.ioc_s_init
             if SN.run_type == "HistSim":
@@ -1291,7 +1299,7 @@ class BatterySim(Battery):
         )
         s += "  ib_in  =          {:7.3f}  // Saved value of current input, A\n".format(self.ib_in)
         s += "  ib     =          {:7.3f}  // Open circuit current into posts, A\n".format(self.ib)
-        s += "  ib_fut =          {:7.3f}  // Future value of limited current, A\n".format(self.ib_fut)
+        s += "  ib_pst =          {:7.3f}  // Future value of limited current, A\n".format(self.ib_pst)
         s += "  voc     =         {:7.3f}  // Open circuit voltage, V\n".format(self.voc)
         s += "  voc_stat=         {:7.3f}  // Static, table lookup value of voc before applying hysteresis, V\n".format(
             self.voc_stat
@@ -1320,73 +1328,84 @@ class BatterySim(Battery):
         OPT,
         q_capacity=None,
         rp=None,
-        soc=None,
+        soc_pst=None,
         saturated_init=None,
         reset_ekf=None,
         i=None,
         i_ekf=None,
     ):
+        # Inputs
         self.SN = SN
         self.reset = reset
         if self.chm != chem:
             self.chemistry.assign_all_mod(chem, self.unit)
             self.chm = chem
-
         self.Tb = Tb
-        self.dt_past = self.dt
         self.dt = dt
         self.dt_charge = dt_charge
         self.ib_in = ib
-        if self.reset and SN.sim_run.bms_off_s[0]:
-            self.ib_fut = 0.0
-        self.ib = max(min(self.ib_fut, Battery.IMAX_NUM), -Battery.IMAX_NUM)
         self.mod = rp.modeling
-        soc_lim = max(min(soc, 1.0), -0.2)  # dag 9/3/2022
+        self.soc_pst = soc_pst
 
         # Saturation logic, both full and empty
         self.sat_ib_max = (
             self.sat_ib_null
-            + (1 - (self.soc + Battery.ap_ds_voc_soc)) * self.sat_cutback_gain * Battery.sp_cutback_gain_slr
+            + (1 - (self.soc_pst + Battery.ap_ds_voc_soc)) * self.sat_cutback_gain * Battery.sp_cutback_gain_slr
         )
         if rp.tweak_test or (not rp.modeling_ib):
             pass
         else:
             self.ib_in = min(self.ib_in, self.sat_ib_max)  # the feedback of self.ib
+        self.vsat = sat_voc(
+            self.Tb_f,
+            self.chemistry.rated_temp,
+            self.chemistry.nom_vsat,
+            self.chemistry.dvoc_dt,
+            vsat_add=Battery.sp_vsat_add,
+        )
+        if self.reset and SN.sim_run.bms_off_s[0]:
+            self.ib_pst = 0.0
+        self.ib = max(min(self.ib_pst,  # Saturation
+                          Battery.IMAX_NUM),  # Overflow
+                          -Battery.IMAX_NUM)  # Overflow
+        soc_lim = max(min(self.soc_pst, 1.0), -0.2)  # slightly beyond
 
         # VOC-OCV model
-        self.voc_stat, self.dv_dsoc = self.calc_soc_voc(soc + Battery.ap_ds_voc_soc, self.Tb_f)
+        self.voc_stat, self.dv_dsoc = self.calc_soc_voc(self.soc_pst + Battery.ap_ds_voc_soc, self.Tb_f)
         if not self.reset:
             self.voc_stat += Battery.ap_dv_voc_soc
         # slightly beyond but don't windup
-        self.voc_stat = min(self.voc_stat + (soc - soc_lim) * self.dv_dsoc, self.vsat * 1.2)
+        self.voc_stat = min(self.voc_stat + (self.soc_pst - soc_lim) * self.dv_dsoc,
+                            self.vsat * 1.2)  # slightly beyond sat but don't windup
 
         # Hysteresis model
-        self.hys.calculate_hys(ib, self.soc, self.chm)
-        init_low = self.bms_off or (
-            self.soc < (self.soc_min + Battery.HYS_SOC_MIN_MARG) and self.ib > Battery.HYS_IB_THR
-        )
+        self.hys.calculate_hys(self.ib_in, self.soc_pst, self.chm)
+        init_low = (
+            self.bms_off or (self.soc_pst < (self.soc_min + Battery.HYS_SOC_MIN_MARG) and self.ib > Battery.HYS_IB_THR))
         self.dv_hys, self.tau_hys = self.hys.update(
             self.dt, init_high=self.sat_s, init_low=init_low, e_wrap=0.0, chem=self.chm
         )
         self.voc = self.voc_stat + self.dv_hys
-        self.voc_soc = self.voc_stat
         self.ioc = self.hys.ioc
 
         # Battery management system (bms)   I believe bms can see only vb but using this for a model causes
         # lots of chatter as it shuts off, restores vb due to loss of dynamic current, then repeats shutoff.
         # Using voc_ is not better because change in dv_hys_ causes the same effect.   So using nice quiet
         # voc_stat_ for ease of simulation, not accuracy.
+        if self.reset:
+            self.vb = self.voc_stat
         if not self.bms_off:
             self.voltage_low = self.voc_stat < self.chemistry.vb_down_sim
         else:
             self.voltage_low = self.voc_stat < self.chemistry.vb_rising_sim
         bms_charging = self.ib_in > Battery.IB_MIN_UP
         self.bms_off = (self.Tb_f < self.chemistry.low_t) or (self.voltage_low and not rp.tweak_test)
-        ib_charge_fut = self.ib_in
+        ib_charge_pst = self.ib_in
         if self.bms_off and self.mod and not bms_charging:
-            ib_charge_fut = 0.0
+            ib_charge_pst = 0.0
         if self.bms_off and self.voltage_low:
             self.ib = 0.0
+
         # Charge transfer dynamics
         self.ib_dyn = self.ChargeTransfer.calculate_tau_seeded(
             self.ib, SN.ib_dyn_s[G.i], self.reset, self.dt, self.chemistry.tau_ct
@@ -1395,7 +1414,11 @@ class BatterySim(Battery):
         self.ib_dyn_T = self.ChargeTransfer.dt
         self.ib_dyn_rstate = self.ChargeTransfer.rstate
         self.ib_dyn_lstate = self.ChargeTransfer.state
-        self.vb = self.voc + self.ib_dyn * self.chemistry.r_ct + self.ib * self.chemistry.r_0
+        dv_dyn = self.ib_dyn * self.chemistry.r_ct + self.ib * self.chemistry.r_0
+        self.vb = self.voc + dv_dyn
+        self.voc_soc = self.voc_stat
+
+        # Special cases override
         if self.bms_off:
             if Battery.ap_dc_dc_on:
                 self.vb = Battery.VB_DC_DC
@@ -1403,19 +1426,12 @@ class BatterySim(Battery):
                 self.vb = 0.0
         self.dv_dyn = self.vb - self.voc
 
-        # Saturation logic, both full and empty
-        self.vsat = sat_voc(
-            self.Tb_f,
-            self.chemistry.rated_temp,
-            self.chemistry.nom_vsat,
-            self.chemistry.dvoc_dt,
-            vsat_add=Battery.sp_vsat_add,
-        )
-        self.ib_fut = ib_charge_fut  # the feedback of self.ib
-        self.ib_charge = self.ib_fut  # same time plane as volt calcs
+        self.ib_charge = ib_charge_pst
+        self.ib_pst = self.ib_charge
 
-        self.cutback_s = (self.voc_stat > self.vsat) & (abs(self.ib_fut - self.sat_ib_max) < 1e-4)
-        self.sat_s = self.cutback_s & (self.ib_fut < self.ib_sat)
+        # Indicators
+        self.cutback_s = (self.voc_stat > self.vsat) & (abs(self.ib_pst - self.sat_ib_max) < 1e-4)
+        self.sat_s = self.cutback_s & (self.ib_pst < self.ib_sat)
         if self.reset and SN.mon_run.saturated[0] is not None:
             self.sat_s = SN.mon_run.saturated[0]
         self.sat = self.sat_s
@@ -1531,7 +1547,7 @@ class BatterySim(Battery):
         self.tau_hys_s = self.tau_hys
         self.vb_s = self.vb
         self.q_s = self.q
-        self.ib_pst_s = self.ib_fut
+        self.ib_pst_s = self.ib_pst
         self.reset_s = self.reset
         self.tau_s = self.tau_hys
         self.tau_hys_s = self.tau_hys

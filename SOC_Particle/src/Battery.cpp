@@ -800,8 +800,6 @@ float BatterySim::calculate(Sensors* Sen, const bool dc_dc_on,
     ib_in_ = min(ib_in_, sat_ib_max_);
   }    
   vsat_ = calc_vsat();
-
-  // 
   if (reset ) {
     ib_pst_ = ib_in_;
   }

@@ -243,11 +243,11 @@ def replicate(OPT: UserOptions):
         elif OPT.run_type == "HistSim":
             reset = True
 
-        mon, sim = SN.calc_temp_pass_1(OPT, mon, sim, G.i, rp, reset=reset)
-
         # Input
         rp.modeling = rp.add_modeling(modeling[G.i])
         mon.tweak_test = rp.tweak_test
+
+        mon, sim = SN.calc_temp_pass_1(OPT, mon, sim, G.i, rp, reset=reset)
 
         prn_soc_debug(OPT, time=now, leader="before sim init:         ", i_temp=i_temp, mon=mon, sim=sim)
         mon.reset_kf = reset
@@ -314,7 +314,7 @@ def replicate(OPT: UserOptions):
             None,
             SN,
             OPT,
-            soc=sim.soc,
+            soc_pst=sim.soc,
             q_capacity=sim.q_capacity,
             rp=rp,
             saturated_init=sat_s_init,
