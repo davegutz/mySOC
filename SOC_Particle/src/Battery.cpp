@@ -793,14 +793,14 @@ float BatterySim::calculate(Sensors* Sen, const bool dc_dc_on,
   sat_ib_max_ = sat_ib_null_ + (1. - (soc_pst_ + ap.ds_voc_soc())) *
                                    sat_cutback_gain_ *
                                    sp.cutback_gain_slr();  // Ds, Sk
-  if (sp.tweak_test() || !sp.mod_ib()) {
+  if ((sp.tweak_test() && !ap.cut_test()) || !sp.mod_ib()) {
     // pass
   } else {
-    ib_in_ = min(ib_in_, sat_ib_max_);
+    ib_ = min(ib_in_, sat_ib_max_);
   }    
   vsat_ = calc_vsat();
   if (reset ) {
-    ib_pst_ = ib_in_;
+    ib_pst_ = ib_;
   }
   ib_ = max(min(ib_pst_,  // Saturation
              IMAX_NUM),   // Overflow
@@ -833,7 +833,7 @@ float BatterySim::calculate(Sensors* Sen, const bool dc_dc_on,
     voltage_low_ = voc_stat_ < chem_.vb_rising_sim;
   bms_charging_ = ib_in_ > IB_MIN_UP;
   bms_off_ = Tb_f_ <= chem_.low_t || (voltage_low_ && !sp.tweak_test());
-  float ib_charge_pst = ib_in_;  // Pass along current to charge unless bms_off
+  float ib_charge_pst = ib_;  // Pass along current to charge unless bms_off
   if (bms_off_ && sp.mod_ib() && !bms_charging_) ib_charge_pst = 0.;
   if (bms_off_ && voltage_low_) ib_ = 0.;
 
@@ -859,8 +859,8 @@ float BatterySim::calculate(Sensors* Sen, const bool dc_dc_on,
   ib_pst_ = ib_charge_;
 
   // Indicators
-  cut_s_ = (voc_stat_ > vsat_) && (ib_charge_ == sat_ib_max_);
-  sat_s_ = cut_s_ && (ib_charge_ < ib_sat_);
+  cut_s_ = ib_charge_ == sat_ib_max_;
+  sat_s_ = cut_s_ && (ib_charge_ < ib_sat_) && (voc_stat_ > vsat_);
   Coulombs::sat_ = sat_s_;
 
   return vb_;

@@ -23,6 +23,7 @@ import numpy as np
 class BatteryConstants:
     AMP_WRAP_TRIM_GAIN = None
     ap_cc_diff_slr = None
+    ap_cut_test = False
     ap_dc_dc_on = None # Truck charging
     ap_disab_ib_fa = None
     ap_disab_tb_fa = None
@@ -96,6 +97,7 @@ class BatteryConstants:
     sp_ib_disch_slr_z = None
     sp_s_cap_mon = None
     sp_s_cap_sim = None
+    sp_tweak_test = False
     sp_vsat_add = None
     T_RLIM = None
     TAU_ERR_FILT = None

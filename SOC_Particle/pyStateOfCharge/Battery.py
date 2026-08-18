@@ -42,6 +42,9 @@ plt.rcParams.update({"figure.max_open_warning": 0})
 import Globals as G
 from battery_constants import BatteryConstants
 
+ap_cut_test = False
+sp_tweak_test = False
+
 
 class Retained:
     def __init__(self):
@@ -631,7 +634,7 @@ class BatteryMonitor(Battery, EKF1x1, Wrap):
         self.Tb = Tb
         self.Tb_f = Tb_f
         self.vb = vb
-        self.ib_in = ib
+        self.ib = ib
         self.dt = dt
         self.ib_amp_hdwe = float(SN.mon_run.ib_amp_hdwe[G.i])
         self.ib_amp_model = SN.ib_amp_model[G.i]
@@ -665,13 +668,15 @@ class BatteryMonitor(Battery, EKF1x1, Wrap):
         self.vsat = self.chemistry.nom_vsat + (self.Tb_f - 25.0) * self.chemistry.dvoc_dt + Battery.sp_vsat_add
         self.mod = rp.modeling
         # Overflow protection since ib past value used
-        self.ib = max(min(self.ib_in, Battery.IMAX_NUM), -Battery.IMAX_NUM)
+        self.ib = max(min(self.ib, Battery.IMAX_NUM), -Battery.IMAX_NUM)
 
+
+        # Table lookup
+        self.voc_soc, self.dv_dsoc = self.calc_soc_voc(self.soc, self.Tb_f)
+
+        # Fault logic
         # Ib diff logic
         self.ib_diff = self.Diff.calculate(reset=reset, dt=self.dt, ib_amp=self.ib_amp, ib_noa=self.ib_noa)
-
-
-
         # Wrap logic
         self.wrap(
             reset=reset,
@@ -683,12 +688,9 @@ class BatteryMonitor(Battery, EKF1x1, Wrap):
             ib_noa_pst=self.ib_noa_pst,
             rp=rp,
         )
-
         # Reversionary model
         self.vb_model_rev = self.voc_soc + self.dv_dyn + self.dv_hys
 
-        # Table lookup
-        self.voc_soc, self.dv_dsoc = self.calc_soc_voc(self.soc, self.Tb_f)
 
         # Battery management system model (uses past value bms_off and voc_stat)
         self.bms_off_past = self.bms_off
@@ -714,7 +716,8 @@ class BatteryMonitor(Battery, EKF1x1, Wrap):
                         f"vb_rising {self.chemistry.vb_rising} bms_off {self.bms_off} "
                         f"voltage_low {self.voltage_low} \n\n"
                     )
-        bms_charging = (self.ib_amp if hasattr(self, "ib_amp") and self.ib_amp is not None else self.ib) > Battery.IB_MIN_UP
+        bms_charging = (self.ib_amp if hasattr(self, "ib_amp") and
+                                       self.ib_amp is not None else self.ib) > Battery.IB_MIN_UP
         if not self.reset:
             if hasattr(SN.mon_run, "bms_off") and getattr(SN.mon_run, "bms_off", None) is not None and G.i < len(SN.mon_run.bms_off):
                 self.bms_off = bool(SN.mon_run.bms_off[G.i] > 0.0)
@@ -837,6 +840,10 @@ class BatteryMonitor(Battery, EKF1x1, Wrap):
         self.voc_ekf = self.hx
         self.ib_past = self.ib
         self.vb_past = self.vb
+
+        self.ib_pst = self.ib_charge
+        if self.ib_charge > 0.1:
+            pass
 
         return self.vb_model_rev
 

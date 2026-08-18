@@ -104,10 +104,11 @@ VolatilePars::VolatilePars() : Parameters() {
 VolatilePars::~VolatilePars() {}
 
 void VolatilePars::initialize() {
-#define NVOL 62
+#define NVOL 63
   V_ = new Variable*[NVOL];
   V_[n_++] = (bare_slr_p = new FloatV("  ", "SZ", NULL, "Slr debounce", "float", 0, 1000, &bare_slr_, 1));                          // SZ
   V_[n_++] = (cc_diff_slr_p = new FloatV("  ", "SC", NULL, "Slr cc_diff", "float", 0, 1000, &cc_diff_slr_, 1));                     // SC
+  V_[n_++] = (cut_test_p= new BooleanV("  ", "Xc", NULL, "Use cutback", "T=on", 0, 1, &cut_test_, false));                          // Xc
   V_[n_++] = (cycles_inj_p = new FloatV("  ", "XC", NULL, "Number prog cycle", "float", 0, 1000, &cycles_inj_, 0));                 // XC
   V_[n_++] = (dc_dc_on_p = new BooleanV("  ", "Xd", NULL, "DC-DC charger on", "T=on", 0, 1, &dc_dc_on_, false));                    // Xd
   V_[n_++] = (disab_ib_fa_p = new BooleanV("  ", "FI", NULL, "Disab hard range ib", "T=disab", 0, 1, &disab_ib_fa_, false));        // FI
@@ -138,17 +139,17 @@ void VolatilePars::initialize() {
   V_[n_++] = (read_delay_p = new ULongV("  ", "Dr", NULL, "Minor frame", "ms", 1UL, 1000000UL, &read_delay_ms_, READ_DELAY_MS));          // Dr
   V_[n_++] = (talk_delay_p = new ULongV("  ", "D>", NULL, "Talk frame", "ms", 1UL, 120000UL, &talk_delay_ms_, TALK_DELAY_MS));            // D>
   V_[n_++] = (sum_delay_p = new ULongV("  ", "Dh", NULL, "Summary frame", "ms", 1000UL, SUMMARY_DELAY_MS, &sum_delay_, SUMMARY_DELAY_MS));// Dh
-  V_[n_++] = (eframe_mult_p = new Uint8tV("  ", "ED", NULL, "EKF frame rate x Dr", "uint", 1, UINT8_MAX, &eframe_mult_, EKF_EFRAME_MULT));  // ED
+  V_[n_++] = (eframe_mult_p = new Uint8tV("  ", "ED", NULL, "EKF frame rate x Dr", "uint", 1, UINT8_MAX, &eframe_mult_, EKF_EFRAME_MULT));// ED
   V_[n_++] = (slr_res_p = new FloatV("  ", "Sr", NULL, "Scalar Randles R0", "slr", 0, 100, &slr_res_, 1));                          // Sr
   V_[n_++] = (s_t_sat_p = new FloatV("  ", "Xs", NULL, "Scalar on T_SAT", "slr", 0, 100, &s_t_sat_, 1));                            // Xs
-  V_[n_++] = (tail_inj_p = new ULongV("  ", "XT", NULL, "Tail end inj", "ms", 0UL, 120000UL, &tail_inj_ms_, 0UL));                     // XT
+  V_[n_++] = (tail_inj_p = new ULongV("  ", "XT", NULL, "Tail end inj", "ms", 0UL, 120000UL, &tail_inj_ms_, 0UL));                  // XT
   V_[n_++] = (Tb_bias_model_p = new FloatV("  ", "D^", NULL, "Del model", "dg C", -120, 50, &Tb_bias_model_, TEMP_BIAS));           // D^
   V_[n_++] = (Tb_noise_amp_p = new FloatV("  ", "DT", NULL, "Tb noise", "dg C pk-pk", 0, 50, &Tb_noise_amp_, TB_NOISE));            // DT
-  V_[n_++] = (until_q_p = new ULongV("  ", "XQ", NULL, "Time until vv0", "ms", 0UL, 1000000UL, &until_q_ms_, 0UL));                    // XQ
+  V_[n_++] = (until_q_p = new ULongV("  ", "XQ", NULL, "Time until vv0", "ms", 0UL, 1000000UL, &until_q_ms_, 0UL));                 // XQ
   V_[n_++] = (vb_add_p = new FloatV("  ", "Dv", NULL, "Bias on vb", "v", -15, 15, &vb_add_, 0));                                    // Dv
   V_[n_++] = (Vb_noise_amp_p = new FloatV("  ", "DV", NULL, "Vb noise", "v pk-pk", 0, 10, &Vb_noise_amp_, VB_NOISE));               // DV
   V_[n_++] = (vc_add_p = new FloatV("  ", "D3", NULL, "Bias on Vc/Vr", "v", -1.65, 0.85, &vc_add_, 0));                             // D3
-  V_[n_++] = (wait_inj_p = new ULongV("  ", "XW", NULL, "Wait start inj", "ms", 0UL, 120000UL, &wait_inj_ms_, 0UL));                   // XW
+  V_[n_++] = (wait_inj_p = new ULongV("  ", "XW", NULL, "Wait start inj", "ms", 0UL, 120000UL, &wait_inj_ms_, 0UL));                // XW
   V_[n_++] = (voc_stat_filt_p = new FloatV("  ", "VF", NULL, "voc_stat_f time", "s", 1, 180, &voc_stat_filt_, VOC_STAT_FILT));      // VF
   V_[n_++] = (Tb_filt_p = new FloatV("  ", "VT", NULL, "Tb_f time", "s", 1, 180, &Tb_filt_, TB_FILT));                              // VT
   V_[n_++] = (ekf_q_p = new FloatV("  ", "VQ", NULL, "EKF_Q_SD_NORM volt", "slr", 0, 10000, &ekf_q_, 1));                           // VQ
@@ -165,7 +166,7 @@ void VolatilePars::initialize() {
   V_[n_++] = (s_cap_mon_p = new FloatV("  ", "SQ", NULL, "Scalar cap Mon","slr", 0, 1000, &s_cap_mon_, 1.));                        // SQ
   V_[n_++] = (s_cap_sim_p = new FloatV("  ", "Sq", NULL, "Scalar cap Sim", "slr", 0, 1000, &s_cap_sim_, 1.));                       // Sq
   V_[n_++] = (Vb_scale_p = new FloatV("  ", "SV", NULL, "Scale Vb sensor", "v", -1e5, 1e5, &Vb_scale_, VB_SCALE));                  // SV
-  V_[n_++] = (solv_err_p = new FloatV("  ", "Se", NULL, "EKF soc solve err", "frac", 0, 1, &solv_err_, SOLV_ERR));                               // Se
+  V_[n_++] = (solv_err_p = new FloatV("  ", "Se", NULL, "EKF soc solve err", "frac", 0, 1, &solv_err_, SOLV_ERR));                  // Se
   V_[n_++] = (solv_max_counts_p = new Uint8tV("  ", "Sx", NULL, "EKF soc solve cnts", "uint", 0, UINT8_MAX, &solv_max_counts_, SOLV_MAX_COUNTS));     // Sx
   V_[n_++] = (solv_succ_counts_p = new Uint8tV("  ", "Su", NULL, "EKF soc solve trans", "uint", 0, UINT8_MAX, &solv_succ_counts_, SOLV_SUCC_COUNTS)); // Su
 }
@@ -194,7 +195,8 @@ void VolatilePars::pretty_print(const bool all) {
   }
   while (n_ != NVOL) {
     delay(5000);
-    sendTxBuf(String::format("set NVOL=%d\n", n_), true, true);
+    sendTxBuf(String::format("set NVOL=%d and recompilel please\n", n_),
+              true, true);
   }
 }
 

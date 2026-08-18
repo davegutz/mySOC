@@ -134,7 +134,7 @@ def compare_run_sim(
     verbose=False,
     scale_batt=1.0,
     slr_hys_sim=1.0,
-    request_history=5,
+    request_history=11,
     init_time=None,
     time_shift=None,
     strict_overplot=False,

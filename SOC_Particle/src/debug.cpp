@@ -138,6 +138,12 @@ void debug_q(BatteryMonitor* Mon, Sensors* Sen) {
       Mon->delta_q_neg(), Mon->time_neg(), Mon->delta_q_pos(), Mon->time_pos());
   sendTxBuf(txBuf, true, true);
 
+  txBuf = String::format(
+      "ib_s%9.6f sat_ib_max%9.6f\n sat%2d sat_s%2d cutback_s%2d\n", 
+      Sen->Sim->ib(), Sen->Sim->sat_ib_max(), Mon->sat(),
+      Sen->Sim->sat(), Sen->Sim->cutback());
+  sendTxBuf(txBuf, true, true);
+
   // if ( Sen->Flt->falw() || Sen->Flt->fltw() ) chit("Pf;", SOON);
   // time_long_2_str((time_t)sp.Time_now(), pr.buff);
   // txBuf = String::format(" time %ld hms:  %s\n", sp.Time_now(), pr.buff);

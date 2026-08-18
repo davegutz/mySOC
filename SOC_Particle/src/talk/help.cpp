@@ -189,8 +189,8 @@ void talkH(BatteryMonitor* Mon, Sensors* Sen) {
   sendTxBuf("kalman Filters in shunt\n", true, IN_SERVICE);
   sendTxBuf("  Rr= ", true, IN_SERVICE);
   sendTxBuf("saturate Mon and equalize Sim & Mon\n", true, IN_SERVICE);
-  sendTxBuf("  RR= ", true, IN_SERVICE);
-  sendTxBuf("DEPLOY\n", true, IN_SERVICE);
+  sendTxBuf("  RA= ", true, IN_SERVICE);
+  sendTxBuf("RESET ALL\n", true, IN_SERVICE);
   sendTxBuf("  Rs= ", true, IN_SERVICE);
   sendTxBuf("small.  Reinitialize filters\n", true, IN_SERVICE);
   sendTxBuf("  RS= ", true, IN_SERVICE);
@@ -261,6 +261,7 @@ void talkH(BatteryMonitor* Mon, Sensors* Sen) {
   sendTxBuf("  Xp20:collect fast\n", true, IN_SERVICE);
   sendTxBuf("  Xp21:collect slow\n", true, IN_SERVICE);
   ap.cycles_inj_p->print_help();  // XC
+  ap.cut_test_p->print_help();  // XC
   sendTxBuf(" XD  ", true, IN_SERVICE);
   sendTxBuf("DONE message\n", true, IN_SERVICE);
   sendTxBuf(" XK  ", true, IN_SERVICE);

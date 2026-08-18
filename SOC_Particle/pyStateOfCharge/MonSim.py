@@ -263,11 +263,18 @@ def replicate(OPT: UserOptions):
             sim.assign_tb_f(sim.Tb_f)
             sim.apply_delta_q_t(sim.delta_q, Tb_f_s[G.i])
             prn_soc_debug(OPT, time=now, leader="after sm.apply_delta_q_t:", i_temp=i_temp, mon=mon, sim=sim)
+            mon.apply_soc(OPT.mon_run.soc[G.i], Tb_f[G.i], OPT.mon_run.delta_q[G.i])
+            mon.load(mon.delta_q)
+            mon.assign_tb(mon.Tb)
+            mon.assign_tb_f(mon.Tb_f)
+            mon.apply_delta_q_t(mon.delta_q, Tb_f[G.i])
             sat_s_init = SN.voc_stat_init > OPT.mon_run.vsat[G.i]
             if OPT.sim_run is not None:
                 sat_s_init = OPT.sim_run.sat_s[G.i]
             sim.sat = sat_s_init
             mon.sat = OPT.mon_run.sat[G.i]
+            if hasattr(OPT.mon_run, "saturated") and OPT.mon_run.saturated is not None:
+                mon.saturated = bool(OPT.mon_run.saturated[G.i] > 0.0)
         mon = SN.calc_temp_pass_2(OPT.mon_run, mon, Battery, rp, G.i, reset=reset)
         # Models
         SN.update_ib_vb(G.i)

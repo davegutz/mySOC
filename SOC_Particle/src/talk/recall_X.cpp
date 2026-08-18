@@ -119,6 +119,7 @@ bool recall_X(const char letter_1, BatteryMonitor* Mon, Sensors* Sen) {
             chit("Xf.2;Xa0;XW10000;XT10000;XC1;", SOON);
             chit("vv4;W4;XR;XQ50000;Xm247;", SOON);
           }
+
           break;
 
         case (16):  // Xp16 low init
@@ -126,7 +127,15 @@ bool recall_X(const char letter_1, BatteryMonitor* Mon, Sensors* Sen) {
           chit("Rb;", SOON);
           chit("Xf.2;Xa0;XW10000;XT10000;XC1;", SOON);
           chit("vv4;W4;XR;XQ50000;", SOON);
+          break;
 
+        case (17):
+        // Xp17:  Cutback
+
+          chit("Xp0;vv0;Xm255;Xc1;W4;Xts;", SOON);
+          chit("Rb;", SOON);
+          chit("Xf.02;Xa+100;XW5000;XT5000;XC3;", SOON);
+          chit("vv4;W4;XR;XQ180000;Xm247;Xc;", SOON);
           break;
 
         case (20):

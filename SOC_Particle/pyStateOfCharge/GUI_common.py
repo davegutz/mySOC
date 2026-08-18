@@ -286,6 +286,11 @@ lookup = {
         "Y;RS;RV;" + quiet + "cc;Dh;Dr;*W;*vv0;*XS;*Ca1;BZ;Ff0;ED;DP1;<HR;<Rf;" + "Pv;Pr;<Pd;<XK;",
         ("",),
     ),
+    "startHere": (
+        22,
+        "Y;RA;" + quiet + "cc;<HR;<Rf;" + "Pv;Pr;<Pd;<XK;",
+        ("",),
+    ),
     "initMid": (
         22,
         "Y;RS;RV;" + quiet + "cc;Dh1800000;*W;*vv0;*XS;*Ca.5;BZ;Ff0;ED;<HR;<Rf;" + "Pv;Pr;<Pd;<XK;",
@@ -420,7 +425,7 @@ lookup = {
         ),
     ),
     "rapidTweakRegression": (
-        235,
+        245,
         slow + "Rs;W8;Xp10;" + quiet + cleanup + "Pv;<XD;",
         (
             "Should run three very large current discharge/recharge cycles without latched fail",
@@ -479,7 +484,7 @@ lookup = {
         ),
     ),
     "rapidTweakRegressionH0": (
-        235,
+        245,
         "Sh0;" + slow + "Rs;W4;Xp10;Pf;W2;" + quiet + cleanup + "Sh1;Pv;<XD;",
         (
             "Should run three very large current discharge/recharge cycles without fault",
@@ -514,7 +519,7 @@ lookup = {
         ),
     ),
     "triTweakDisch": (
-        235,
+        245,
         slow + "Rs;W4;Xp13;" + quiet + cleanup + "<XD;",
         (
             "Should run three very large current discharge/recharge cycles without fault",
@@ -884,10 +889,12 @@ lookup = {
     ),
     "nvm": (25, off_r + "W5" + restore_r, ("Adjst all and cycle power", "To evaluate type PR")),
     "cutback": (
-        70,
-        "Xm247;Ca0.96;Ds=0.039;" + tranPrep + sc50 + "XQ6000;" + "W2;DI;W10;" + quiet + cleanup + "<XD;",
+        245,
+        slow + "Rs;W8;Ca.995;Xp17;" + quiet + cleanup + "Pv;<XD;",
         (
-            "Should run one step transient to engage cutback",
+            "Should run three runs in cutback limit",
+            "",
+            ""
             "",
         ),
     ),

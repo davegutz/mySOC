@@ -76,6 +76,7 @@ class PlotKiller(tk.Toplevel):
         self.pdf_base = pdf_base_
         tk.Toplevel.__init__(self)
         self.title("SOC-close")
+        self.protocol("WM_DELETE_WINDOW", self.close_figs)
         tk.Button(self, command=self.close_figs, text="close " + message, font=("Courier", 12)).grid(
             row=0, column=0, columnspan=4, padx=15, pady=15
         )
@@ -97,7 +98,10 @@ class PlotKiller(tk.Toplevel):
                 row=3, column=0, columnspan=4, padx=15, pady=5
             )
         self.lift()
-        self.mainloop()
+        try:
+            self.mainloop()
+        except KeyboardInterrupt:
+            self.close_figs()
         # self.grab_set()  # Prevents other Tkinter windows from being used
 
     def rescale_axes(self):

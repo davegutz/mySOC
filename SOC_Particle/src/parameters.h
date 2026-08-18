@@ -62,6 +62,7 @@ class VolatilePars : public Parameters {
 
   FloatV* bare_slr_p;
   FloatV* cc_diff_slr_p;
+  BooleanV* cut_test_p;
   FloatV* cycles_inj_p;
   BooleanV* dc_dc_on_p;
   BooleanV* disab_ib_fa_p;
@@ -129,6 +130,8 @@ class VolatilePars : public Parameters {
   void bare_slr(const float input) { bare_slr_ = input; }
   float cc_diff_slr() { return cc_diff_slr_; }
   void cc_diff_slr(const float input) { cc_diff_slr_ = input; }
+  bool cut_test() { return cut_test_; }
+  void cut_test(const bool input) { cut_test_ = input; }
   float cycles_inj() { return cycles_inj_; }
   void cycles_inj(const float input) { cycles_inj_ = input; }
   bool dc_dc_on() { return dc_dc_on_; }
@@ -263,6 +266,7 @@ class VolatilePars : public Parameters {
  protected:
   float bare_slr_;  // Scale bare detection thresh, scalar
   float cc_diff_slr_;  // Scale cc_diff detection thresh, scalar
+  bool cut_test_;  // Run cutback test, T=test
   float cycles_inj_;  // Number of injection cycles
   bool dc_dc_on_;  // DC-DC charger is on
   bool dis_vb_fa_lt_;  // Disable hard fault range failures for vb

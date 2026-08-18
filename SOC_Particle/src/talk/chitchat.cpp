@@ -51,7 +51,8 @@ void benign_zero(BatteryMonitor* Mon, Sensors* Sen)  // BZ
 
   // Model
   ap.slr_res_p->print_adj_print(1.f);          // Sr 1
-  sp.cutback_gain_slr_p->print_adj_print(1);  // Sk 1
+  ap.cut_test_p->print_adj_print(false);       // Xc 0
+  sp.cutback_gain_slr_p->print_adj_print(1);   // Sk 1
   ap.hys_state_p->print_adj_print(0.f);        // SH 0
 
   // Injection

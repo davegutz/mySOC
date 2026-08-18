@@ -20,7 +20,7 @@ Coulomb Counter built in."""
 
 from datetime import datetime, timedelta
 
-from Battery import Retained
+from Battery import Retained, Battery
 
 # noinspection PyPep8Naming
 import Globals as G
@@ -81,7 +81,22 @@ def print_pair(val1, val2, total_digits, sig_digits, name, print_name, df=False,
             if val is None:
                 return " " * width
             try:
-                return f"{val:<{width}.{sig_digits}f}"
+                val_f = float(val)
+                import math
+                if math.isnan(val_f) or math.isinf(val_f):
+                    return f"{str(val_f):<{width}}"
+
+                num_width = width - 2 if width > 4 else width
+                s = f"{val_f:.{sig_digits}f}"
+                if len(s) > num_width:
+                    int_len = len(f"{int(val_f):d}")
+                    avail_dec = num_width - int_len - 1
+                    if avail_dec >= 0:
+                        s = f"{val_f:.{avail_dec}f}"
+                    else:
+                        exp_dec = max(0, num_width - 7)
+                        s = f"{val_f:.{exp_dec}e}"
+                return f"{s:<{num_width}}" + ("  " if num_width < width else "")
             except (ValueError, TypeError):
                 return f"{str(val):<{width}}"
 
@@ -128,6 +143,15 @@ def print_col_leads(h, df, t, SN, mon, sim, i_temp, calc_temp, i_ekf, calc_ekf):
     print_pair(i_ekf, None, 2, 0, 'ie', h, df)
     print_pair(calc_ekf, None, 2, 0, 'ce', h, df)
     print_pair(SN.mon_run.sat[G.i], mon.sat, 2, 0, 'sa', h, df)
+    print_pair(
+        SN.mon_run.saturated[G.i] if hasattr(SN.mon_run, "saturated") and SN.mon_run.saturated is not None else False,
+        mon.saturated if hasattr(mon, "saturated") else False,
+        2,
+        0,
+        'sa_d',
+        h,
+        df,
+    )
     print_pair(SN.sim_run.sat_s[G.i], sim.sat, 2, 0, 'sa_s', h, df)
     print_pair(SN.sim_run.cutback_s[G.i], sim.cutback_s, 2, 0, 'cb_s', h, df)
 
@@ -381,19 +405,26 @@ def print_cutback_RunSim(SN, i_temp, i_ekf, t, mon, sim, calc_temp, calc_ekf, df
 
     rp.modeling = rp.add_modeling(SN.mon_run.mod_data[G.i])
     tweak_test = rp.tweak_test
+    cut_test = Battery.ap_cut_test
 
     for i_hdr in range(int(print_hdr), -1, -1):
         h = (i_hdr == 1)
         print_col_leads(h, df, t, SN, mon, sim, i_temp, calc_temp, i_ekf, calc_ekf)
         print_pair(rp.modeling_ib, None,  2, 0, 'modeling_ib', h, df)
         print_pair(tweak_test, None,  2, 0, 'tweak_test', h, df)
+        print_pair(cut_test, None,  2, 0, 'cut_test', h, df)
         print_pair(SN.sim_run.ib_in_s[G.i], sim.ib_in, 12, 8, 'ib_in', h, df)
         print_pair(SN.sim_run.ib_s[G.i], sim.ib, 12, 8, 'ib_s', h, df)
         print_pair(SN.sim_run.soc_s[G.i], sim.soc, 12, 8, 'soc_s', h, df)
         print_pair(SN.sim_run.sat_ib_max_s[G.i], sim.sat_ib_max, 12, 8, 'sat_ib_max', h, df)
-        print_pair(SN.sim_run.vsat_s[G.i], sim.vsat, 12, 8, 'vsat', h, df)
-        print_pair(SN.sim_run.ib_pst_s[G.i], sim.ib_pst_s, 12, 8, 'ib_pst', h, df)
-        print_pair(SN.sim_run.ib_charge_s[G.i], sim.ib_charge, 12, 8, 'ib_charge', h, df, end="\n")
+        print_pair(SN.sim_run.voc_stat_s[G.i], sim.voc_stat, 12, 8, 'voc_stat_s', h, df)
+        print_pair(SN.sim_run.vsat_s[G.i], sim.vsat, 12, 8, 'vsat_s', h, df)
+        print_pair(SN.sim_run.ib_pst_s[G.i], sim.ib_pst_s, 12, 8, 'ib_pst_s', h, df)
+        print_pair(SN.sim_run.ib_charge_s[G.i], sim.ib_charge, 12, 8, 'ib_charge_s', h, df)
+        print_pair(SN.mon_run.ib[G.i], mon.ib, 12, 8, 'ib', h, df)
+        print_pair(SN.mon_run.ib_charge[G.i], mon.ib_charge, 12, 8, 'ib_charge', h, df)
+        print_pair(SN.mon_run.d_delta_q[G.i], mon.d_delta_q, 12, 8, 'd_delta_q', h, df)
+        print_pair(SN.mon_run.delta_q[G.i], mon.delta_q, 12, 8, 'delta_q', h, df, end="\n")
 
     print(Colors.reset, end="")
     return 'header'  # print_cutback_RunSim # 11
