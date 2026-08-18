@@ -802,7 +802,7 @@ float BatterySim::calculate(Sensors* Sen, const bool dc_dc_on,
   if (reset ) {
     ib_pst_ = ib_;
   }
-  ib_ = max(min(ib_pst_,  // Saturation
+  ib_pst_ = max(min(ib_pst_,  // Saturation
              IMAX_NUM),   // Overflow
             -IMAX_NUM);   // Overflow
   double soc_lim = max(min(soc_pst_, 1.0), -0.2);  // slightly beyond
@@ -814,9 +814,9 @@ float BatterySim::calculate(Sensors* Sen, const bool dc_dc_on,
                   vsat_ * 1.2);  // slightly beyond sat but don't windup
 
   // Hysteresis model
-  hys_->calculate(ib_in_, soc_pst_, ap.hys_scale());
+  hys_->calculate(ib_pst_, soc_pst_, ap.hys_scale());
   bool init_low =
-      bms_off_ || (soc_pst_ < (soc_min_ + HYS_SOC_MIN_MARG) && ib_ > HYS_IB_THR);
+      bms_off_ || (soc_pst_ < (soc_min_ + HYS_SOC_MIN_MARG) && ib_pst_ > HYS_IB_THR);
   dv_hys_ = hys_->update(dt_s_, sat_, init_low, 0.0, ap.hys_scale(), reset);
   voc_ = voc_stat_ + dv_hys_;
   ioc_ = hys_->ioc();
@@ -831,17 +831,17 @@ float BatterySim::calculate(Sensors* Sen, const bool dc_dc_on,
     voltage_low_ = voc_stat_ < chem_.vb_down_sim;
   else
     voltage_low_ = voc_stat_ < chem_.vb_rising_sim;
-  bms_charging_ = ib_in_ > IB_MIN_UP;
+  bms_charging_ = ib_pst_ > IB_MIN_UP;
   bms_off_ = Tb_f_ <= chem_.low_t || (voltage_low_ && !sp.tweak_test());
   float ib_charge_pst = ib_;  // Pass along current to charge unless bms_off
   if (bms_off_ && sp.mod_ib() && !bms_charging_) ib_charge_pst = 0.;
-  if (bms_off_ && voltage_low_) ib_ = 0.;
+  if (bms_off_ && voltage_low_) ib_pst_ = 0.;
 
   // ChargeTransfer dynamic model for model, reverse version to generate sensor
   // inputs
-  ib_dyn_ = ChargeTransfer_->calculate(ib_, reset, chem_.tau_ct, dt_s_);
+  ib_dyn_ = ChargeTransfer_->calculate(ib_pst_, reset, chem_.tau_ct, dt_s_);
   float dvdyn =
-      (ib_dyn_ * chem_.r_ct * ap.slr_res() + ib_ * chem_.r_0 * ap.slr_res());
+      (ib_dyn_ * chem_.r_ct * ap.slr_res() + ib_pst_ * chem_.r_0 * ap.slr_res());
 
   vb_ = voc_ + dvdyn;
   voc_soc_ = voc_stat_;
