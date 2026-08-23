@@ -1409,13 +1409,13 @@ class BatterySim(Battery):
             self.voltage_low = self.voc_stat < self.chemistry.vb_down_sim
         else:
             self.voltage_low = self.voc_stat < self.chemistry.vb_rising_sim
-        bms_charging = self.ib_in > Battery.IB_MIN_UP
+        bms_charging = self.ib_pst > Battery.IB_MIN_UP
         self.bms_off = (self.Tb_f < self.chemistry.low_t) or (self.voltage_low and not rp.tweak_test)
         ib_charge_pst = self.ib
         if self.bms_off and self.mod and not bms_charging:
             ib_charge_pst = 0.0
         if self.bms_off and self.voltage_low:
-            self.ib = 0.0
+            self.ib_pst = 0.0
 
         # Charge transfer dynamics
         self.ib_dyn = self.ChargeTransfer.calculate_tau_seeded(

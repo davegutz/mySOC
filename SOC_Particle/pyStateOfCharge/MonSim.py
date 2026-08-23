@@ -176,8 +176,13 @@ def replicate(OPT: UserOptions):
         vsat_add=Battery.sp_vsat_add,
         tweak_test=tweak_test,
     )
-    Is_sat_delay = TFDelay(in_=(OPT.mon_run.soc[0] > 0.97 and not rp.tweak_test), t_true=T_SAT, t_false=T_DESAT, dt=0.1)
-                                                                                            # dt is set dynamically
+    if hasattr(OPT.mon_run, "saturated") and OPT.mon_run.saturated is not None:
+        in_sat_init = bool(OPT.mon_run.saturated[0] > 0.0)
+    else:
+        in_sat_init = (OPT.mon_run.soc[0] > 0.97 and not rp.tweak_test)
+    Is_sat_delay = TFDelay(in_=in_sat_init, t_true=T_SAT, t_false=T_DESAT, dt=0.1)
+
+    # dt is set dynamically
 
     # Time sync
     if hasattr(OPT.mon_run, "time_run_start"):
