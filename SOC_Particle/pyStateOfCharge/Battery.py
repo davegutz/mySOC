@@ -1356,10 +1356,11 @@ class BatterySim(Battery):
             self.sat_ib_null
             + (1 - (self.soc_pst + Battery.ap_ds_voc_soc)) * self.sat_cutback_gain * self.cutback_gain_slr
         )
+        self.ib = self.ib_in
         if (rp.tweak_test and not Battery.ap_cut_test) or (not rp.modeling_ib):
             pass
         else:
-            self.ib_in = min(self.ib_in, self.sat_ib_max)  # the feedback of self.ib
+            self.ib = min(self.ib_in, self.sat_ib_max)  # the feedback of self.ib
         self.vsat = sat_voc(
             self.Tb_f,
             self.chemistry.rated_temp,
@@ -1367,11 +1368,13 @@ class BatterySim(Battery):
             self.chemistry.dvoc_dt,
             vsat_add=Battery.sp_vsat_add,
         )
+        if self.reset:
+            self.ib_pst = self.ib
         if self.reset and SN.sim_run.bms_off_s[0]:
             self.ib_pst = 0.0
-        self.ib = max(min(self.ib_pst,  # Saturation
-                          Battery.IMAX_NUM),  # Overflow
-                          -Battery.IMAX_NUM)  # Overflow
+        self.ib_pst = max(min(self.ib_pst,  # Saturation
+                              Battery.IMAX_NUM),  # Overflow
+                              -Battery.IMAX_NUM)  # Overflow
         soc_lim = max(min(self.soc_pst, 1.0), -0.2)  # slightly beyond
 
         # VOC-OCV model
@@ -1383,9 +1386,11 @@ class BatterySim(Battery):
                             self.vsat * 1.2)  # slightly beyond sat but don't windup
 
         # Hysteresis model
-        self.hys.calculate_hys(self.ib_in, self.soc_pst, self.chm)
+        self.hys.calculate_hys(self.ib_pst, self.soc_pst, self.chm)
         init_low = (
-            self.bms_off or (self.soc_pst < (self.soc_min + Battery.HYS_SOC_MIN_MARG) and self.ib > Battery.HYS_IB_THR))
+            self.bms_off or
+            (self.soc_pst < (self.soc_min + Battery.HYS_SOC_MIN_MARG) and
+            self.ib_pst > Battery.HYS_IB_THR))
         self.dv_hys, self.tau_hys = self.hys.update(
             self.dt, init_high=self.sat_s, init_low=init_low, e_wrap=0.0, chem=self.chm
         )
@@ -1404,7 +1409,7 @@ class BatterySim(Battery):
             self.voltage_low = self.voc_stat < self.chemistry.vb_rising_sim
         bms_charging = self.ib_in > Battery.IB_MIN_UP
         self.bms_off = (self.Tb_f < self.chemistry.low_t) or (self.voltage_low and not rp.tweak_test)
-        ib_charge_pst = self.ib_in
+        ib_charge_pst = self.ib
         if self.bms_off and self.mod and not bms_charging:
             ib_charge_pst = 0.0
         if self.bms_off and self.voltage_low:
