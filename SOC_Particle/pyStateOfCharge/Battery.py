@@ -671,9 +671,6 @@ class BatteryMonitor(Battery, EKF1x1, Wrap):
         self.ib = max(min(self.ib, Battery.IMAX_NUM), -Battery.IMAX_NUM)
 
 
-        # Table lookup
-        self.voc_soc, self.dv_dsoc = self.calc_soc_voc(self.soc, self.Tb_f)
-
         # Fault logic
         # Ib diff logic
         self.ib_diff = self.Diff.calculate(reset=reset, dt=self.dt, ib_amp=self.ib_amp, ib_noa=self.ib_noa)
@@ -691,6 +688,8 @@ class BatteryMonitor(Battery, EKF1x1, Wrap):
         # Reversionary model
         self.vb_model_rev = self.voc_soc + self.dv_dyn + self.dv_hys
 
+        # Table lookup
+        self.voc_soc, self.dv_dsoc = self.calc_soc_voc(self.soc, self.Tb_f)
 
         # Battery management system model (uses past value bms_off and voc_stat)
         self.bms_off_past = self.bms_off
@@ -1417,13 +1416,13 @@ class BatterySim(Battery):
 
         # Charge transfer dynamics
         self.ib_dyn = self.ChargeTransfer.calculate_tau_seeded(
-            self.ib, SN.ib_dyn_s[G.i], self.reset, self.dt, self.chemistry.tau_ct
+            self.ib_pst, SN.ib_dyn_s[G.i], self.reset, self.dt, self.chemistry.tau_ct
         )
         self.ib_dyn_r = self.ChargeTransfer.reset
         self.ib_dyn_T = self.ChargeTransfer.dt
         self.ib_dyn_rstate = self.ChargeTransfer.rstate
         self.ib_dyn_lstate = self.ChargeTransfer.state
-        dv_dyn = self.ib_dyn * self.chemistry.r_ct + self.ib * self.chemistry.r_0
+        dv_dyn = self.ib_dyn * self.chemistry.r_ct + self.ib_pst * self.chemistry.r_0
         self.vb = self.voc + dv_dyn
         self.voc_soc = self.voc_stat
 

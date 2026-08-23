@@ -421,6 +421,7 @@ def print_cutback_RunSim(SN, i_temp, i_ekf, t, mon, sim, calc_temp, calc_ekf, df
         print_pair(SN.sim_run.vsat_s[G.i], sim.vsat, 12, 8, 'vsat_s', h, df)
         print_pair(SN.sim_run.ib_pst_s[G.i], sim.ib_pst_s, 12, 8, 'ib_pst_s', h, df)
         print_pair(SN.sim_run.ib_charge_s[G.i], sim.ib_charge, 12, 8, 'ib_charge_s', h, df)
+        print_pair(SN.sim_run.dv_dyn_s[G.i], sim.dv_dyn, 12, 8, 'dv_dyn_s', h, df)
         print_pair(SN.mon_run.ib[G.i], mon.ib, 12, 8, 'ib', h, df)
         print_pair(SN.mon_run.ib_charge[G.i], mon.ib_charge, 12, 8, 'ib_charge', h, df)
         print_pair(SN.mon_run.d_delta_q[G.i], mon.d_delta_q, 12, 8, 'd_delta_q', h, df)
