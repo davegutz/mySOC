@@ -1356,7 +1356,7 @@ class BatterySim(Battery):
             self.sat_ib_null
             + (1 - (self.soc_pst + Battery.ap_ds_voc_soc)) * self.sat_cutback_gain * self.cutback_gain_slr
         )
-        if rp.tweak_test or (not rp.modeling_ib):
+        if (rp.tweak_test and not Battery.ap_cut_test) or (not rp.modeling_ib):
             pass
         else:
             self.ib_in = min(self.ib_in, self.sat_ib_max)  # the feedback of self.ib
@@ -1434,7 +1434,7 @@ class BatterySim(Battery):
         self.ib_pst = self.ib_charge
 
         # Indicators
-        self.cutback_s = (self.voc_stat > self.vsat) & (abs(self.ib_pst - self.sat_ib_max) < 1e-4)
+        self.cutback_s = (abs(self.ib_pst - self.sat_ib_max) < 1e-4)
         self.sat_s = self.cutback_s & (self.ib_pst < self.ib_sat)
         if self.reset and SN.mon_run.saturated[0] is not None:
             self.sat_s = SN.mon_run.saturated[0]
