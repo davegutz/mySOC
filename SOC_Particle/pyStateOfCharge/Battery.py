@@ -47,13 +47,16 @@ sp_tweak_test = False
 
 
 class Retained:
-    def __init__(self):
+    def __init__(self, modeling=None):
         self.delta_q = 0.0
         self.modeling = 0
         self.modeling_ib = False
         self.modeling_vb = False
         self.modeling_Tb = False
         self.tweak_test = False
+        self.modeling = modeling
+        if self.modeling is not None:
+            self.add_modeling(self.modeling)
 
     def add_modeling(self, modeling=None):
         self.modeling = modeling

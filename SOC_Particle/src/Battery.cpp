@@ -794,7 +794,7 @@ float BatterySim::calculate(Sensors* Sen, const bool dc_dc_on,
                                    sat_cutback_gain_ *
                                    sp.cutback_gain_slr();  // Ds, Sk
   if ((sp.tweak_test() && !ap.cut_test()) || !sp.mod_ib()) {
-    // pass
+    ib_ = ib_in_;
   } else {
     ib_ = min(ib_in_, sat_ib_max_);
   }    

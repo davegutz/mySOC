@@ -384,7 +384,7 @@ lookup = {
         ("Hardware zero_with_pc run", "", "", ""),
     ),
     "ampHiEmptFail": (
-        130,
+        145,
         modLoInit + tranPrep + c50 + "XQ25000;" + c00 + quiet + cleanup + "Pv;<XD;",
         (
             "Inject 50A into amp.  Should detect and switch amp current failure",
@@ -399,7 +399,7 @@ lookup = {
         ),
     ),
     "ampHiFail": (
-        130,
+        145,
         modHalfInit + tranPrep + c50 + "XQ25000;" + c00 + quiet + cleanup + "Pv;<XD;",
         (
             "Inject 50A into amp.  Should detect and switch amp current failure",
@@ -414,7 +414,7 @@ lookup = {
         ),
     ),
     "noaHiFail": (
-        130,
+        145,
         modHalfInit + tranPrep + d50 + "XQ25000;" + c00 + quiet + cleanup + "Pv;<XD;",
         (
             "Inject 50A into noa. With ib_diff only nothing changes then "
@@ -862,7 +862,7 @@ lookup = {
         ("Should be normal hard charge step", "Like engine start", "", ""),
     ),
     "ibDualMid": (
-        130,
+        145,
         modHalfInit + tranPrep + cmn100 + "XQ25000;" + c00 + quiet + cleanup + "<XD;",
         (
             "Inject 100A into amp and noa simultaneously.  Should detect and switch dual amp current failure set Ib=0",
@@ -871,7 +871,7 @@ lookup = {
         ),
     ),
     "ibDualFlat": (
-        130,
+        145,
         modFlatInit + tranPrep + cmn100 + "XQ25000;" + c00 + quiet + cleanup + "<XD;",
         (
             "Inject 100A into amp and noa simultaneously.  Should detect and switch dual amp current failure set Ib=0",

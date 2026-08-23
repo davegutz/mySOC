@@ -42,7 +42,7 @@ class TFDelay:
         if in_:
             self.timer = self.nf
         else:
-            self.time = -self.nt
+            self.timer = -self.nt
         self.saved = Saved()
 
     def __str__(self, prefix=""):

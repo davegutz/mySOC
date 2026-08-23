@@ -139,10 +139,10 @@ def replicate(OPT: UserOptions):
     chm_m, chm_s = chm_from_mon_or_sim(OPT.mon_run, OPT.sim_run)
 
     t_len = len(t)
-    rp = Retained()
 
     # modeling
     modeling = get_modeling(OPT.mon_run, OPT.mod_force)
+    rp = Retained(modeling[0])
 
     # tweaking
     tweak_test = rp.tweak_test
@@ -176,7 +176,8 @@ def replicate(OPT: UserOptions):
         vsat_add=Battery.sp_vsat_add,
         tweak_test=tweak_test,
     )
-    Is_sat_delay = TFDelay(in_=OPT.mon_run.soc[0] > 0.97, t_true=T_SAT, t_false=T_DESAT, dt=0.1)  # later, dt is changed
+    Is_sat_delay = TFDelay(in_=(OPT.mon_run.soc[0] > 0.97 and not rp.tweak_test), t_true=T_SAT, t_false=T_DESAT, dt=0.1)
+                                                                                            # dt is set dynamically
 
     # Time sync
     if hasattr(OPT.mon_run, "time_run_start"):
@@ -423,7 +424,9 @@ def replicate(OPT: UserOptions):
                 mon.chemistry.low_t,
                 vsat_add=Battery.sp_vsat_add,
             )
-            saturated = Is_sat_delay.calculate(sat, T_SAT, T_DESAT, min(T, T_SAT / 2.0), reset)
+            saturated = Is_sat_delay.calculate(sat, T_SAT, T_DESAT, min(T, T_SAT / 2.0), reset and not rp.tweak_test)
+            mon.saturated = saturated
+            mon.sat = sat
 
         # Monitor count Coulumbs
         mon.count_coulombs(
