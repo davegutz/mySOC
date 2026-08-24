@@ -17,9 +17,15 @@ __author__ = "Dave Gutz <davegutz@alum.mit.edu>"
 __version__ = "$Revision: 1.1 $"
 __date__ = "$Date: 2022/06/02 13:15:02 $"
 
+import math
 import numpy as np
 import os
 from pathlib import Path, PurePosixPath
+
+
+def c_round(x):
+    """C/C++ std::round equivalent (half-way rounds away from zero, unlike Python 3 banker's rounding)."""
+    return math.floor(x + 0.5) if x >= 0 else math.ceil(x - 0.5)
 
 
 class TFDelay:
@@ -30,8 +36,8 @@ class TFDelay:
         self.timer = 0
         self.t_true = t_true
         self.t_false = t_false
-        self.nt = int(max(round(self.t_true / dt) + 1, 0))
-        self.nf = int(max(round(self.t_false / dt) + 1, 0))
+        self.nt = int(max(c_round(self.t_true / dt) + 1, 0))
+        self.nf = int(max(c_round(self.t_false / dt) + 1, 0))
         self.dt = dt
         self.in_ = in_
         self.out = self.in_
@@ -87,16 +93,16 @@ class TFDelay:
         return out
 
     def calculate3(self, in_, t_true, t_false):
-        self.nt = int(max(round(t_true / self.dt) + 1, 0))
-        self.nf = int(max(round(t_false / self.dt) + 1, 0))
+        self.nt = int(max(c_round(t_true / self.dt) + 1, 0))
+        self.nf = int(max(c_round(t_false / self.dt) + 1, 0))
         return self.calculate1(in_)
 
     def calculate4t(self, in_, t_true, t_false, dt):
         self.dt = max(dt, 1e-9)
         self.t_true = t_true
         self.t_false = t_false
-        self.nt = int(max(round(self.t_true / self.dt) + 1, 0))
-        self.nf = int(max(round(self.t_false / self.dt) + 1, 0))
+        self.nt = int(max(c_round(self.t_true / self.dt) + 1, 0))
+        self.nf = int(max(c_round(self.t_false / self.dt) + 1, 0))
         return self.calculate1(in_)
 
     def calculate4r(self, in_, t_true, t_false, reset):

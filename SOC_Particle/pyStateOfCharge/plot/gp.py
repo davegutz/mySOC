@@ -67,8 +67,6 @@ def gp_1(S: PlotOptions, fig_list=None, fig_files=None):
     plt.subplot(224)
     plq(plt, S.sr, "time", S.sr, "ib_in_s", color="blue", linestyle="-", warn=not S.ver_is_stdy)
     plq(plt, S.smv, "time", S.smv, "ib_in_s", color="red", linestyle="--", warn=not S.ver_is_run)
-    if not S.strict_overplot:
-        plq(plt, S.smv, "time", S.smv, "ib_pst_s", color="orange", linestyle="-.", warn=not S.ver_is_run)
     plt.legend(loc=1)
     fig_file_name = S.filename + "_" + str(len(fig_list)) + ".png"
     fig_files.append(fig_file_name)

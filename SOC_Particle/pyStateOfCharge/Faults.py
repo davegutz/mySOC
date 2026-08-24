@@ -220,6 +220,7 @@ class Looparound:
         e_wrap_filt_init=0.0,
         e_wrap_trim_init=0.0,
         freeze=False,
+        disable_fault=False,
     ):
         from Battery import Battery
 
@@ -285,22 +286,24 @@ class Looparound:
         # wrap_vb latches because vb is single sensor  faultAssign( (e_wrap_filt_ >= ewhi_thr_ && !Mon->sat()),
         # WRAP_HI_FLT);
 
-        self.hi_fault = self.e_wrap_filt >= self.ewhi_thr
-        self.hi_fail = self.WrapHi.calculate(
-            in_=self.hi_fault,
-            t_true=Battery.WRAP_HI_SET,
-            t_false=Battery.WRAP_HI_RES,
-            dt=dt_into_wrap,
-            reset=self.reset,
-        )  # non-latching
-        self.lo_fault = self.e_wrap_filt <= self.ewlo_thr
-        self.lo_fail = self.WrapLo.calculate(
-            in_=self.lo_fault,
-            t_true=Battery.WRAP_LO_SET,
-            t_false=Battery.WRAP_LO_RES,
-            dt=dt_into_wrap,
-            reset=self.reset,
-        )  # non-latching
+        self.hi_fault = (self.e_wrap_filt >= self.ewhi_thr) and not disable_fault
+        if not disable_fault:
+            self.hi_fail = self.WrapHi.calculate(
+                in_=self.hi_fault,
+                t_true=Battery.WRAP_HI_SET,
+                t_false=Battery.WRAP_HI_RES,
+                dt=dt_into_wrap,
+                reset=self.reset,
+            )  # non-latching
+        self.lo_fault = (self.e_wrap_filt <= self.ewlo_thr) and not disable_fault
+        if not disable_fault:
+            self.lo_fail = self.WrapLo.calculate(
+                in_=self.lo_fault,
+                t_true=Battery.WRAP_LO_SET,
+                t_false=Battery.WRAP_LO_RES,
+                dt=dt_into_wrap,
+                reset=self.reset,
+            )  # non-latching
         self.ib_past2 = self.ib_past
         self.ib_past = self.ib
         self.dt_past = self.dt
@@ -515,6 +518,7 @@ class Wrap(MyLooparounds):
                 e_wrap_filt_init=SN.mon_run.e_wrap_m_filt[G.i],
                 e_wrap_trim_init=SN.mon_run.e_wrap_m_trim[G.i],
                 freeze=not self.ib_lo_active,
+                disable_fault=self.disable_amp_fault,
             )
 
         # Scale for final selection

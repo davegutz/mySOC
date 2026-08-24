@@ -547,7 +547,6 @@ class BatteryMonitor(Battery, EKF1x1, Wrap):
         self.tau_hys_s = 0.0
         self.vb_s = 0.0
         self.q_s = 0.0
-        self.ib_pst_s = 0.0
         self.reset_s = 0.0
         self.tau_s = 0.0
         self.tau_hys_s = 0.0
@@ -842,10 +841,6 @@ class BatteryMonitor(Battery, EKF1x1, Wrap):
         self.voc_ekf = self.hx
         self.ib_past = self.ib
         self.vb_past = self.vb
-
-        self.ib_pst = self.ib_charge
-        if self.ib_charge > 0.1:
-            pass
 
         return self.vb_model_rev
 
@@ -1145,7 +1140,6 @@ class BatteryMonitor(Battery, EKF1x1, Wrap):
         self.ib_dyn_tau_s = sim.chemistry.tau_ct
         self.tau_hys_s = sim.tau_hys
         self.q_s = sim.q
-        self.ib_pst_s = sim.ib_pst
         self.reset_s = sim.reset
         self.tau_s = sim.tau_hys
         self.tau_hys_s = sim.tau_hys
@@ -1226,7 +1220,6 @@ class BatterySim(Battery):
         self.c_time = 0.0
         self.c_time_sim = 0.0
         self.saved_s = SavedS("ver_s")  # for plots and prints
-        self.ib_pst = 0.0  # Future value of limited current, A
         self.soc_pst = 1.
         self.reset_temp_past = self.sat_s
         self.dt_charge_s = 0.0
@@ -1260,7 +1253,6 @@ class BatterySim(Battery):
         self.tau_hys_s = 0.0
         self.vb_s = 0.0
         self.q_s = 0.0
-        self.ib_pst_s = 0.0
         self.reset_s = 0.0
         self.tau_s = 0.0
         self.tau_hys_s = 0.0
@@ -1271,7 +1263,6 @@ class BatterySim(Battery):
             self.d_delta_q = SN.d_delta_q_s_init
             self.delta_q = SN.delta_q_s_init
             self.ib = SN.ib_s_init
-            self.ib_pst = SN.ib_pst_s_init
             self.ib_charge = SN.ib_charge_s_init
             self.ioc = SN.ioc_s_init
             if SN.run_type == "HistSim":
@@ -1305,7 +1296,6 @@ class BatterySim(Battery):
         )
         s += "  ib_in  =          {:7.3f}  // Saved value of current input, A\n".format(self.ib_in)
         s += "  ib     =          {:7.3f}  // Open circuit current into posts, A\n".format(self.ib)
-        s += "  ib_pst =          {:7.3f}  // Future value of limited current, A\n".format(self.ib_pst)
         s += "  voc     =         {:7.3f}  // Open circuit voltage, V\n".format(self.voc)
         s += "  voc_stat=         {:7.3f}  // Static, table lookup value of voc before applying hysteresis, V\n".format(
             self.voc_stat
@@ -1370,13 +1360,9 @@ class BatterySim(Battery):
             self.chemistry.dvoc_dt,
             vsat_add=Battery.sp_vsat_add,
         )
-        if self.reset:
-            self.ib_pst = self.ib
         if self.reset and SN.sim_run.bms_off_s[0]:
-            self.ib_pst = 0.0
-        self.ib_pst = max(min(self.ib_pst,  # Saturation
-                              Battery.IMAX_NUM),  # Overflow
-                              -Battery.IMAX_NUM)  # Overflow
+            self.ib = 0.0
+        self.ib = max(min(self.ib, Battery.IMAX_NUM), -Battery.IMAX_NUM)  # Overflow
         soc_lim = max(min(self.soc_pst, 1.0), -0.2)  # slightly beyond
 
         # VOC-OCV model
@@ -1388,11 +1374,11 @@ class BatterySim(Battery):
                             self.vsat * 1.2)  # slightly beyond sat but don't windup
 
         # Hysteresis model
-        self.hys.calculate_hys(self.ib_pst, self.soc_pst, self.chm)
+        self.hys.calculate_hys(self.ib, self.soc_pst, self.chm)
         init_low = (
             self.bms_off or
             (self.soc_pst < (self.soc_min + Battery.HYS_SOC_MIN_MARG) and
-            self.ib_pst > Battery.HYS_IB_THR))
+            self.ib > Battery.HYS_IB_THR))
         self.dv_hys, self.tau_hys = self.hys.update(
             self.dt, init_high=self.sat_s, init_low=init_low, e_wrap=0.0, chem=self.chm
         )
@@ -1409,23 +1395,23 @@ class BatterySim(Battery):
             self.voltage_low = self.voc_stat < self.chemistry.vb_down_sim
         else:
             self.voltage_low = self.voc_stat < self.chemistry.vb_rising_sim
-        bms_charging = self.ib_pst > Battery.IB_MIN_UP
+        bms_charging = self.ib > Battery.IB_MIN_UP
         self.bms_off = (self.Tb_f < self.chemistry.low_t) or (self.voltage_low and not rp.tweak_test)
         ib_charge_pst = self.ib
         if self.bms_off and self.mod and not bms_charging:
             ib_charge_pst = 0.0
         if self.bms_off and self.voltage_low:
-            self.ib_pst = 0.0
+            self.ib = 0.0
 
         # Charge transfer dynamics
         self.ib_dyn = self.ChargeTransfer.calculate_tau_seeded(
-            self.ib_pst, SN.ib_dyn_s[G.i], self.reset, self.dt, self.chemistry.tau_ct
+            self.ib, SN.ib_dyn_s[G.i], self.reset, self.dt, self.chemistry.tau_ct
         )
         self.ib_dyn_r = self.ChargeTransfer.reset
         self.ib_dyn_T = self.ChargeTransfer.dt
         self.ib_dyn_rstate = self.ChargeTransfer.rstate
         self.ib_dyn_lstate = self.ChargeTransfer.state
-        dv_dyn = self.ib_dyn * self.chemistry.r_ct + self.ib_pst * self.chemistry.r_0
+        dv_dyn = self.ib_dyn * self.chemistry.r_ct + self.ib * self.chemistry.r_0
         self.vb = self.voc + dv_dyn
         self.voc_soc = self.voc_stat
 
@@ -1438,11 +1424,11 @@ class BatterySim(Battery):
         self.dv_dyn = self.vb - self.voc
 
         self.ib_charge = ib_charge_pst
-        self.ib_pst = self.ib_charge
+        self.ib = self.ib_charge
 
         # Indicators
-        self.cutback_s = (abs(self.ib_pst - self.sat_ib_max) < 1e-4)
-        self.sat_s = self.cutback_s & (self.ib_pst < self.ib_sat)
+        self.cutback_s = (abs(self.ib - self.sat_ib_max) < 1e-4)
+        self.sat_s = self.cutback_s & (self.ib < self.ib_sat)
         if self.reset and SN.mon_run.saturated[0] is not None:
             self.sat_s = SN.mon_run.saturated[0]
         self.sat = self.sat_s
@@ -1558,7 +1544,6 @@ class BatterySim(Battery):
         self.tau_hys_s = self.tau_hys
         self.vb_s = self.vb
         self.q_s = self.q
-        self.ib_pst_s = self.ib_pst
         self.reset_s = self.reset
         self.tau_s = self.tau_hys
         self.tau_hys_s = self.tau_hys
@@ -1764,7 +1749,6 @@ class SavedS:
         self.d_delta_q_s = []
         self.ib_charge_s = []
         self.dt_charge_s = []
-        self.ib_pst_s = []
         self.sat_s = []
         self.ddq_s = []
         self.delta_q_s = []
@@ -1789,7 +1773,6 @@ class SavedS:
             s += "{:8.3f},".format(self.ib_s[i])
             s += "{:8.3f},".format(self.ib_dyn_s[i])
             s += "{:8.3f},".format(self.ib_in_s[i])
-            s += "{:8.3f},".format(self.ib_pst_s[i])
             s += "{:1.0f},".format(self.sat_s[i])
             s += "{:5.3f},".format(self.ddq_s[i])
             s += "{:5.3f},".format(self.delta_q_s[i])

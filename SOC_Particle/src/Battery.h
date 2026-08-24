@@ -276,7 +276,6 @@ class BatterySim : public Battery {
   void hys_pretty_print() { hys_->pretty_print(0., 0., 0.); };
   float ib_charge() { return ib_charge_; };
   float sat_ib_max() { return sat_ib_max_; };
-  float ib_pst() { return ib_pst_; };
   float ib_in() { return ib_in_; };
   float ib_s() { return ib_; };
   void init_battery_sim(const bool reset, Sensors* Sen);
@@ -296,7 +295,6 @@ class BatterySim : public Battery {
   uint32_t duty_;  // Used in Test Mode to inject Fake shunt current (0 - 255)
   double d_delta_q_s_;  // Charge rate, C/s
   float ib_charge_;  // Current input avaiable for charging, A
-  float ib_pst_;  // Past value of limited current, A
   float ib_in_;  // Saved value of current input, A
   float ib_sat_;  // Threshold to declare saturation
                   // This regeneratively slows

@@ -285,7 +285,6 @@ class Sensors:
         self.dv_dyn_s = self.sim_run.dv_dyn_s
         self.ib_s_init = self.ib_in_s[0]
         self.ib_charge_s_init = self.ib_charge_s[0]
-        self.ib_pst_s_init = self.ib_in_s[0]
         self.ib_charge_s_init = self.ib_charge_s[0]
         self.ioc_s_init = self.ib_in_s[0]
         self.voc_s_init = self.sim_run.voc_stat_s[0]

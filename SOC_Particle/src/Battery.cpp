@@ -707,7 +707,7 @@ BatterySim::BatterySim(const float dx_voc, const float dy_voc,
     : Battery(sp.delta_q_model_ptr(), VS, dx_voc, dy_voc, dz_voc),
       Sin_inj_(nullptr), Sq_inj_(nullptr), Tri_inj_(nullptr), Cos_inj_(nullptr),
       c_time_s_(0.), dt_s_(0ULL), duty_(0UL), d_delta_q_s_(0.),
-      ib_charge_(0.), ib_pst_(0.), ib_in_(0.),
+      ib_charge_(0.), ib_in_(0.),
       ib_sat_(0.5), cut_s_(true), sat_s_(false),
       q_(NOM_UNIT_CAP * 3600.), 
       sat_cutback_gain_(SAT_CUTBACK_GAIN), sat_ib_max_(0.), sat_ib_null_(0.),
@@ -741,7 +741,6 @@ output/input.
 //  Inputs:
 //    Sen->Tb_f      Filtered battery bank temp, C
 //    Sen->Ib_model_in  Battery bank current input to model, A
-//    ib_pst_(past)     Past future value of limited current, A
 //    Sen->T            Update time, sec
 //    sat
 //    bms_off
@@ -750,8 +749,8 @@ output/input.
 //    soc_              State of Charge, fraction
 //
 //  Outputs:
-//    Tb_f_               Simulated Tb, deg C
-//    ib_pst_           Simulated over-ridden by saturation, A
+//    Tb_f_             Simulated Tb, deg C
+//    ib_               Simulated over-ridden by saturation, A
 //    vb_               Simulated vb, V
 //    sp.inj_bias       Used to inject fake shunt current, A
 
@@ -799,12 +798,7 @@ float BatterySim::calculate(Sensors* Sen, const bool dc_dc_on,
     ib_ = min(ib_in_, sat_ib_max_);
   }    
   vsat_ = calc_vsat();
-  if (reset ) {
-    ib_pst_ = ib_;
-  }
-  ib_pst_ = max(min(ib_pst_,  // Saturation
-             IMAX_NUM),   // Overflow
-            -IMAX_NUM);   // Overflow
+  ib_ = max(min(ib_, IMAX_NUM), -IMAX_NUM);   // Overflow
   double soc_lim = max(min(soc_pst_, 1.0), -0.2);  // slightly beyond
 
   // VOC-OCV model
@@ -814,9 +808,9 @@ float BatterySim::calculate(Sensors* Sen, const bool dc_dc_on,
                   vsat_ * 1.2);  // slightly beyond sat but don't windup
 
   // Hysteresis model
-  hys_->calculate(ib_pst_, soc_pst_, ap.hys_scale());
+  hys_->calculate(ib_, soc_pst_, ap.hys_scale());
   bool init_low =
-      bms_off_ || (soc_pst_ < (soc_min_ + HYS_SOC_MIN_MARG) && ib_pst_ > HYS_IB_THR);
+      bms_off_ || (soc_pst_ < (soc_min_ + HYS_SOC_MIN_MARG) && ib_ > HYS_IB_THR);
   dv_hys_ = hys_->update(dt_s_, sat_, init_low, 0.0, ap.hys_scale(), reset);
   voc_ = voc_stat_ + dv_hys_;
   ioc_ = hys_->ioc();
@@ -831,17 +825,17 @@ float BatterySim::calculate(Sensors* Sen, const bool dc_dc_on,
     voltage_low_ = voc_stat_ < chem_.vb_down_sim;
   else
     voltage_low_ = voc_stat_ < chem_.vb_rising_sim;
-  bms_charging_ = ib_pst_ > IB_MIN_UP;
+  bms_charging_ = ib_ > IB_MIN_UP;
   bms_off_ = Tb_f_ <= chem_.low_t || (voltage_low_ && !sp.tweak_test());
   float ib_charge_pst = ib_;  // Pass along current to charge unless bms_off
   if (bms_off_ && sp.mod_ib() && !bms_charging_) ib_charge_pst = 0.;
-  if (bms_off_ && voltage_low_) ib_pst_ = 0.;
+  if (bms_off_ && voltage_low_) ib_ = 0.;
 
   // ChargeTransfer dynamic model for model, reverse version to generate sensor
   // inputs
-  ib_dyn_ = ChargeTransfer_->calculate(ib_pst_, reset, chem_.tau_ct, dt_s_);
+  ib_dyn_ = ChargeTransfer_->calculate(ib_, reset, chem_.tau_ct, dt_s_);
   float dvdyn =
-      (ib_dyn_ * chem_.r_ct * ap.slr_res() + ib_pst_ * chem_.r_0 * ap.slr_res());
+      (ib_dyn_ * chem_.r_ct * ap.slr_res() + ib_ * chem_.r_0 * ap.slr_res());
 
   vb_ = voc_ + dvdyn;
   voc_soc_ = voc_stat_;
@@ -856,7 +850,7 @@ float BatterySim::calculate(Sensors* Sen, const bool dc_dc_on,
   dv_dyn_ = vb_ - voc_;
 
   ib_charge_ = ib_charge_pst;
-  ib_pst_ = ib_charge_;
+  ib_ = ib_charge_;
 
   // Indicators
   cut_s_ = ib_charge_ == sat_ib_max_;
@@ -1023,7 +1017,6 @@ void BatterySim::init_battery_sim(const bool reset, Sensors* Sen) {
   if (isnan(voc_)) voc_ = 13.;  // reset overflow
   if (isnan(ib_)) ib_ = 0.;     // reset overflow
   dv_dyn_ = vb_ - voc_;
-  ib_pst_ = ib_;
   init_hys(0.0);
   ibs_ = hys_->ibs();
 #ifdef DEBUG_INIT
@@ -1047,7 +1040,6 @@ void BatterySim::pretty_print() {
   Serial.printf("  hys_scale%7.3f,\n", ap.hys_scale());
   Serial.printf("  ib%7.3f, A\n", ib_);
   Serial.printf("  ib_charge%7.3f, A\n", ib_charge_);
-  Serial.printf("  ib_pst%7.3f, A\n", ib_pst_);
   Serial.printf("  ib_in%7.3f, A\n", ib_in_);
   Serial.printf("  ib_sat%7.3f\n", ib_sat_);
   Serial.printf("  mod_cb %d\n", cut_s_);
