@@ -274,7 +274,10 @@ def replicate(OPT: UserOptions):
             mon.assign_tb(mon.Tb)
             mon.assign_tb_f(mon.Tb_f)
             mon.apply_delta_q_t(mon.delta_q, Tb_f[G.i])
-            sat_s_init = SN.voc_stat_init > OPT.mon_run.vsat[G.i]
+            if SN.run_type == "RunSim":
+                sat_s_init = SN.mon_run.voc_stat[0] > OPT.mon_run.vsat[G.i]
+            elif SN.run_type == "HistSim":
+                sat_s_init = SN.mon_run.voc_stat_f[0] > OPT.mon_run.vsat[G.i]
             if OPT.sim_run is not None:
                 sat_s_init = OPT.sim_run.sat_s[G.i]
             sim.sat = sat_s_init

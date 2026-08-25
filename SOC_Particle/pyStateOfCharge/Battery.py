@@ -487,12 +487,20 @@ class BatteryMonitor(Battery, EKF1x1, Wrap):
             self.Tb_model = SN.mon_run.Tb_model[0]
             self.Tb_model_f = SN.mon_run.Tb_model_f[0]
             self.Tb_model_f_rate = SN.mon_run.Tb_model_f_rate[0]
-            self.e_wrap = SN.e_wrap_init
+            self.e_wrap = SN.mon_run.e_wrap_filt[0]
             self.e_wrap_filt = SN.mon_run.e_wrap_filt[0]
-            self.e_wrap_m = SN.e_wrap_m_init
+            if hasattr(SN.mon_run, "e_wrap"):
+                self.e_wrap_m = SN.mon_run.e_wrap_m[0]
+            else:
+                self.e_wrap_m = SN.mon_run.e_wrap_m_filt[0]
             self.e_wrap_m_filt = SN.mon_run.e_wrap_m_filt[0]
             self.e_wrap_m_trim = SN.mon_run.e_wrap_m_trim[0]
-            self.e_wrap_n = SN.e_wrap_n_init
+            if hasattr(SN.mon_run, "e_wrap"):
+                self.e_wrap_m = SN.mon_run.e_wrap_m[0]
+                self.e_wrap_n = SN.mon_run.e_wrap_n[0]
+            else:
+                self.e_wrap_m = SN.mon_run.e_wrap_m_filt[0]
+                self.e_wrap_n = SN.mon_run.e_wrap_n_filt[0]
             self.e_wrap_n_filt = SN.mon_run.e_wrap_n_filt[0]
             self.e_wrap_n_trim = SN.mon_run.e_wrap_n_trim[0]
             self.e_wrap_n_trim = 0.0
@@ -504,7 +512,10 @@ class BatteryMonitor(Battery, EKF1x1, Wrap):
             self.Tb_model = SN.mon_run.Tb_model[0]
             self.ib = SN.ib_init
             self.ib_dyn = SN.ib_dyn[0]
-            self.ib_charge = SN.ib_charge_init
+            if SN.run_type == "RunSim":
+                self.ib_charge = SN.mon_run.ib_charge[0]
+            elif SN.run_type == "HistSim":
+                self.ib_charge = SN.mon_run.ib_charge_f[0]
             self.ib_charge_ekf = self.ib_charge
             self.vb = SN.vb_init
             self.soc = SN.mon_run.soc[0]

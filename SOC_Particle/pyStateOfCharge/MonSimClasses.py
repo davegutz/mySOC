@@ -93,7 +93,6 @@ class Sensors:
                 self.mod_tb = np.copy(self.mon_run.mod_data)
             self.Tb = self.mon_run.Tb[0]
             self.Tb_f = self.mon_run.Tb_f[0]
-            self.lut_dTb = None
             self.dTb = 0.0
             self.Tb_f_rate = self.mon_run.Tb_f_rate[0]
             self.Tb_past = self.mon_run.Tb[0] + self.dTb
@@ -151,20 +150,11 @@ class Sensors:
             self.ib_dyn_s = self.sim_run.ib_dyn_s
             self.dv_dyn_s = self.sim_run.dv_dyn_s
             self.dt_s = self.sim_run.dt_s if hasattr(self.sim_run, "dt_s") else self.mon_run.dt
-            self.d_delta_q_s_init = 0.0
-            self.delta_q_s_init = self.sim_run.delta_q_s[0] if hasattr(self.sim_run, "delta_q_s") and len(self.sim_run.delta_q_s) > 0 else 0.0
             self.Tb_model_f_fut = self.mon_run.Tb_model_f[1]
             self.Tb_model_f_rate_fut = self.mon_run.Tb_model_f_rate[1]
-            self.e_wrap_init = self.mon_run.e_wrap[0]
-            self.e_wrap_m_init = self.mon_run.e_wrap_m[0]
-            self.e_wrap_n_init = self.mon_run.e_wrap_n[0]
             self.dTb = 0.0
-            # self.Tb_f = self.mon_run.Tb_f
             self.ib_init = self.mon_run.ib[0]
-            self.ib_charge_init = self.mon_run.ib_charge[0]
             self.vb_init = self.mon_run.vb[0]
-            self.voc_stat_init = self.mon_run.voc_stat[0]
-            self.ib_amp_model = self.mon_run.ib_amp_model
             self.voc_stat_f_lstate = self.mon_run.voc_stat_f_lstate
             self.voc_stat_f_lstate_init = self.voc_stat_f_lstate[0]
 
@@ -182,18 +172,6 @@ class Sensors:
             if not hasattr(self.mon_run, "ib_h"):
                 self.mon_run.ib_h = np.copy(self.mon_run.ib_f)
             self.Battery = Battery
-
-            if hasattr(self.mon_run, "e_wrap"):
-                self.e_wrap_init = self.mon_run.e_wrap[0]
-                self.e_wrap_m_init = self.mon_run.e_wrap_m[0]
-                self.e_wrap_n_init = self.mon_run.e_wrap_n[0]
-            else:
-                self.e_wrap_init = self.mon_run.e_wrap_filt[0]
-                self.e_wrap_m_init = self.mon_run.e_wrap_m_filt[0]
-                self.e_wrap_n_init = self.mon_run.e_wrap_n_filt[0]
-            self.e_wrap_filt_init = self.mon_run.e_wrap_filt[0]
-            self.voc_stat_init = self.mon_run.voc_stat_f[0]
-            self.lut_dTb = None
             self.dTb = 0.0
             self.Tb = self.mon_run.Tb_f[0]
             self.Tb_f_rate = np.copy(self.Tb_f) * 0.0
@@ -221,7 +199,6 @@ class Sensors:
             self.ib_noa = self.mon_run.ib_noa_hdwe_f
             self.ib_init = self.mon_run.ib_f[0]
             self.ib_dyn = ProArray(self.mon_run.ib_dyn)
-            self.ib_charge_init = self.mon_run.ib_charge_f[0]
             self.vb_init = self.mon_run.vb_f[0]
             self.ib_amp_model = self.mon_run.ib_amp_hdwe_f
             self.z = self.mon_run.z
