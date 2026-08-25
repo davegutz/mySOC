@@ -132,18 +132,8 @@ class Sensors:
                     self.KfShuntNoa.P = np.array([[self.mon_run.P00n[0], self.mon_run.P01n[0]], [self.mon_run.P10n[0], self.mon_run.P11n[0]]])
                     self.KfShuntNoa.P_prior = self.KfShuntNoa.P.copy()
 
-            self.ib_amp_model = self.mon_run.ib_amp_model
-            if OPT.mon_run.mib[0]:
-                self.ib_amp = self.mon_run.ib_amp_model[0]
-                self.ib_noa = self.mon_run.ib_noa_model[0]
-            else:
-                self.ib_amp = self.mon_run.ib_amp_hdwe[0]
-                self.ib_noa = self.mon_run.ib_noa_hdwe[0]
             self.dt_s = self.sim_run.dt_s if hasattr(self.sim_run, "dt_s") else self.mon_run.dt
-            self.Tb_model_f_fut = self.mon_run.Tb_model_f[1]
-            self.Tb_model_f_rate_fut = self.mon_run.Tb_model_f_rate[1]
             self.dTb = 0.0
-            self.voc_stat_f_lstate = self.mon_run.voc_stat_f_lstate
 
         elif self.run_type == "HistSim":
             self.mon_run = OPT.mon_run.copy()
@@ -184,17 +174,8 @@ class Sensors:
                 self.mon_run.e_wrap_n_trim,
                 self.mon_run.e_wrap_n_filt,
             )
-            self.ib_amp = self.mon_run.ib_amp_hdwe_f
-            self.ib_noa = self.mon_run.ib_noa_hdwe_f
-            self.ib_dyn = ProArray(self.mon_run.ib_dyn)
-            self.ib_amp_model = self.mon_run.ib_amp_hdwe_f
-            self.z = self.mon_run.z
-            self.voc_stat_f_lstate = self.mon_run.voc_stat_f_lstate
 
         self.i = 0
-        self.soc_s = self.mon_run.soc_s
-        if hasattr(self.mon_run, "Tb_model_f_fut"):
-            self.Tb_model_f_fut = self.mon_run.Tb_model_f_fut[0]
 
         # q
         if not hasattr(self.sim_run, "qcap_s"):
@@ -210,8 +191,6 @@ class Sensors:
             self.delta_q_s = -self.qcap_s * (1.0 - self.mon_run.soc_s)
         else:
             self.delta_q_s = self.sim_run.delta_q_s
-        self.ib_in_s = self.sim_run.ib_in_s
-        self.dv_dyn_s = self.sim_run.dv_dyn_s
         self.reset_kf = True
         self.VoVcm = 0.0
         self.VoVcm_f = 0.0

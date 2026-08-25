@@ -651,7 +651,7 @@ class BatteryMonitor(Battery, EKF1x1, Wrap):
         self.ib = ib
         self.dt = dt
         self.ib_amp_hdwe = float(SN.mon_run.ib_amp_hdwe[G.i])
-        self.ib_amp_model = SN.ib_amp_model[G.i]
+        self.ib_amp_model = SN.mon_run.ib_amp_model[G.i]
         self.ib_noa_hdwe = float(SN.mon_run.ib_noa_hdwe[G.i])
         self.ib_noa_model = SN.mon_run.ib_noa_model[G.i]
         if getattr(SN.mon_run, "vb_model", None) is not None:
@@ -1457,7 +1457,6 @@ class BatterySim(Battery):
             charge_curr     Charge, A
             sat             Indicator that battery is saturated (VOC>threshold(temp)), T/F
             use_mon_soc     Command to drive integrator with input mon_soc
-            SN.soc_s        Auxiliary integrator setting, fraction soc
         Outputs:
             soc     State of charge, fraction (0-1.5)
         """
