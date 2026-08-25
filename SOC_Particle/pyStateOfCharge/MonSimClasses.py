@@ -222,11 +222,6 @@ class Sensors:
         if not hasattr(self, "ib_dyn_s"):
             self.ib_dyn_s = np.copy(self.ib_in_s)
         self.dv_dyn_s = self.sim_run.dv_dyn_s
-        self.voc_s_init = self.sim_run.voc_stat_s[0]
-        self.hx_init = self.mon_run.voc_soc[0]
-        self.x_init = self.mon_run.soc[0]
-        self.x_prior_init = self.x_init
-        self.soc_ekf_init = self.mon_run.soc[0]
         self.reset_kf = True
         self.VoVcm = 0.0
         self.VoVcm_f = 0.0

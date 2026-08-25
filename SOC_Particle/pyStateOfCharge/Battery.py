@@ -526,10 +526,10 @@ class BatteryMonitor(Battery, EKF1x1, Wrap):
             self.saturated = SN.mon_run.saturated[0]
             self.reset_ekf = True
             self.init_soc_ekf(ref, 0, 0)
-            self.voc_ekf = SN.hx_init
-            self.x = SN.x_init
-            self.x_prior = SN.x_prior_init
-            self.soc_ekf = SN.soc_ekf_init
+            self.voc_ekf = SN.mon_run.voc_soc[0]
+            self.x = SN.mon_run.soc[0]
+            self.x_prior = SN.mon_run.soc[0]
+            self.soc_ekf = SN.mon_run.soc[0]
             self.z = SN.mon_run.z[0]
         self.dt_s = 0.0
         self.chm_s = 0.0
@@ -1282,7 +1282,7 @@ class BatterySim(Battery):
                 self.vb = SN.mon_run.vb_f[0]
             else:
                 self.vb = SN.mon_run.vb[0]
-            self.voc = SN.voc_s_init
+            self.voc = SN.sim_run.voc_stat_s[0]
             self.ib_dyn = SN.ib_dyn_s[0]
             self.soc = SN.sim_run.soc_s[0]
 
