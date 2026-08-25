@@ -391,7 +391,7 @@ def replicate(OPT: UserOptions):
                 else:
                     T_ekf = T
 
-        SN.update_ekf(max(i_ekf, 0))  # z_init and voc_stat_f_lstate_init
+        SN.update_ekf(max(i_ekf, 0))  # initial z
 
         if reset_ekf and calc_ekf:
             mon.init_soc_ekf(OPT.mon_run, G.i, max(i_ekf, 0))  # when modeling (assumed in python) ekf wants to equal model

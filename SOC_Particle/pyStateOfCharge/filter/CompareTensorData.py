@@ -106,16 +106,13 @@ def seek_tensor(save_pdf_path="./figures", path_to_temp="./temp"):
     use_ib_mon_in = True
     skip = 1
     time_end = None
-    # plot_init_in = False
     long_term_in = False
     plot_overall_in = True
     use_vb_sim_in = False
     cc_dif_tol_in = 0.2
     verbose_in = False
     legacy_in = False
-    # data_file_txt = None
     temp_file = ""
-    # sat_init_in = None
     use_mon_soc = True
     v1_only_in = True
     dDA_in = 0.0

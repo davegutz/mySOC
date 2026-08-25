@@ -153,10 +153,7 @@ class Sensors:
             self.Tb_model_f_fut = self.mon_run.Tb_model_f[1]
             self.Tb_model_f_rate_fut = self.mon_run.Tb_model_f_rate[1]
             self.dTb = 0.0
-            self.ib_init = self.mon_run.ib[0]
-            self.vb_init = self.mon_run.vb[0]
             self.voc_stat_f_lstate = self.mon_run.voc_stat_f_lstate
-            self.voc_stat_f_lstate_init = self.voc_stat_f_lstate[0]
 
         elif self.run_type == "HistSim":
             if not hasattr(self.mon_run, "ib_dyn_m"):
@@ -197,17 +194,12 @@ class Sensors:
             )
             self.ib_amp = self.mon_run.ib_amp_hdwe_f
             self.ib_noa = self.mon_run.ib_noa_hdwe_f
-            self.ib_init = self.mon_run.ib_f[0]
             self.ib_dyn = ProArray(self.mon_run.ib_dyn)
-            self.vb_init = self.mon_run.vb_f[0]
             self.ib_amp_model = self.mon_run.ib_amp_hdwe_f
             self.z = self.mon_run.z
-            self.z_init = self.z[0]
             self.voc_stat_f_lstate = self.mon_run.voc_stat_f_lstate
-            self.voc_stat_f_lstate_init = self.voc_stat_f_lstate[0]
 
         self.i = 0
-        self.sat_init = self.mon_run.sat[0]
         self.soc_s = self.mon_run.soc_s
         if hasattr(self.mon_run, "Tb_model_f_fut"):
             self.Tb_model_f_fut = self.mon_run.Tb_model_f_fut[0]
@@ -226,22 +218,15 @@ class Sensors:
             self.delta_q_s = -self.qcap_s * (1.0 - self.mon_run.soc_s)
         else:
             self.delta_q_s = self.sim_run.delta_q_s
-        self.d_delta_q_s_init = 0.0
-        self.delta_q_s_init = self.delta_q_s[0]
-
         self.ib_in_s = self.sim_run.ib_in_s
         if not hasattr(self, "ib_dyn_s"):
             self.ib_dyn_s = np.copy(self.ib_in_s)
         self.dv_dyn_s = self.sim_run.dv_dyn_s
-        self.ib_s_init = self.ib_in_s[0]
-        self.ib_charge_s_init = self.ib_charge_s[0]
-        self.ioc_s_init = self.ib_in_s[0]
         self.voc_s_init = self.sim_run.voc_stat_s[0]
         self.hx_init = self.mon_run.voc_soc[0]
         self.x_init = self.mon_run.soc[0]
         self.x_prior_init = self.x_init
         self.soc_ekf_init = self.mon_run.soc[0]
-        self.z_init = self.mon_run.z[0]
         self.reset_kf = True
         self.VoVcm = 0.0
         self.VoVcm_f = 0.0
@@ -449,7 +434,6 @@ class Sensors:
 
     def update_ekf(self, i_ekf):
         self.z_init = self.z[i_ekf]
-        self.voc_stat_f_lstate_init = self.voc_stat_f_lstate[i_ekf]
 
     def update(self, i):
         self.i = min(max(i, 0), len(self.mon_run.time) - 1)

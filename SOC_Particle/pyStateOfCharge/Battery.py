@@ -510,17 +510,19 @@ class BatteryMonitor(Battery, EKF1x1, Wrap):
             self.Tb_f = SN.Tb_f
             self.Tb_f_rate = SN.mon_run.Tb_f_rate[0]
             self.Tb_model = SN.mon_run.Tb_model[0]
-            self.ib = SN.ib_init
-            self.ib_dyn = SN.ib_dyn[0]
             if SN.run_type == "RunSim":
+                self.ib = SN.mon_run.ib[0]
                 self.ib_charge = SN.mon_run.ib_charge[0]
+                self.vb = SN.mon_run.vb[0]
             elif SN.run_type == "HistSim":
+                self.ib = SN.mon_run.ib_f[0]
                 self.ib_charge = SN.mon_run.ib_charge_f[0]
+                self.vb = SN.mon_run.vb_f[0]
+            self.ib_dyn = SN.ib_dyn[0]
             self.ib_charge_ekf = self.ib_charge
-            self.vb = SN.vb_init
             self.soc = SN.mon_run.soc[0]
             self.reset = True
-            self.sat = SN.sat_init
+            self.sat = SN.mon_run.sat[0]
             self.saturated = SN.mon_run.saturated[0]
             self.reset_ekf = True
             self.init_soc_ekf(ref, 0, 0)
@@ -528,7 +530,7 @@ class BatteryMonitor(Battery, EKF1x1, Wrap):
             self.x = SN.x_init
             self.x_prior = SN.x_prior_init
             self.soc_ekf = SN.soc_ekf_init
-            self.z = SN.z_init
+            self.z = SN.mon_run.z[0]
         self.dt_s = 0.0
         self.chm_s = 0.0
         self.qcrs_s = 0.0
@@ -1271,18 +1273,18 @@ class BatterySim(Battery):
             self.Tb = SN.mon_run.Tb_f[0]
             self.dv_dyn = SN.dv_dyn_s[0]
             self.ib_in = SN.sim_run.ib_in_s[0]
-            self.d_delta_q = SN.d_delta_q_s_init
-            self.delta_q = SN.delta_q_s_init
-            self.ib = SN.ib_s_init
-            self.ib_charge = SN.ib_charge_s_init
-            self.ioc = SN.ioc_s_init
+            self.d_delta_q = 0.
+            self.delta_q = SN.delta_q_s[0]
+            self.ib = SN.sim_run.ib_s[0]
+            self.ib_charge = SN.sim_run.ib_charge_s[0]
+            self.ioc = SN.sim_run.ioc_s[0]
             if SN.run_type == "HistSim":
                 self.vb = SN.mon_run.vb_f[0]
             else:
                 self.vb = SN.mon_run.vb[0]
             self.voc = SN.voc_s_init
             self.ib_dyn = SN.ib_dyn_s[0]
-            self.soc = SN.mon_run.soc_s[0]
+            self.soc = SN.sim_run.soc_s[0]
 
     def __str__(self, prefix=""):
         """Returns representation of the object"""
