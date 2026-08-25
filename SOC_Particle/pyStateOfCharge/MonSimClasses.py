@@ -137,19 +137,13 @@ class Sensors:
                     self.KfShuntNoa.P = np.array([[self.mon_run.P00n[0], self.mon_run.P01n[0]], [self.mon_run.P10n[0], self.mon_run.P11n[0]]])
                     self.KfShuntNoa.P_prior = self.KfShuntNoa.P.copy()
 
-            self.ib_amp = 0.0
-            self.ib_noa = 0.0
             self.ib_amp_model = self.mon_run.ib_amp_model
-            self.ib_noa_model = self.mon_run.ib_noa_model
-            self.ib_amp_hdwe = self.mon_run.ib_amp_hdwe
-            self.ib_noa_hdwe = self.mon_run.ib_noa_hdwe
             if OPT.mon_run.mib[0]:
                 self.ib_amp = self.mon_run.ib_amp_model[0]
                 self.ib_noa = self.mon_run.ib_noa_model[0]
             else:
                 self.ib_amp = self.mon_run.ib_amp_hdwe[0]
                 self.ib_noa = self.mon_run.ib_noa_hdwe[0]
-            self.ib_diff = self.ib_amp - self.ib_noa
             self.ib_dyn = ProArray(self.mon_run.ib_dyn, mutable=True)
             self.z = self.mon_run.z
             self.ib_in_s = self.sim_run.ib_in_s
@@ -157,18 +151,13 @@ class Sensors:
             self.ib_dyn_s = self.sim_run.ib_dyn_s
             self.dv_dyn_s = self.sim_run.dv_dyn_s
             self.dt_s = self.sim_run.dt_s if hasattr(self.sim_run, "dt_s") else self.mon_run.dt
-            # self.dt_charge_s = self.sim_run.dt_charge_s
             self.d_delta_q_s_init = 0.0
             self.delta_q_s_init = self.sim_run.delta_q_s[0] if hasattr(self.sim_run, "delta_q_s") and len(self.sim_run.delta_q_s) > 0 else 0.0
             self.Tb_model_f_fut = self.mon_run.Tb_model_f[1]
             self.Tb_model_f_rate_fut = self.mon_run.Tb_model_f_rate[1]
             self.e_wrap_init = self.mon_run.e_wrap[0]
-            self.e_wrap_filt_init = self.mon_run.e_wrap_filt[0]
             self.e_wrap_m_init = self.mon_run.e_wrap_m[0]
             self.e_wrap_n_init = self.mon_run.e_wrap_n[0]
-            # self.Tb_f_init = self.mon_run.Tb_f[0]
-            # self.Tb_f_rate_init = self.mon_run.Tb_f_rate[0]
-            self.lut_dTb = None
             self.dTb = 0.0
             # self.Tb_f = self.mon_run.Tb_f
             self.ib_init = self.mon_run.ib[0]
@@ -186,7 +175,6 @@ class Sensors:
                 self.mon_run.ib_dyn_n = np.copy(self.mon_run.ib_noa_hdwe_f)
 
             self.dt_s = self.sim_run.dt_s if hasattr(self.sim_run, "dt_s") else self.mon_run.dt
-            self.dt_charge_s = self.sim_run.dt_charge_s
             if not hasattr(self.mon_run, "ibmm"):
                 self.mon_run.ibmm = np.copy(self.mon_run.ib_amp_hdwe_f)
             if not hasattr(self.mon_run, "ib_noa_model"):
@@ -236,7 +224,6 @@ class Sensors:
             self.ib_charge_init = self.mon_run.ib_charge_f[0]
             self.vb_init = self.mon_run.vb_f[0]
             self.ib_amp_model = self.mon_run.ib_amp_hdwe_f
-            self.ib_noa_model = self.mon_run.ib_noa_hdwe_f
             self.z = self.mon_run.z
             self.z_init = self.z[0]
             self.voc_stat_f_lstate = self.mon_run.voc_stat_f_lstate
@@ -249,20 +236,6 @@ class Sensors:
             self.Tb_model_f_fut = self.mon_run.Tb_model_f_fut[0]
 
         # q
-        if not hasattr(self.mon_run, "q_capacity"):
-            self.q_cap = calculate_capacity(
-                q_cap_rated_scaled=self.mon_run.qcrs,
-                dqdt=self.mon_run.dqdt,
-                tb_f=self.Tb_f,
-                t_rated=self.mon_run.t_rated,
-            )
-        else:
-            self.q_cap = self.mon_run.q_capacity
-        if not hasattr(self.mon_run, "delta_q"):
-            self.delta_q = -self.q_cap * (1.0 - self.mon_run.soc)
-        else:
-            self.delta_q = self.mon_run.delta_q
-        # self.Tb_f = self.mon_run.Tb_f
         if not hasattr(self.sim_run, "qcap_s"):
             self.qcap_s = calculate_capacity(
                 q_cap_rated_scaled=self.mon_run.qcrs_s,
@@ -284,7 +257,6 @@ class Sensors:
             self.ib_dyn_s = np.copy(self.ib_in_s)
         self.dv_dyn_s = self.sim_run.dv_dyn_s
         self.ib_s_init = self.ib_in_s[0]
-        self.ib_charge_s_init = self.ib_charge_s[0]
         self.ib_charge_s_init = self.ib_charge_s[0]
         self.ioc_s_init = self.ib_in_s[0]
         self.voc_s_init = self.sim_run.voc_stat_s[0]
@@ -326,9 +298,8 @@ class Sensors:
         if not hasattr(self.mon_run, "Tb_hdwe_f_rate"):
             self.mon_run.Tb_hdwe_f_rate = 0.0 * self.mon_run.Tb_h_f.copy()
         if hasattr(self.sim_run, "Tb_f_s"):
-            self.Tb_model_f_past = self.sim_run.Tb_f_s[0]
+            pass
         else:
-            self.Tb_model_f_past = self.mon_run.Tb_f[0]
             self.sim_run.Tb_f_s = self.mon_run.Tb_f
         if hasattr(self.mon_run, "mtb"):
             self.mtb = self.mon_run.mtb[0]
