@@ -80,13 +80,9 @@ class Sensors:
 
     def __init__(self, OPT, rp, run_type=None):
         self.run_type = run_type
-        if self.run_type == "HistSim":
-            self.mon_run = OPT.mon_run.copy()
-            self.sim_run = OPT.sim_run.copy()
-        else:
+        if self.run_type == "RunSim":
             self.mon_run = OPT.mon_run
             self.sim_run = OPT.sim_run
-        if self.run_type == "RunSim":
             if hasattr(self.mon_run, "mtb") and self.mon_run.mtb is not None:
                 self.mod_tb = self.mon_run.mtb
             else:
@@ -143,12 +139,6 @@ class Sensors:
             else:
                 self.ib_amp = self.mon_run.ib_amp_hdwe[0]
                 self.ib_noa = self.mon_run.ib_noa_hdwe[0]
-            self.ib_dyn = ProArray(self.mon_run.ib_dyn, mutable=True)
-            self.z = self.mon_run.z
-            self.ib_in_s = self.sim_run.ib_in_s
-            self.ib_charge_s = self.sim_run.ib_charge_s
-            self.ib_dyn_s = self.sim_run.ib_dyn_s
-            self.dv_dyn_s = self.sim_run.dv_dyn_s
             self.dt_s = self.sim_run.dt_s if hasattr(self.sim_run, "dt_s") else self.mon_run.dt
             self.Tb_model_f_fut = self.mon_run.Tb_model_f[1]
             self.Tb_model_f_rate_fut = self.mon_run.Tb_model_f_rate[1]
@@ -156,6 +146,8 @@ class Sensors:
             self.voc_stat_f_lstate = self.mon_run.voc_stat_f_lstate
 
         elif self.run_type == "HistSim":
+            self.mon_run = OPT.mon_run.copy()
+            self.sim_run = OPT.sim_run.copy()
             if not hasattr(self.mon_run, "ib_dyn_m"):
                 self.mon_run.ib_dyn_m = np.copy(self.mon_run.ib_amp_hdwe_f)
             if not hasattr(self.mon_run, "ib_dyn_n"):
@@ -219,8 +211,6 @@ class Sensors:
         else:
             self.delta_q_s = self.sim_run.delta_q_s
         self.ib_in_s = self.sim_run.ib_in_s
-        if not hasattr(self, "ib_dyn_s"):
-            self.ib_dyn_s = np.copy(self.ib_in_s)
         self.dv_dyn_s = self.sim_run.dv_dyn_s
         self.reset_kf = True
         self.VoVcm = 0.0
@@ -428,7 +418,7 @@ class Sensors:
         mon.Tb_model_f_lstate = self.TbModelFilt.state
 
     def update_ekf(self, i_ekf):
-        self.z_init = self.z[i_ekf]
+        self.z_init = self.mon_run.z[i_ekf]
 
     def update(self, i):
         self.i = min(max(i, 0), len(self.mon_run.time) - 1)

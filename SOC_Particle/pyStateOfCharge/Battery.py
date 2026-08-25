@@ -518,7 +518,6 @@ class BatteryMonitor(Battery, EKF1x1, Wrap):
                 self.ib = SN.mon_run.ib_f[0]
                 self.ib_charge = SN.mon_run.ib_charge_f[0]
                 self.vb = SN.mon_run.vb_f[0]
-            self.ib_dyn = SN.ib_dyn[0]
             self.ib_charge_ekf = self.ib_charge
             self.soc = SN.mon_run.soc[0]
             self.reset = True
@@ -767,7 +766,7 @@ class BatteryMonitor(Battery, EKF1x1, Wrap):
             dt_local = self.dt
             ib_dc = self.ib
         self.ib_dyn = self.ChargeTransfer.calculate_tau_seeded(
-            ib_dc, SN.ib_dyn[G.i], reset, dt_local, self.chemistry.tau_ct
+            ib_dc, SN.mon_run.ib_dyn[G.i], reset, dt_local, self.chemistry.tau_ct
         )
         self.ib_dyn_in = self.ChargeTransfer.in_
         self.ib_dyn_r = self.ChargeTransfer.reset
@@ -1059,7 +1058,7 @@ class BatteryMonitor(Battery, EKF1x1, Wrap):
         self.vovcn = SN.VoVcn
         self.vovcnkf = SN.VoVcn_f
         self.mod_data = self.mod
-        self.ib_model = SN.ib_in_s
+        self.ib_model = SN.sim_run.ib_in_s
         self.ib_h = self.ib_hdwe
         self.ib_s = SN.sim_run.ib_in_s
         self.mib = rp.modeling_ib
@@ -1271,7 +1270,7 @@ class BatterySim(Battery):
         self.tau_hys_s = 0.0
         if SN is not None:
             self.Tb = SN.mon_run.Tb_f[0]
-            self.dv_dyn = SN.dv_dyn_s[0]
+            self.dv_dyn = SN.sim_run.dv_dyn_s[0]
             self.ib_in = SN.sim_run.ib_in_s[0]
             self.d_delta_q = 0.
             self.delta_q = SN.delta_q_s[0]
@@ -1283,7 +1282,7 @@ class BatterySim(Battery):
             else:
                 self.vb = SN.mon_run.vb[0]
             self.voc = SN.sim_run.voc_stat_s[0]
-            self.ib_dyn = SN.ib_dyn_s[0]
+            self.ib_dyn = SN.sim_run.ib_dyn_s[0]
             self.soc = SN.sim_run.soc_s[0]
 
     def __str__(self, prefix=""):
@@ -1418,7 +1417,7 @@ class BatterySim(Battery):
 
         # Charge transfer dynamics
         self.ib_dyn = self.ChargeTransfer.calculate_tau_seeded(
-            self.ib, SN.ib_dyn_s[G.i], self.reset, self.dt, self.chemistry.tau_ct
+            self.ib, SN.sim_run.ib_dyn_s[G.i], self.reset, self.dt, self.chemistry.tau_ct
         )
         self.ib_dyn_r = self.ChargeTransfer.reset
         self.ib_dyn_T = self.ChargeTransfer.dt
