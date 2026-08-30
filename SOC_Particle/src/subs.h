@@ -86,6 +86,7 @@ void monitor(const bool reset, const bool reset_temp, const bool reset_ekf,
              const uint64_t now, TFDelay* Is_sat_delay, BatteryMonitor* Mon,
              Sensors* Sen);
 void print_firmware_version();
+void print_unit_name();
 void sample_burst(Pins* myPins, Sensors* SenS);
 void sense_synth_select(const bool reset, const bool reset_temp,
                         const bool reset_kf, const uint64_t now,

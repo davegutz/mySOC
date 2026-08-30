@@ -4,7 +4,7 @@
 #define xstr(s) str(s)
 #define str(s) #s
 
-#define version_str "g20260612a"  // deviceOS@6.2.1
+#define version_str "g20260828"  // deviceOS@6.2.1
 // g20260612a was main beta development config.  Auto testing bug-free
 // g20250612a was main alpha development config.  First use of AI to debug. BLE.
 // g20250612 is catch functional Vb failure (soft) and revert voc(soc) for BB.

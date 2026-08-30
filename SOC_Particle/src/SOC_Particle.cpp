@@ -199,6 +199,7 @@ void setup() {
   handle_boot_sequence();
 
   print_firmware_version();
+  print_unit_name();
 
   sendTxBuf("End setup()\n\n", true, IN_SERVICE);
 }  // setup

@@ -55,6 +55,7 @@ bool recall_P(const char letter_1, BatteryMonitor* Mon, Sensors* Sen) {
 
     case ('d'):  // Pd:  Print firmware version date
       print_firmware_version();
+      print_unit_name();
       break;
 
     case ('e'):  // Pe:  Print EKF

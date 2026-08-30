@@ -355,6 +355,11 @@ void print_firmware_version(){
     __DATE__, __TIME__);
 }
 
+// Print unit
+void print_unit_name(){
+  Serial.printf("Unit: %s\n", unit);
+}
+
 // Read sensors, model signals, select between them.
 // Sim used for any missing signals (Tb, Vb, Ib)
 //    Needed here in this location to have available a value for
