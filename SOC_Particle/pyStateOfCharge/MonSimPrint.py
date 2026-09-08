@@ -134,10 +134,18 @@ def print_pair(val1, val2, total_digits, sig_digits, name, print_name, df=False,
 def print_col_leads(h, df, t, SN, mon, sim, i_temp, calc_temp, i_ekf, calc_ekf):
     print_pair(G.i, None, 4, 0, 'i', h, df)
     print_pair(t[G.i], None, 7, 3, 'time', h, df)
-    print_pair(bool(SN.mon_run.reset[G.i]), mon.reset, 2, 0, 'r', h, df)
-    print_pair(bool(SN.mon_run.kf_reset[G.i]), mon.reset_kf, 2, 0, 'rk', h, df)
-    print_pair(bool(SN.mon_run.reset_temp[G.i]), mon.reset_temp, 2, 0, 'rt', h, df)
-    print_pair(bool(SN.mon_run.cp_ekf_reset[i_ekf]), mon.reset_ekf, 2, 0, 're', h, df)
+    reset_val = getattr(SN.mon_run, "reset", getattr(SN.mon_run, "res", None))
+    print_pair(bool(reset_val[G.i]) if reset_val is not None else False, mon.reset, 2, 0, 'r', h, df)
+
+    kf_reset_val = getattr(SN.mon_run, "kf_reset", None)
+    print_pair(bool(kf_reset_val[G.i]) if kf_reset_val is not None else False, mon.reset_kf, 2, 0, 'rk', h, df)
+
+    reset_temp_val = getattr(SN.mon_run, "reset_temp", None)
+    print_pair(bool(reset_temp_val[G.i]) if reset_temp_val is not None else False, mon.reset_temp, 2, 0, 'rt', h, df)
+
+    cp_ekf_reset_val = getattr(SN.mon_run, "cp_ekf_reset", None)
+    print_pair(bool(cp_ekf_reset_val[i_ekf]) if cp_ekf_reset_val is not None else False, mon.reset_ekf, 2, 0, 're', h,
+               df)
     print_pair(i_temp, None, 2, 0, 'it', h, df)
     print_pair(calc_temp, None, 2, 0, 'ct', h, df)
     print_pair(i_ekf, None, 2, 0, 'ie', h, df)
@@ -1282,7 +1290,8 @@ def save_clean_file(mon_ver, csv_file, unit_key):
             s += "{:7.3f},".format(mon_ver.soc_s[i])
             s += "{:7.3f},".format(mon_ver.soc_ekf[i])
             s += "{:7.3f},".format(mon_ver.soc[i])
-            s += "{:7.5f},".format(mon_ver.ib_lag[i])
+            ib_lag_val = getattr(mon_ver, "ib_lag", mon_ver.ib)
+            s += "{:7.5f},".format(ib_lag_val[i])
             s += "{:7.3f},".format(mon_ver.voc_soc_new[i])
             s += "\n"
             output.write(s)

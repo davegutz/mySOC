@@ -507,7 +507,6 @@ class BatteryMonitor(Battery, EKF1x1, Wrap):
             self.voc_soc = SN.mon_run.voc_soc[0]
             self.voc_stat = self.voc_soc - self.e_wrap
             self.Tb = SN.mon_run.Tb_f[0]
-            self.Tb_f = SN.Tb_f
             self.Tb_f_rate = SN.mon_run.Tb_f_rate[0]
             self.Tb_model = SN.mon_run.Tb_model[0]
             if SN.run_type == "RunSim":
@@ -651,7 +650,12 @@ class BatteryMonitor(Battery, EKF1x1, Wrap):
         self.ib = ib
         self.dt = dt
         self.ib_amp_hdwe = float(SN.mon_run.ib_amp_hdwe[G.i])
-        self.ib_amp_model = SN.mon_run.ib_amp_model[G.i]
+        if hasattr(SN.mon_run, "ib_amp_model"):
+            self.ib_amp_model = SN.mon_run.ib_amp_model[G.i]
+        elif hasattr(SN.mon_run, "ibmm"):
+            self.ib_amp_model = SN.mon_run.ibmm[G.i]
+        else:
+            self.ib_amp_model = self.ib_amp_hdwe
         self.ib_noa_hdwe = float(SN.mon_run.ib_noa_hdwe[G.i])
         self.ib_noa_model = SN.mon_run.ib_noa_model[G.i]
         if getattr(SN.mon_run, "vb_model", None) is not None:
@@ -901,7 +905,10 @@ class BatteryMonitor(Battery, EKF1x1, Wrap):
 
         # Jacobian of measurement function
         if self.reset_ekf:
-            self.H = OPT.mon_run.H[i_ekf]
+            if hasattr(OPT.mon_run, "H") and getattr(OPT.mon_run, "H", None) is not None:
+                self.H = OPT.mon_run.H[i_ekf]
+            else:
+                self.H = min(self.dv_dsoc, Battery.H_MAX)
         else:
             self.H = (1. - Battery.H_ALPHA) * self.H_pst + Battery.H_ALPHA * self.dv_dsoc
             self.H = min(self.H, Battery.H_MAX)

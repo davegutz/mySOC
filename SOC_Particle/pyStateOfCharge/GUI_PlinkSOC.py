@@ -235,6 +235,7 @@ from GUI_common import (
     default_dict,
     empty_file,
     ExRoot,
+    get_default_auto,
     get_init_time_for_macro,
     lookup,
     macro_init_time_dict,
@@ -1691,16 +1692,21 @@ def check_auto_plink():
     if auto_plink_path.is_file():
         print(f"Acknowledged: {auto_plink_path} exists.")
     else:
-        _write_default_auto_plink(auto_plink_path)
+        test_obj = globals().get("Test", None)
+        folder = getattr(test_obj, "dataReduction_folder", None)
+        version = getattr(test_obj, "version", None)
+        battery = getattr(test_obj, "battery", None)
+        _write_default_auto_plink(auto_plink_path, folder=folder, version=version, battery=battery)
         print(f"Prepopulated {auto_plink_path} with default_auto content.")
     print(f"Report: plink_test.csv location is {plink_path}")
 
 
-def _write_default_auto_plink(path):
+def _write_default_auto_plink(path, folder=None, version=None, battery=None):
     fields = [f.strip() for f in default_auto_header.split(",")]
+    rows = get_default_auto(folder=folder, version=version, battery=battery)
     with open(path, "w") as f:
         f.write("#" + default_auto_header + ",\n")
-        for row in default_auto:
+        for row in rows:
             f.write(", ".join(str(row.get(field, "")) for field in fields) + ",\n")
 
 

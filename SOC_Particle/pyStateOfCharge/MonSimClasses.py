@@ -144,8 +144,8 @@ class Sensors:
                 self.mon_run.ib_dyn_n = np.copy(self.mon_run.ib_noa_hdwe_f)
 
             self.dt_s = self.sim_run.dt_s if hasattr(self.sim_run, "dt_s") else self.mon_run.dt
-            if not hasattr(self.mon_run, "ibmm"):
-                self.mon_run.ibmm = np.copy(self.mon_run.ib_amp_hdwe_f)
+            if not hasattr(self.mon_run, "ib_amp_model"):
+                self.mon_run.ib_amp_model = np.copy(self.mon_run.ib_amp_hdwe_f)
             if not hasattr(self.mon_run, "ib_noa_model"):
                 self.mon_run.ib_noa_model = np.copy(self.mon_run.ib_noa_hdwe_f)
             if not hasattr(self.mon_run, "ib_h"):
@@ -153,10 +153,10 @@ class Sensors:
             self.Battery = Battery
             self.dTb = 0.0
             self.Tb = self.mon_run.Tb_f[0]
-            self.Tb_f_rate = np.copy(self.Tb_f) * 0.0
+            self.Tb_f_rate = np.copy(self.mon_run.Tb_f) * 0.0
             self.Tb_past = self.mon_run.Tb_f[0] + self.dTb
             self.Tb_f_past = self.mon_run.Tb_f[0] + self.dTb
-            self.Tb_f_rate_past = np.copy(self.Tb_f) * 0.0
+            self.Tb_f_rate_past = np.copy(self.mon_run.Tb_f) * 0.0
             self.TbModelFilt = LagExp(0, Battery.TB_FILT, Battery.TB_HDWE_MIN, Battery.TB_HDWE_MAX)
             self.TbSenseFilt = LagExp(0, Battery.TB_FILT, Battery.TB_HDWE_MIN, Battery.TB_HDWE_MAX)
 
@@ -182,7 +182,7 @@ class Sensors:
             self.qcap_s = calculate_capacity(
                 q_cap_rated_scaled=self.mon_run.qcrs_s,
                 dqdt=self.mon_run.dqdt,
-                tb_f=self.Tb_f,
+                tb_f=self.mon_run.Tb_f,
                 t_rated=self.mon_run.t_rated,
             )
         else:
@@ -379,7 +379,6 @@ class Sensors:
                     rmin=-Battery_.T_RLIM,
                 )
         else:
-            mon.Tb_model_f = self.Tb_model_f_fut
             mon.Tb_model_f_rate = self.Tb_model_f_rate_fut
             mon.Tb_model_f = self.TbModelFilt.calculate_tau_seeded(
                 mon.Tb_model,

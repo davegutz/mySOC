@@ -22,9 +22,9 @@ def main():
 
     # Cut-pasted from GUI_TestSOC Run window
     data_file_run = "G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20250612a/ampHiEmptFail_soc2p2_hi_lo_bb.csv"
-    unit_key_run = "g20250612a_soc2p2_hi_lo_bb"
+    unit_key_run = "g20260612a_soc2p2_hi_lo_bb"
     data_file_tst = "G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20250612a/ampHiEmptFail_soc3p2_hi_lo_bb.csv"
-    unit_key_tst = "g20250612a_soc3p2_hi_lo_bb"
+    unit_key_tst = "g20260612a_soc3p2_hi_lo_bb"
     dt_resample = 1
     terse = True
     hardcopy = False

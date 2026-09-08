@@ -21,7 +21,7 @@ from CompareRunHist import compare_run_hist
 def main():  # Example usage: ok 20260217
     # Cut-pasted from GUI_TestSOC Run window
     data_file = "G:/My Drive/GitHubArchive/SOC_Particle/dataReduction\\g20250612a\\ampHiEmptFail_soc3p2_hi_lo_bb.csv"
-    unit_key = "g20250612a_soc3p2_hi_lo_bb"
+    unit_key = "g20260612a_soc3p2_hi_lo_bb"
     time_end = None
     plots = True
     strict_overplot = True

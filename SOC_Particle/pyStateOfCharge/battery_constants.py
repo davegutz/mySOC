@@ -61,6 +61,7 @@ class BatteryConstants:
     HDWE_IB_HI_LO_AMP_LO = None
     HDWE_IB_HI_LO_NOA_HI = None
     HDWE_IB_HI_LO_NOA_LO = None
+    H_MAX = 30.0  # NS * H_CELL_MAX = 4 * 7.5 = 30.0 (matching constants.h)
     HYS_IB_THR = None
     HYS_SOC_MIN_MARG = None
     IB_ABS_MAX_AMP = None
@@ -87,7 +88,7 @@ class BatteryConstants:
     NP = None
     NS = None
     RATED_TEMP = None
-    SAT_CUTBACK_GAIN = None
+    SAT_CUTBACK_GAIN = 1000.  # Default fallback matching constants.h
     SHUNT_AMP_GAIN = None
     SHUNT_NOA_GAIN = None
     skip_battery = None

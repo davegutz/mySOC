@@ -152,12 +152,30 @@ def get_init_time_for_macro(macro_name: str, default: float = -4.0) -> float:
 
 # Default content for auto_plink.csv (analogous to default_dict for the .ini file)
 default_auto_header = "folder, version, battery, macro, hardfigure"
-_auto_row = {"folder": default_dr, "version": "g20250612a", "battery": "bb", "hardfigure": "True"}
-default_auto = (
-    [{**_auto_row, "macro": "ampHiEmptFail"}, {**_auto_row, "macro": "ampHiFail"}, {**_auto_row, "macro": "noaHiFail"}]
-    + [{**_auto_row, "macro": m} for m in sel_list[sel_list.index("rapidTweakRegression") :]]
-    + [{**_auto_row, "macro": m} for m in sel_list1[: sel_list1.index("vcFlat") + 1]]
-)
+
+
+def get_auto_row(folder: str = None, version: str = None, battery: str = None, hardfigure: str = "True") -> dict:
+    """Return a base row dictionary for auto_plink.csv defaulting to values from default_dict."""
+    return {
+        "folder": folder if folder is not None else default_dict["test"]["dataReduction_folder"],
+        "version": version if version is not None else default_dict["test"]["version"],
+        "battery": battery if battery is not None else default_dict["test"]["battery"],
+        "hardfigure": hardfigure,
+    }
+
+
+def get_default_auto(folder: str = None, version: str = None, battery: str = None, hardfigure: str = "True") -> list:
+    """Return default auto_plink configuration rows generated with given or default parameters."""
+    row = get_auto_row(folder=folder, version=version, battery=battery, hardfigure=hardfigure)
+    return (
+        [{**row, "macro": "ampHiEmptFail"}, {**row, "macro": "ampHiFail"}, {**row, "macro": "noaHiFail"}]
+        + [{**row, "macro": m} for m in sel_list[sel_list.index("rapidTweakRegression") :]]
+        + [{**row, "macro": m} for m in sel_list1[: sel_list1.index("vcFlat") + 1]]
+    )
+
+
+_auto_row = get_auto_row()
+default_auto = get_default_auto()
 
 macro_sel_list = [
     "end_early",

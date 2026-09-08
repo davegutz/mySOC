@@ -27,13 +27,12 @@ def main():  # Sample usage. OK on 20260217
 
     # User inputs (multiple input_files allowed
     # Cut-pasted from GUI_TestSOC Run window
-    # data_file = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20250612a/truckHist_20260302.csv'
 
-    data_file = "/home/daveg/.local/SOC_Particle/plink/dataReduction/g20250612a/tLoFailModel_soc3p2_hi_lo_bb.csv"
+    data_file = "/home/daveg/.local/SOC_Particle/dataReduction/soc4p2_20260904_PaQ_soc4p2_hi_lo_bb.csv"
     time_end = None
-    plots = False
+    plots = True
     use_mon_csv = True
-    unit_key = "g20250612a_soc3p2_hi_lo_bb"
+    unit_key = "g20260612a_soc4p2_hi_lo_bb"
     sync_time = None
     dt_resample = 10
     Tb_force = None
