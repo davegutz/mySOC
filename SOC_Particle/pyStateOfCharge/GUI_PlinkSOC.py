@@ -2400,6 +2400,23 @@ def start_plink(command_to_paste=None, force_if_ready=False, force_kill=False, f
             else:
                 plink_cmd = f"{plink_base_cmd}; exec bash"
 
+            def _hex_to_rgb(hex_code, default=(255, 255, 255)):
+                try:
+                    h = hex_code.lstrip("#")
+                    if len(h) == 3:
+                        h = "".join(c * 2 for c in h)
+                    return tuple(int(h[i:i + 2], 16) for i in (0, 2, 4))
+                except Exception:
+                    return default
+
+            fg_r, fg_g, fg_b = _hex_to_rgb(fg_color, (0, 255, 0))
+            bg_r, bg_g, bg_b = _hex_to_rgb(bg_color_, (0, 0, 0))
+            ansi_color_setup = (
+                f"printf '\\e[48;2;{bg_r};{bg_g};{bg_b}m'; "
+                f"(clear || printf '\\e[H\\e[2J\\e[3J') 2>/dev/null; "
+                f"printf '\\e[38;2;{fg_r};{fg_g};{fg_b}m';"
+            )
+
             if "gnome-terminal" in term:
                 # zoom 0.8 is roughly "two sizes smaller" (standard is 1.0, 0.9 is one size, 0.8 is two)
                 cmd = [
@@ -2411,7 +2428,7 @@ def start_plink(command_to_paste=None, force_if_ready=False, force_kill=False, f
                     "-c",
                     (
                         f"echo -e '\\e]11;{bg_color_}\\a\\e]10;{fg_color}\\a\\e]0;plink-terminal-server\\a'; "
-                        f"clear; {plink_cmd}"
+                        f"{ansi_color_setup} {plink_cmd}"
                     ),
                 ]
                 print(f"Running command: {shlex.join(cmd)}")
@@ -2450,10 +2467,11 @@ def start_plink(command_to_paste=None, force_if_ready=False, force_kill=False, f
                     print(f"AUTO running case No. {auto_case_index + 1} of {auto_case_total}")
             else:
                 # qterminal / x-terminal-emulator: pass bash -c args separately to avoid single-quote
-                # conflicts when plink_cmd contains quoted strings, and use OSC sequences for colors
+                # conflicts when plink_cmd contains quoted strings. Use OSC sequences and ANSI RGB
+                # escape sequences so colors work on terminals that do not support OSC 10/11 (e.g. QTerminal).
                 full_bash_cmd = (
                     f"echo -e '\\e]11;{bg_color_}\\a\\e]10;{fg_color}\\a\\e]0;plink-terminal-server\\a'; "
-                    f"clear; {plink_cmd}"
+                    f"{ansi_color_setup} {plink_cmd}"
                 )
                 cmd = [term, "-e", "bash", "-c", full_bash_cmd]
                 print(f"Running command: {shlex.join(cmd)}")
