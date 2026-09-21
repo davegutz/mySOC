@@ -779,3 +779,75 @@ void wait_on_user_input() {
     sendTxBuf(" N.  moving on...\n\n", true, IN_SERVICE);
   }
 }
+
+// Wait on user input to set initial UNIX time
+void wait_on_user_ut_input() {
+  uint8_t count = 0;
+  String in_str = "";
+  bool done = false;
+  const uint32_t default_ut = 1735689600UL;  // Jan 1, 2025 00:00:00 UTC
+
+  sendTxBuf("\n\n", true, IN_SERVICE);
+  char buffer[32];
+  time_long_2_str((time_t)default_ut, buffer);
+  sendTxBuf(String::format("Set UNIX time? [default %lu (%s)]:", default_ut,
+                          buffer),
+            true, IN_SERVICE);
+
+  while (count < WAITS_ON_USER_UT && !done) {
+    if (Serial.available()) {
+      char in_char = (char)Serial.read();
+      if (in_char == '\r' || in_char == '\n' || in_char == ';') {
+        done = true;
+        Serial.printf("\n");
+      } else if (in_char == '\b' || in_char == 127) {
+        if (in_str.length() > 0) {
+          Serial.printf("\b \b");
+          in_str.remove(in_str.length() - 1);
+        }
+      } else if (in_char >= ' ' && in_char <= '~') {
+        in_str += in_char;
+        Serial.print(in_char);
+      }
+    } else if (cp.ble_first_char != '\0') {
+      char in_char = cp.ble_first_char;
+      cp.ble_first_char = '\0';
+      if (in_char == '\r' || in_char == '\n' || in_char == ';') {
+        done = true;
+      } else if (in_char >= ' ' && in_char <= '~') {
+        in_str += in_char;
+      }
+    } else if (cp.inp_str.length() > 0) {
+      in_str = cp.inp_str;
+      cp.inp_str = "";
+      done = true;
+    } else {
+      Serial.printf("?");
+      count++;
+      delay(1000);
+    }
+  }
+
+  in_str.trim();
+  if (in_str.startsWith("UT") || in_str.startsWith("ut")) {
+    in_str = in_str.substring(2);
+  }
+  in_str.replace(";", "");
+  in_str.trim();
+
+  if (in_str.length() == 0) {
+    sendTxBuf(
+        String::format(" Defaulting to Jan 1, 2025 (%lu)...\n", default_ut),
+        true, IN_SERVICE);
+    sp.Time_now_p->print_adj_print(default_ut);
+  } else {
+    sp.Time_now_p->print_adjust(in_str);
+  }
+
+  Time.setTime((time_t)(sp.Time_now()));
+  time_long_2_str((time_t)sp.Time_now(), buffer);
+  sendTxBuf(String::format(" time %ld hms:  %s\n\n", sp.Time_now(), buffer),
+            true, IN_SERVICE);
+  sp.dirty(sp.eval_dirty());
+  System.backupRamSync();
+}

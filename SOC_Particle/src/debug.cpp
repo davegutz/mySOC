@@ -161,6 +161,8 @@ void debug_q(BatteryMonitor* Mon, Sensors* Sen) {
                            Sen->Flt->falw());
     sendTxBuf(txBuf, true, true);
   }
+  txBuf = String::format("CONFIG:  %s\n", pp.pubList.unit.c_str());
+  sendTxBuf(txBuf, true, true);
 }
 
 // Quick print critical selection parameters

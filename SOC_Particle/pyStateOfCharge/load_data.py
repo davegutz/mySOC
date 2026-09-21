@@ -141,6 +141,7 @@ def load_data(
         battery_raw = None
         print(f"load_data: returning battery_raw=None")
     # Load off-nominal Battery values
+    Battery_off_dict = None
     if battery_raw is not None:
         # Scroll through all off-nominals make dictionary
         Battery_off_dict = load_off_nominal_battery(Battery_to_add=battery_raw)
@@ -162,13 +163,13 @@ def load_data(
         f_raw = np.unique(f_raw)
         f_raw = remove_nan(f_raw)
         f_raw = rename_all(f_raw)
-        batt.sp_vsat_add = Battery_off_dict["sp_vsat_add"]
+        batt.sp_vsat_add = Battery_off_dict.get("sp_vsat_add", 0.0) if Battery_off_dict else 0.0
         f = add_stuff_f(
             f_raw,
             batt,
             ib_band=IB_BAND,
-            ap_ib_diff_slr=Battery_off_dict["ap_ib_diff_slr"],
-            ap_ib_quiet_slr=Battery_off_dict["ap_ib_quiet_slr"],
+            ap_ib_diff_slr=Battery_off_dict.get("ap_ib_diff_slr", 1.0) if Battery_off_dict else 1.0,
+            ap_ib_quiet_slr=Battery_off_dict.get("ap_ib_quiet_slr", 1.0) if Battery_off_dict else 1.0,
         )
         # print("\nload_data:  f:\n", f, "\n")
         f = filter_Tb(f, 20.0, batt, tb_band=100.0, rated_batt_cap=rated_batt_cap)

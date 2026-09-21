@@ -720,6 +720,9 @@ void check_and_fix_corruption() {
 void handle_boot_sequence() {
   sp.get_booted();
   sendTxBuf(String::format("booted = %d\n", sp.booted()), true, IN_SERVICE);
+  if (!sp.booted()) {
+    wait_on_user_ut_input();
+  }
   if (ASK_DURING_BOOT == 0 && !sp.booted()) {
     sp.set_nominal();
     sp.put_booted(true);
@@ -762,7 +765,8 @@ void manage_summaries(const bool boot_wait, const bool summarizing,
     sp.put_Isum(sp.isum() + 1);
     if (sp.isum() > (uint16_t)(sp.nsum() - 1)) sp.put_Isum(0);
     mySum[sp.isum()].copy_to_Flt_ram_from(hist_bounced);
-    sendTxBuf("Summ...\n", true, IN_SERVICE);
+    sendTxBuf(String::format("Summ(%s)...\n", pp.pubList.unit.c_str()),
+              true, IN_SERVICE);
     cp.write_summary = false;
   }
 }

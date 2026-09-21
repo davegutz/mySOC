@@ -37,6 +37,7 @@ class Parameters {
   // Do everything
   bool dirty() { return dirty_; }
   void dirty(const bool d) { dirty_ = d; }
+  bool eval_dirty();
   bool find_adjust(const String& str);
   virtual void initialize() {}
   bool is_corrupt();

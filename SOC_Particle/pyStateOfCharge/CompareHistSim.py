@@ -391,11 +391,10 @@ def load_hist_and_prep(
     Battery_off_dict = load_off_nominal_battery(Battery_to_add=battery_raw)
     apply_off_nominal_battery(Battery, Battery_off_dict)
 
-    rated_batt_cap = Battery.NOM_UNIT_CAP * Battery.sp_s_cap_mon
+    sp_s_cap_mon = Battery.sp_s_cap_mon if getattr(Battery, "sp_s_cap_mon", None) is not None else 1.0
+    rated_batt_cap = Battery.NOM_UNIT_CAP * sp_s_cap_mon
     qcrs = rated_batt_cap * 3600.0
 
-    # Save these
-    rated_batt_cap = Battery.NOM_UNIT_CAP * Battery.sp_s_cap_mon
     # Reconstruction of soc using subsampled data is poor.  Drive everything with soc from Monitor
     dvoc_mon = 0.0
 
@@ -481,6 +480,18 @@ def load_hist_and_prep(
         if s_raw is not None:
             s_raw.Tb = Tb_force
 
+    # Resolve scalars with safe fallbacks
+    ap_ib_diff_slr = (
+        Battery_off_dict["ap_ib_diff_slr"]
+        if (Battery_off_dict and "ap_ib_diff_slr" in Battery_off_dict)
+        else (getattr(Battery, "ap_ib_diff_slr", 1.0) or 1.0)
+    )
+    ap_ib_quiet_slr = (
+        Battery_off_dict["ap_ib_quiet_slr"]
+        if (Battery_off_dict and "ap_ib_quiet_slr" in Battery_off_dict)
+        else (getattr(Battery, "ap_ib_quiet_slr", 1.0) or 1.0)
+    )
+
     # Sort and augment data
     fault = None
     if f_raw is not None:
@@ -498,8 +509,8 @@ def load_hist_and_prep(
                 rated_batt_cap=rated_batt_cap,
                 Dw=dvoc_mon,
                 time_sync=sync_time,
-                ap_ib_diff_slr=Battery_off_dict["ap_ib_diff_slr"],
-                ap_ib_quiet_slr=Battery_off_dict["ap_ib_quiet_slr"],
+                ap_ib_diff_slr=ap_ib_diff_slr,
+                ap_ib_quiet_slr=ap_ib_quiet_slr,
             )
             print("\nfault after add_stuff_f:\n", fault.dtype.names, fault, "\n")
             fault = filter_Tb(
@@ -526,8 +537,8 @@ def load_hist_and_prep(
             rated_batt_cap=rated_batt_cap,
             Dw=dvoc_mon,
             time_sync=sync_time,
-            ap_ib_diff_slr=Battery_off_dict["ap_ib_diff_slr"],
-            ap_ib_quiet_slr=Battery_off_dict["ap_ib_quiet_slr"],
+            ap_ib_diff_slr=ap_ib_diff_slr,
+            ap_ib_quiet_slr=ap_ib_quiet_slr,
         )
 
         hist = add_mod(hist, use_mon_csv, mon)
@@ -815,3 +826,51 @@ def compare_hist_sim(
     print("DONE")
 
     return fig_list, fig_files
+
+
+# noinspection PyUnusedLocal,PyPep8Naming
+def main():  # Sample usage. OK on 20260217
+
+    import sys
+
+    if sys.platform == "linux":
+        gdrive = "/home/daveg/gdrive/"
+    else:
+        gdrive = "G:/My Drive/"
+
+    # User inputs (multiple input_files allowed
+    # Cut-pasted from GUI_TestSOC Run window
+    # data_file = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20250612a/truckHist_20260302.csv'
+
+    data_file = "/home/daveg/.local/SOC_Particle/plink/dataReduction/g20250612a/tLoFailModel_soc3p2_hi_lo_bb.csv"
+    time_end = None
+    plots = False
+    use_mon_csv = True
+    unit_key = "g20250612a_soc3p2_hi_lo_bb"
+    sync_time = None
+    dt_resample = 10
+    Tb_force = None
+    request_history = 5
+    strict_overplot = True
+    terse = True
+    fig_files = None
+    fig_list = None
+    show_killer_ = True
+    hardcopy = True
+
+    compare_hist_sim(
+        data_file=data_file,
+        use_mon_csv=use_mon_csv,
+        unit_key=unit_key,
+        dt_resample=dt_resample,
+        plots=plots,
+        Tb_force=Tb_force,
+        request_history=request_history,
+        strict_overplot=strict_overplot,
+        terse=terse,
+        hardcopy=hardcopy,
+    )
+
+
+if __name__ == "__main__":  # Example usage.  Ran ok 20260217
+    main()

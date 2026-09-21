@@ -57,6 +57,7 @@ import subprocess
 import datetime
 import platform
 from Colors import Colors
+from GitHub_util import check_newer_git_repo
 from test_soc_util import run_shell_cmd
 
 _initial_dependency_mtimes = {}
@@ -2614,6 +2615,50 @@ def update_data_buttons():
     start_button.config(bg="black", activebackground="black", fg="#00ff00", activeforeground="#00ff00")
 
 
+def check_git_newer_version(verbose=False):
+    """Check if a newer version of mySOC exists in git repository."""
+    app_dir = os.path.dirname(os.path.abspath(__file__))
+    try:
+        is_newer, info = check_newer_git_repo(repo_dir=app_dir, print_status=True)
+        repo_name = info.get('repo_name', 'mySOC')
+        if is_newer:
+            rem_date = info.get('remote_date', 'Unknown')
+            rem_msg = info.get('remote_msg', '')
+            rem_sha = info.get('remote_sha', '')
+            behind = info.get('behind_count')
+
+            msg_lines = [
+                f"A newer version of '{repo_name}' is available on git!\n",
+                f"Remote commit date:    {rem_date}",
+            ]
+            if rem_msg:
+                msg_lines.append(f"Remote commit message: {rem_msg}")
+            if rem_sha:
+                msg_lines.append(f"Remote commit SHA:     {rem_sha}")
+            if behind:
+                msg_lines.append(f"Commits behind:        {behind}")
+            if 'local_date' in info and info['local_date']:
+                msg_lines.append(f"Local commit date:     {info['local_date']}")
+            msg_lines.append(f"\nPlease update your '{repo_name}' repository ('git pull') to get the latest updates.")
+            msg = "\n".join(msg_lines)
+            print(Colors.fg.yellow, f"\n[WARNING] Newer application version found on git!\n{msg}\n", Colors.reset)
+            tkinter.messagebox.showwarning(title=f"Warning: Newer {repo_name} on Git", message=msg, parent=master)
+        else:
+            if 'error' in info:
+                print(Colors.fg.orange, f"[Git Check] Status: {info.get('error')}\n", Colors.reset)
+                if verbose:
+                    tkinter.messagebox.showerror(title="Git Check Error", message=f"Could not check git status:\n{info['error']}", parent=master)
+            else:
+                method = info.get('method', 'git')
+                print(Colors.fg.green, f"[Git Check] Status: Repository '{repo_name}' is up to date with {method}.\n", Colors.reset)
+                if verbose:
+                    tkinter.messagebox.showinfo(title="Git Status", message=f"Repository '{repo_name}' is up to date with git.", parent=master)
+    except Exception as e:
+        print(Colors.fg.red, f"[Git Check] Error checking git version: {e}\n", Colors.reset)
+        if verbose:
+            tkinter.messagebox.showerror(title="Git Check Error", message=f"Error checking git version:\n{e}", parent=master)
+
+
 if __name__ == "__main__":  # Example usage.  Ran ok 20260217
     import os
     import tkinter as tk
@@ -3270,8 +3315,20 @@ if __name__ == "__main__":  # Example usage.  Ran ok 20260217
         font=butt_font,
     )
     hist_hist_choose_button.pack(side="left", padx=5, pady=5)
+    git_check_button = myButton(
+        compare_panel,
+        text="Git Check",
+        command=lambda: check_git_newer_version(verbose=True),
+        fg="purple",
+        bg=bg_color,
+        wraplength=wrap_length,
+        justify="left",
+        font=butt_font,
+    )
+    git_check_button.pack(side="right", padx=5, pady=5)
 
     # Begin
+    master.after(200, check_git_newer_version)
     handle_test_unit()
     handle_run_unit()
     handle_test_battery()

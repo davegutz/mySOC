@@ -309,6 +309,9 @@ const float QUIET_RES(QUIET_SET /
   25.  // Amp looparound low error trim scalar.  Should provide hysteresis (~1
        // V) authority (25.)
 #endif
+#if !defined(WAITS_ON_USER_UT)
+  #define WAITS_ON_USER_UT 3000
+#endif
 #if !defined(EWHI_TRM_SLR)
 #define EWHI_TRM_SLR \
   25.  // Amp looparound high error trim scalar.  Should provide hysteresis (~1

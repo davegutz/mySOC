@@ -131,6 +131,7 @@ extern BleCharacteristic rxCharacteristic;  // Receive from BLE
 // ── retained SRAM (survives power cycle) ─────────────────────────────
 retained Flt_st saved_hist[NHIS];    // For displaying history
 retained Flt_st saved_faults[NFLT];  // For displaying faults
+retained uint32_t last_build_hash;   // 4-byte build timestamp hash to detect reflashes
 retained SavedPars sp = SavedPars(
     saved_hist, uint16_t(NHIS), saved_faults,
     uint16_t(NFLT));  // Various parameters to be common at system level
@@ -184,6 +185,22 @@ void setup() {
   // Determine millis() at turn of Time.now   Used to improve accuracy of
   // timing.
   sync_time(millis(), &last_sync_ms, &flip_ms);
+
+  // Detect firmware reflash using build timestamp hash
+  constexpr const char build_timestamp[] = __DATE__ " " __TIME__;
+  uint32_t current_build_hash = 2166136261u;
+  for (size_t i = 0; build_timestamp[i] != '\0'; i++) {
+    current_build_hash ^= (uint8_t)build_timestamp[i];
+    current_build_hash *= 16777619u;
+  }
+  if (last_build_hash != current_build_hash) {
+    last_build_hash = current_build_hash;
+    sp.put_booted(false);
+    sendTxBuf(
+        String::format("New firmware flash detected (%s): reset booted to false\n",
+                       build_timestamp),
+        true, IN_SERVICE);
+  }
 
   // Enable and print stored history
   System.enableFeature(FEATURE_RETAINED_MEMORY);
@@ -272,8 +289,9 @@ void loop() {
 // Warn if parameters have been changed but not saved
 #if IN_SERVICE
     if (NoSaveWarn->update(now_ms, reset) && sp.dirty()) {
-      sendTxBuf(String::format("WARNING: unsaved Retained parameter."
-        "  Enter 'w' to save. now dirty=%d\n", sp.dirty()), true, true);
+      sendTxBuf(String::format("WARNING(%s): unsaved Retained parameter."
+        "  Enter 'w' to save. now dirty=%d\n", pp.pubList.unit.c_str(),
+        sp.dirty()), true, true);
     }
 #endif
 
@@ -287,8 +305,8 @@ void loop() {
     // Read sensors, model signals, select between them, synthesize injection
     // signals on current Inputs:  sp.config, sp.sim_chm Outputs: Sen->Ib,
     // Sen->Vb, sp.inj_bias, Sen->Tb / Tb_f
-    sense_synth_select(reset, reset_temp, reset_kf, ReadSensors->now_ms(), elapsed,
-                       myPins, Mon, Sen);
+    sense_synth_select(reset, reset_temp, reset_kf, ReadSensors->now_ms(),
+                       elapsed, myPins, Mon, Sen);
 
     // Calculate Ah remaining
     // Inputs:  sp.mon_chm, Sen->Ib, Sen->Vb, Sen->Tb_f

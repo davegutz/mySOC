@@ -38,6 +38,15 @@ Parameters::Parameters() : n_(0), V_(nullptr), dirty_(false){};
 
 Parameters::~Parameters(){};
 
+bool Parameters::eval_dirty() {
+  for (uint8_t i = 0; i < n_; i++) {
+    if (V_[i]->code() != "vv" && V_[i]->code() != "UT" && V_[i]->is_off()) {
+      return true;
+    }
+  }
+  return false;
+}
+
 bool Parameters::find_adjust(const String& str) {
   uint8_t count = 0;
   bool found = false;
@@ -53,7 +62,7 @@ bool Parameters::find_adjust(const String& str) {
       found = true;
       if (!count) {
         success = V_[i]->print_adjust(value_str_);  // prints own error messages
-        if (success) dirty_ = true;
+        if (success) dirty_ = eval_dirty();
       } else
         Serial.printf("RPT: %d %s success=%d\n", i, V_[i]->code().c_str(),
                       success);
@@ -248,7 +257,7 @@ void SavedPars::initialize() {
   V_[n_++] = (amp_p = new FloatV("* ", "Xa", rP_, "Inj amp", "Amps pk", -1e6, 1e6, &amp_, 0));  // Xa
   V_[n_++] = (booted_p = new BooleanV("  ", "Bb", rP_, "Clean boot", "T=clean", 0, 1, &booted_, false));  // Bb
   V_[n_++] = (cutback_gain_slr_p = new FloatV("* ", "Sk", rP_, "Cutback gain scalar", "slr", -1e6, 1e6, &cutback_gain_slr_, 1));  // Sk
-  V_[n_++] = (debug_p = new IntV("* ", "vv", rP_, "Verbosity", "int", -128, 128, &debug_, VV));  // vv
+  V_[n_++] = (debug_p = new IntV("* ", "vv", rP_, "Verbosity", "int", -128, 128, &debug_, VV, false));  // vv
   V_[n_++] = (delta_q_model_p = new DoubleV("* ", "qs", rP_, "Charge chg Sim", "C", -1e8, 1e5, &delta_q_model_, 0, false));  // qs
   V_[n_++] = (delta_q_p = new DoubleV("* ", "qm", rP_, "Charge chg", "C", -1e8, 1e5, &delta_q_, 0, false));  // qm
   V_[n_++] = (Dw_p = new FloatV("* ", "Dw", rP_, "Tab mon adj", "v", -1e2, 1e2, &Dw_, VTAB_BIAS));  // Dw

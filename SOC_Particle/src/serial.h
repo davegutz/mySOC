@@ -65,3 +65,4 @@ void print_ekf_header();
 void sendTxBuf(const String& txBuf, const bool sendSerial, const bool sendBLE);
 void sendTxBuf(const char* txBuf, const bool sendSerial, const bool sendBLE);
 void wait_on_user_input();
+void wait_on_user_ut_input();
