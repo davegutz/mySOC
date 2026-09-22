@@ -393,6 +393,8 @@ class Wrap(MyLooparounds):
 
         MyLooparounds.__init__(self, Mon_)
 
+        self.dt = 0.1
+        self.dt_past = 0.1
         self.sdb_voc = SlidingDeadband(Battery.HDB_VB)
         self.e_wrap = 0.0
         self.e_wrap_filt = 0.0
@@ -430,7 +432,7 @@ class Wrap(MyLooparounds):
         from Battery import Battery
         import Globals as G
 
-        dt_local = self.dt
+        dt_local = getattr(self, "dt", 0.1)
 
         # e_wrap scalars normally calculated in Sensors
         if self.soc >= Battery.WRAP_SOC_HI_OFF:
@@ -456,12 +458,12 @@ class Wrap(MyLooparounds):
             if rp.modeling_vb or rp.modeling_ib or SN.run_type == "HistSim":
                 self.ib_noa = ib_noa
                 self.ib_noa_pst = ib_noa_pst
-                dt_local = self.dt
+                dt_local = getattr(self, "dt", 0.1)
                 ibnoa = self.ib_noa
             else:
                 self.ib_noa = ib_noa
                 self.ib_noa_pst = ib_noa_pst
-                dt_local = self.dt_past
+                dt_local = getattr(self, "dt_past", getattr(self, "dt", 0.1))
                 ibnoa = self.ib_noa
             self.LoopIbNoa.calculate(
                 reset=reset,
@@ -532,7 +534,7 @@ class Wrap(MyLooparounds):
         self.e_wrap = self.sel_brk_hdwe.scale_select(ib_noa_hdwe, e_wrap_m_val, e_wrap_n_val)
         self.e_wrap_filt = self.sel_brk_hdwe.scale_select(ib_noa_hdwe, e_wrap_m_filt_val, e_wrap_n_filt_val)
         self.e_wrap_rate = self.sel_brk_hdwe.scale_select(ib_noa_hdwe, e_wrap_m_rate_val, e_wrap_n_rate_val)
+        self.dt_past = getattr(self, "dt", 0.1)
 
     # Maintain wrap() method alias
     wrap = calculate
-

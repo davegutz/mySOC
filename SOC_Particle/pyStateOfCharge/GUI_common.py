@@ -1072,13 +1072,16 @@ def contain_all(testpath):
     folder_path, basename = str(PurePosixPath(testpath).parent), PurePosixPath(testpath).name
     parent, txt = str(PurePosixPath(folder_path).parent), PurePosixPath(folder_path).name
     key = ""
-    with open(testpath, "r") as file:
+    with open(testpath, "r", encoding="cp437") as file:
         for line in file:
-            if line.__contains__(txt):
+            if txt in line and not line.startswith(("Firmware:", "Unit:", "Config:", "CONFIG:", "WARNING")):
                 shorter = line[line.find(txt) :]
                 end_key = shorter.find(",")
-                key = shorter[:end_key].strip()
-                break
+                if end_key > 0:
+                    candidate = shorter[:end_key].strip()
+                    if " " not in candidate and "(" not in candidate and ")" not in candidate:
+                        key = candidate
+                        break
     return folder_path, parent, basename, txt, key
 
 

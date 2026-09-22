@@ -155,20 +155,15 @@ def write_clean_file(path_to_data, type_=None, hdr_key=None, unit_key=None, skip
             input_file.seek(0)
             num_lines = 0
             num_text_run = 0
-            num_lines = 0
             num_skips = 0
             unit_key_found = False
             skipped_last = False
             for line in input_file:
                 line = filter_f15_sequence(line)  # ESC[28~ injected by f15 keypress GUI_TestSOC to keep term awake
-                if line.__contains__(unit_key) and not line.__contains__("Config:"):
+                if line.__contains__(unit_key) and not line.startswith(("Config:", "CONFIG:", "Summ", "WARNING", "Firmware:", "Unit:")):
                     unit_key_found = True
-                    # if line.__contains__('946s868214.902'):
-                    #     print("line_run:", line_run)
-                    #     print("bad line:", line)
-                    #     exit(1)
                     num_text = count_text_fields(line)
-                    if num_lines == 0:
+                    if num_text_run == 0 and line.count(",") == num_fields:
                         num_text_run = num_text
                     if (
                         line.count(",") == num_fields
@@ -195,7 +190,6 @@ def write_clean_file(path_to_data, type_=None, hdr_key=None, unit_key=None, skip
                         print(f"{num_text=} {num_text_run=}")
                         num_skips += 1
                         skipped_last = True
-                    num_lines += 1
     if not num_lines:
         csv_file = None
         print("I(write_clean_file): no data to write")

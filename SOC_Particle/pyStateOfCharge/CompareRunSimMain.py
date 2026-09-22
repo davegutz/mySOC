@@ -40,17 +40,17 @@ def main():  # Example usage.  ok on 20260217
             9:  dyn_n
             10: cc_diff
         """
-        data_file = '/home/daveg/.local/SOC_Particle/dataReduction/g20260612a/stepUp_soc3p2_hi_lo_bb.csv'
-        unit_key = 'g20260612a_soc3p2_hi_lo_bb'
+        data_file = '/home/daveg/.local/SOC_Particle/dataReduction/g20260828/soc4_20260921Fix_soc4p2_hi_lo_bb.csv'
+        unit_key = 'g20260828_soc4p2_hi_lo_bb'
         time_end = None
         compare_run_ver = True
         shift_soc_s = True
-        plots = True
+        plots = False
         use_mon_soc_ = False
         verbose = False
         scale_batt = 1.0
         slr_hys_sim = 1.0
-        request_history = 11
+        request_history = 3
         init_time = None
         time_shift = None
         strict_overplot = True
