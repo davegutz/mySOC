@@ -808,6 +808,6 @@ void wait_on_user_ut_input() {
   time_long_2_str((time_t)sp.Time_now(), buffer);
   sendTxBuf(String::format(" time %ld hms:  %s\n\n", sp.Time_now(), buffer),
             true, IN_SERVICE);
-  sp.dirty(sp.eval_dirty());
+  sp.sync_sram();
   System.backupRamSync();
 }

@@ -133,7 +133,7 @@ def print_pair(val1, val2, total_digits, sig_digits, name, print_name, df=False,
 # Appears at beginning of every print columns
 def print_col_leads(h, df, t, SN, mon, sim, i_temp, calc_temp, i_ekf, calc_ekf):
     print_pair(G.i, None, 4, 0, 'i', h, df)
-    print_pair(t[G.i], None, 7, 3, 'time', h, df)
+    print_pair(t[G.i], None, 8, 3, 'time', h, df)
     reset_val = getattr(SN.mon_run, "reset", getattr(SN.mon_run, "res", None))
     print_pair(bool(reset_val[G.i]) if reset_val is not None else False, mon.reset, 2, 0, 'r', h, df)
 
@@ -648,12 +648,12 @@ def print_ekf_RunSim(SN, i_temp, i_ekf, t, mon, sim, calc_ekf, calc_temp, df=Fal
         print_pair(SN.mon_run.soc_s[G.i], mon.soc_s, 13, 8, 'soc_s', h, df)
         print_pair(SN.mon_run.soc_ekf[G.i], mon.soc_ekf, 11, 8, 'soc_ekf', h, df)
         print_pair(mon.x, None, 12, 8, 'mon.x', h, df)
-        print_pair(SN.mon_run.y_ekf[G.i], mon.y_ekf, 12, 8, 'y_ekf', h, df)
-        print_pair(SN.mon_run.y_ekf_f[G.i], mon.y_ekf_f, 12, 8, 'y_ekf_f', h, df)
-        print_pair(SN.mon_run.y_ekf_f_T[i_ekf], mon.y_ekf_f_T, 12, 8, 'y_ekf_f_T', h, df)
-        print_pair(SN.mon_run.y_ekf_f_tau[i_ekf], mon.y_ekf_f_tau, 12, 8, 'y_ekf_f_tau', h, df)
-        print_pair(SN.mon_run.y_ekf_f_lstate[i_ekf], mon.y_ekf_f_state, 12, 9, 'y_ekf_f_state', h, df)
-        print_pair(SN.mon_run.z[i_ekf], mon.z, 13, 9, 'z', h, df)
+        print_pair(SN.mon_run.y_ekf[G.i], mon.y_ekf, 13, 8, 'y_ekf', h, df)
+        print_pair(SN.mon_run.y_ekf_f[G.i], mon.y_ekf_f, 13, 8, 'y_ekf_f', h, df)
+        print_pair(SN.mon_run.y_ekf_f_T[i_ekf], mon.y_ekf_f_T, 13, 8, 'y_ekf_f_T', h, df)
+        print_pair(SN.mon_run.y_ekf_f_tau[i_ekf], mon.y_ekf_f_tau, 13, 8, 'y_ekf_f_tau', h, df)
+        print_pair(SN.mon_run.y_ekf_f_lstate[i_ekf], mon.y_ekf_f_state, 14, 9, 'y_ekf_f_state', h, df)
+        print_pair(SN.mon_run.z[i_ekf], mon.z, 14, 9, 'z', h, df)
         print_pair(SN.mon_run.hx[i_ekf], mon.hx, 15, 9, 'hx', h, df)
         print_pair(SN.mon_run.voc_ekf[G.i], mon.voc_ekf, 13, 9, 'mon.voc_ekf', h, df)
         print_pair(SN.mon_run.Tb_f[G.i], mon.Tb_f, 12, 8, 'Tb_f', h, df)

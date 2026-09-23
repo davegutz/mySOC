@@ -100,6 +100,7 @@ sel_list = [
     "noaHiFailNoise",
     "rapidTweakRegression40C",
     "slowTweakRegression",
+    "slowTweakRegressionReal",
     "satSitBB",
     "satSitCHG",
     "cutback",
@@ -635,6 +636,16 @@ lookup = {
     "slowTweakRegression": (
         750,
         slow + "Rs;W4;Xp11;" + quiet + cleanup + "<XD;",
+        (
+            "Should run one very large slow (~15 min) current discharge/r"
+            "echarge cycle without fault.   It will take 60 seconds to st"
+            "art changing current.",
+            "Occasional jumps in ib_sel_stat are normal when pass through 0 A",
+        ),
+    ),
+    "slowTweakRegressionReal": (
+        750,
+        slow + "Dm-1;" + noisePackage+ "Rs;W4;Xp11;" + quiet + cleanup + "<XD;",
         (
             "Should run one very large slow (~15 min) current discharge/r"
             "echarge cycle without fault.   It will take 60 seconds to st"

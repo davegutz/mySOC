@@ -106,6 +106,13 @@ class EKF1x1:
             self.P = self.Fx * self.P * self.Fx + self.Q
             self.x_prior = self.x
             self.P_prior = self.P
+        else:
+            if OPT is not None and getattr(OPT, "mon_run", None) is not None and i_ekf is not None:
+                mr = OPT.mon_run
+                if hasattr(mr, "x_prior") and len(mr.x_prior) > i_ekf:
+                    self.x_prior = mr.x_prior[i_ekf]
+                if hasattr(mr, "P_prior") and len(mr.P_prior) > i_ekf:
+                    self.P_prior = mr.P_prior[i_ekf]
 
     def update_ekf(self, z, x_min, x_max, OPT=None, i_ekf=None):
         """1x1 Extended Kalman Filter update
@@ -130,7 +137,20 @@ class EKF1x1:
             self.S = self.H * pht + self.R
             if abs(self.S) > 1e-12:
                 self.K = pht / self.S  # using last-good-value if S=0
-        self.y = self.z - self.hx
+        if self.reset and OPT is not None and getattr(OPT, "mon_run", None) is not None and i_ekf is not None:
+            mr = OPT.mon_run
+            if hasattr(mr, "hx") and len(mr.hx) > i_ekf:
+                self.hx = mr.hx[i_ekf]
+            if hasattr(mr, "x_for_hx") and len(mr.x_for_hx) > i_ekf:
+                self.x_for_hx = mr.x_for_hx[i_ekf]
+            if hasattr(mr, "y") and len(mr.y) > i_ekf:
+                self.y = mr.y[i_ekf]
+            elif hasattr(mr, "y_ekf") and len(mr.y_ekf) > i_ekf:
+                self.y = mr.y_ekf[i_ekf]
+            else:
+                self.y = self.z - self.hx
+        else:
+            self.y = self.z - self.hx
         if not self.reset and not self.freeze:
             self.x = max(min(self.x + self.K * self.y, x_max), x_min)
         i_kh = 1.0 - self.K * self.H

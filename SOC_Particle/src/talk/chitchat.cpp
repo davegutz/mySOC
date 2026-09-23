@@ -468,9 +468,9 @@ void describe(BatteryMonitor* Mon, Sensors* Sen) {
       // parameters), to avoid SRAM life impact.
       case ('w'):  // w:  confirm write * adjustments to to SRAM
         System.backupRamSync();
-        sp.dirty(false);
+        sp.sync_sram();
         sendTxBuf(String::format("SAVED * now dirty=%d\n", sp.dirty()), true, true);
-            break;
+        break;
 
       case ('W'):  // W<>:  wait.  Skip
         if (cp.cmd_str.substring(1).length()) {

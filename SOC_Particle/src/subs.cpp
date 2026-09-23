@@ -728,6 +728,7 @@ void handle_boot_sequence() {
     sp.put_booted(true);
     sendTxBuf("\n\nSet booted true and stored...", true, IN_SERVICE);
     System.backupRamSync();
+    sp.sync_sram();
     delay(1000);
     sendTxBuf("backup Ram synced *\n", true, IN_SERVICE);
     sp.get_booted();

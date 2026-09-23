@@ -152,6 +152,7 @@ def write_clean_file(path_to_data, type_=None, hdr_key=None, unit_key=None, skip
             except IOError:
                 print("DataOverModel381:", line)  # last line
             # Data - rewind to start of input, continue appending to same output
+            # Data - rewind to start of input, continue appending to same output
             input_file.seek(0)
             num_lines = 0
             num_text_run = 0
@@ -160,7 +161,7 @@ def write_clean_file(path_to_data, type_=None, hdr_key=None, unit_key=None, skip
             skipped_last = False
             for line in input_file:
                 line = filter_f15_sequence(line)  # ESC[28~ injected by f15 keypress GUI_TestSOC to keep term awake
-                if line.__contains__(unit_key) and not line.startswith(("Config:", "CONFIG:", "Summ", "WARNING", "Firmware:", "Unit:")):
+                if line.__contains__(unit_key) and not line.lstrip("*").startswith(("Config:", "CONFIG:", "Summ", "WARNING", "Firmware:", "Unit:")):
                     unit_key_found = True
                     num_text = count_text_fields(line)
                     if num_text_run == 0 and line.count(",") == num_fields:

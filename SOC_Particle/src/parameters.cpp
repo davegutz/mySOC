@@ -38,9 +38,17 @@ Parameters::Parameters() : n_(0), V_(nullptr), dirty_(false){};
 
 Parameters::~Parameters(){};
 
+void Parameters::sync_sram() {
+  for (uint8_t i = 0; i < n_; i++) {
+    V_[i]->sync_sram();
+  }
+  dirty_ = false;
+}
+
 bool Parameters::eval_dirty() {
   for (uint8_t i = 0; i < n_; i++) {
-    if (V_[i]->code() != "vv" && V_[i]->code() != "UT" && V_[i]->is_off()) {
+    if (V_[i]->code() != "vv" && V_[i]->code() != "UT" &&
+        V_[i]->check_for_off_on_init() && !V_[i]->is_sram_match()) {
       return true;
     }
   }
@@ -315,7 +323,9 @@ void SavedPars::pretty_print(const bool all) {
     pretty_print_modeling();
 #endif
   } else {
-    Serial.printf("saved (sp) diffs\n");
+    dirty_ = eval_dirty();
+    sendTxBuf(String::format("saved (sp) diffs now dirty=%d\n", dirty()), true,
+              true);
     uint8_t count = 0;
     for (int i = 0; i < n_; i++) {
       if (V_[i]->is_off()) {

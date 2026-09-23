@@ -43,6 +43,7 @@ class Parameters {
   bool is_corrupt();
   virtual void pretty_print(const bool all) {}
   void set_nominal();
+  void sync_sram();
   String value_str() { return value_str_; }
 
  protected:

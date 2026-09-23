@@ -63,6 +63,10 @@ class Variable {
   bool success() { return success_; }
   const char* units() { return units_.c_str(); }
 
+  bool check_for_off_on_init() const { return check_for_off_on_init_; }
+  virtual bool is_sram_match() { return true; }
+  virtual void sync_sram() {}
+
   // Placeholders
   virtual void get(){};
   virtual bool is_corrupt() { return false; };
@@ -106,6 +110,7 @@ class BooleanV : public Variable {
     max_ = max;
     val_ = store;
     default_ = (std::max)((std::min)(_default, max_), min_);
+    sram_ = *val_;
     if (check_for_off_on_init_) check_set_put(*val_);
   }
 
@@ -126,6 +131,19 @@ class BooleanV : public Variable {
 
   virtual void get() {
     if (is_eeram_) *val_ = rP_->read(addr_.a16);
+  }
+
+  virtual bool is_sram_match() override {
+    if (is_eeram_) {
+      bool temp = rP_->read(addr_.a16);
+      return *val_ == temp;
+    }
+    return *val_ == sram_;
+  }
+
+  virtual void sync_sram() override {
+    sram_ = *val_;
+    if (is_eeram_) rP_->write(addr_.a16, *val_);
   }
 
   virtual bool is_corrupt() {
@@ -189,6 +207,7 @@ class BooleanV : public Variable {
   bool min_;
   bool max_;
   bool default_;
+  bool sram_;
 };
 
 class DoubleV : public Variable {
@@ -204,6 +223,7 @@ class DoubleV : public Variable {
     max_ = max;
     val_ = store;
     default_ = (std::max)((std::min)(_default, max_), min_);
+    sram_ = *val_;
     if (check_for_off_on_init_) check_set_put(*val_);
   }
 
@@ -227,6 +247,20 @@ class DoubleV : public Variable {
     if (is_eeram_) {
       rP_->get(addr_.a16, *val_);
     }
+  }
+
+  virtual bool is_sram_match() override {
+    if (is_eeram_) {
+      double temp;
+      rP_->get(addr_.a16, temp);
+      return abs(*val_ - temp) <= 1e-4;
+    }
+    return abs(*val_ - sram_) <= 1e-4;
+  }
+
+  virtual void sync_sram() override {
+    sram_ = *val_;
+    if (is_eeram_) rP_->put(addr_.a16, *val_);
   }
 
   virtual bool is_corrupt() {
@@ -293,6 +327,7 @@ class DoubleV : public Variable {
   double default_;
   double min_;
   double max_;
+  double sram_;
 };
 
 class FloatV : public Variable {
@@ -308,6 +343,7 @@ class FloatV : public Variable {
     max_ = max;
     val_ = store;
     default_ = (std::max)((std::min)(_default, max_), min_);
+    sram_ = *val_;
     if (check_for_off_on_init_) check_set_put(*val_);
   }
 
@@ -331,6 +367,20 @@ class FloatV : public Variable {
     if (is_eeram_) {
       rP_->get(addr_.a16, *val_);
     }
+  }
+
+  virtual bool is_sram_match() override {
+    if (is_eeram_) {
+      float temp;
+      rP_->get(addr_.a16, temp);
+      return abs(*val_ - temp) <= 1e-4;
+    }
+    return abs(*val_ - sram_) <= 1e-4;
+  }
+
+  virtual void sync_sram() override {
+    sram_ = *val_;
+    if (is_eeram_) rP_->put(addr_.a16, *val_);
   }
 
   virtual bool is_corrupt() {
@@ -397,6 +447,7 @@ class FloatV : public Variable {
   float default_;
   float min_;
   float max_;
+  float sram_;
 };
 
 class IntV : public Variable {
@@ -412,6 +463,7 @@ class IntV : public Variable {
     max_ = max;
     val_ = store;
     default_ = (std::max)((std::min)(_default, max_), min_);
+    sram_ = *val_;
     if (check_for_off_on_init_) check_set_put(*val_);
   }
 
@@ -435,6 +487,20 @@ class IntV : public Variable {
     if (is_eeram_) {
       rP_->get(addr_.a16, *val_);
     }
+  }
+
+  virtual bool is_sram_match() override {
+    if (is_eeram_) {
+      int temp;
+      rP_->get(addr_.a16, temp);
+      return *val_ == temp;
+    }
+    return *val_ == sram_;
+  }
+
+  virtual void sync_sram() override {
+    sram_ = *val_;
+    if (is_eeram_) rP_->put(addr_.a16, *val_);
   }
 
   virtual bool is_corrupt() {
@@ -497,6 +563,7 @@ class IntV : public Variable {
   int min_;
   int max_;
   int default_;
+  int sram_;
 };
 
 class Int8tV : public Variable {
@@ -512,6 +579,7 @@ class Int8tV : public Variable {
     max_ = max;
     val_ = store;
     default_ = (std::max)((std::min)(_default, max_), min_);
+    sram_ = *val_;
     if (check_for_off_on_init_) check_set_put(*val_);
   }
 
@@ -535,6 +603,20 @@ class Int8tV : public Variable {
     if (is_eeram_) {
       rP_->get(addr_.a16, *val_);
     }
+  }
+
+  virtual bool is_sram_match() override {
+    if (is_eeram_) {
+      int8_t temp;
+      rP_->get(addr_.a16, temp);
+      return *val_ == temp;
+    }
+    return *val_ == sram_;
+  }
+
+  virtual void sync_sram() override {
+    sram_ = *val_;
+    if (is_eeram_) rP_->put(addr_.a16, *val_);
   }
 
   virtual bool is_corrupt() {
@@ -598,6 +680,7 @@ class Int8tV : public Variable {
   int8_t min_;
   int8_t max_;
   int8_t default_;
+  int8_t sram_;
 };
 
 class Uint16tV : public Variable {
@@ -613,6 +696,7 @@ class Uint16tV : public Variable {
     max_ = max;
     val_ = store;
     default_ = (std::max)((std::min)(_default, max_), min_);
+    sram_ = *val_;
     if (check_for_off_on_init_) check_set_put(*val_);
   }
 
@@ -636,6 +720,20 @@ class Uint16tV : public Variable {
     if (is_eeram_) {
       rP_->get(addr_.a16, *val_);
     }
+  }
+
+  virtual bool is_sram_match() override {
+    if (is_eeram_) {
+      uint16_t temp;
+      rP_->get(addr_.a16, temp);
+      return *val_ == temp;
+    }
+    return *val_ == sram_;
+  }
+
+  virtual void sync_sram() override {
+    sram_ = *val_;
+    if (is_eeram_) rP_->put(addr_.a16, *val_);
   }
 
   virtual bool is_corrupt() {
@@ -699,6 +797,7 @@ class Uint16tV : public Variable {
   uint16_t min_;
   uint16_t max_;
   uint16_t default_;
+  uint16_t sram_;
 };
 
 class Uint8tV : public Variable {
@@ -714,6 +813,7 @@ class Uint8tV : public Variable {
     max_ = max;
     val_ = store;
     default_ = (std::max)((std::min)(_default, max_), min_);
+    sram_ = *val_;
     if (check_for_off_on_init_) check_set_put(*val_);
   }
 
@@ -735,6 +835,19 @@ class Uint8tV : public Variable {
 
   virtual void get() {
     if (is_eeram_) *val_ = rP_->read(addr_.a16);
+  }
+
+  virtual bool is_sram_match() override {
+    if (is_eeram_) {
+      uint8_t temp = rP_->read(addr_.a16);
+      return *val_ == temp;
+    }
+    return *val_ == sram_;
+  }
+
+  virtual void sync_sram() override {
+    sram_ = *val_;
+    if (is_eeram_) rP_->write(addr_.a16, *val_);
   }
 
   virtual bool is_corrupt() {
@@ -798,6 +911,7 @@ class Uint8tV : public Variable {
   uint8_t min_;
   uint8_t max_;
   uint8_t default_;
+  uint8_t sram_;
 };
 
 class ULongV : public Variable {
@@ -813,6 +927,7 @@ class ULongV : public Variable {
     max_ = max;
     val_ = store;
     default_ = (std::max)((std::min)(_default, max_), min_);
+    sram_ = *val_;
     if (check_for_off_on_init_) check_set_put(*val_);
   }
 
@@ -836,6 +951,20 @@ class ULongV : public Variable {
     if (is_eeram_) {
       rP_->get(addr_.a16, *val_);
     }
+  }
+
+  virtual bool is_sram_match() override {
+    if (is_eeram_) {
+      uint32_t temp;
+      rP_->get(addr_.a16, temp);
+      return *val_ == temp;
+    }
+    return *val_ == sram_;
+  }
+
+  virtual void sync_sram() override {
+    sram_ = *val_;
+    if (is_eeram_) rP_->put(addr_.a16, *val_);
   }
 
   virtual bool is_corrupt() {
@@ -900,4 +1029,5 @@ class ULongV : public Variable {
   uint32_t min_;
   uint32_t max_;
   uint32_t default_;
+  uint32_t sram_;
 };

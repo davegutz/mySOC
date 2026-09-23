@@ -27,6 +27,7 @@
 #define VTAB_BIAS 0.0  // Bias on voc_soc table (* 'Dw'), V
 
 // Ib hardware
+#define HDWE_BARE  // Nothing attached to prototype
 #define SHUNT_AMP_R1 5100.     // Internal amp resistance 196x, ohms (5100)
 #define SHUNT_AMP_R2 1000000.  // Internal amp resistance 196x, ohms (1000000)
 #define IB_ABS_MAX_AMP 12.0  // Hard range limit of sensor electrically

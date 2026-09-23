@@ -370,7 +370,7 @@ def replicate(OPT: UserOptions):
         consider_ekf = (i_ekf + 1 < len(OPT.mon_run.time_e)) and (OPT.mon_run.time_e[i_ekf + 1] <= OPT.mon_run.time[G.i])
         if consider_ekf:
             i_ekf += 1
-            reset_ekf = i_ekf < 2 or reset or OPT.run_type == "HistSim"
+            reset_ekf = i_ekf < 1 or reset or OPT.run_type == "HistSim"
             if i_ekf < 1:
                 T_ekf = OPT.mon_run.dt_ekf[i_ekf]
             else:
