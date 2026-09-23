@@ -16,8 +16,6 @@
 // #define LOGHANDLE
 
 // Miscellaneous
-#define ASK_DURING_BOOT 0  // Flag to ask for application of this file to *
-                           // retain adjustments 0=retain,1=ask,2=force default
 #define MODELING 247  // Nominal modeling bitmap (* 'Xm'),
     // 0=all hdwe, 1+=Tb, 2+=Vb, 4+=Ib, 7=all model  +240 for discn
 

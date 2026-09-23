@@ -739,46 +739,6 @@ void serialEvent() {
   }
 }
 
-// Wait on user input to reset EERAM values
-void wait_on_user_input() {
-  uint8_t count = 0;
-  int answer = 0;
-
-  sendTxBuf("\n\n", true, IN_SERVICE);
-  sp.pretty_print(false);
-  sendTxBuf("Reset to defaults? [y/N]:", true, IN_SERVICE);
-
-  while (count < 30 && answer != 'Y' && answer != 'y' && answer != 'n' &&
-         answer != 'N') {
-    if (Serial.available()) {
-      answer = Serial.read();
-      if (answer == '\r' || answer == '\n') {
-        answer = 'n';
-        break;
-      }
-    } else if (cp.ble_first_char != '\0') {
-      answer = cp.ble_first_char;
-      cp.ble_first_char = '\0';
-      if (answer == '\r' || answer == '\n') {
-        answer = 'n';
-        break;
-      }
-    } else {
-      Serial.printf("?");
-      count++;
-      delay(1000);
-    }
-  }
-
-  if (answer == 'Y' || answer == 'y') {
-    sendTxBuf("  Y reset\n\n", true, IN_SERVICE);
-    sp.set_nominal();
-    sp.pretty_print(true);
-    System.backupRamSync();
-  } else {
-    sendTxBuf(" N.  moving on...\n\n", true, IN_SERVICE);
-  }
-}
 
 // Wait on user input to set initial UNIX time
 void wait_on_user_ut_input() {

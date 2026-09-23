@@ -301,17 +301,17 @@ restore_r = (
 lookup = {
     "satInit": (
         22,
-        "Y;RS;RV;" + quiet + "cc;Dh;Dr;*W;*vv0;*XS;*Ca1;BZ;Ff0;ED;DP1;<HR;<Rf;" + "Pv;Pr;<Pd;<XK;",
+        "RS;RV;" + quiet + "cc;Dh;Dr;*W;*vv0;*XS;*Ca1;BZ;Ff0;ED;DP1;<HR;<Rf;" + "Pv;Pr;<Pd;<XK;",
         ("",),
     ),
     "startHere": (
         22,
-        "Y;RA;" + quiet + "cc;<HR;<Rf;" + "Pv;Pr;<Pd;<XK;",
+        "RA;" + quiet + "cc;<HR;<Rf;" + "Pv;Pr;<Pd;<XK;",
         ("",),
     ),
     "initMid": (
         22,
-        "Y;RS;RV;" + quiet + "cc;Dh1800000;*W;*vv0;*XS;*Ca.5;BZ;Ff0;ED;<HR;<Rf;" + "Pv;Pr;<Pd;<XK;",
+        "RS;RV;" + quiet + "cc;Dh1800000;*W;*vv0;*XS;*Ca.5;BZ;Ff0;ED;<HR;<Rf;" + "Pv;Pr;<Pd;<XK;",
         ("",),
     ),
     "saveAdjusts": (
@@ -929,7 +929,7 @@ no_shift_soc_s = frozenset(
 )
 
 macro_lookup = {
-    "end_early": (22, "Y;cc;Dh1800000;*W;*vv0;*XS;*Ca1;<Hd;<Pf;", ("", "", "", "")),
+    "end_early": (22, "cc;Dh1800000;*W;*vv0;*XS;*Ca1;<Hd;<Pf;", ("", "", "", "")),
     "hdwNoVbPcMidInit": (5, hdwNoVbPcMidInit, ("", "", "", "")),
     "modFullInit": (5, modFullInit, ("", "", "", "")),
     "modLoInit": (5, modLoInit, ("", "", "", "")),

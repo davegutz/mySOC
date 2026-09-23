@@ -1145,7 +1145,7 @@ def grab_init(command_to_append="", force_if_ready=False, force_kill=False, fg_c
     except AttributeError:
         current_ut = ""
         print(f"current_ut blank ***No Internet??")
-    init_command = init.get() + current_ut
+    init_command = current_ut + init.get()
     if command_to_append:
         init_command += command_to_append
     print(f"Init command to paste: {init_command}")

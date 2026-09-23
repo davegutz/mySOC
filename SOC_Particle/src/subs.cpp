@@ -723,7 +723,7 @@ void handle_boot_sequence() {
   if (!sp.booted()) {
     wait_on_user_ut_input();
   }
-  if (ASK_DURING_BOOT == 0 && !sp.booted()) {
+  if (!sp.booted()) {
     sp.set_nominal();
     sp.put_booted(true);
     sendTxBuf("\n\nSet booted true and stored...", true, IN_SERVICE);
@@ -734,9 +734,6 @@ void handle_boot_sequence() {
     sendTxBuf(String::format("booted = %d\n", sp.booted()), true, IN_SERVICE);
     sendTxBuf("booted should be true\n\n", true, IN_SERVICE);
     delay(1000);
-  }
-  if (ASK_DURING_BOOT == 1) {
-    if (sp.num_diffs()) wait_on_user_input();
   }
 }
 

@@ -421,11 +421,6 @@ const float QUIET_RES(QUIET_SET /
 #if !defined(EKF_CONV)
 #define EKF_CONV 0.025  // EKF tracking error indicating convergence, V (0.025)
 #endif
-#if !defined(ASK_DURING_BOOT)
-#define ASK_DURING_BOOT \
-  0  // Flag to ask for application of this file to * retained adjustements
-     // 0=retain,1=ask,2=force default
-#endif
 #if !defined(SNAP_WAIT)
 #define SNAP_WAIT \
   10000ULL  // Interval between fault snapshots (10000ULL = 10 sec)
