@@ -40,7 +40,7 @@ def main():  # Example usage.  ok on 20260217
             9:  dyn_n
             10: cc_diff
         """
-        data_file = '/home/daveg/.local/SOC_Particle/dataReduction/g20260828/vcFlat_pro2p2_hi_lo_bb.csv'
+        data_file = '/home/daveg/.local/SOC_Particle/dataReduction/g20260828/tLoFailHdwe_pro2p2_hi_lo_bb.csv'
         unit_key = 'g20260828_pro2p2_hi_lo_bb'
         time_end = None
         compare_run_ver = True
@@ -50,7 +50,7 @@ def main():  # Example usage.  ok on 20260217
         verbose = False
         scale_batt = 1.0
         slr_hys_sim = 1.0
-        request_history = 1
+        request_history = 3
         init_time = None
         time_shift = None
         strict_overplot = True

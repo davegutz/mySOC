@@ -674,7 +674,7 @@ void Sensors::Tb_load(const uint16_t tb_pin, const bool reset) {
 #else
     Tb_raw_ = 0.;
     Tb_volt_ = 0.;
-    Tb_hdwe_ = 0.;
+    Tb_hdwe_ = NOMINAL_TB + hdwe_add;
 #endif
   } else {
     Tb_raw_ = 0;
@@ -743,6 +743,10 @@ void Sensors::vb_load(const uint16_t vb_pin, const bool reset) {
     Vb_volt_ = Vb_raw_ * VB_RAW_CONV_GAIN;
     Vb_hdwe_ = float(Vb_raw_) * VB_CONV_GAIN * ap.Vb_scale() + float(VB_A) +
                sp.Vb_bias_hdwe();
+#else
+    Vb_raw_ = 0;
+    Vb_volt_ = 0.;
+    Vb_hdwe_ = NOMINAL_VB + sp.Vb_bias_hdwe();
 #endif
     Vb_hdwe_f_ = VbFilt->calculate(Vb_hdwe_, reset, AMP_FILT_TAU, T_);
   } else {

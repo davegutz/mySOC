@@ -645,7 +645,7 @@ lookup = {
     ),
     "slowTweakRegressionReal": (
         750,
-        slow + "Dm-1;" + noisePackage+ "Rs;W4;Xp11;" + quiet + cleanup + "<XD;",
+        slow + "Mn-9.5;" + noisePackage+ "Rs;W4;Xm247;Ca1;Sk100;Rb;Xts;Xf0.002;Xa-60;XW10000,XT60000;XC1;vv4;W4;XR;XQ700000;" + quiet + cleanup + "Sk;<XD;",
         (
             "Should run one very large slow (~15 min) current discharge/r"
             "echarge cycle without fault.   It will take 60 seconds to st"
