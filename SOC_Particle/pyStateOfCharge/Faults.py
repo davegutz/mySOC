@@ -455,16 +455,10 @@ class Wrap(MyLooparounds):
 
         # Individual wrap logic
         if ib_noa is not None:
-            if rp.modeling_vb or rp.modeling_ib or SN.run_type == "HistSim":
-                self.ib_noa = ib_noa
-                self.ib_noa_pst = ib_noa_pst
-                dt_local = getattr(self, "dt", 0.1)
-                ibnoa = self.ib_noa
-            else:
-                self.ib_noa = ib_noa
-                self.ib_noa_pst = ib_noa_pst
-                dt_local = getattr(self, "dt_past", getattr(self, "dt", 0.1))
-                ibnoa = self.ib_noa
+            self.ib_noa = ib_noa
+            self.ib_noa_pst = ib_noa_pst
+            dt_local = getattr(self, "dt", 0.1)
+            ibnoa = self.ib_noa
             self.LoopIbNoa.calculate(
                 reset=reset,
                 rp=rp,

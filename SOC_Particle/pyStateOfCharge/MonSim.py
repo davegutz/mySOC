@@ -286,7 +286,7 @@ def replicate(OPT: UserOptions):
                 mon.saturated = bool(OPT.mon_run.saturated[G.i] > 0.0)
         mon = SN.calc_temp_pass_2(OPT.mon_run, mon, Battery, rp, G.i, reset=reset)
         # Models
-        SN.update_ib_vb(G.i)
+        SN.update_ib_vb(G.i, reset=reset)
 
         if OPT.sim_run is not None and not OPT.use_ib_mon:
             ib_in_s = OPT.sim_run.ib_in_s[G.i]
@@ -331,7 +331,7 @@ def replicate(OPT: UserOptions):
             None,
             SN,
             OPT,
-            soc_pst=sim.soc_pst,
+            soc=sim.soc_pst,
             q_capacity=sim.q_capacity,
             rp=rp,
             saturated_init=sat_s_init,

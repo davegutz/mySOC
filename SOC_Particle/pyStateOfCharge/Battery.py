@@ -1278,6 +1278,7 @@ class BatterySim(Battery):
         if SN is not None:
             self.Tb = SN.mon_run.Tb_f[0]
             self.dv_dyn = SN.sim_run.dv_dyn_s[0]
+            self.dv_hys = SN.sim_run.dv_hys_s[0]
             self.ib_in = SN.sim_run.ib_in_s[0]
             self.d_delta_q = 0.
             self.delta_q = SN.delta_q_s[0]
@@ -1343,7 +1344,7 @@ class BatterySim(Battery):
         OPT,
         q_capacity=None,
         rp=None,
-        soc_pst=None,
+        soc=None,
         saturated_init=None,
         reset_ekf=None,
         i=None,
@@ -1360,7 +1361,7 @@ class BatterySim(Battery):
         self.dt_charge = dt_charge
         self.ib_in = ib
         self.mod = rp.modeling
-        self.soc_pst = soc_pst
+        self.soc_pst = soc
 
         # Saturation logic, both full and empty
         self.sat_ib_max = (
@@ -1401,6 +1402,9 @@ class BatterySim(Battery):
         self.dv_hys, self.tau_hys = self.hys.update(
             self.dt, init_high=self.sat_s, init_low=init_low, e_wrap=0.0, chem=self.chm
         )
+        if self.reset:
+            self.dv_hys = SN.sim_run.dv_hys_s[G.i]
+            self.hys.init(self.dv_hys)
         self.voc = self.voc_stat + self.dv_hys
         self.ioc = self.hys.ioc
 
@@ -1448,8 +1452,13 @@ class BatterySim(Battery):
         # Indicators
         self.cutback_s = (abs(self.ib - self.sat_ib_max) < 1e-4)
         self.sat_s = self.cutback_s & (self.ib < self.ib_sat)
-        if self.reset and SN.mon_run.saturated[0] is not None:
-            self.sat_s = SN.mon_run.saturated[0]
+        if self.reset:
+            if saturated_init is not None:
+                self.sat_s = saturated_init
+            elif hasattr(SN, "sim_run") and hasattr(SN.sim_run, "sat_s"):
+                self.sat_s = SN.sim_run.sat_s[G.i]
+            elif SN.mon_run.saturated[0] is not None:
+                self.sat_s = SN.mon_run.saturated[0]
         self.sat = self.sat_s
 
         return self.vb

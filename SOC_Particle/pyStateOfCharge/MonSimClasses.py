@@ -401,7 +401,7 @@ class Sensors:
     def update(self, i):
         self.i = min(max(i, 0), len(self.mon_run.time) - 1)
 
-    def update_ib_vb(self, i):
+    def update_ib_vb(self, i, reset=None):
         self.i = min(max(i, 0), len(self.mon_run.time) - 1)
         self.WrapLoopAmp.update(i)
         self.WrapLoopNoa.update(i)

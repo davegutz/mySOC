@@ -305,6 +305,8 @@ auto_case_total = 0  # Total number of AUTO cases
 _monitor_after_id: Optional[str] = None  # Pending after() ID for monitor_plink_done; used to cancel stale loops
 run_start_time: Optional[float]
 timer: Optional[CountdownTimer]
+current_auto_case = ""  # Active AUTO case name
+current_selected_case = ""  # Active manual case name
 
 
 sys.stdout = _Tee(sys.__stdout__, _log_file)
@@ -1297,8 +1299,10 @@ def handle_modeling(*_args):
 
 
 def handle_macro(*_args):
+    global current_selected_case
     lookup_macro()
     macro_option_ = macro_option.get()
+    current_selected_case = macro_option_
 
     # Check if this is what you want to do (skipped in AUTO)
     if not auto_running:
@@ -1333,8 +1337,10 @@ def handle_macro(*_args):
 
 
 def handle_option(*_args):
+    global current_selected_case
     lookup_start()
     option_ = option.get()
+    current_selected_case = option_
 
     # Check if this is what you want to do (skipped in AUTO)
     if not auto_running:
@@ -1925,10 +1931,11 @@ def grab_auto():
 
         # Process each line
         def process_next_config(index):
-            global auto_running, auto_fig_list, auto_case_index, auto_case_total
+            global auto_running, auto_fig_list, auto_case_index, auto_case_total, current_auto_case
             if index >= len(data_rows):
                 n_cases = len(data_rows)
                 auto_running = False
+                current_auto_case = ""
 
                 # Restore runtime state
                 Test.dataReduction_folder = saved_config["folder"]
@@ -1988,6 +1995,7 @@ def grab_auto():
 
             battery = config.get("battery", Test.battery)
             macro_val = config.get("macro", "")
+            current_auto_case = macro_val
             case_desc = f"version={Test.version!r}, macro={macro_val!r}"
             if should_skip_battery_case(battery, macro_val):
                 reason = f"battery upcase {battery.upper()!r} contained in case name {macro_val!r}"
@@ -2581,7 +2589,17 @@ def start_plink(command_to_paste=None, force_if_ready=False, force_kill=False, f
 
 def start_timer():
     global timer
-    timer = CountdownTimer(master, timer_val.get(), max_flash=60, exit_function=None, trigger=True)
+    if auto_running and current_auto_case:
+        current_case = current_auto_case
+    elif current_selected_case:
+        current_case = current_selected_case
+    else:
+        current_case = macro_option.get() or option.get()
+    if not current_case and hasattr(Test, "file_txt") and Test.file_txt:
+        current_case = Path(Test.file_txt).stem
+    timer = CountdownTimer(
+        master, timer_val.get(), max_flash=60, exit_function=None, trigger=True, case_name=current_case
+    )
 
 
 def swap_run_test():

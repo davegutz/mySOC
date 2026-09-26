@@ -16,9 +16,12 @@
 """Raise a window visible at task bar to close all plots"""
 
 import tkinter as tk
-import sys
 import time
 import platform
+try:
+    from Colors import Colors
+except Exception:
+    Colors = None
 
 if platform.system() == "Darwin":
     # noinspection PyUnresolvedReferences
@@ -30,10 +33,17 @@ bg_color = "lightgray"
 
 
 class CountdownTimer(tk.Toplevel):
-    def __init__(self, root_, time_, max_flash=30, exit_function=None, trigger=False, title="SOC-countdown"):
+    def __init__(self, root_, time_, max_flash=30, exit_function=None, trigger=False, title="SOC-countdown", case_name=""):
         """Block caller task asking to close all plots then doing so"""
         tk.Toplevel.__init__(self)
         self.title(title)
+        self.case_name = case_name
+        self.countup_started = False
+        self.countup_start_time = None
+        self.final_countup = 0
+        self.final_countup_time = 0.0
+        self.countup_size = 0
+        self.printed_countup = False
         self.root = root_
         self.flasher_window = None
         self.flasher_label = None
@@ -51,6 +61,7 @@ class CountdownTimer(tk.Toplevel):
         self.trigger = trigger
         self._flasher_after_id = None
         self._countdown_after_id = None
+        self.protocol("WM_DELETE_WINDOW", self.close)
         if self.trigger:
             self.begin()
         # self.mainloop()  # Removed blocking mainloop
@@ -65,6 +76,28 @@ class CountdownTimer(tk.Toplevel):
         y = (screen_height / 2) - (height / 2)
         self.geometry("%dx%d+%d+%d" % (width, height, x, y))
 
+    def _record_and_print_countup(self):
+        if not getattr(self, "countup_started", False):
+            return
+        if getattr(self, "printed_countup", False):
+            return
+        self.printed_countup = True
+
+        if self.countup_start_time is not None:
+            elapsed = time.time() - self.countup_start_time
+            self.final_countup_time = elapsed
+            countup_val = max(self.flashes, int(round(elapsed)))
+        else:
+            countup_val = self.flashes
+            self.final_countup_time = float(self.flashes)
+        self.final_countup = countup_val
+        self.countup_size = countup_val
+
+        red = getattr(getattr(Colors, "fg", None), "red", "\033[91m") if Colors else "\033[91m"
+        reset = getattr(Colors, "reset", "\033[0m") if Colors else "\033[0m"
+        case_str = f"'{self.case_name}'" if self.case_name else "Case"
+        print(f"{red}{case_str} countup: {self.final_countup} s{reset}", flush=True)
+
     def close(self):
         try:
             from CompareRunSim import is_compare_run_sim_main_running
@@ -73,6 +106,7 @@ class CountdownTimer(tk.Toplevel):
                 return
         except Exception:
             pass
+        self._record_and_print_countup()
         if self._flasher_after_id is not None:
             try:
                 self.after_cancel(self._flasher_after_id)
@@ -130,6 +164,11 @@ class CountdownTimer(tk.Toplevel):
 
     def flasher_start(self, text):
         """function which creates window with message"""
+        self.countup_started = True
+        self.countup_start_time = time.time()
+        self.final_countup = 0
+        self.final_countup_time = 0.0
+        self.countup_size = 0
         # create window with messages
         self.flasher_window = tk.Toplevel()
         self.flasher_window.geometry("300x200")
@@ -139,6 +178,7 @@ class CountdownTimer(tk.Toplevel):
         self.flasher_window.attributes("-topmost", True)
         self.flasher_window.attributes("-topmost", False)
         self.flasher_window.lift()
+        self.flasher_window.protocol("WM_DELETE_WINDOW", self.close)
         self.bell()
 
         # update window after 500ms
@@ -156,10 +196,13 @@ class CountdownTimer(tk.Toplevel):
                     self.flasher_label["text"] = str(self.flashes)
                     self.flasher_label["bg"] = "red"
                     self.flasher_window.configure(bg="red")
+                    self.final_countup = self.flashes
+                    self.countup_size = self.flashes
 
                 # update window
                 self._flasher_after_id = self.after(500, self.flasher_update)
             else:
+                self._record_and_print_countup()
                 if self.flasher_window is not None:
                     try:
                         if self.flasher_window.winfo_exists():
@@ -172,6 +215,7 @@ class CountdownTimer(tk.Toplevel):
                 except Exception:
                     pass
         except Exception as e:
+            self._record_and_print_countup()
             print("e=", e)
             print("killing flasher window")
             if self.flasher_window is not None:
@@ -185,6 +229,10 @@ class CountdownTimer(tk.Toplevel):
                     self.destroy()
             except Exception:
                 pass
+
+    def destroy(self):
+        self._record_and_print_countup()
+        super().destroy()
 
 
 def start_timer():
