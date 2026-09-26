@@ -122,7 +122,6 @@ sel_list1 = [
     "tHiFailModel",
     "tLoFailHdwe",
     "tHiFailHdwe",
-    "faultParade",
     "stepDown",
     "stepUp",
     "ibDualMid",
@@ -403,7 +402,7 @@ lookup = {
         ("Hardware zero_with_pc run", "", "", ""),
     ),
     "ampHiEmptFail": (
-        145,
+        150,
         modLoInit + tranPrep + c50 + "XQ25000;" + c00 + quiet + cleanup + "Pv;<XD;",
         (
             "Inject 50A into amp.  Should detect and switch amp current failure",
@@ -418,7 +417,7 @@ lookup = {
         ),
     ),
     "ampHiFail": (
-        145,
+        150,
         modHalfInit + tranPrep + c50 + "XQ25000;" + c00 + quiet + cleanup + "Pv;<XD;",
         (
             "Inject 50A into amp.  Should detect and switch amp current failure",
@@ -433,7 +432,7 @@ lookup = {
         ),
     ),
     "noaHiFail": (
-        145,
+        150,
         modHalfInit + tranPrep + d50 + "XQ25000;" + c00 + quiet + cleanup + "Pv;<XD;",
         (
             "Inject 50A into noa. With ib_diff only nothing changes then "
@@ -479,7 +478,7 @@ lookup = {
         ),
     ),
     "pulseSoft": (
-        85,
+        90,
         synced_slow_pulse
         + ("XS;Dm0;Dn0;vv0;Xm255;Ca.5;Pm;W2;Rs;W20;vv4;W10;" + "Xp7;W10;Pc;" + quiet + cleanup + "Pv;<XD;"),
         (
@@ -491,7 +490,7 @@ lookup = {
         ),
     ),
     "pulseHard": (
-        85,
+        90,
         synced_slow_pulse
         + ("XS;Dm0;Dn0;vv0;Xm255;Ca.5;Pm;W2;Rs;W20;vv4;W10;" + "Xp8;W10;Pc;" + quiet + cleanup + "Pv;<XD;"),
         (
@@ -503,7 +502,7 @@ lookup = {
         ),
     ),
     "rapidTweakRegressionH0": (
-        245,
+        250,
         "Sh0;" + slow + "Rs;W4;Xp10;Pf;W2;" + quiet + cleanup + "Sh1;Pv;<XD;",
         (
             "Should run three very large current discharge/recharge cycles without fault",
@@ -513,7 +512,7 @@ lookup = {
         ),
     ),
     "offLowSoc": (
-        170,
+        200,
         modEmptInitGen + tranPrep + "W25" + vm12 + "XQ55000;" + dv0 + quiet + cleanup + "Pv;<XD;",
         ("Test for clean faults on shutoff.",),
     ),
@@ -547,7 +546,7 @@ lookup = {
         ),
     ),
     "ampHiFailFf": (
-        150,
+        170,
         modHalfInit + tranPrep + "Ff1;" + c50 + "XQ40000;" + c00 + quiet + cleanup + "<XD;",
         (
             "Should detect but not switch amp current failure. (See 'diff' and current!=0 on display).",
@@ -561,7 +560,7 @@ lookup = {
         ),
     ),
     "ampLoFail": (
-        155,
+        180,
         modHalfInit + tranPrep + cm50 + "XQ50000;" + c00 + quiet + cleanup + "<XD;",
         (
             "Should detect and switch amp current failure.",
@@ -572,7 +571,7 @@ lookup = {
         ),
     ),
     "ampLoFullFail": (
-        155,
+        180,
         modFullInit + tranPrep + cm50 + "XQ50000;" + c00 + quiet + cleanup + "<XD;",
         (
             "Should detect and switch amp current failure before saturation tripped (would only be a problem for noa).",
@@ -583,7 +582,7 @@ lookup = {
         ),
     ),
     "noaLoFail": (
-        155,
+        180,
         modHalfInit + tranPrep + dm50 + "XQ50000;" + c00 + quiet + cleanup + "<XD;",
         (
             "Should detect and switch noa current failure.",
@@ -594,7 +593,7 @@ lookup = {
         ),
     ),
     "noaLoFullFail": (
-        155,
+        180,
         modFullInit + "DS-0.30" + tranPrep + dm50 + "XQ50000;" + c00 + quiet + cleanup + "DS;<XD;",
         (
             "Race with artificially low SAT logic to detect and switch noa current failure.",
@@ -603,7 +602,7 @@ lookup = {
         ),
     ),
     "ampHiFailNoise": (
-        140,
+        180,
         modHalfInit + tranPrep + noisePackage + c50 + "XQ25000;" + c00 + silentPackage + quiet + cleanup + "<XD;",
         (
             "Noisy ampHiFail.  Should detect and switch amp current failure.",
@@ -614,7 +613,7 @@ lookup = {
         ),
     ),
     "noaHiFailNoise": (
-        140,
+        180,
         modHalfInit + tranPrep + noisePackage + d50 + "XQ25000;" + c00 + silentPackage + quiet + cleanup + "<XD;",
         (
             "Noisy noaHiFail.  Should detect and switch noa current failure.",
@@ -625,7 +624,7 @@ lookup = {
         ),
     ),
     "rapidTweakRegression40C": (
-        220,
+        240,
         "D^15;" + slow + "Rs;W4;Xp10;" + quiet + cleanup + "<XD;",
         (
             "Should run three very large current discharge/recharge cycles without fault",
@@ -634,7 +633,7 @@ lookup = {
         ),
     ),
     "slowTweakRegression": (
-        750,
+        760,
         slow + "Rs;W4;Xp11;" + quiet + cleanup + "<XD;",
         (
             "Should run one very large slow (~15 min) current discharge/r"
@@ -654,7 +653,7 @@ lookup = {
         ),
     ),
     "satSitBB": (
-        690,
+        715,
         "Xm247;Ca0.9962;" + fastTwitchDef + "Xa17;" + tranPrep + "XR;XQ600000;" + "Xa0;" + quiet + cleanup + "<XD;",
         (
             "Should run one saturation and de-saturation event without fault.   Takes about 15 minutes.",
@@ -679,7 +678,7 @@ lookup = {
         ),
     ),
     "offSitBmsNoiseBB": (
-        750,
+        700,
         modEmptInitBB
         + (
             slowTwitchDef
@@ -731,7 +730,7 @@ lookup = {
         ),
     ),
     "ampHiFailSlow": (
-        535,
+        560,
         modHalfInit + "SC0.0006;Fd0.5;" + tranPrep + c10 + "XQ400000;" + c00 + quiet + cleanup + "<XD;",
         (
             "10A bias on amp, disable wrap, noa in range at 0A and reflec"
@@ -744,7 +743,7 @@ lookup = {
         ),
     ),
     "ampHiFailSlowNoAlpha": (
-        535,
+        560,
         modHalfInit + "SC0.0006;Fd0.5;Ha1;" + tranPrep + c10 + "XQ400000;" + c00 + quiet + cleanup + "Ha;<XD;",
         (
             "10A bias on amp, disable wrap, noa in range at 0A and reflec"
@@ -757,7 +756,7 @@ lookup = {
         ),
     ),
     "noaHiFailSlow": (
-        525,
+        560,
         modHalfInit + "SC0.0006;" + tranPrep + d20 + "XQ400000;" + c00 + quiet + cleanup + "<XD;",
         (
             "20A bias on noa, amp in range at 0A and reflects battery sta"
@@ -771,7 +770,7 @@ lookup = {
         ),
     ),
     "noaHiFailSlower": (
-        525,
+        560,
         modHalfInit + "SC0.0006;" + tranPrep + d08 + "XQ400000;" + c00 + quiet + cleanup + "<XD;",
         (
             "8A bias on noa, amp in range at 0A and reflects battery stat"
@@ -785,7 +784,7 @@ lookup = {
         ),
     ),
     "noaHiFailSlowest": (
-        525,
+        560,
         modHalfInit + "SC0.0006;" + tranPrep + d05 + "XQ400000;" + c00 + quiet + cleanup + "<XD;",
         (
             "5A bias on noa, amp in range at 0A and reflects battery stat"
@@ -808,7 +807,7 @@ lookup = {
         ),
     ),
     "vHiFailNoise": (
-        165,
+        190,
         modHalfInit + tranPrep + noisePackage + "XY;Dv0.82;XQ60000;" + dv0 + quiet + cleanup + "<XD;",
         (
             "Should detect voltage failure and display '*fail' and 'redl' within 60 seconds.",
@@ -818,7 +817,7 @@ lookup = {
         ),
     ),
     "vHiFailFf": (
-        180,
+        190,
         modHalfInit + tranPrep + "Ff1;XY;Dv0.8;XQ60000;" + dv0 + quiet + cleanup + "<XD;",
         (
             "Run for about 1 minute.",
@@ -837,7 +836,7 @@ lookup = {
         ),
     ),
     "tLoFailModel": (
-        285,
+        310,
         modHalfInit
         + ("D^7;" + tranPrep + "XY;W10;D^-113;XQ120000;" + "D^;Rf;W50;" + cleanup + "<W50;" + quietwait + "<Pf;<XD;"),
         (
@@ -848,7 +847,7 @@ lookup = {
         ),
     ),
     "tHiFailModel": (
-        285,
+        310,
         modHalfInit
         + ("D^7;" + tranPrep + "XY;W10;D^+50;XQ120000;" + "D^;Rf;W50;" + cleanup + "<W50;" + quietwait + "<Pf;<XD;"),
         (
@@ -859,7 +858,7 @@ lookup = {
         ),
     ),
     "tLoFailHdwe": (
-        285,
+        330,
         modHalfInit230
         + (tranPrep + "XY;W10;Dt-113;XQ120000;" + "Dt;Rf;W50;" + cleanup + "<W50;" + quietwait + "<Pf;<XD;"),
         (
@@ -870,7 +869,7 @@ lookup = {
         ),
     ),
     "tHiFailHdwe": (
-        285,
+        370,
         modHalfInit230
         + (tranPrep + "XY;W10;Dt+50;XQ120000;" + "Dt;Rf;W50;" + cleanup + "<W50;" + quietwait + "<Pf;<XD;"),
         (
@@ -881,17 +880,17 @@ lookup = {
         ),
     ),
     "stepDown": (
-        165,
+        195,
         modHalfInit + tranPrep + sd50 + "XQ25000;" + s00 + quiet + cleanup + "<XD;",
         ("Should be normal hard discharge step", "", "", ""),
     ),
     "stepUp": (
-        165,
+        195,
         modHalfInit + tranPrep + sc50 + "XQ25000;" + s00 + quiet + cleanup + "<XD;",
         ("Should be normal hard charge step", "Like engine start", "", ""),
     ),
     "ibDualMid": (
-        145,
+        150,
         modHalfInit + tranPrep + cmn100 + "XQ25000;" + c00 + quiet + cleanup + "<XD;",
         (
             "Inject 100A into amp and noa simultaneously.  Should detect and switch dual amp current failure set Ib=0",
@@ -900,7 +899,7 @@ lookup = {
         ),
     ),
     "ibDualFlat": (
-        145,
+        150,
         modFlatInit + tranPrep + cmn100 + "XQ25000;" + c00 + quiet + cleanup + "<XD;",
         (
             "Inject 100A into amp and noa simultaneously.  Should detect and switch dual amp current failure set Ib=0",
@@ -909,7 +908,7 @@ lookup = {
         ),
     ),
     "vcFlat": (
-        140,
+        105,
         modFlatInitHi + tranPrepKf + "D30.6;" + "XQ25000;" + "D3;" + quiet + cleanup + "<XD;",
         (
             "Inject 0.6V into sensed Vc (normally 1.65).  Should fail both currents.",

@@ -302,6 +302,9 @@ auto_running = False  # Track if AUTO process is active
 auto_fig_list: Optional[list] = None  # Handles to figures from the most recently completed AUTO case
 auto_case_index = 0  # Current AUTO case index (0-based)
 auto_case_total = 0  # Total number of AUTO cases
+auto_transient_time = 0  # Current AUTO transient duration (s)
+auto_transient_time_remaining = 0  # Remaining AUTO transient duration (s)
+auto_total_transient_time = 0  # Total AUTO transient duration for all cases (s)
 _monitor_after_id: Optional[str] = None  # Pending after() ID for monitor_plink_done; used to cancel stale loops
 run_start_time: Optional[float]
 timer: Optional[CountdownTimer]
@@ -339,6 +342,31 @@ def should_skip_battery_case(battery: str, case_name: str) -> bool:
         return True
 
     return False
+
+
+def get_transient_time(config: dict) -> int:
+    """Return the transient duration in seconds for a configuration row."""
+    macro_name = config.get("macro", "") or config.get("option", "")
+    if macro_name in lookup:
+        return int(lookup[macro_name][0])
+    elif macro_name in macro_lookup:
+        return int(macro_lookup[macro_name][0])
+    return 0
+
+
+def format_duration(seconds: int) -> str:
+    """Format duration in seconds to a human-readable string."""
+    if seconds >= 3600:
+        h = seconds // 3600
+        m = (seconds % 3600) // 60
+        s = seconds % 60
+        return f"{seconds} s ({h}h {m}m {s}s)"
+    elif seconds >= 60:
+        m = seconds // 60
+        s = seconds % 60
+        return f"{seconds} s ({m}m {s}s)"
+    else:
+        return f"{seconds} s"
 
 
 
@@ -1851,10 +1879,22 @@ def grab_auto():
             display_parts = []
             for k, v in config.items():
                 display_parts.append(f"{k}: {v}")
+            t_sec = get_transient_time(config)
+            if t_sec > 0:
+                display_parts.append(f"time: {t_sec}s")
             display_lines.append(" | ".join(display_parts))
 
         all_lines_text = "\n".join(display_lines)
         print(f"All configurations:\n{all_lines_text}")
+
+        # Total up the total times of the AUTO transients
+        global auto_total_transient_time
+        auto_total_transient_time = sum(
+            get_transient_time(c)
+            for c in data_rows
+            if not should_skip_battery_case(c.get("battery", Test.battery), c.get("macro", "") or c.get("option", ""))
+        )
+        print(f"\nTotal time of AUTO transients: {format_duration(auto_total_transient_time)}\n")
 
         # Custom wide dialog
         dialog = tk.Toplevel(master)
@@ -1877,7 +1917,12 @@ def grab_auto():
         top_frame = tk.Frame(dialog)
         top_frame.pack(side="top", fill="x", padx=20, pady=10)
         prompt_label = tk.Label(
-            top_frame, text="Do you want to run these configurations automatically?", font=("Arial", 11, "bold")
+            top_frame,
+            text=(
+                "Do you want to run these configurations automatically?\n"
+                f"Total transient time: {format_duration(auto_total_transient_time)}"
+            ),
+            font=("Arial", 11, "bold"),
         )
         prompt_label.pack(side="left")
         btn_frame = tk.Frame(top_frame)
@@ -1932,10 +1977,13 @@ def grab_auto():
         # Process each line
         def process_next_config(index):
             global auto_running, auto_fig_list, auto_case_index, auto_case_total, current_auto_case
+            global auto_transient_time, auto_transient_time_remaining
             if index >= len(data_rows):
                 n_cases = len(data_rows)
                 auto_running = False
                 current_auto_case = ""
+                auto_transient_time = 0
+                auto_transient_time_remaining = 0
 
                 # Restore runtime state
                 Test.dataReduction_folder = saved_config["folder"]
@@ -1964,7 +2012,11 @@ def grab_auto():
                 lookup_start()
 
                 print(f"\n\n----------------------------\nBatch Summary\n-------------------------------\n")
-                print(f"AUTO complete: {n_cases} case(s) run. Original configuration restored.")
+                print(
+                    f"AUTO complete: {n_cases} case(s) run. "
+                    f"Total transient time: {format_duration(auto_total_transient_time)}. "
+                    f"Original configuration restored."
+                )
 
                 if auto_problem_cases:
                     print("\033[92m--- AUTO problem summary ---\033[0m")
@@ -2006,6 +2058,22 @@ def grab_auto():
                 process_next_config(index + 1)
                 return
 
+            # Track AUTO case progress and transient times
+            auto_case_index = index
+            auto_case_total = len(data_rows)
+            auto_transient_time = get_transient_time(config)
+            auto_transient_time_remaining = sum(
+                get_transient_time(c)
+                for c in data_rows[index:]
+                if not should_skip_battery_case(c.get("battery", Test.battery), c.get("macro", "") or c.get("option", ""))
+            )
+
+            print(
+                f"\n>>> AUTO transient '{macro_val}' ({index + 1}/{len(data_rows)}): "
+                f"time of transient = {format_duration(auto_transient_time)}, "
+                f"total transient time remaining = {format_duration(auto_transient_time_remaining)}",
+                flush=True,
+            )
             print(f"Processing configuration {index + 1}/{len(data_rows)}: {config}")
 
             if "folder" in config:
@@ -2036,12 +2104,9 @@ def grab_auto():
                 elif m_name in macro_lookup:
                     macro_option.set(m_name)
                     set_red(macro_sel)
+                    timer_val.set(macro_lookup[m_name][0])
                 else:
                     print(f"Error: Macro '{m_name}' not found in lookup or macro_lookup. Skipping.")
-
-            # Track AUTO case progress (used by start_plink for status print)
-            auto_case_index = index
-            auto_case_total = len(data_rows)
 
             # Trigger START HERE button
             print(f"\n\nTriggering START HERE for config {index + 1}")
@@ -2057,7 +2122,13 @@ def grab_auto():
                             f_.seek(max(0, size - 1024))
                             last_data = f_.read().decode("utf-8", errors="ignore")
                             if "***READY***" in last_data:
-                                print(f"***READY*** detected for config {index + 1}. Triggering start_button.")
+                                print(
+                                    f"***READY*** detected for config {index + 1}. Triggering start_button.\n"
+                                    f"Beginning transient '{macro_val}': "
+                                    f"time of transient = {format_duration(auto_transient_time)}, "
+                                    f"total transient time remaining = {format_duration(auto_transient_time_remaining)}",
+                                    flush=True,
+                                )
                                 grab_start()
                                 # After starting, wait for DONE
                                 # noinspection PyTypeChecker,PyUnfilledParameters
@@ -2376,6 +2447,18 @@ def start_plink(command_to_paste=None, force_if_ready=False, force_kill=False, f
     if enter_size < 64:
         kill_plink(platform.system())
         print(f"restarting plink   plink -load {test_filename.get()}")
+        def _print_auto_status():
+            if auto_running:
+                msg = f"AUTO running case No. {auto_case_index + 1} of {auto_case_total}"
+                if current_auto_case:
+                    msg += f" ('{current_auto_case}')"
+                if auto_transient_time > 0:
+                    msg += (
+                        f":\n  transient time  = {format_duration(auto_transient_time)}, "
+                        f"\n  total remaining = {format_duration(auto_transient_time_remaining)}"
+                    )
+                print(msg)
+
         if platform.system() == "Linux":
             term = (
                 find_executable("gnome-terminal")
@@ -2446,8 +2529,7 @@ def start_plink(command_to_paste=None, force_if_ready=False, force_kill=False, f
                 tksleep(1.0)  # Wait for terminal to spawn plink
                 plink_pid, ppid = _find_and_record_plink_pid(test_filename.get())
                 print(f"Spawned PID: {plink_pid}  PPID: {ppid}")
-                if auto_running:
-                    print(f"AUTO running case No. {auto_case_index + 1} of {auto_case_total}")
+                _print_auto_status()
             elif "xterm" in term:
                 # xterm -bg black -fg green -fs 10 (assuming default is ~12)
                 # Pass bash -c args separately so single quotes inside plink_cmd don't break the shell
@@ -2472,8 +2554,7 @@ def start_plink(command_to_paste=None, force_if_ready=False, force_kill=False, f
                 tksleep(1.0)  # Wait for terminal to spawn plink
                 plink_pid, ppid = _find_and_record_plink_pid(test_filename.get())
                 print(f"Spawned PID: {plink_pid}  PPID: {ppid}")
-                if auto_running:
-                    print(f"AUTO running case No. {auto_case_index + 1} of {auto_case_total}")
+                _print_auto_status()
             else:
                 # qterminal / x-terminal-emulator: pass bash -c args separately to avoid single-quote
                 # conflicts when plink_cmd contains quoted strings. Use OSC sequences and ANSI RGB
@@ -2489,8 +2570,7 @@ def start_plink(command_to_paste=None, force_if_ready=False, force_kill=False, f
                 tksleep(1.0)  # Wait for terminal to spawn plink
                 plink_pid, ppid = _find_and_record_plink_pid(test_filename.get())
                 print(f"Spawned PID: {plink_pid}  PPID: {ppid}")
-                if auto_running:
-                    print(f"AUTO running case No. {auto_case_index + 1} of {auto_case_total}")
+                _print_auto_status()
         elif platform.system() == "Windows":
             # plink has no -tee flag.  Git's tee.exe opens with deny-read sharing so check_completion
             # can never read plink_test.csv while tee is running.  Use a tiny Python helper instead:
@@ -2559,8 +2639,7 @@ def start_plink(command_to_paste=None, force_if_ready=False, force_kill=False, f
                 print(Colors.fg.red, ee, 'error near line 2153 of GUI_PlinkSOC.py', Colors.reset)
                 pass  # plink_pid stays None; kill_plink falls back to taskkill /im plink.exe
             print(f"Spawned plink PID: {plink_pid}  cmd window PID: {cmd_window_pid}")
-            if auto_running:
-                print(f"AUTO running case No. {auto_case_index + 1} of {auto_case_total}")
+            _print_auto_status()
         elif platform.system() == "Darwin":
             # plink has no -tee flag; pipe stdout through shell tee instead
             if command_to_paste:
@@ -2582,8 +2661,7 @@ def start_plink(command_to_paste=None, force_if_ready=False, force_kill=False, f
             tksleep(1.0)
             plink_pid, ppid = _find_and_record_plink_pid(test_filename.get())
             print(f"Spawned PID: {plink_pid}  PPID: {ppid}")
-            if auto_running:
-                print(f"AUTO running case No. {auto_case_index + 1} of {auto_case_total}")
+            _print_auto_status()
     return True
 
 

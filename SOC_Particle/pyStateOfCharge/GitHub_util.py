@@ -326,11 +326,11 @@ def check_newer_git_repo(repo_dir=None, repo_owner=None, repo_name=None, file_pa
             upstream = None
             for ref in ['@{u}', 'origin/main', 'origin/master']:
                 r = subprocess.run(
-                    ['git', '-C', repo_dir, 'rev-parse', '--verify', ref],
+                    ['git', '-C', repo_dir, 'rev-parse', '--abbrev-ref', ref],
                     capture_output=True, text=True, timeout=timeout
                 )
-                if r.returncode == 0:
-                    upstream = ref
+                if r.returncode == 0 and r.stdout.strip():
+                    upstream = r.stdout.strip()
                     break
 
             if upstream:

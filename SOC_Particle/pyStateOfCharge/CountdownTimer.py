@@ -38,6 +38,12 @@ class CountdownTimer(tk.Toplevel):
         tk.Toplevel.__init__(self)
         self.title(title)
         self.case_name = case_name
+        self.countdown_started = False
+        self.countdown_start_time = None
+        self.final_countdown = 0
+        self.final_countdown_time = 0.0
+        self.countdown_size = 0
+        self.printed_countdown = False
         self.countup_started = False
         self.countup_start_time = None
         self.final_countup = 0
@@ -76,6 +82,35 @@ class CountdownTimer(tk.Toplevel):
         y = (screen_height / 2) - (height / 2)
         self.geometry("%dx%d+%d+%d" % (width, height, x, y))
 
+    def _record_and_print_countdown(self):
+        if not getattr(self, "countdown_started", False):
+            return
+        if getattr(self, "countup_started", False):
+            return
+        if getattr(self, "printed_countdown", False):
+            return
+        self.printed_countdown = True
+
+        if self.countdown_start_time is not None:
+            elapsed = time.time() - self.countdown_start_time
+            remaining = max(0.0, float(self.initial_time) - elapsed)
+            self.final_countdown_time = remaining
+            countdown_val = max(0, min(self.initial_time, int(round(remaining))))
+        else:
+            try:
+                current_time = self.time.get()
+            except Exception:
+                current_time = self.initial_time
+            countdown_val = max(0, min(self.initial_time, current_time))
+            self.final_countdown_time = float(countdown_val)
+        self.final_countdown = countdown_val
+        self.countdown_size = countdown_val
+
+        green = getattr(getattr(Colors, "fg", None), "green", "\033[92m") if Colors else "\033[92m"
+        reset = getattr(Colors, "reset", "\033[0m") if Colors else "\033[0m"
+        case_str = f"'{self.case_name}'" if self.case_name else "Case"
+        print(f"{green}{case_str} countdown: {self.final_countdown} s{reset}", flush=True)
+
     def _record_and_print_countup(self):
         if not getattr(self, "countup_started", False):
             return
@@ -106,6 +141,7 @@ class CountdownTimer(tk.Toplevel):
                 return
         except Exception:
             pass
+        self._record_and_print_countdown()
         self._record_and_print_countup()
         if self._flasher_after_id is not None:
             try:
@@ -134,6 +170,7 @@ class CountdownTimer(tk.Toplevel):
     def begin(self):
         """Countdown in seconds then exit"""
         self.bell()
+        self.countdown_started = True
         if self.trigger:
             self.trigger = False
             self._countdown_after_id = self.after(1000, self.begin)
@@ -148,13 +185,21 @@ class CountdownTimer(tk.Toplevel):
 
     def countdown(self):
         """Countdown in seconds then exit"""
+        self.countdown_started = True
+        if self.countdown_start_time is None:
+            self.countdown_start_time = time.time()
         self.time.set(self.time.get() - 1)
         self.button.config(text=str(self.time.get()), fg="black", bg=bg_color, font=("Courier", 96))
+        self.final_countdown = max(0, self.time.get())
+        self.countdown_size = self.final_countdown
         if self.time.get() > 0:
             self.lift()
             # self.center()
             self._countdown_after_id = self.after(1000, self.countdown)
         else:
+            self.final_countdown = 0
+            self.countdown_size = 0
+            self.final_countdown_time = 0.0
             self.time.set(self.initial_time)
             self.button.config(text=str(self.initial_time), fg="white", bg=bg_color, font=("Courier", 96))
             if self.exit_function is not None:
@@ -231,6 +276,7 @@ class CountdownTimer(tk.Toplevel):
                 pass
 
     def destroy(self):
+        self._record_and_print_countdown()
         self._record_and_print_countup()
         super().destroy()
 
