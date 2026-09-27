@@ -54,16 +54,27 @@ class Retained:
         self.modeling_vb = False
         self.modeling_Tb = False
         self.tweak_test = False
+        self.mod_ib_all_dscn = False
+        self.mod_ib_noa_dscn = False
+        self.mod_ib_amp_dscn = False
+        self.mod_vb_dscn = False
+        self.mod_tb_dscn = False
         self.modeling = modeling
         if self.modeling is not None:
             self.add_modeling(self.modeling)
 
     def add_modeling(self, modeling=None):
         self.modeling = modeling
-        self.tweak_test = bool(0b1000 & int(self.modeling))
-        self.modeling_ib = bool(0b0100 & int(self.modeling))
-        self.modeling_vb = bool(0b0010 & int(self.modeling))
-        self.modeling_Tb = bool(0b0001 & int(self.modeling))
+        mod_val = int(self.modeling)
+        self.tweak_test = bool(0b1000 & mod_val)
+        self.mod_ib_all_dscn = mod_val > 191
+        self.mod_ib_noa_dscn = bool(1 << 7 & mod_val) or self.mod_ib_all_dscn
+        self.mod_ib_amp_dscn = bool(1 << 6 & mod_val) or self.mod_ib_all_dscn
+        self.mod_vb_dscn = bool(1 << 5 & mod_val)
+        self.mod_tb_dscn = bool(1 << 4 & mod_val)
+        self.modeling_ib = bool(0b0100 & mod_val) or self.mod_ib_all_dscn
+        self.modeling_vb = bool(0b0010 & mod_val) or self.mod_vb_dscn
+        self.modeling_Tb = bool(0b0001 & mod_val) or self.mod_tb_dscn
         return self.modeling
 
     def get_modeling(self, mr, mod_force=None):
@@ -691,7 +702,7 @@ class BatteryMonitor(Battery, EKF1x1, Wrap):
 
         # Fault logic
         # Ib diff logic
-        self.ib_diff = self.Diff.calculate(reset=reset, dt=self.dt, ib_amp=self.ib_amp, ib_noa=self.ib_noa)
+        self.ib_diff = self.Diff.calculate(reset=reset, dt=self.dt, ib_amp=self.ib_amp, ib_noa=self.ib_noa, rp=rp)
         # Wrap logic
         self.wrap(
             reset=reset,

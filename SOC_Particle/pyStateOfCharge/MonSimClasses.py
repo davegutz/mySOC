@@ -80,6 +80,7 @@ class Sensors:
 
     def __init__(self, OPT, rp, run_type=None):
         self.run_type = run_type
+        self.rp = rp
         if self.run_type == "RunSim":
             self.mon_run = OPT.mon_run
             self.sim_run = OPT.sim_run
@@ -406,29 +407,51 @@ class Sensors:
         self.WrapLoopAmp.update(i)
         self.WrapLoopNoa.update(i)
 
+        dscn_amp = getattr(self.rp, "mod_ib_amp_dscn", False)
+        dscn_noa = getattr(self.rp, "mod_ib_noa_dscn", False)
+
         if hasattr(self.mon_run, "kfres") and self.mon_run.kfres is not None:
             self.reset_kf = bool(self.mon_run.kfres[i])
             if hasattr(self.mon_run, "vovcm"):
-                self.VoVcm = self.mon_run.vovcm[i]
-                dt_m = self.mon_run.dtm[i] if hasattr(self.mon_run, "dtm") else self.mon_run.ib_dyn_T_m[i]
-                self.KfShuntAmp.calculate(reset=self.reset_kf, dt=dt_m, in_=self.VoVcm)
-                self.VoVcm_f, self.kf_v_m = self.KfShuntAmp.get_state()
-                self.VoVcm_f = float(self.VoVcm_f)
-                self.kf_v_m = float(self.kf_v_m)
-            self.VoVcn = self.mon_run.vovcn[i]
-            dt_n = self.mon_run.dtn[i] if hasattr(self.mon_run, "dtn") else self.mon_run.ib_dyn_T_n[i]
-            self.KfShuntNoa.calculate(reset=self.reset_kf, dt=dt_n, in_=self.VoVcn)
-            self.VoVcn_f, self.kf_v_n = self.KfShuntNoa.get_state()
-            self.VoVcn_f = float(self.VoVcn_f)
-            self.kf_v_n = float(self.kf_v_n)
-            if hasattr(self.mon_run, "vovcm"):
+                if dscn_amp:
+                    self.VoVcm = 0.0
+                    self.VoVcm_f = 0.0
+                    self.kf_v_m = 0.0
+                    self.KfShuntAmp.kf_init(0.0)
+                else:
+                    self.VoVcm = self.mon_run.vovcm[i]
+                    dt_m = self.mon_run.dtm[i] if hasattr(self.mon_run, "dtm") else self.mon_run.ib_dyn_T_m[i]
+                    self.KfShuntAmp.calculate(reset=self.reset_kf, dt=dt_m, in_=self.VoVcm)
+                    self.VoVcm_f, self.kf_v_m = self.KfShuntAmp.get_state()
+                    self.VoVcm_f = float(self.VoVcm_f)
+                    self.kf_v_m = float(self.kf_v_m)
+
+            if dscn_noa:
+                self.VoVcn = 0.0
+                self.VoVcn_f = 0.0
+                self.kf_v_n = 0.0
+                self.KfShuntNoa.kf_init(0.0)
+            else:
+                self.VoVcn = self.mon_run.vovcn[i]
+                dt_n = self.mon_run.dtn[i] if hasattr(self.mon_run, "dtn") else self.mon_run.ib_dyn_T_n[i]
+                self.KfShuntNoa.calculate(reset=self.reset_kf, dt=dt_n, in_=self.VoVcn)
+                self.VoVcn_f, self.kf_v_n = self.KfShuntNoa.get_state()
+                self.VoVcn_f = float(self.VoVcn_f)
+                self.kf_v_n = float(self.kf_v_n)
+
+            if hasattr(self.mon_run, "vovcm") and not dscn_amp:
                 self.iscm = float((self.VoVcm * Battery.SHUNT_AMP_GAIN) / Battery.NP)
                 self.iscm_f = float((self.VoVcm_f * Battery.SHUNT_AMP_GAIN) / Battery.NP)
             else:
                 self.iscm = 0.0
                 self.iscm_f = 0.0
-            self.iscn = float((self.VoVcn * Battery.SHUNT_NOA_GAIN) / Battery.NP)
-            self.iscn_f = float((self.VoVcn_f * Battery.SHUNT_NOA_GAIN) / Battery.NP)
+
+            if not dscn_noa:
+                self.iscn = float((self.VoVcn * Battery.SHUNT_NOA_GAIN) / Battery.NP)
+                self.iscn_f = float((self.VoVcn_f * Battery.SHUNT_NOA_GAIN) / Battery.NP)
+            else:
+                self.iscn = 0.0
+                self.iscn_f = 0.0
 
     def update_tb(self):
         self.Tb_past = self.Tb

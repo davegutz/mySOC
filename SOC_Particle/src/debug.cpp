@@ -236,6 +236,12 @@ void debug_check_99(BatteryMonitor* Mon, Sensors* Sen) {
           true, IN_SERVICE);
       chit("Xm0,", QUEUE);  // Hardware mode
       chit("Dr1,", QUEUE);  // Max rate to measure throughput in zero script
+    } else {
+        sendTxBuf(
+            String::format("\nResetting hardware 'Xm0,' and throughput 'Dr1,'\n"),
+            true, IN_SERVICE);
+        chit("Xm,", QUEUE);  // Nominal
+        chit("Dr,", QUEUE);  // Nominal
     }
   }
   last_call = sp.debug();

@@ -99,13 +99,21 @@ class Diff:
 
     # Update the loop
     # needs to be called twice with reset=True to initialize properly
-    def calculate(self, reset=True, dt=None, ib_amp=None, ib_noa=None):
+    def calculate(self, reset=True, dt=None, ib_amp=None, ib_noa=None, rp=None):
         from Battery import Battery
 
         self.reset = reset
         self.dt = dt
         self.ib_amp = ib_amp
         self.ib_noa = ib_noa
+
+        dscn_or_mod = False
+        if rp is not None:
+            dscn_or_mod = bool(
+                getattr(rp, "modeling_ib", False)
+                or getattr(rp, "mod_ib_amp_dscn", False)
+                or getattr(rp, "mod_ib_noa_dscn", False)
+            )
 
         self.ib_amp_hi = self.ib_amp >= Battery.HDWE_IB_HI_LO_AMP_HI / Battery.NP
         self.ib_lo_limited_hi = self.LoHi.calculate(
@@ -134,26 +142,50 @@ class Diff:
             self.ib_diff = max(0.0, self.ib_diff)
         elif self.ib_lo_limited_lo:
             self.ib_diff = min(0.0, self.ib_diff)
-        self.ib_diff_f = self.IbDiffFilt.calculate(in_=self.ib_diff,
-                    reset=self.reset or self.disable_amp_fault or self.ib_lo_limited_hi or self.ib_lo_limited_lo,
-                    dt=self.dt)
+        self.ib_diff_f = self.IbDiffFilt.calculate(
+            in_=self.ib_diff,
+            reset=self.reset or self.disable_amp_fault or self.ib_lo_limited_hi or self.ib_lo_limited_lo or dscn_or_mod,
+            dt=self.dt,
+        )
         self.ib_diff_T = self.IbDiffFilt.dt
         self.ib_diff_rstate = self.IbDiffFilt.rstate
         self.ib_diff_state = self.IbDiffFilt.state
         self.ib_diff_tau = self.IbDiffFilt.tau
         self.ib_diff_thr = Battery.IBATT_DISAGREE_THRESH * Battery.ap_ib_diff_slr
-        self.ib_diff_hi_flt = self.IbdPosPer.calculate(self.ib_diff_f >= self.ib_diff_thr,
-                                                  Battery.IBATT_INST_DIFF_SET, Battery.IBATT_INST_DIFF_RES,
-                                                  self.dt, self.reset)
-        self.ib_diff_lo_flt = self.IbdNegPer.calculate(self.ib_diff_f <= -self.ib_diff_thr,
-                                                  Battery.IBATT_INST_DIFF_SET, Battery.IBATT_INST_DIFF_RES,
-                                                  self.dt, self.reset)
-        self.ib_diff_hi_fa = self.IbdHiPer.calculate(self.ib_diff_hi_flt,
-                                                  Battery.IBATT_DISAGREE_SET, Battery.IBATT_DISAGREE_RES,
-                                                  self.dt, self.reset)
-        self.ib_diff_lo_fa = self.IbdLoPer.calculate(self.ib_diff_lo_flt,
-                                                  Battery.IBATT_DISAGREE_SET, Battery.IBATT_DISAGREE_RES,
-                                                  self.dt, self.reset)
+        self.ib_diff_hi_flt = self.IbdPosPer.calculate(
+            self.ib_diff_f >= self.ib_diff_thr and not dscn_or_mod,
+            Battery.IBATT_INST_DIFF_SET,
+            Battery.IBATT_INST_DIFF_RES,
+            self.dt,
+            self.reset,
+        )
+        self.ib_diff_lo_flt = self.IbdNegPer.calculate(
+            self.ib_diff_f <= -self.ib_diff_thr and not dscn_or_mod,
+            Battery.IBATT_INST_DIFF_SET,
+            Battery.IBATT_INST_DIFF_RES,
+            self.dt,
+            self.reset,
+        )
+        self.ib_diff_hi_fa = self.IbdHiPer.calculate(
+            self.ib_diff_hi_flt,
+            Battery.IBATT_DISAGREE_SET,
+            Battery.IBATT_DISAGREE_RES,
+            self.dt,
+            self.reset,
+        )
+        self.ib_diff_lo_fa = self.IbdLoPer.calculate(
+            self.ib_diff_lo_flt,
+            Battery.IBATT_DISAGREE_SET,
+            Battery.IBATT_DISAGREE_RES,
+            self.dt,
+            self.reset,
+        )
+        if dscn_or_mod:
+            self.ib_diff_f = 0.0
+            self.ib_diff_hi_flt = False
+            self.ib_diff_lo_flt = False
+            self.ib_diff_hi_fa = False
+            self.ib_diff_lo_fa = False
         return self.ib_diff
 
 

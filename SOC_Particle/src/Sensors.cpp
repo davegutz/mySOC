@@ -102,13 +102,16 @@ void Shunt::pretty_print() {
 // Convert sampled shunt data to Ib engineering units
 void Shunt::convert(const bool disconnect, const bool reset, Sensors* Sen) {
   reset_ = reset;
+  dscn_cmd_ = disconnect;
 #if !defined(HDWE_BARE)
   bare_shunt_ = Bare_delay_->calculate(Vc_read_->dead(), RAW_BARE_SET,
                                        RAW_BARE_RES, Sen->T(), reset_);
+  const bool ignore_sense = bare_shunt_ || dscn_cmd_;
 #else
   bare_shunt_ = false;
+  const bool ignore_sense = true;
 #endif
-  if (!bare_shunt_ && !dscn_cmd_) {
+  if (!ignore_sense) {
     vshunt_ = Vo_Vc_;
     vshunt_int_0_ = 0;
     vshunt_int_1_ = 0;
@@ -138,11 +141,28 @@ void Shunt::convert(const bool disconnect, const bool reset, Sensors* Sen) {
 }
 
 // Sample and filter amplifier Vo-Vc
-void Shunt::sample(const bool reset_kf, const double T) {
-  sample_Vo();
-  sample_Vc();
-  sample_combine();
-  sample_filter_kf(reset_kf, T);
+void Shunt::sample(const bool disconnect, const bool reset_kf, const double T) {
+  dscn_cmd_ = disconnect;
+#if defined(HDWE_BARE)
+  const bool ignore_sense = true;
+#else
+  const bool ignore_sense = dscn_cmd_ || bare_shunt_;
+#endif
+
+  if (ignore_sense) {
+    Vo_raw_ = 0;
+    Vc_raw_ = 0;
+    Vo_ = 0.;
+    Vc_ = 0.;
+    Vo_Vc_ = 0.;
+    vshunt_kf_ = 0.;
+    KF_->kf_init(0.);
+  } else {
+    sample_Vo();
+    sample_Vc();
+    sample_combine();
+    sample_filter_kf(reset_kf, T);
+  }
   if (sp.debug() == 14)
     Serial.printf(
         "reset_kf %d ADCref %7.3f vo_pin_ %d V0_raw_ %d Vo_ %7.3f "

@@ -128,7 +128,7 @@ class Shunt {
   void print_serial_header(const char suffix);
   void print_serial();
   void pretty_print();
-  void sample(const bool reset_kf, const double T);
+  void sample(const bool disconnect, const bool reset_kf, const double T);
   void sample_combine();
   void sample_filter_kf(const bool reset_kf, const double T);
   void sample_Vc();
