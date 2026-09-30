@@ -27,7 +27,7 @@
         // 20250608
 #define CURR_BIAS_NOA \
   0.15  // Calibration of non-amplified shunt sensor (* 'DB'), A
-#define VOLT_BIAS -0.10  // Bias on Vb sensor (* 'Dc'), V
+#define VOLT_BIAS 0.02   // Bias on Vb sensor (* 'Dc'), V
 #define TEMP_BIAS 0.0    // Bias on Tb sensor (* 'Dt'), deg C
 #define VTAB_BIAS 0.0    // Bias on voc_soc table (* 'Dw'), V  (0.0)
 
