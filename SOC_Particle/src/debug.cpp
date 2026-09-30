@@ -232,16 +232,16 @@ void debug_check_99(BatteryMonitor* Mon, Sensors* Sen) {
   if (sp.debug() != last_call) {
     if (sp.debug() == 99) {
       sendTxBuf(
-          String::format("\nSetting hardware 'Xm0,' and throughput 'Dr1,'\n"),
-          true, IN_SERVICE);
+        String::format("\nSetting hardware 'Xm0,' and throughput 'Dr1,'\n"),
+        true, IN_SERVICE);
       chit("Xm0,", QUEUE);  // Hardware mode
       chit("Dr1,", QUEUE);  // Max rate to measure throughput in zero script
-    } else {
-        sendTxBuf(
-            String::format("\nResetting hardware 'Xm0,' and throughput 'Dr1,'\n"),
-            true, IN_SERVICE);
-        chit("Xm,", QUEUE);  // Nominal
-        chit("Dr,", QUEUE);  // Nominal
+    } else if (last_call == 99) {
+      sendTxBuf(
+          String::format("\nResetting hardware 'Xm,' and throughput 'Dr,'\n"),
+          true, IN_SERVICE);
+      chit("Xm,", QUEUE);  // Nominal
+      chit("Dr,", QUEUE);  // Nominal
     }
   }
   last_call = sp.debug();

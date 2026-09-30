@@ -305,6 +305,7 @@ auto_case_total = 0  # Total number of AUTO cases
 auto_transient_time = 0  # Current AUTO transient duration (s)
 auto_transient_time_remaining = 0  # Remaining AUTO transient duration (s)
 auto_total_transient_time = 0  # Total AUTO transient duration for all cases (s)
+auto_results: list = []  # Completed AUTO case results: list of (status, case_desc, reason)
 _monitor_after_id: Optional[str] = None  # Pending after() ID for monitor_plink_done; used to cancel stale loops
 run_start_time: Optional[float]
 timer: Optional[CountdownTimer]
@@ -367,6 +368,27 @@ def format_duration(seconds: int) -> str:
         return f"{seconds} s ({m}m {s}s)"
     else:
         return f"{seconds} s"
+
+
+def format_auto_rate_status(indent: str = "") -> str:
+    """Format success/failure rate and agree/disagree results so far for AUTO run."""
+    n_agree = sum(1 for status, _, _ in auto_results if status == "agree")
+    n_disagree = sum(1 for status, _, _ in auto_results if status != "agree")
+    total = n_agree + n_disagree
+    if total == 0:
+        lines = [f"{indent}Success/failure rate so far: 0/0 (0 agreed, 0 disagreed)"]
+    else:
+        pct = (n_agree / total) * 100.0
+        lines = [
+            f"{indent}Success/failure rate so far: {n_agree}/{total} ({pct:.1f}%) - {n_agree} agreed, {n_disagree} disagreed:"
+        ]
+        for status, desc, reason in auto_results:
+            if status == "agree":
+                lines.append(f"\033[92m{indent}  {desc}: {reason}\033[0m")
+            else:
+                lines.append(f"\033[91m{indent}  {desc}: {reason}\033[0m")
+    return "\n".join(lines)
+
 
 
 
@@ -1973,11 +1995,13 @@ def grab_auto():
         auto_running = True
         auto_problem_cases = []
         auto_disagree_cases = []
+        global auto_results
+        auto_results = []
 
         # Process each line
         def process_next_config(index):
             global auto_running, auto_fig_list, auto_case_index, auto_case_total, current_auto_case
-            global auto_transient_time, auto_transient_time_remaining
+            global auto_transient_time, auto_transient_time_remaining, auto_results
             if index >= len(data_rows):
                 n_cases = len(data_rows)
                 auto_running = False
@@ -2071,9 +2095,12 @@ def grab_auto():
             print(
                 f"\n>>> AUTO transient '{macro_val}' ({index + 1}/{len(data_rows)}): "
                 f"time of transient = {format_duration(auto_transient_time)}, "
-                f"total transient time remaining = {format_duration(auto_transient_time_remaining)}",
+                f"total remaining time = {format_duration(auto_transient_time_remaining)}",
                 flush=True,
             )
+            rate_status = format_auto_rate_status()
+            if rate_status:
+                print(rate_status, flush=True)
             print(f"Processing configuration {index + 1}/{len(data_rows)}: {config}")
 
             if "folder" in config:
@@ -2126,7 +2153,7 @@ def grab_auto():
                                     f"***READY*** detected for config {index + 1}. Triggering start_button.\n"
                                     f"Beginning transient '{macro_val}': "
                                     f"time of transient = {format_duration(auto_transient_time)}, "
-                                    f"total transient time remaining = {format_duration(auto_transient_time_remaining)}",
+                                    f"total remaining time = {format_duration(auto_transient_time_remaining)}",
                                     flush=True,
                                 )
                                 grab_start()
@@ -2177,9 +2204,20 @@ def grab_auto():
                                                     diff_details.append(f"diffs in {', '.join(params)}")
                                             reason = "; ".join(diff_details) if diff_details else "differences found"
                                             auto_disagree_cases.append((case_desc, reason))
+                                            auto_results.append(("disagree", case_desc, reason))
+                                        else:
+                                            auto_results.append(("agree", case_desc, "agreed within tolerance"))
+                                    else:
+                                        reason = "no comparison pairs found"
+                                        auto_problem_cases.append((case_desc, reason))
+                                        auto_disagree_cases.append((case_desc, reason))
+                                        auto_results.append(("disagree", case_desc, reason))
                                 except Exception as auto_e:
                                     print(f"Error checking comparison in AUTO: {auto_e}")
-                                    auto_problem_cases.append((case_desc, f"failed: {auto_e}"))
+                                    reason = f"failed: {auto_e}"
+                                    auto_problem_cases.append((case_desc, reason))
+                                    auto_disagree_cases.append((case_desc, reason))
+                                    auto_results.append(("disagree", case_desc, reason))
 
                                 # noinspection PyTypeChecker,PyUnfilledParameters
                                 master.after(1000, lambda: process_next_config(index + 1))
@@ -2454,9 +2492,12 @@ def start_plink(command_to_paste=None, force_if_ready=False, force_kill=False, f
                     msg += f" ('{current_auto_case}')"
                 if auto_transient_time > 0:
                     msg += (
-                        f":\n  transient time  = {format_duration(auto_transient_time)}, "
-                        f"\n  total remaining = {format_duration(auto_transient_time_remaining)}"
+                        f":\n  transient time       = {format_duration(auto_transient_time)}, "
+                        f"\n  total remaining time = {format_duration(auto_transient_time_remaining)}"
                     )
+                rate_str = format_auto_rate_status(indent="  ")
+                if rate_str:
+                    msg += f"\n{rate_str}"
                 print(msg)
 
         if platform.system() == "Linux":
