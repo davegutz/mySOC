@@ -418,11 +418,13 @@ Flt_st SavedPars::put_history(Flt_st input, const uint8_t i) {
 
 // Reset arrays
 void SavedPars::reset_flt() {
+  put_Iflt(0);
   for (uint16_t i = 0; i < nflt_; i++) {
     fault_[i].put_nominal();
   }
 }
 void SavedPars::reset_his() {
+  put_Ihis(0);
   for (uint16_t i = 0; i < nhis_; i++) {
     history_[i].put_nominal();
   }

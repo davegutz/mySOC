@@ -1084,14 +1084,13 @@ def contain_all(testpath):
     key = ""
     with open(testpath, "r", encoding="cp437") as file:
         for line in file:
-            if txt in line and not line.startswith(("Firmware:", "Unit:", "Config:", "CONFIG:", "WARNING")):
+            if txt in line and not line.startswith(("Firmware:", "Unit:", "WARNING")):
                 shorter = line[line.find(txt) :]
                 end_key = shorter.find(",")
-                if end_key > 0:
-                    candidate = shorter[:end_key].strip()
-                    if " " not in candidate and "(" not in candidate and ")" not in candidate:
-                        key = candidate
-                        break
+                candidate = shorter[:end_key].strip() if end_key > 0 else shorter.split()[0].strip()
+                if " " not in candidate and "(" not in candidate and ")" not in candidate:
+                    key = candidate
+                    break
     return folder_path, parent, basename, txt, key
 
 

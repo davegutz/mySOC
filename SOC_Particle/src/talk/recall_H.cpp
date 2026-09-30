@@ -25,6 +25,7 @@
 #include "../Summary.h"
 #include "../command.h"
 #include "../parameters.h"
+#include "../subs.h"
 #include "application.h"
 #include "chitchat.h"
 #include "serial.h"
@@ -40,6 +41,8 @@ bool recall_H(const char letter_1, BatteryMonitor* Mon, Sensors* Sen) {
   switch (letter_1) {
     case ('d'):  // Hd: History dump
       Serial.printf("\n");
+      print_firmware_version();
+      print_unit_name();
       print_all_fault_buffer("unit_u", mySum, sp.isum(), sp.nsum());
       sp.print_fault_header(&pp.pubList);
       chit("Pr;Q;", SOON);
@@ -66,9 +69,12 @@ bool recall_H(const char letter_1, BatteryMonitor* Mon, Sensors* Sen) {
 
     case ('R'):  // HR: History reset
       Serial.printf("Reset sum, his, flt...");
-      reset_all_fault_buffer("unit_h", mySum, sp.isum(), sp.nsum());
+      reset_all_fault_buffer("unit_u", mySum, sp.isum(), sp.nsum());
       sp.reset_his();
       sp.reset_flt();
+      sp.put_Isum(0);
+      sp.put_Ihis(0);
+      sp.put_Iflt(0);
       Serial.printf("Reset infinite counter\n");
       cp.inf_reset = true;
       Serial.printf("done\n");
