@@ -749,4 +749,125 @@ Two main repositories:
 
 ---
 
+## Appendix 3: Gemini 3.8 (High) Evaluation of hist_20261009_soc4_p2.csv
+
+> **Scenario / Question:**
+> *CompareHistSim loads and runs a steady state history run for a certain couple days where temperature, sunlight, and current draw were varying. It is known that $V_b$ calibration is poor and varies with temperature. That variation is undefined. It is also known that the battery has classic electromagnetic hysteresis with change of current ($V_{oc}$ vs $\text{SOC}$). That hysteresis is undefined. It is also known that the battery charge response has Randles' lag that is neglected for this CompareHistSim run where steady-state solutions are enforced at each time step. Can you unravel this data to explain what is happening and what to look at next? I already plan to screen the $V_b$ sensor for $T_b$ effects and make it constant with $T_b$ for the same $V_b$.*
+
+It is **not impossible**, but it is a classic coupled parameter-identification problem. The reason field data looks like an intractable knot is that **all three physical phenomena (plus solar insolation and day/night cycling) are correlated in time**:
+
+1. **Sun rises** $\rightarrow$ solar current charges the battery ($I_b > 0$) $\rightarrow$ terminal voltage jumps by ohmic drop $I R_0$ $\rightarrow$ Randles overpotential builds $\rightarrow$ battery switches to the upper (charge) hysteresis branch $\rightarrow$ battery and enclosure heat up ($T_b$ rises) $\rightarrow$ sensor drifts.
+2. **Sun sets** $\rightarrow$ current drops to zero or light discharge $\rightarrow$ Randles overpotentials relax $\rightarrow$ battery relaxes toward the lower hysteresis branch $\rightarrow$ temperature drops $\rightarrow$ sensor drifts back.
+
+Because these factors move together, a naive regression will attribute sensor drift to hysteresis, hysteresis to temperature coefficient, or Randles lag to state-of-charge error.
+
+However, by inspecting the 51-hour dataset (`hist_20261007am_soc4p2_hi_lo.csv`) loaded by [`CompareHistSim.py`](pyStateOfCharge/CompareHistSim.py), the physics can be uncoupled by looking at **different time regimes and physical symmetries**.
+
+---
+
+### 1. What the Data Reveals: The Anatomy of the Signal
+
+The true terminal voltage measured by the hardware is:
+
+$$V_{b,\text{meas}}(t) = V_{oc}(\text{SOC}) + \Delta V_{\text{hys}}(I_b, \text{history}) + I_b R_0 + \eta_{\text{ct}}(t) + \epsilon_{\text{sens}}(T_b, V_c)$$
+
+Across this 51-hour run:
+
+#### A. The $V_b$ Sensor Error is Dominating Everything Else
+In $\text{LiFePO}_4$ cells, the chemical open-circuit voltage between 20% and 80% SOC is flat at approximately **13.0 V to 13.25 V** (3.25–3.31 V/cell). Its thermodynamic temperature coefficient $dV_{oc}/dT$ is minuscule ($\sim \pm 0.4\text{ to } 0.8\text{ mV/}^\circ\text{C}$ for the 12V 4-cell pack).
+
+Yet in the raw history data during quiescent rest periods ($|I_b| < 0.1\text{ A}$):
+- **Night 1 ($t = 16\text{h} - 22\text{h}$, $\text{SOC} \approx 0.47$)**: $T_b$ drops from $13.7^\circ\text{C} \rightarrow 11.1^\circ\text{C}$ ($\Delta T = -2.6^\circ\text{C}$), and $V_b$ drops from $12.10\text{ V} \rightarrow 11.89\text{ V}$ (**$+81\text{ mV/}^\circ\text{C}$** apparent drift).
+- **Night 2 ($t = 36\text{h} - 45.5\text{h}$, $\text{SOC} \approx 0.71$)**: $T_b$ drops from $14.5^\circ\text{C} \rightarrow 8.5^\circ\text{C}$ ($\Delta T = -6.0^\circ\text{C}$), but $V_b$ *rises* from $11.88\text{ V} \rightarrow 12.24\text{ V}$ (**$-60\text{ mV/}^\circ\text{C}$** apparent drift).
+- **Afternoon Sag ($t = 31\text{h} - 35\text{h}$, $\text{SOC} \approx 0.72$, $I_b \approx 0$)**: As temperature rose to $17.5^\circ\text{C}$, measured $V_b$ dropped to **$11.17\text{ V}$** — almost **1.5 V below true $\text{LiFePO}_4$ OCV**!
+
+**Diagnosis:**
+The sensor error $\epsilon_{\text{sens}}$ is on the order of **$\pm 200\text{ mV}$ to $1000\text{ mV}$**. Since $\text{LiFePO}_4$ hysteresis is only $\sim 60 - 100\text{ mV}$ and Randles overpotentials are $\sim 50 - 150\text{ mV}$, **the sensor error is currently 5 to 10 times larger than the battery electrochemical effects being observed**.
+
+Furthermore, notice column `Vc_h` in the dataset: it shifts between **2.957 V and 3.178 V** (a ~7% drift in the 3.3V reference rail!). Because [`Sensors.cpp`](src/Sensors.cpp) uses an ADC reading through a resistive divider relative to the MCU analog reference, any drift in the 3.3V rail or temperature variation in the divider resistors causes a direct gain error on $V_b$ ($\sim 0.07 \times 13\text{ V} \approx 0.9\text{ V}$!).
+
+#### B. The Randles Lag vs. Steady-State Disconnect
+In [`CompareHistSim.py`](pyStateOfCharge/CompareHistSim.py), the 30-minute history samples are resampled to 15-minute points ($dt = 900\text{ s}$) and solved statically at each step:
+- Solid-state diffusion (Warburg impedance) in 100 Ah $\text{LiFePO}_4$ cells has relaxation times spanning **500 to 1800 seconds** (10 to 30 minutes).
+- At $t = 46\text{h} - 47.5\text{h}$, when solar current pulses up to **+33.5 A**, $V_b$ jumps to $13.16\text{ V}$. When current drops back to near zero at $t = 48.5\text{h}$, the voltage does not instantly fall to equilibrium OCV; it decays along an exponential tail over the next 1–2 hours.
+- Enforcing instantaneous steady state at each step misinterprets this transient diffusion tail as either steady-state hysteresis or higher SOC.
+
+#### C. The Saturation Cliff at $\text{SOC} = 1.0$
+At $t = 47.5\text{h}$, Coulomb counting reached $1.000$. The simulation's OCV curve ([`Battery.py`](pyStateOfCharge/Battery.py)) jumped immediately to **$14.50\text{ V}$**, while the actual battery terminal was at $13.16 - 13.39\text{ V}$. This generated an artificial **$1.1\text{ V}$ to $1.8\text{ V}$ residual spike** and caused `e_wrap` to trip.
+
+---
+
+### 2. How to Unravel the Confounded Effects
+
+To separate the three unknowns, leverage their distinct physical signatures:
+
+| Effect | Primary Physical Driver | Symmetry / Signature | Time Scale |
+| :--- | :--- | :--- | :--- |
+| **$V_b$ Sensor Drift** | Electronics temperature ($T_{\text{amb}}$, $T_b$) & $V_c$ rail | Drifts even when $\text{SOC}$ is static and $I_b = 0$ for hours | Correlates with diurnal thermal cycles |
+| **Randles Lag ($\eta_{\text{ct}}$)** | Current magnitude ($|I_b|$) and duration | Proportional to current; decays toward zero after current stops | Transient ($\tau \approx 10\text{ s}$ to $1800\text{ s}$) |
+| **Electrochemical Hysteresis** | Current direction ($\text{sgn}(I_b)$) and past cycling | **Odd symmetry**: $+V_{\text{hys}}$ after charging, $-V_{\text{hys}}$ after discharging | Persistent in steady state; does not decay with time |
+
+---
+
+### 3. What to Look at Next (Action Plan)
+
+#### Step 1: Calibrate $V_b$ Hardware First (Planned Screen)
+Prioritizing screening $V_b$ for temperature effects is critical before attempting to tune electrochemical parameters:
+- **Isolate $V_b$ vs. $T_{\text{amb}}$ and $V_c$**: In a thermal chamber or test bench, feed a constant, precision 12.000 V and 14.000 V source into the sensor while cycling board temperature from 0°C to 45°C.
+- **Check the Reference Rail ($V_c$)**: Verify whether the ADC is ratiometric to the Particle 3.3V supply. If the 3.3V regulator drifts with temperature, compensate $V_b$ using the measured $V_c$ reading (`Vc_raw_` / `Vc_` in [`Sensors.cpp`](src/Sensors.cpp)):
+  $$V_{b,\text{corrected}} = V_{b,\text{raw}} \cdot K(T) \cdot \frac{V_{c,\text{nominal}}}{V_{c,\text{meas}}}$$
+- Once the sensor error is reduced to $< 10\text{ mV}$, the true battery OCV plateau will be flat across the night instead of drifting by 800 mV.
+
+#### Step 2: Extract Pure Hysteresis from Relaxed Day/Night Transitions
+Once $V_b$ calibration is flat with temperature:
+- Find rest periods where $|I_b| < 0.1\text{ A}$ for at least **2 hours** (ensuring Randles overpotential $\eta_{\text{ct}} \approx 0$).
+- Compare a relaxed rest period following a **charge** (e.g., late afternoon/evening) with a relaxed rest period following a **discharge** (early morning before sunrise) at the same SOC (e.g., around SOC = 0.50):
+  $$2 \cdot V_{\text{hys}} = V_{b,\text{rest}}(\text{after charge}) - V_{b,\text{rest}}(\text{after discharge})$$
+- For a Battleborn 4-cell $\text{LiFePO}_4$ pack, $2 \cdot V_{\text{hys}}$ will typically be between **$50\text{ mV}$ and $100\text{ mV}$**.
+
+#### Step 3: Extract Randles Lag Dynamics
+With sensor drift eliminated and the steady-state hysteresis envelope known:
+- Look at the step transition when high solar charging ceases ($I_b \rightarrow 0$).
+- The instantaneous voltage drop is the ohmic resistance:
+  $$R_0 = \frac{V_b(t^-) - V_b(t^+)}{I_b}$$
+- The subsequent slow decay over 15–45 minutes is the Randles RC branch:
+  $$\eta_{\text{ct}}(t) = V_b(t) - V_{oc,\text{relaxed}} = I_{\text{charge}} R_{\text{ct}} e^{-t / \tau_{\text{ct}}}$$
+- In [`Battery.py`](pyStateOfCharge/Battery.py), maintain the continuous charge-transfer filter state (`ib_dyn`) across steps rather than re-initializing to steady state in history mode.
+
+#### Step 4: Soften the Saturation Boundary in Simulation
+- In [`Battery.py`](pyStateOfCharge/Battery.py), add a smooth knee as SOC approaches 1.0 rather than an abrupt step from $13.15\text{ V}$ to $14.50\text{ V}$, preventing spurious `e_wrap` trips on full charge history runs.
+
+---
+
+### 4. Photon 2 / P2 ADC Reference & $V_c$ Compensation
+
+> **Question:**
+> *Do you know if Particle Photon 2 (P2) compensates for $V_c$ variation in the ADC sensing and conversion?*
+
+**No, the Particle Photon 2 (P2) does NOT compensate for $V_c$ or 3.3V rail variation in its ADC sensing and conversion.**
+
+#### Hardware Architecture
+1. **Fixed Internal Reference (`AdcReference::INTERNAL`):** On the Realtek RTL872x core of the Photon 2 / P2, Device OS locks the ADC conversion reference to an internal silicon bandgap reference. Calling `analogSetReference()` is unsupported and returns `SYSTEM_ERROR_NOT_SUPPORTED`. Furthermore, there is no external $V_{\text{REF}}$ pin exposed on the module.
+2. **The Ratiometric Mismatch:** In traditional MCUs where $V_{\text{REF}}$ is tied directly to the `3V3` supply, supply rail drift cancels out in divider circuits ($V_{\text{in}} / V_{\text{REF}} = \text{const}$). On the Photon 2, the ADC samples against the internal bandgap while external divider networks (such as the battery voltage divider and the amplifier centering bias $V_c$) are powered by the board's switching regulator. Changes in the 3.3V rail due to temperature, USB input variations, or Wi-Fi/BLE transmit bursts cause the external divider voltages to shift without changing the ADC full-scale reference.
+
+#### Firmware Implementation
+In [`src/constants.h`](src/constants.h#L55-L450) and [`src/Sensors.cpp`](src/Sensors.cpp#L764):
+```cpp
+#define PHOTON_ADC_VOLT 3.3        // Hard-coded constant 3.3V
+...
+const float VB_CONV_GAIN =
+    float(PHOTON_ADC_VOLT) * float(VB_SENSE_R_HI + VB_SENSE_R_LO) /
+    float(VB_SENSE_R_LO) / float(PHOTON_ADC_COUNT) * float(VB_S);
+...
+Vb_hdwe_ = float(Vb_raw_) * VB_CONV_GAIN * ap.Vb_scale() + float(VB_A) + sp.Vb_bias_hdwe();
+```
+`VB_CONV_GAIN` assumes a static 3.3000 V at all times. A mere 2% drift in the 3.3V rail or internal reference shifts $V_b$ by $\sim 260\text{ mV}$ ($13\text{ V} \times 0.02$).
+
+#### Software Compensation Using $V_c$
+Since the hardware already samples the amplifier centering signal $V_c$ on pin `D14` (`Vc_read_` in [`src/Sensors.cpp`](src/Sensors.cpp#L186-L193)), this channel can be used to cancel out rail wander in software:
+$$\text{Gain}_{\text{corr}} = \frac{V_{c,\text{nominal}}}{V_{c,\text{measured}}(t)}$$
+$$V_{b,\text{comp}} = V_{b,\text{hdwe}} \times \left( \frac{V_{c,\text{nominal}}}{V_{c,\text{measured}}} \right)$$
+
+---
+
 **Author:** Dave Gutz — <davegutz@alum.mit.edu> — GitHub `davegutz`
