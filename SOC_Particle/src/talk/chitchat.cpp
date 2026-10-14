@@ -60,10 +60,10 @@ void benign_zero(BatteryMonitor* Mon, Sensors* Sen)  // BZ
   ap.ib_noa_add_p->print_adj_print(0.f);       // Dn 0
   sp.ib_bias_all_p->print_adj_print(0.f);      // DI 0
   ap.vb_add_p->print_adj_print(NOM_VB_ADD);    // Dv 0
-  // ap.ds_voc_soc_p->print_adj_print(NOM_DS);    // Ds 0
   Sen->Sim->put_dx_voc(ap.ds_voc_soc());
 
-  ap.Tb_bias_model_p->print_adj_print(TEMP_BIAS);                       // D^
+  ap.Tb_bias_model_p->print_adj_print(TB_BIAS);                         // D^
+  ap.Tc_bias_model_p->print_adj_print(TC_BIAS);                         // D<
   ap.dv_voc_soc_p->print_adj_print(NOM_DY);                             // Dy
   ap.vc_add_p->print_adj_print(NOM_VC_ADD);                             // D3
   ap.ib_max_amp_p->print_adj_print(IB_ABS_MAX_AMP / NP / SIZE_MARG);    // Mm 0
@@ -73,6 +73,7 @@ void benign_zero(BatteryMonitor* Mon, Sensors* Sen)  // BZ
 
   // Noise
   ap.Tb_noise_amp_p->print_adj_print(TB_NOISE);          // DT 0
+  ap.Tc_noise_amp_p->print_adj_print(TC_NOISE);          // DE 0
   ap.Vb_noise_amp_p->print_adj_print(VB_NOISE);          // DV 0
   ap.Ib_amp_noise_amp_p->print_adj_print(IB_AMP_NOISE);  // DM 0
   ap.Ib_noa_noise_amp_p->print_adj_print(IB_NOA_NOISE);  // DN 0
@@ -89,6 +90,7 @@ void benign_zero(BatteryMonitor* Mon, Sensors* Sen)  // BZ
   ap.ib_quiet_slr_p->print_adj_print(1.f);        // Fq 1
   ap.disab_ib_fa_p->print_adj_print(false);       // FI 0
   ap.disab_tb_fa_p->print_adj_print(false);       // FT 0
+  ap.disab_tc_fa_p->print_adj_print(false);       // FC 0
   ap.dis_vb_fa_lt_p->print_adj_print(false);      // FV 0
 }
 

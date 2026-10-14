@@ -131,7 +131,7 @@ extern BleCharacteristic rxCharacteristic;  // Receive from BLE
 // ── retained SRAM (survives power cycle) ─────────────────────────────
 retained Flt_st saved_hist[NHIS];    // For displaying history
 retained Flt_st saved_faults[NFLT];  // For displaying faults
-retained uint32_t last_build_hash;   // 4-byte build timestamp hash to detect reflashes
+retained uint32_t last_build_hash;   // 4-byte timestamp hash to detect reflash
 retained SavedPars sp = SavedPars(
     saved_hist, uint16_t(NHIS), saved_faults,
     uint16_t(NFLT));  // Various parameters to be common at system level
@@ -197,7 +197,7 @@ void setup() {
     last_build_hash = current_build_hash;
     sp.put_booted(false);
     sendTxBuf(
-        String::format("New firmware flash detected (%s): reset booted to false\n",
+        String::format("New firmware flash detected (%s): reset booted false\n",
                        build_timestamp),
         true, IN_SERVICE);
   }

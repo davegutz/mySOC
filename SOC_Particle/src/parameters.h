@@ -69,6 +69,7 @@ class VolatilePars : public Parameters {
   BooleanV* dc_dc_on_p;
   BooleanV* disab_ib_fa_p;
   BooleanV* disab_tb_fa_p;
+  BooleanV* disab_tc_fa_p;
   BooleanV* dis_vb_fa_lt_p;
   FloatV* ds_voc_soc_p;
   FloatV* dv_voc_soc_p;
@@ -97,6 +98,8 @@ class VolatilePars : public Parameters {
   ULongV* talk_delay_p;
   FloatV* Tb_bias_model_p;
   FloatV* Tb_noise_amp_p;
+  FloatV* Tc_bias_model_p;
+  FloatV* Tc_noise_amp_p;
   ULongV* until_q_p;
   FloatV* vb_add_p;
   FloatV* Vb_noise_amp_p;
@@ -108,6 +111,7 @@ class VolatilePars : public Parameters {
   FloatV* ib_min_noa_p;
   FloatV* voc_stat_filt_p;
   FloatV* Tb_filt_p;
+  FloatV* Tc_filt_p;
   FloatV* ekf_q_p;
   FloatV* ekf_r_p;
   FloatV* ekf_conv_p;
@@ -142,6 +146,8 @@ class VolatilePars : public Parameters {
   void disab_ib_fa(const bool input) { disab_ib_fa_ = input; }
   bool disab_tb_fa() { return disab_tb_fa_; }
   void disab_tb_fa(const bool input) { disab_tb_fa_ = input; }
+  bool disab_tc_fa() { return disab_tc_fa_; }
+  void disab_tc_fa(const bool input) { disab_tc_fa_ = input; }
   bool disab_vb_fa_lt() { return dis_vb_fa_lt_; }
   void disab_vb_fa_lt(const bool input) { dis_vb_fa_lt_ = input; }
   float ds_voc_soc() { return ds_voc_soc_; }
@@ -236,6 +242,12 @@ class VolatilePars : public Parameters {
   void Tb_filt(const float input) { Tb_filt_ = input; }
   float Tb_noise_amp() { return Tb_noise_amp_; }
   void Tb_noise_amp(const float input) { Tb_noise_amp_ = input; }
+  float Tc_bias_model() { return Tc_bias_model_; }
+  void Tc_bias_model(const float input) { Tc_bias_model_ = input; }
+  float Tc_filt() { return Tc_filt_; }
+  void Tc_filt(const float input) { Tc_filt_ = input; }
+  float Tc_noise_amp() { return Tc_noise_amp_; }
+  void Tc_noise_amp(const float input) { Tc_noise_amp_ = input; }
   uint32_t until_q() { return until_q_ms_; }
   void until_q(const uint32_t input) { until_q_ms_ = input; }
   float vb_add() { return vb_add_; }
@@ -273,7 +285,8 @@ class VolatilePars : public Parameters {
   bool dc_dc_on_;  // DC-DC charger is on
   bool dis_vb_fa_lt_;  // Disable hard fault range failures for vb
   bool disab_ib_fa_;  // Disable hard fault range failures for ib
-  bool disab_tb_fa_;  // Disable hard fault range failures for tb
+  bool disab_tb_fa_;  // Disable hard fault range failures for Tb
+  bool disab_tc_fa_;  // Disable hard fault range failures for Tc
   float ds_voc_soc_;  // VOC(SOC) delta soc on input, frac
   float dv_voc_soc_;  // VOC(SOC) del v, V
   uint8_t eframe_mult_;  // Frame multiplier for EKF execution.  Number of READ
@@ -324,6 +337,9 @@ class VolatilePars : public Parameters {
   float Tb_bias_model_;  // Bias on Tb for model
   float Tb_filt_;  // TbHdweFilt time constant, s
   float Tb_noise_amp_;  // Tb noise amplitude model only, deg C pk-pk
+  float Tc_bias_model_;  // Bias on Tc for model
+  float Tc_filt_;  // TcHdweFilt time constant, s
+  float Tc_noise_amp_;  // Tc noise amplitude model only, deg C pk-pk
   uint32_t until_q_ms_;  // Time until set vv0, ms
   float vb_add_;  // Fault injection bias, V
   float Vb_noise_amp_;  // Vb bank noise amplitude model only, V pk-pk
@@ -380,6 +396,7 @@ class SavedPars : public Parameters {
   uint8_t preserving() { return preserving_; }
   uint8_t* preserving_ptr() { return &preserving_; }
   float Tb_bias_hdwe() { return Tb_bias_hdwe_; }
+  float Tc_bias_hdwe() { return Tc_bias_hdwe_; }
   uint32_t Time_now() { return Time_now_; }
   uint8_t type() { return type_; }
   float Vb_bias_hdwe() { return Vb_bias_hdwe_; }
@@ -441,6 +458,9 @@ class SavedPars : public Parameters {
   bool mod_tb_dscn() {
     return (1 << 4 & modeling());
   }  // Nothing connected to one-wire Tb sensor on D6
+  bool mod_tc_dscn() {
+    return (1 << 4 & modeling());
+  }  // Nothing connected to one-wire Tb sensor on D6
   bool mod_ib() {
     return (1 << 2 & modeling() || mod_ib_all_dscn());
   }  // Using Sim as source of ib
@@ -450,6 +470,9 @@ class SavedPars : public Parameters {
   bool mod_tb() {
     return (1 << 0 & modeling() || mod_tb_dscn());
   }                                              // Using Sim as source of tb
+  bool mod_tc() {
+    return (1 << 0 & modeling() || mod_tc_dscn());
+  }                                              // Using Sim as source of tc
   bool mod_none() { return (0 == modeling()); }  // Using all
 
   // put
@@ -501,6 +524,7 @@ class SavedPars : public Parameters {
   Uint8tV* modeling_p;
   Uint8tV* preserving_p;
   FloatV* Tb_bias_hdwe_p;
+  FloatV* Tc_bias_hdwe_p;
   ULongV* Time_now_p;
   Uint8tV* Type_p;
   FloatV* Vb_bias_hdwe_p;
@@ -535,6 +559,7 @@ class SavedPars : public Parameters {
   uint8_t modeling_;
   uint8_t preserving_;
   float Tb_bias_hdwe_;
+  float Tc_bias_hdwe_;
   uint32_t Time_now_;
   uint8_t type_;
   float Vb_bias_hdwe_;

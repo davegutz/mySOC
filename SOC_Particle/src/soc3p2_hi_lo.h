@@ -23,7 +23,7 @@
 #define CURR_BIAS_AMP 0.00  // Calibration of amplified shunt sensor (* 'DA'), A
 #define CURR_BIAS_NOA 0.00  // Calibration of unamped shunt sensor (* 'DB'), A
 #define VOLT_BIAS 0.18f  // Bias on Vb sensor (* 'Dc'), V
-#define TEMP_BIAS 0.0  // Bias on Tb sensor (* 'Dt'), deg C
+#define TB_BIAS 0.0  // Bias on Tb sensor (* 'Dt'), deg C
 #define VTAB_BIAS 0.0  // Bias on voc_soc table (* 'Dw'), V
 
 // Ib hardware

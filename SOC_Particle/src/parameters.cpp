@@ -121,7 +121,7 @@ VolatilePars::VolatilePars() : Parameters() {
 VolatilePars::~VolatilePars() {}
 
 void VolatilePars::initialize() {
-#define NVOL 63
+#define NVOL 66
   V_ = new Variable*[NVOL];
   V_[n_++] = (bare_slr_p = new FloatV("  ", "SZ", NULL, "Slr debounce", "float", 0, 1000, &bare_slr_, 1));                          // SZ
   V_[n_++] = (cc_diff_slr_p = new FloatV("  ", "SC", NULL, "Slr cc_diff", "float", 0, 1000, &cc_diff_slr_, 1));                     // SC
@@ -130,13 +130,14 @@ void VolatilePars::initialize() {
   V_[n_++] = (dc_dc_on_p = new BooleanV("  ", "Xd", NULL, "DC-DC charger on", "T=on", 0, 1, &dc_dc_on_, false));                    // Xd
   V_[n_++] = (disab_ib_fa_p = new BooleanV("  ", "FI", NULL, "Disab hard range ib", "T=disab", 0, 1, &disab_ib_fa_, false));        // FI
   V_[n_++] = (disab_tb_fa_p = new BooleanV("  ", "FT", NULL, "Disab hard range tb", "T=disab", 0, 1, &disab_tb_fa_, DISAB_TB_FA));  // FT
+  V_[n_++] = (disab_tc_fa_p = new BooleanV("  ", "FC", NULL, "Disab hard range tc", "T=disab", 0, 1, &disab_tc_fa_, DISAB_TC_FA));  // FC
   V_[n_++] = (dis_vb_fa_lt_p = new BooleanV("  ", "FV", NULL, "Disab hard range vb", "T=disab", 0, 1, &dis_vb_fa_lt_, DISAB_VB_FA_LT));  // FV
   V_[n_++] = (ds_voc_soc_p = new FloatV("  ", "Ds", NULL, "VOC(SOC) del soc", "slr", -0.5, 0.5, &ds_voc_soc_, NOM_DS));             // Ds
   V_[n_++] = (dv_voc_soc_p = new FloatV("  ", "Dy", NULL, "VOC(SOC) del v", "v", -50, 50, &dv_voc_soc_, NOM_DY));                   // Dy
   V_[n_++] = (ewhi_slr_p = new FloatV("  ", "Fi", NULL, "Slr wrap hi thr", "slr", 0, 1000, &ewhi_slr_, FI_NOM));                    // Fi
   V_[n_++] = (ewlo_slr_p = new FloatV("  ", "Fo", NULL, "Slr wrap lo thr", "slr", 0, 1000, &ewlo_slr_, FO_NOM));                    // Fo
   V_[n_++] = (fake_faults_p = new BooleanV("  ", "Ff", NULL, "Faults ignored", "T=ign", 0, 1, &fake_faults_, FAKE_FAULTS));         // Ff
-  V_[n_++] = (h_alpha_p = new FloatV("  ", "Ha", NULL, "EKF H-alpha", "slr", 0, 1, &h_alpha_, H_ALPHA));                  // Ha
+  V_[n_++] = (h_alpha_p = new FloatV("  ", "Ha", NULL, "EKF H-alpha", "slr", 0, 1, &h_alpha_, H_ALPHA));                            // Ha
   V_[n_++] = (hys_scale_p = new FloatV("  ", "Sh", NULL, "Sim hys scale", "slr", 0, 100, &hys_scale_, HYS_SCALE));                  // Sh
   V_[n_++] = (hys_state_p = new FloatV("  ", "SH", NULL, "Sim hys state", "v", -10, 10, &hys_state_, 0));                           // SH
   V_[n_++] = (Ib_amp_noise_amp_p = new FloatV("  ", "DM", NULL, "Amp amp noise", "A", 0, 1000, &Ib_amp_noise_amp_, IB_AMP_NOISE));  // DM
@@ -160,8 +161,10 @@ void VolatilePars::initialize() {
   V_[n_++] = (slr_res_p = new FloatV("  ", "Sr", NULL, "Scalar Randles R0", "slr", 0, 100, &slr_res_, 1));                          // Sr
   V_[n_++] = (s_t_sat_p = new FloatV("  ", "Xs", NULL, "Scalar on T_SAT", "slr", 0, 100, &s_t_sat_, 1));                            // Xs
   V_[n_++] = (tail_inj_p = new ULongV("  ", "XT", NULL, "Tail end inj", "ms", 0UL, 120000UL, &tail_inj_ms_, 0UL));                  // XT
-  V_[n_++] = (Tb_bias_model_p = new FloatV("  ", "D^", NULL, "Del model", "dg C", -120, 50, &Tb_bias_model_, TEMP_BIAS));           // D^
+  V_[n_++] = (Tb_bias_model_p = new FloatV("  ", "D^", NULL, "Del model", "dg C", -120, 50, &Tb_bias_model_, TB_BIAS));             // D^
   V_[n_++] = (Tb_noise_amp_p = new FloatV("  ", "DT", NULL, "Tb noise", "dg C pk-pk", 0, 50, &Tb_noise_amp_, TB_NOISE));            // DT
+  V_[n_++] = (Tc_bias_model_p = new FloatV("  ", "D<", NULL, "Del model", "dg C", -120, 50, &Tc_bias_model_, TC_BIAS));             // D<
+  V_[n_++] = (Tc_noise_amp_p = new FloatV("  ", "DE", NULL, "Tc noise", "dg C pk-pk", 0, 50, &Tc_noise_amp_, TC_NOISE));            // DE
   V_[n_++] = (until_q_p = new ULongV("  ", "XQ", NULL, "Time until vv0", "ms", 0UL, 1000000UL, &until_q_ms_, 0UL));                 // XQ
   V_[n_++] = (vb_add_p = new FloatV("  ", "Dv", NULL, "Bias on vb", "v", -15, 15, &vb_add_, 0));                                    // Dv
   V_[n_++] = (Vb_noise_amp_p = new FloatV("  ", "DV", NULL, "Vb noise", "v pk-pk", 0, 10, &Vb_noise_amp_, VB_NOISE));               // DV
@@ -169,6 +172,7 @@ void VolatilePars::initialize() {
   V_[n_++] = (wait_inj_p = new ULongV("  ", "XW", NULL, "Wait start inj", "ms", 0UL, 120000UL, &wait_inj_ms_, 0UL));                // XW
   V_[n_++] = (voc_stat_filt_p = new FloatV("  ", "VF", NULL, "voc_stat_f time", "s", 1, 180, &voc_stat_filt_, VOC_STAT_FILT));      // VF
   V_[n_++] = (Tb_filt_p = new FloatV("  ", "VT", NULL, "Tb_f time", "s", 1, 180, &Tb_filt_, TB_FILT));                              // VT
+  V_[n_++] = (Tc_filt_p = new FloatV("  ", "Ve", NULL, "Tc_f time", "s", 1, 180, &Tc_filt_, TC_FILT));                              // Ve
   V_[n_++] = (ekf_q_p = new FloatV("  ", "VQ", NULL, "EKF_Q_SD_NORM volt", "slr", 0, 10000, &ekf_q_, 1));                           // VQ
   V_[n_++] = (ekf_r_p = new FloatV("  ", "VR", NULL, "EKF_R_SD_NORM frac", "slr", 0, 10000, &ekf_r_, 1));                           // VR
   V_[n_++] = (ekf_conv_p = new FloatV("  ", "VC", NULL, "ekf conv abs", "v", 0, 1, &ekf_conv_, EKF_CONV));                          // VC
@@ -260,7 +264,7 @@ SavedPars::SavedPars(SerialRAM* ram) : Parameters() {
 SavedPars::~SavedPars() {}
 
 void SavedPars::initialize() {
-#define NSAV 24
+#define NSAV 25
   V_ = new Variable*[NSAV];
   V_[n_++] = (amp_p = new FloatV("* ", "Xa", rP_, "Inj amp", "Amps pk", -1e6, 1e6, &amp_, 0));  // Xa
   V_[n_++] = (booted_p = new BooleanV("  ", "Bb", rP_, "Clean boot", "T=clean", 0, 1, &booted_, false));  // Bb
@@ -281,7 +285,8 @@ void SavedPars::initialize() {
   V_[n_++] = (isum_p = new Uint16tV("* ", "is", rP_, "Summ buffer indx", "uint", 0, NSUM + 1, &isum_, NSUM, false));  // is
   V_[n_++] = (modeling_p = new Uint8tV("* ", "Xm", rP_, "Modeling bitmap", "[0x]", 0, 255, &modeling_, MODELING));  // Xm
   V_[n_++] = (preserving_p = new Uint8tV("* ", "X?", rP_, "Preserving fault", "T=Preserve", 0, 1, &preserving_, 0, false));  // X?
-  V_[n_++] = (Tb_bias_hdwe_p = new FloatV("* ", "Dt", rP_, "Bias Tb sensor", "dg C", -500, 500, &Tb_bias_hdwe_, TEMP_BIAS));  // Dt
+  V_[n_++] = (Tb_bias_hdwe_p = new FloatV("* ", "Dt", rP_, "Bias Tb sensor", "dg C", -500, 500, &Tb_bias_hdwe_, TB_BIAS));  // Dt
+  V_[n_++] = (Tc_bias_hdwe_p = new FloatV("* ", "De", rP_, "Bias Tc sensor", "dg C", -500, 500, &Tc_bias_hdwe_, TC_BIAS));  // De
   V_[n_++] = (Time_now_p = new ULongV("* ", "UT", rP_, "UNIX time epoch", "sec", 0UL, 2100000000UL, &Time_now_, 1669801880UL, false));  // UT
   V_[n_++] = (Type_p = new Uint8tV("* ", "Xt", rP_, "Inj type", "1sn 2sq 3tr 4 1C, 5 -1C, 8cs", 0, 10, &type_, 0));  // Xt
   V_[n_++] = (Vb_bias_hdwe_p = new FloatV("* ", "Dc", rP_, "Bias Vb sensor", "v", -10, 70, &Vb_bias_hdwe_, VOLT_BIAS));  // Dc

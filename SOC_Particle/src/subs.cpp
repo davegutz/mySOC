@@ -124,6 +124,15 @@ void initialize_all(BatteryMonitor* Mon, Sensors* Sen, const float soc_in,
     Sen->Tb_f(Sen->Tb_hdwe_f());
     Sen->Tb_f_rate(Sen->Tb_hdwe_f_rate());
   }
+  if (sp.mod_tc()) {
+    Sen->Tc(Sen->Tc_model());
+    Sen->Tc_f(Sen->Tc_model_f());
+    Sen->Tc_f_rate(Sen->Tc_model_f_rate());
+  } else {
+    Sen->Tc(Sen->Tc_hdwe());
+    Sen->Tc_f(Sen->Tc_hdwe_f());
+    Sen->Tc_f_rate(Sen->Tc_hdwe_f_rate());
+  }
   if (use_soc_in) {
     Mon->apply_soc(soc_in, Sen->Tb_f());  // saves sp.delta_q and sp.T_state
     Sen->Sim->apply_soc(soc_in,
@@ -314,6 +323,11 @@ void load_ib_vb_tb(const bool reset, const bool reset_temp, const bool reset_kf,
   Sen->Flt->Tb_check(Sen, TB_MIN, TB_MAX, reset_temp);  // Sets Tb_fa()
   if (sp.debug() == 16) Sen->Tb_print();
 
+  // Load temperature Tc
+  Sen->Tc_load(myPins->VTc_pin, reset_temp);
+  Sen->Flt->Tc_check(Sen, TC_MIN, TC_MAX, reset_temp);  // Sets Tc_fa()
+  if (sp.debug() == 17) Sen->Tc_print();
+
   // Power calculation
   Sen->Wb(Sen->Vb() * Sen->Ib());
 }
@@ -463,7 +477,8 @@ void sense_synth_select(const bool reset, const bool reset_temp,
   Sen->Sim->count_coulombs(Sen, reset_temp, Mon, false);
 
   // Injection test
-  if ((Sen->start_inj() <= Sen->now_ms()) && (Sen->now_ms() <= Sen->end_inj()) &&
+  if ((Sen->start_inj() <= Sen->now_ms()) &&
+      (Sen->now_ms() <= Sen->end_inj()) &&
       (Sen->now_ms() > 0ULL))  // in range, test in progress
   {
     // Shift times because sampling is asynchronous: improve repeatibility
@@ -518,12 +533,17 @@ void serial_display(Sensors* Sen, BatteryMonitor* Mon) {
 
   // ---------- Top Line of Display -------------------------------------------
   // Tb
-  sprintf(pr.buff, "%3.0f", pp.pubList.Tb);
+  sprintf(pr.buff, "%3.0f / %3.0f", pp.pubList.Tb, pp.pubList.Tc);
   disp_0 = pr.buff;  // Default
   if (Sen->Flt->Tb_fa() && (blink == 0 || blink == 1)) {
     disp_0 = "***";
     dispAssign(true, flt_tb);
   }
+  if (Sen->Flt->Tc_fa() && (blink == 1 || blink == 3)) {
+      disp_0 = "accy";
+      dispAssign(true, flt_tc);
+  }
+
 
   // Voc
   sprintf(pr.buff, "%5.2f", pp.pubList.Voc);
@@ -617,7 +637,7 @@ void serial_display(Sensors* Sen, BatteryMonitor* Mon) {
   {
     String txBuf;
     txBuf = String::format(
-        "%s   Tb,C  VOC,V  Ib,A \n%s   EKF,Ah  chg,hrs  CC, Ah\nPf; for fails.  %s %s"
+        "%s Tb,C  VOC,V  Ib,A \n%s EKF,Ah chg,hrs CC, Ah\nPf; for fails.  %s %s"
         " prints=%ld\n\n",
         disp_Tbop.c_str(), dispBot.c_str(), HDWE_UNIT, version, cp.num_v_print);
     sendTxBuf(txBuf, true, true);
@@ -627,7 +647,7 @@ void serial_display(Sensors* Sen, BatteryMonitor* Mon) {
   {
     String txBuf;
     txBuf = String::format(
-        "%s   Tb,C  VOC,V  Ib,A \n%s   EKF,Ah  chg,hrs  CC, Ah\nPf; for fails.  %s %s"
+        "%s Tb,C  VOC,V  Ib,A \n%s EKF,Ah chg,hrs CC, Ah\nPf; for fails.  %s %s"
         " prints=%ld\n\n",
         disp_Tbop.c_str(), dispBot.c_str(), HDWE_UNIT, version, cp.num_v_print);
     sendTxBuf(txBuf, false, true);
@@ -645,7 +665,7 @@ void serial_display(Sensors* Sen, BatteryMonitor* Mon) {
         Sen->Flt->Tb_fa(), Sen->Flt->ib_amp_fa(), Sen->Flt->ib_noa_fa(),
         Sen->Flt->ib_diff_fa(), Sen->Flt->dscn_fa(), Sen->Flt->red_loss());
     Serial.printf(
-        "%s   Tb,C  VOC,V  Ib,A \n%s   EKF,Ah  chg,hrs  CC, Ah\nPf; for fails.  %s %s"
+        "%s Tb,C  VOC,V  Ib,A \n%s EKF,Ah chg,hrs CC, Ah\nPf; for fails.  %s %s"
         " prints=%lu\n\n",
         disp_Tbop.c_str(), dispBot.c_str(), HDWE_UNIT, version, cp.num_v_print);
   }
@@ -683,12 +703,12 @@ void setup_serial_ble() {
   BleAdvertisingData data;
   data.appendServiceUUID(serviceUuid);
   BLE.advertise(&data);
-}
+} 
 
 // Configure hardware pins and report temperature sensor type in setup()
 void setup_pins() {
-  //        status_led, Vb_pin, Von_pin, Vom_pin, Vc_pin,    VTb_pin, using_2wir
-  myPins = new Pins(D7, D12,    D11,     D13,     D14,       D0);
+  //        status_led, Vb_pin, Von_pin, Vom_pin, Vc_pin, VTb_pin, VTc_pin
+  myPins = new Pins(D7, D12,    D11,     D13,     D14,    D0,      D1);
   pinMode(myPins->status_led, OUTPUT);
   digitalWrite(myPins->status_led, LOW);
 

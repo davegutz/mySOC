@@ -75,9 +75,14 @@ bool followup(const char letter_0, const char letter_1, BatteryMonitor* Mon,
 
     case ('D'):
       switch (letter_1) {
-        case (
-            'h'):  //   Dh<>:  Summary sample time input  Not sure this section
-                   //   needed since nominalizing capability added 11/2025
+
+        case ('e'):  //*  De<>:  Tc bias change hardware
+          if (sp.Tc_bias_hdwe_p->success() &&
+              sp.modeling() != 230)  // modeling==230 is special regression test
+            cp.cmd_reset();
+          break;
+
+        case ('h'):  //   Dh<>:  Summary sample time input
           if (ap.sum_delay_p->success())
             Sen->Summarize->delay(max(ap.read_delay_ms(), ap.sum_delay()),
                                   Sen->now_ms());  // validated

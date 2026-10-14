@@ -462,7 +462,7 @@ void print_signal_sel_header() {
       "e_wrap_n, e_wrap_n_filt, e_wrap_n_trim, ");
   Serial.printf(
       "  ib_sel_stat, ib_choice, vc_h,ib_h, ib_s, mib, vb_sel, vb_hdwe, vb_s, "
-      "mvb,vb_sen,  mtb, ");
+      "mvb,vb_sen,  mtb, mod_tc,");
   Serial.printf(
       "  ib_rate, ib_quiet, ib_really_quiet, tb_sel, ccd_thr, ewmhi_thr, "
       "ewmlo_thr, ewnhi_thr, ewnlo_thr, ibd_thr, ibq_thr, "
@@ -530,11 +530,11 @@ void print_signal_sel_serial(const bool reset, Sensors* Sen,
     Serial.printf("%s", pr.buff);
 
     sprintf(pr.buff,
-            "  %d,%d,%8.6f,%8.6f,%8.6f, %d,  %d,%8.6f,%8.6f, %d,%8.6f,  %d, ",
+            "  %d,%d,%8.6f,%8.6f,%8.6f, %d,  %d,%8.6f,%8.6f, %d,%8.6f, %d,%d,",
             Sen->Flt->ib_sel_stat(), Sen->Flt->ib_choice(), Sen->Vc_hdwe(),
             Sen->ib_hdwe(), Sim->ib_s(), sp.mod_ib(), Sen->Flt->vb_sel_stat(),
             Sen->vb_hdwe(), Sen->Sim->vb(), sp.mod_vb(), Sen->vb(),
-            sp.mod_tb());
+            sp.mod_tb(), sp.mod_tc());
     Serial.printf("%s", pr.buff);
 
     sprintf(pr.buff,
@@ -638,7 +638,8 @@ void print_sim_serial(const bool initializing_all, const bool reset,
   static double last_c_time_sim = 0.;
 
   const bool is_sim_debug =
-      (sp.debug() == 2 || sp.debug() == 3 || sp.debug() == 4 || sp.debug() == 6);
+      (sp.debug() == 2 || sp.debug() == 3 || sp.debug() == 4 ||
+       sp.debug() == 6);
   // const bool was_sim_debug =
   //     (cp.last_read_debug == 2 || cp.last_read_debug == 3 ||
   //      cp.last_read_debug == 4 || cp.last_read_debug == 6);

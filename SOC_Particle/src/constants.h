@@ -33,6 +33,9 @@ all
 #if !defined(DISAB_TB_FA)
 #define DISAB_TB_FA false
 #endif
+#if !defined(DISAB_TC_FA)
+#define DISAB_TC_FA false
+#endif
 #if !defined(DISAB_VB_FA_LT)
 #define DISAB_VB_FA_LT false
 #endif
@@ -54,6 +57,7 @@ const char unit[] = version_str "_" HDWE_UNIT;
 #define PHOTON_ADC_COUNT 4096      // Photon ADC range, counts (4096)
 #define PHOTON_ADC_VOLT 3.3        // Photon ADC range, V (3.3)
 #define TB_FILT 120.               // Temperature filter lag, s (120)
+#define TC_FILT 120.               // Temperature filter lag, s (120)
 #define SCL_40 40.                 // Data storage integer scaling
 #define SCL_60 60.                 // Data storage integer scaling
 #define SCL_600 600.               // Data storage integer scaling
@@ -108,14 +112,30 @@ const float T_DESAT = 20;  // De-saturation time, sec
 #if !defined(TB_MIN)
 #define TB_MIN -19.  // Hard fault threshold 2wire only, C (-19.)
 #endif
+#if !defined(TC_HDWE_MAX)
+#define TC_HDWE_MAX 150.0  // Hardware electrical limit 2wire only, C (150)
+#endif
+#if !defined(TC_HDWE_MIN)
+#define TC_HDWE_MIN -20.0 // Hardware electrical limit 2wire only, C (-20)
+#endif
+#if !defined(TC_MAX)
+#define TC_MAX  60.  // Hard fault threshold 2wire only, C (60.)
+#endif
+#if !defined(TC_MIN)
+#define TC_MIN -19.  // Hard fault threshold 2wire only, C (-19.)
+#endif
 #define TB_HARD_SET 1.  // Tb 2-wire range fail persistence, s (1.)
 #define TB_HARD_RES 2.  // Tb 2-wire range fail reset persistence, s (2.)
+#define TC_HARD_SET 1.  // Tc 2-wire range fail persistence, s (1.)
+#define TC_HARD_RES 2.  // Tc 2-wire range fail reset persistence, s (2.)
 #define VB_HARD_SET 1.  // Vb range fail persistence, s (1.)
 #define VB_HARD_RES 2.  // Vb range fail reset persistence, s (2.)
 #define VC_HARD_SET 1.  // Vb  range fail persistence, s (1.)
 #define VC_HARD_RES 2.  // Vc range fail reset persistence, s (2.)
 #define TB_NOISE 0.  // Tb added noise amplitude, deg C pk-pk
 #define TB_NOISE_SEED 0xe2 // Tb added noise seed 0-255 = 0x00-0xFF (0xe2)
+#define TC_NOISE 0.  // Tc added noise amplitude, deg C pk-pk
+#define TC_NOISE_SEED 0xe3 // Tc added noise seed 0-255 = 0x00-0xFF (0xe3)
 #define VB_NOISE 0.  // Vb added noise amplitude, V pk-pk
 #define VB_NOISE_SEED 0xb2  // Vb added noise seed 0-255 = 0x00-0xFF (0xb2)
 #define IB_AMP_NOISE 0.  // Ib amplified added noise amplitude, A pk-pk
@@ -153,17 +173,13 @@ const float IBATT_DISAGREE_SET = (WRAP_LO_SET - 1.);
 #define WN_Q_FILT 1.0     // Quiet filter-2 natural frequency, r/s (1.0)
 #define ZETA_Q_FILT 0.9   // Quiet fiter-2 damping factor (0.9)
 #define MAX_T_Q_FILT 0.2  // Quiet filter max update time (0.2)
-#define QUIET_A \
-  0.005            // Quiet set threshold, sec (0.005, 0.01 too large in truck)
+#define QUIET_A 0.005  // Quiet set thres, sec (0.005, 0.01 too large in truck)
 #define LOW_A 1.0  // Currents are very small, A (1.0)
 #define QUIET_SET 60.  // Quiet set persistence, sec (60.)
-const float QUIET_RES(QUIET_SET /
-                      10.);  // Quiet reset persistence, sec ('up 1 down 10')
-#define NOMINAL_TB \
-  15.  // Middle of the road Tb for decent reversionary operation, deg C (15.)
-#define NOMINAL_VB \
-  (13. *           \
-   NS)  // Middle of the road Vb for decent reversionary operation, V (13.)
+const float QUIET_RES(QUIET_SET/10.);  // Quiet reset pers, sec ('up 1 down 10')
+#define NOMINAL_TB 15.  // Middle of the road Tb for good rev op, deg C (15.)
+#define NOMINAL_TC 25.  // Middle of the road Tc for good rev op, deg C (25.)
+#define NOMINAL_VB  (13.*NS)  // Middle of the road Vb for good rev op, V (13.)
 #define IMAX_NUM 100000.  // Simulation limit to prevent NaN, A (1e5)
 #if !defined(WRAP_SOC_HI_OFF)
 #define WRAP_SOC_HI_OFF 0.97  // Disable e_wrap_hi when saturated (0.97)
@@ -185,6 +201,7 @@ const float QUIET_RES(QUIET_SET /
 #define VC_S 1.0                  // Vc sense scalar (1.0)
 #define VO_S 1.0                  // Vo sense scalar (1.0)
 #define VTB_S 1.0                 // VTb sense scalar (1.0)
+#define VTC_S 1.0                 // VTc sense scalar (1.0)
 #define AMP_FILT_TAU \
   4.0             // Ib filters time constant for calibration only, s (4.0)
 #define V3V3 3.3  // Theoretical nominal V3v3, V (3.3)
@@ -230,8 +247,11 @@ const float QUIET_RES(QUIET_SET /
 #if !defined(VV)
 #define VV 0  // Nominal verbosity (vv) (0)
 #endif
-#if !defined(TEMP_BIAS)
-#define TEMP_BIAS 0.0  // Nominal bias on Tb (D^) (0.0)
+#if !defined(TB_BIAS)
+#define TB_BIAS 0.0  // Nominal bias on Tb (D^) (0.0)
+#endif
+#if !defined(TC_BIAS)
+#define TC_BIAS 0.0  // Nominal bias on Tc (De) (0.0)
 #endif
 #if !defined(NOM_VB_ADD)
 #define NOM_VB_ADD 0.0  // Nominal bias on Vb (Dv) (0.0)
@@ -351,6 +371,10 @@ const float QUIET_RES(QUIET_SET /
 #define VRAW_TB_BARE_DETECTED  860  // 50 C
   // Level of common voltage to declare Tb circuit unconnected, V (50UL)
 #endif
+#if !defined(VRAW_TC_BARE_DETECTED)
+#define VRAW_TC_BARE_DETECTED  860  // 50 C
+  // Level of common voltage to declare Tc circuit unconnected, V (50UL)
+#endif
 #if !defined(VRAW_VB_BARE_DETECTED)
 #define VRAW_VB_BARE_DETECTED  400  // 2 v
   // Level of common voltage to declare circuit unconnected, V (50UL)
@@ -439,7 +463,7 @@ const float QUIET_RES(QUIET_SET /
 #endif
 
 // Conversion gains
-constexpr double H_CELL_MAX = 15.;
+const double H_CELL_MAX = 15.;
 const double H_MAX = NS * H_CELL_MAX;
 const double H_ALPHA = 0.05;  // Ha
 // Voltage measurement gains
@@ -459,6 +483,8 @@ const float SHUNT_NOA_GAIN = SHUNT_GAIN * SHUNT_NOA_R1 / SHUNT_NOA_R2;
 const float VH3V3_CONV_GAIN = float(PHOTON_ADC_VOLT) / float(PHOTON_ADC_COUNT);
 const float VTB_CONV_GAIN =
     float(PHOTON_ADC_VOLT) / float(PHOTON_ADC_COUNT) * float(VTB_S);
+const float VTC_CONV_GAIN =
+    float(PHOTON_ADC_VOLT) / float(PHOTON_ADC_COUNT) * float(VTC_S);
 
 // Time scalar for modifying fault logic time delays when deliberately running
 // slowly for regression testing

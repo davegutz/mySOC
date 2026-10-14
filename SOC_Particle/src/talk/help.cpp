@@ -98,6 +98,8 @@ void talkH(BatteryMonitor* Mon, Sensors* Sen) {
   sp.vsat_add_p->print_help();          //  DS
   sp.Tb_bias_hdwe_p->print_help();      //* Dt
   ap.Tb_noise_amp_p->print_help();      //  DT
+  sp.Tc_bias_hdwe_p->print_help();      //* De
+  ap.Tc_noise_amp_p->print_help();      //  DE
   ap.vb_add_p->print_help();            //  Dv
   ap.Vb_noise_amp_p->print_help();      //  DV
   sp.Dw_p->print_help();                //* Dw
@@ -127,6 +129,7 @@ void talkH(BatteryMonitor* Mon, Sensors* Sen) {
   ap.ib_quiet_slr_p->print_help();  // Fq
   ap.disab_ib_fa_p->print_help();   // FI
   ap.disab_tb_fa_p->print_help();   // FT
+  ap.disab_tc_fa_p->print_help();   // FC
   ap.dis_vb_fa_lt_p->print_help();  // FV
   ap.solv_err_p->print_help();        // Se
   ap.solv_max_counts_p->print_help(); // Sx
@@ -208,6 +211,7 @@ void talkH(BatteryMonitor* Mon, Sensors* Sen) {
   ap.ekf_r_p->print_help();          // VR
   ap.voc_stat_filt_p->print_help();  // VS
   ap.Tb_filt_p->print_help();        // VT
+  ap.Tc_filt_p->print_help();        // Ve
   sp.debug_p->print_help();          // vv
 
   sendTxBuf("  -<>: Negative - Arduino plot compatible\n", true, IN_SERVICE);
@@ -224,6 +228,7 @@ void talkH(BatteryMonitor* Mon, Sensors* Sen) {
   sendTxBuf(" vv14: vshunt and Ib raw\n", true, IN_SERVICE);
   sendTxBuf(" vv15: vb raw\n", true, IN_SERVICE);
   sendTxBuf(" vv16: Tb\n", true, IN_SERVICE);
+  sendTxBuf(" vv17: Tc\n", true, IN_SERVICE);
   sendTxBuf(" vv21: ib_quiet\n", true, IN_SERVICE);
   sendTxBuf("vv-23: Vb_hdwe_ac\n", true, IN_SERVICE);
   sendTxBuf("vv-24: Vb_hdwe_ac, Ib_hdwe\n", true, IN_SERVICE);

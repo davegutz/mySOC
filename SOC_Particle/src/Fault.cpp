@@ -211,6 +211,7 @@ Fault::Fault(const double T, uint8_t* preserving, BatteryMonitor* Mon,
       reset_all_faults_(false), reset_all_faults_print_(false),
       sp_preserving_(preserving), splrr_amp_(false), splrr_noa_(false),
       tb_sel_stat_(TB_SEL_STAT_DEF), tb_sel_stat_last_(TB_SEL_STAT_DEF),
+      tc_sel_stat_(TC_SEL_STAT_DEF), tc_sel_stat_last_(TC_SEL_STAT_DEF),
       vb_sel_stat_(VB_SEL_STAT_DEF), vb_sel_stat_last_(VB_SEL_STAT_DEF),
       wrap_hi_volt_(WRAP_HI_AMPV), wrap_hi_noa_(WRAP_HI_NOAV),
       wrap_lo_volt_(WRAP_LO_AMPV), wrap_lo_noa_(WRAP_LO_NOAV) {
@@ -227,6 +228,7 @@ Fault::Fault(const double T, uint8_t* preserving, BatteryMonitor* Mon,
   IbLoLimitedLo = new TFDelay(true, IB_LO_ACTIVE_SET, IB_LO_ACTIVE_RES, T);
   IbNoAmpHardFail = new TFDelay(false, IB_HARD_SET, IB_HARD_RES, T);
   TbHardFail = new TFDelay(false, TB_HARD_SET, TB_HARD_RES, T);
+  TcHardFail = new TFDelay(false, TC_HARD_SET, TC_HARD_RES, T);
   VbHardFail = new TFDelay(false, VB_HARD_SET, VB_HARD_RES, T);
   VcHardFail = new TFDelay(false, VC_HARD_SET, VC_HARD_RES, T);
   QuietPer = new TFDelay(false, QUIET_SET, QUIET_RES, T);
@@ -541,6 +543,7 @@ void Fault::pretty_print(Sensors* Sen, BatteryMonitor* Mon) {
       String::format(" cc_diff_fa %d\n", cc_diff_fa_) +
       String::format(" dis_ib_fa %d\n", ap.disab_ib_fa()) +
       String::format(" dis_tb_fa %d\n", ap.disab_tb_fa()) +
+      String::format(" dis_tc_fa %d\n", ap.disab_tc_fa()) +
       String::format(" dis_vb_fa %d\n", ap.disab_vb_fa_lt()) +
       String::format(" disable_amp_fault %d\n", disable_amp_fault_) +
       String::format(" e_wrap%7.3f\n", e_wrap_) +
@@ -584,6 +587,9 @@ void Fault::pretty_print(Sensors* Sen, BatteryMonitor* Mon) {
       String::format(" Tb Tbh%9.5f Tbm%9.5f sel%9.5f\n", Sen->Tb_hdwe(),
                      Sen->Tb_model(), Sen->Tb()) +
       String::format(" tb_sel_stat %d\n", tb_sel_stat_) +
+      String::format(" Tc Tch%9.5f Tcm%9.5f sel%9.5f\n", Sen->Tc_hdwe(),
+                     Sen->Tc_model(), Sen->Tc()) +
+      String::format(" tc_sel_stat %d\n", tc_sel_stat_) +
       String::format(" Vb Vbh%7.3f Vbm%7.3f sel%7.3f\n", Sen->Vb_hdwe(),
                      Sen->Vb_model(), Sen->Vb()) +
       String::format(" vb_sel_stat %d\n", vb_sel_stat_) +
@@ -597,8 +603,6 @@ void Fault::pretty_print(Sensors* Sen, BatteryMonitor* Mon) {
       String::format(" sel_brk_hdwe: ");
   sendTxBuf(txBuf, true, true);
 
-  // if ( ib_choice_ != ib_choice_last_ || vb_sel_stat_ != vb_sel_stat_last_ ||
-  // tb_sel_stat_ != tb_sel_stat_last_ )
   debug_qs(Mon, Sen);
 
   txBuf =
@@ -629,14 +633,14 @@ void Fault::pretty_print(Sensors* Sen, BatteryMonitor* Mon) {
       String::format("1 vb      %d  %d 'Fv 1  SV, *Dc/*Dv'.", vb_flt(),
                      vb_fa_lt()) +
       String::format("  bms_off %d\n", Mon->bms_off()) +
-      String::format("0 Tb      %d  %d 'Ft 1'\n\n", Tb_flt(), Tb_fa()) +
-      // String::format("B-time_long%2d\n", dispRead(time_long)) +  //
-      // distracting
+      String::format("0 Tb      %d  %d 'Ft 1'\n", Tb_flt(), Tb_fa()) +
+      String::format("0x Tc     %d  %d 'Ft 1'\n\n", Tc_flt(), Tc_fa()) +
       String::format("A-accy     %2d\n", dispRead(accy)) +
       String::format("9-off      %2d\n", dispRead(off)) +
       String::format("8-SAT      %2d\n", dispRead(SAT)) +
       String::format("7-flt_ekf  %2d\n", dispRead(flt_ekf)) +
       String::format("6-flt_tb   %2d\n", dispRead(flt_tb)) +
+      String::format("6x-flt_tc  %2d\n", dispRead(flt_tc)) +
       String::format("*5-fail_vb %2d\n", dispRead(fail_vb)) +
       String::format("*4-fail_ibm%2d\n", dispRead(fail_ibm)) +
       String::format("*3-fail_ib %2d\n", dispRead(fail_ib)) +
@@ -644,9 +648,6 @@ void Fault::pretty_print(Sensors* Sen, BatteryMonitor* Mon) {
       String::format("1-diff_ib  %2d\n", dispRead(diff_ib)) +
       String::format("0-conn     %2d\n\n", dispRead(conn));
   sendTxBuf(txBuf, true, true);
-  // enum dispw {conn=0, diff_ib=1, red_loss=2, fail_ib=3, fail_ibm=4,
-  // fail_vb=5, flt_tb=6, flt_ekf=7, SAT=8, off=9, accy=10, time_long=11,
-  // Count};
 
   txBuf = bitMapPrint(pr.buff, fltw_, NUM_FLT) + String::format("   ") +
           bitMapPrint(pr.buff, falw_, NUM_FA) + String::format("   ") +
@@ -674,14 +675,16 @@ void Fault::pretty_print(Sensors* Sen, BatteryMonitor* Mon) {
 // Calculate selection for ib_decision_
 // Use model instead of sensors when running tests as user
 // Equivalent to using voc(soc) as voter between two hardware currrents
-// Over-ride sensed Ib, Vb and Tb with model when running tests
+// Over-ride sensed Ib, Vb, Tb, and Tc with model when running tests
 // Inputs:  Sen->Ib_model, Sen->Ib_hdwe,
 //          Sen->Vb_model, Sen->Vb_hdwe,
 //          ----------------, Sen->Tb_hdwe, Sen->Tb_hdwe_f
+//          ----------------, Sen->Tc_hdwe, Sen->Tc_hdwe_f
 // Outputs: Ib,
 //          Vb,
 
 //          Tb, Tb_f
+//          Tc, Tc_f
 //          latch_
 void Fault::select_all_logic(Sensors* Sen, BatteryMonitor* Mon,
                              const bool reset) {
@@ -735,9 +738,24 @@ void Fault::select_all_logic(Sensors* Sen, BatteryMonitor* Mon,
   } else
     tb_sel_stat_ = 1;
 
+  // Tc failure from inactivity. Does not latch because can heal and failure not
+  // critical
+  if (reset_all_faults_) {
+    tc_sel_stat_last_ = 1;
+    tc_sel_stat_ = 1;
+    Serial.printf("reset tc flts\n");
+    failAssign(false, TC_FA);
+  }
+  if (Tc_fa())  // Latches
+  {
+    tc_sel_stat_ = 0;
+    latch_ = true;
+  } else
+    tc_sel_stat_ = 1;
+
   // Print
   if (ib_choice_ != ib_choice_last_ || vb_sel_stat_ != vb_sel_stat_last_ ||
-      tb_sel_stat_ != tb_sel_stat_last_)
+      tb_sel_stat_ != tb_sel_stat_last_ || tc_sel_stat_ != tc_sel_stat_last_ )
     debug_qs(Mon, Sen);
 
   // Latch memory
@@ -745,6 +763,7 @@ void Fault::select_all_logic(Sensors* Sen, BatteryMonitor* Mon,
   ib_sel_stat_last_ = ib_sel_stat_;
   vb_sel_stat_last_ = vb_sel_stat_;
   tb_sel_stat_last_ = tb_sel_stat_;
+  tc_sel_stat_last_ = tc_sel_stat_;
 
   // Make sure Rf command gets executed at least once all fault logic.
   // Asynchronous hence counter
@@ -973,6 +992,35 @@ void Fault::Tb_check(Sensors* Sen, const float _tb_min, const float _tb_max,
                 TB_FLT);
     failAssign(
         Tb_fa() || TbHardFail->calculate(Tb_flt(), TB_HARD_SET, TB_HARD_RES,
+                                         Sen->T(), reset_loc),
+        TB_FA);
+  }
+}
+
+// Check Tc 2-wire analog voltage.  Latches
+void Fault::Tc_check(Sensors* Sen, const float _tc_min, const float _tc_max,
+                     const bool reset) {
+  bool reset_loc = reset | reset_all_faults_;
+  if (reset_loc) {
+    failAssign(false, TB_FA);
+  }
+  if (sp.mod_tc()) {
+    faultAssign(
+        ((Sen->Tc_model() <= _tc_min) || (Sen->Tc_model() >= _tc_max)) &&
+            !ap.disab_tc_fa(),
+        TB_FLT);
+    failAssign(
+        Tc_fa() || TcHardFail->calculate(Tc_flt(), TB_HARD_SET, TB_HARD_RES,
+                                         Sen->T(), reset_loc),
+        TB_FA);
+  } else if (ap.disab_tc_fa()) {
+    faultAssign(false, TB_FLT);
+    failAssign(false, TB_FA);
+  } else {
+    faultAssign((Sen->Tc_hdwe() <= _tc_min) || (Sen->Tc_hdwe() >= _tc_max),
+                TB_FLT);
+    failAssign(
+        Tc_fa() || TcHardFail->calculate(Tc_flt(), TB_HARD_SET, TB_HARD_RES,
                                          Sen->T(), reset_loc),
         TB_FA);
   }

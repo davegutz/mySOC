@@ -232,6 +232,36 @@ class Sensors {
   void Tb_model_f_rstate(const double input) { Tb_model_f_rstate_ = input; }
   double Tb_model_f_rstate() { return Tb_model_f_rstate_; }
   double Tb_model_f_tau() { return Tb_model_f_tau_; }
+  void Tc(const double input) { Tc_ = input; }
+  double Tc() { return Tc_; }
+  void Tc_f(const double input) { Tc_f_ = input; }
+  double Tc_f() { return Tc_f_; }
+  void Tc_f_rate(const double input) { Tc_f_rate_ = input; }
+  double Tc_f_rate() { return Tc_f_rate_; }
+  void Tc_hdwe(const double input) { Tc_hdwe_ = input; }
+  double Tc_hdwe() { return Tc_hdwe_; }
+  void Tc_hdwe_f(const double input) { Tc_hdwe_f_ = input; }
+  double Tc_hdwe_f() { return Tc_hdwe_f_; }
+  double Tc_hdwe_f_dt() { return Tc_hdwe_f_dt_; }
+  void Tc_hdwe_f_rate(const double input) { Tc_hdwe_f_rate_ = input; }
+  double Tc_hdwe_f_rate() { return Tc_hdwe_f_rate_; }
+  void Tc_hdwe_f_rstate(const double input) { Tc_hdwe_f_rstate_ = input; }
+  double Tc_hdwe_f_rstate() { return Tc_hdwe_f_rstate_; }
+  void Tc_hdwe_f_lstate(const double input) { Tc_hdwe_f_lstate_ = input; }
+  double Tc_hdwe_f_lstate() { return Tc_hdwe_f_lstate_; }
+  double Tc_hdwe_f_tau() { return Tc_hdwe_f_tau_; }
+  void Tc_model(const double input) { Tc_model_ = input; }
+  double Tc_model() { return Tc_model_; }
+  void Tc_model_f(const double input) { Tc_model_f_ = input; }
+  double Tc_model_f() { return Tc_model_f_; }
+  double Tc_model_f_dt() { return Tc_model_f_dt_; }
+  void Tc_model_f_rate(const double input) { Tc_model_f_rate_ = input; }
+  double Tc_model_f_rate() { return Tc_model_f_rate_; }
+  void Tc_model_f_lstate(const double input) { Tc_model_f_lstate_ = input; }
+  double Tc_model_f_lstate() { return Tc_model_f_lstate_; }
+  void Tc_model_f_rstate(const double input) { Tc_model_f_rstate_ = input; }
+  double Tc_model_f_rstate() { return Tc_model_f_rstate_; }
+  double Tc_model_f_tau() { return Tc_model_f_tau_; }
   void Ib(const float input) { Ib_ = input; }
   float Ib() { return Ib_; }
   void Ib_f(const float input) { Ib_f_ = input; }
@@ -384,6 +414,9 @@ class Sensors {
   float Tb_noise();
   void Tb_load(const uint16_t vb_pin, const bool reset);  // Analog read of Tb
   void Tb_print();                                        // Print Tb result
+  float Tc_noise();
+  void Tc_load(const uint16_t vb_pin, const bool reset);  // Analog read of Tc
+  void Tc_print();                                        // Print Tc result
   void update_dt();
 
   // Battery select unit voltage, V
@@ -407,6 +440,7 @@ class Sensors {
   uint64_t inst_time_;     // UTC Zulu at instantiation, s
   LagExp* NoaFilt;         // Noise filter for calibration
   PRBS_7* Prbn_Tb_;        // Tb noise generator model only
+  PRBS_7* Prbn_Tc_;        // Tc noise generator model only
   PRBS_7* Prbn_Vb_;        // Vb noise generator model only
   PRBS_7* Prbn_Ib_amp_;    // Ib amplified sensor noise generator model only
   PRBS_7* Prbn_Ib_noa_;    // Ib non-amplified sensor noise generator model only
@@ -415,13 +449,18 @@ class Sensors {
   LagExp* SelFiltCal;             // Noise filter for calibration
   LagExp* TbHdweFilt;             // Noise filter for calibration
   LagExp* TbModelFilt;            // Noise filter for calibration
+  LagExp* TcHdweFilt;             // Noise filter for calibration
+  LagExp* TcModelFilt;            // Noise filter for calibration
   LagExp* VbFilt;                 // Noise filter for calibration
   RecursiveRMSMonitorFP* VbRMS;   // RMS noise monitor for Vb
   RecursiveRMSMonitorFP* VcRMS;   // RMS noise monitor for Vc
   AnalogReadP2* Tb_read_;         // Tb sense debounce
+  AnalogReadP2* Tc_read_;         // Tc sense debounce
   AnalogReadP2* Vb_read_;         // Vb sense debounce
   int Tb_raw_;                    // Raw analog read, integer
   float Tb_volt_;                 // Sensed battery bank temperature at ADC, V
+  int Tc_raw_;                    // Raw analog read, integer
+  float Tc_volt_;                 // Sensed common elect temperature at ADC, V
   int Vb_raw_;                    // Raw analog read, integer
   float Vb_;                      // Selected battery bank voltage, V
   float Vb_f_;                    // Selected filtered battery bank voltage, V
@@ -432,8 +471,8 @@ class Sensors {
   float Vc_;                      // Selected common reference voltage, V
   float Vc_hdwe_;                 // Sensed common reference voltage, V
   float Vc_hdwe_sum_;             // Sensed common reference voltage sum, V
-  double Tb_;                     // Selected battery bank temp, C
-  double Tb_f_;                   // Selected filtered battery bank temp, C
+  double Tb_;                 // Selected battery bank temp, C
+  double Tb_f_;               // Selected filtered battery bank temp, C
   double Tb_f_rate_;          // Selected filtered battery bank temp rate, C/s
   double Tb_hdwe_;            // Sensed battery temp, C
   double Tb_hdwe_f_;          // Filtered, sensed battery temp, C
@@ -449,6 +488,23 @@ class Sensors {
   double Tb_model_f_rstate_;  // Filtered, sensed battery temp rate state, C/s
   double Tb_model_f_lstate_;  // Filtered, sensed battery temp rate state, C/s
   double Tb_model_f_tau_;     // Battery model temp filter time constant, s
+  double Tc_;                 // Selected electronic temp, C
+  double Tc_f_;               // Selected filtered electronic temp, C
+  double Tc_f_rate_;          // Selected filtered electronic temp rate, C/s
+  double Tc_hdwe_;            // Sensed  electronic temp, C
+  double Tc_hdwe_f_;          // Filtered, sensed  electronic temp, C
+  double Tc_hdwe_f_dt_;       // Battery hdwe temp  electronic update time, s
+  double Tc_hdwe_f_rate_;     // Filtered, sensed  electronic temp rate, C/s
+  double Tc_hdwe_f_rstate_;   // Filtered, sensed  elect temp rate state, C/s
+  double Tc_hdwe_f_lstate_;   // Filtered, sensed  elect temp rate state, C/s
+  double Tc_hdwe_f_tau_;      // Electronic hdwe temp filter time constant, s
+  float Tc_model_;            // Modeled  electronic bank temp, C
+  float Tc_model_f_;          // Filtered, modeled  electronic temp, C
+  double Tc_model_f_dt_;      // Electronic model temp filter update time, s
+  double Tc_model_f_rate_;    // Filtered, modeled  electronic temp rate, C/s
+  double Tc_model_f_rstate_;  // Filtered, sensed  elect temp rate state, C/s
+  double Tc_model_f_lstate_;  // Filtered, sensed  elect temp rate state, C/s
+  double Tc_model_f_tau_;     // Electronic model temp filter time constant, s
   float Ib_;                  // Selected battery bank current, A
   float Ib_f_;                // Selected filtered battery bank current, A
   float Ib_amp_;              // Initial selected amp battery bank current, A

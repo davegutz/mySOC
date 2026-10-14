@@ -48,7 +48,7 @@ void assign_publist(Publish* pubList, const uint64_t now, const String unit,
   pubList->unit = unit + batt.c_str();
   pubList->hm_string = hm_string;
   pubList->Tb = Sen->Tb();
-  // Log.info("    assign_publist pubList->Tb=%9.5f", pubList->Tb);
+  pubList->Tc = Sen->Tc();
   if (sp.ib_force() > -1)
     pubList->Ib = Sen->Ib();
   else

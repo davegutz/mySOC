@@ -54,10 +54,11 @@ struct Pins {
   uint16_t Vcm_pin;     // Amp (m) common voltage
   uint16_t Vom_pin;     // Amp (m) output voltage
   uint16_t VTb_pin;     // Tb 2wire measurement voltage
+  uint16_t VTc_pin;     // Tc 2wire measurement voltage
   bool using_opAmp;     // Using differential hardware amp
   Pins() {}
   Pins(uint16_t status_led, uint16_t Vb_pin, uint16_t Von_pin, uint16_t Vom_pin,
-       uint16_t Vc_pin, uint16_t VTb_pin) {
+       uint16_t Vc_pin, uint16_t VTb_pin, uint16_t VTc_pin) {
     this->status_led = status_led;
     this->Vb_pin = Vb_pin;
     this->Von_pin = Von_pin;
@@ -66,6 +67,7 @@ struct Pins {
     this->Vcm_pin = Vc_pin;
     this->using_opAmp = true;
     this->VTb_pin = VTb_pin;
+    this->VTc_pin = VTc_pin;
   }
 };
 

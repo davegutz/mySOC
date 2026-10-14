@@ -115,16 +115,17 @@ void debug_q(BatteryMonitor* Mon, Sensors* Sen) {
   debug_qf(Mon, Sen);
 
   txBuf = String::format(
-      "ib_amp_fail %d\nib_noa_fail %d\nvb_fail %d\nTb%10.6f\nvb%13.9f\nvoc%13.9f\n"
+      "ib_amp_fail %d\nib_noa_fail %d\nvb_fail %d\nTb%10.6f\nTc%10.6f\n"
+      "vb%13.9f\nvoc%13.9f\n"
       "voc_filt%13.9f\nvoc_stat%13.9f\nvoc_stat_f%13.9f\nvoc_soc%13.9f\n"
       "vsat%7.3f\nVc%7.3f\nib%10.6f\nsoc_m%9.5f\n"
       "soc_ekf%9.5f\nsoc%9.5f\nsoc_min%8.4f\nsoc_inf%8.4f\n"
       "modeling %d\n",
       Sen->Flt->ib_amp_fa(), Sen->Flt->ib_noa_fa(), Sen->Flt->vb_fail(),
-      Sen->Tb_f(), Mon->vb(), Mon->voc(), Mon->voc_dead(), Mon->voc_stat(),
-      Mon->voc_stat_f(), Mon->voc_soc(), Mon->vsat(), Sen->Vc(), Mon->ib(),
-      Sen->Sim->soc(), Mon->soc_ekf(), Mon->soc(), Mon->soc_min(),
-      Mon->soc_inf(), sp.modeling());
+      Sen->Tb_f(), Sen->Tc_f(), Mon->vb(), Mon->voc(), Mon->voc_dead(),
+      Mon->voc_stat(), Mon->voc_stat_f(), Mon->voc_soc(), Mon->vsat(),
+      Sen->Vc(), Mon->ib(), Sen->Sim->soc(), Mon->soc_ekf(), Mon->soc(),
+      Mon->soc_min(), Mon->soc_inf(), sp.modeling());
   sendTxBuf(txBuf, true, true);
 
   txBuf = String::format(
@@ -170,10 +171,10 @@ void debug_qf(BatteryMonitor* Mon, Sensors* Sen) {
   String txBuf;
 
   txBuf = String::format(
-      "  mod_tb      %d  mod_vb      %d mod_ib          %d\n  tb_s_st     %d  "
+      "  mod_tb      %d  mod_tc      %d  mod_vb      %d mod_ib          %d\n  tb_s_st     %d  "
       "vb_s_st     %d ib_s_st         %d  ib_choice %d  ib_decision_ %d\n  "
       "mod_tb_dscn %d  mod_vb_dscn %d mod_ib_amp_dscn %d mod_ib_noa_dscn %d\n",
-      sp.mod_tb(), sp.mod_vb(), sp.mod_ib(), sp.mod_tb_dscn(), sp.mod_vb_dscn(),
+      sp.mod_tb(), sp.mod_tc(), sp.mod_vb(), sp.mod_ib(), sp.mod_tb_dscn(), sp.mod_vb_dscn(),
       sp.mod_ib_amp_dscn(), sp.mod_ib_noa_dscn(), Sen->Flt->tb_sel_status(),
       Sen->Flt->vb_sel_stat(), Sen->Flt->ib_sel_stat(), Sen->Flt->ib_choice(),
       Sen->Flt->ib_decision());
@@ -198,12 +199,13 @@ void debug_qs(BatteryMonitor* Mon, Sensors* Sen) {
       String::format(
           "Selection:\n %d  Amp->bare\n %d  NoAmp->bare\n %d  ib diff fail\n "
           "%d  wrap hi fail\n %d  wrap lo fail\n %d  wrap volt fail\n %d  cc "
-          "diff fail\n %d  sp.ib_force()\n %d  vb fail\n %d  Tb fail\n",
+          "diff fail\n %d  sp.ib_force()\n %d  vb fail\n %d  Tb fail %d Tc fail"
+          " %d \n",
           Sen->ShuntAmp->bare_shunt(), Sen->ShuntNoAmp->bare_shunt(),
           Sen->Flt->ib_diff_fa(), Sen->Flt->wrap_hi_fa(),
           Sen->Flt->wrap_lo_fa(), Sen->Flt->wrap_vb_fa(),
           Sen->Flt->cc_diff_fa(), sp.ib_force(), Sen->Flt->vb_fa_lt(),
-          Sen->Flt->Tb_fa()) +
+          Sen->Flt->Tb_fa(), Sen->Flt->Tc_fa()) +
       String::format(
           " %d  fake\n %d  ib choice\n %d  ib choice past\n %d  ib decision\n "
           "%d  vb sel stat\n %d  vb sel stat past\n %d  latch\n %d  "
@@ -251,6 +253,7 @@ void debug_check_99(BatteryMonitor* Mon, Sensors* Sen) {
   else {
     String txBuf =
         String::format("\n Tb   |") +
+        String::format("Tc   |") +
         String::format("Vb      Vbrms  SV,     *Dc|") +
         String::format("Vr    Vrrms|") +
         String::format(" Imh    Imhkf Imhrms  SA,    *DA|") +
@@ -259,16 +262,17 @@ void debug_check_99(BatteryMonitor* Mon, Sensors* Sen) {
         String::format("voc   voc_soc *DwTab|") + String::format("*Sran|") +
         String::format("   T  |\n") +
         String::format(
-            "%6.2f|%6.3f %6.3f %5.2f %6.3f|%5.3f %5.3f|%6.2f %6.2f %5.3f %5.2f "
-            "%6.2f|%6.2f %6.2f %5.3f %5.2f %6.2f|%6.2f  %5.2f|%5.2f %5.2f  "
-            "%7.3f| %4.2f|%6.4f|\n",
-            Sen->Tb_hdwe_f(), Sen->Vb_hdwe_f(), Sen->Vb_rms(), ap.Vb_scale(),
-            sp.Vb_bias_hdwe(), Sen->ShuntAmp->Vc(), Sen->Vc_rms(),
-            Sen->Ib_amp_hdwe_f(), Sen->Ib_amp_hdwe_kf(), Sen->Ib_amp_rms(),
-            ap.ib_scale_amp(), sp.ib_bias_amp(), Sen->Ib_noa_hdwe_f(),
-            Sen->Ib_noa_hdwe_kf(), Sen->Ib_noa_rms(), ap.ib_scale_noa(),
-            sp.ib_bias_noa(), Sen->Ib_hdwe_f_cal(), sp.ib_disch_slr(),
-            Mon->voc(), Mon->voc_soc(), sp.Dw(), ap.slr_res(), Sen->T());
+            "%6.2f|%6.2f|%6.3f %6.3f %5.2f %6.3f|%5.3f %5.3f|%6.2f %6.2f %5.3f "
+            "%5.2f %6.2f|%6.2f %6.2f %5.3f %5.2f %6.2f|%6.2f  %5.2f|%5.2f "
+            "%5.2f  %7.3f| %4.2f|%6.4f|\n",
+            Sen->Tb_hdwe_f(), Sen->Tc_hdwe_f(), Sen->Vb_hdwe_f(), Sen->Vb_rms(),
+            ap.Vb_scale(), sp.Vb_bias_hdwe(), Sen->ShuntAmp->Vc(),
+            Sen->Vc_rms(), Sen->Ib_amp_hdwe_f(), Sen->Ib_amp_hdwe_kf(),
+            Sen->Ib_amp_rms(), ap.ib_scale_amp(), sp.ib_bias_amp(),
+            Sen->Ib_noa_hdwe_f(), Sen->Ib_noa_hdwe_kf(), Sen->Ib_noa_rms(),
+            ap.ib_scale_noa(), sp.ib_bias_noa(), Sen->Ib_hdwe_f_cal(),
+            sp.ib_disch_slr(), Mon->voc(), Mon->voc_soc(), sp.Dw(),
+            ap.slr_res(), Sen->T());
 
     sendTxBuf(txBuf, true, true);
   }

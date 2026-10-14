@@ -23,7 +23,7 @@
 #define CURR_BIAS_AMP 0.00  // Calibration of amplified shunt sensor (* 'DA'), A
 #define CURR_BIAS_NOA 0.00  // Calibration of unamped shunt sensor (* 'DB'), A
 #define VOLT_BIAS 0.18f  // Bias on Vb sensor (* 'Dc'), V
-#define TEMP_BIAS 0.0  // Bias on Tb sensor (* 'Dt'), deg C
+#define TB_BIAS 0.0  // Bias on Tb sensor (* 'Dt'), deg C
 #define VTAB_BIAS 0.0  // Bias on voc_soc table (* 'Dw'), V
 
 // Ib hardware
@@ -53,7 +53,8 @@
                                  // fraction of charge that gets used (1.0)
 #define CHEM 0  // Chemistry monitor code integer, 0=Battleborn,
                 // 1=CHINS-guest room, 2=CHINS-garage
-#define NOM_UNIT_CAP 108.4  // Nominal battery unit capacity (* 'Sc' or ' BS'/' BP'), Ah
+#define NOM_UNIT_CAP 108.4  // Nominal battery unit capacity
+                            // (* 'Sc' or ' BS'/' BP'), Ah
 #define CHEM_NOM_VSAT 13.85  // Nominal saturation voltage at 25C, V (13.85)
 #define HYS_SCALE 1.0 // Scalar on hysteresis (1.0)
 #define NS 1.0  // Number of series batteries in bank. Fractions scale(* 'BS')

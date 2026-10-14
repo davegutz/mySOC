@@ -8,6 +8,7 @@ struct Publish {
   String unit;
   String hm_string;
   double Tb;
+  double Tc;
   float Ib;
   float Voc;
   bool sat;

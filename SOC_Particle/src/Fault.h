@@ -58,6 +58,7 @@ extern VolatilePars ap;  // Various adjustment parameters shared at system level
 
 #define IB_SEL_STAT_DEF 0
 #define TB_SEL_STAT_DEF 1
+#define TC_SEL_STAT_DEF 1
 #define VB_SEL_STAT_DEF 1
 
 enum ibSel { UsingNoa = -1, KeepTrying = 0, UsingAmp = 1, UsingNone = 2 };
@@ -69,6 +70,7 @@ enum dispw {
   fail_ibm = 4,
   fail_vb = 5,
   flt_tb = 6,
+  flt_tc = 6,
   flt_ekf = 7,
   SAT = 8,
   off = 9,
@@ -129,6 +131,7 @@ enum dispw {
 #define WRAP_LO_M_FLT 15  // Wrap reports Vb hi / Ib amp low fault
 #define WRAP_HI_N_FLT 16  // Wrap reports Vb lo / Ib noa high fault
 #define WRAP_LO_N_FLT 17  // Wrap reports Vb hi / Ib noa low fault
+#define TC_FLT 18      // Momentary isolation of Tc failure, T=faulted
 #define NUM_FLT 20        // Number of these to reserve space
 
 // Fail word bits.   A couple don't latch (and therefore heal) because single
@@ -171,6 +174,9 @@ enum dispw {
   16  // Wrap isolates to Ib amp high fail, heals because dual sensor (no latch)
 #define WRAP_LO_N_FA \
   17  // Wrap isolates to Ib amp low fail, heals because dual sensor (no latch)
+#define TC_FA \
+  18  // Peristed, latched isolation of Tc failure, heals because soft type,
+     // T=failed
 #define NUM_FA 20  // Number of these to reserve space
 
 #define faultRead(bit) ((fltw_ >> bit) & 1)
@@ -383,6 +389,11 @@ class Fault {
   bool Tb_fa() { return failRead(TB_FA); };
   bool Tb_flt() { return faultRead(TB_FLT); };
   int8_t tb_sel_status() { return tb_sel_stat_; };
+  void Tc_check(Sensors* Sen, const float _tc_min, const float _tc_max,
+                const bool reset);  // Range check Tc
+  bool Tc_fa() { return failRead(TC_FA); };
+  bool Tc_flt() { return faultRead(TC_FLT); };
+  int8_t tc_sel_status() { return tc_sel_stat_; };
   void vb_check(Sensors* Sen, BatteryMonitor* Mon, const float _vb_min,
                 const float _vb_max, const bool reset);  // Range check Vb
   bool vb_fail() { return (vb_fa_lt() || vb_sel_stat_ == 0); };
@@ -435,6 +446,7 @@ class Fault {
   TFDelay* QuietPerFunc;     // Persistence ib quiet normal functional detection
   RateLagExp* QuietRate;     // Linear filter to calculate rate for quiet
   TFDelay* TbHardFail;       // Persistence Tb hard fail
+  TFDelay* TcHardFail;       // Persistence Tc hard fail
   TFDelay* VbHardFail;       // Persistence vb hard fail
   TFDelay* VcHardFail;       // Persistence vc hard fail
   LagExp* WrapErrFilt;       // Noise filter for voltage wrap
@@ -497,6 +509,8 @@ class Fault {
                         // T=preserve
   int8_t tb_sel_stat_;  // Memory of Tb signal selection, 0=none, 1=sensor
   int8_t tb_sel_stat_last_;  // past value
+  int8_t tc_sel_stat_;  // Memory of Tc signal selection, 0=none, 1=sensor
+  int8_t tc_sel_stat_last_;  // past value
   int8_t vb_sel_stat_;       // Memory of Vb signal selection, 0=none, 1=sensor
   int8_t vb_sel_stat_last_;  // past value
   float wrap_hi_volt_;       // Wrap high amplified, V
