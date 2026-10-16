@@ -421,7 +421,23 @@ class Exec:
             )
         else:
             try:
-                os.makedirs(self.version_path, exist_ok=True)
+                if not Path(self.version_path).is_dir():
+                    if platform.system() == "Windows":
+                        import threading
+
+                        def _make_dir():
+                            try:
+                                os.makedirs(self.version_path, exist_ok=True)
+                            except Exception as e:
+                                print(f"Exec.__init__: {e}")
+
+                        t = threading.Thread(target=_make_dir, daemon=True)
+                        t.start()
+                        t.join(timeout=1.0)
+                        if t.is_alive():
+                            print(f"Exec.__init__: timeout creating directory {self.version_path}")
+                    else:
+                        os.makedirs(self.version_path, exist_ok=True)
             except OSError:
                 tk.messagebox.showerror(
                     title="Error",
@@ -466,7 +482,24 @@ class Exec:
             self.key = create_file_key(self.version, self.unit, self.battery)
         self.file_path = str(PurePosixPath(self.version_path or ".") / (self.file_txt or "undefined"))
         self.update_file_label()
-        self.file_exists = Path(self.file_path).is_file()
+        if platform.system() == "Windows":
+            import threading
+
+            self.file_exists = False
+
+            def _check_is_file():
+                try:
+                    self.file_exists = Path(self.file_path).is_file()
+                except Exception as e:
+                    print(f"create_file_path_and_key: {e}")
+
+            t = threading.Thread(target=_check_is_file, daemon=True)
+            t.start()
+            t.join(timeout=0.5)
+            if t.is_alive():
+                print(f"create_file_path_and_key: timeout checking is_file for {self.file_path}")
+        else:
+            self.file_exists = Path(self.file_path).is_file()
         self.update_file_label()
         self.update_key_label()
         self.update_folder_button()
@@ -530,10 +563,28 @@ class Exec:
         self.version_button.config(text=self.version)
         self.version_path = str(PurePosixPath(self.dataReduction_folder or ".") / (self.version or "undefined"))
         if Path(self.dataReduction_folder or "").exists():
-            os.makedirs(self.version_path, exist_ok=True)
+            if not Path(self.version_path).is_dir():
+                if platform.system() == "Windows":
+                    import threading
+
+                    def _make_dir():
+                        try:
+                            os.makedirs(self.version_path, exist_ok=True)
+                        except Exception as e:
+                            print(f"enter_version: {e}")
+
+                    t = threading.Thread(target=_make_dir, daemon=True)
+                    t.start()
+                    t.join(timeout=1.0)
+                    if t.is_alive():
+                        print(f"enter_version: timeout creating directory {self.version_path}")
+                else:
+                    try:
+                        os.makedirs(self.version_path, exist_ok=True)
+                    except OSError:
+                        pass
 
         self.create_file_path_and_key()
-        self.update_key_label()
         self.label.config(text=self.file_txt)
 
     def load_root_config(self, config_file_path):
@@ -600,10 +651,27 @@ class Exec:
         self.battery_button.config(text=self.battery)
 
     def update_folder_button(self):
-        if Path(self.dataReduction_folder).exists():
-            self.dataReduction_folder_exists = True
-        else:
+        if platform.system() == "Windows":
+            import threading
+
             self.dataReduction_folder_exists = False
+
+            def _check_folder():
+                try:
+                    self.dataReduction_folder_exists = Path(self.dataReduction_folder).exists()
+                except Exception as e:
+                    print(f"update_folder_button: {e}")
+
+            t = threading.Thread(target=_check_folder, daemon=True)
+            t.start()
+            t.join(timeout=0.5)
+            if t.is_alive():
+                print(f"update_folder_button: timeout checking {self.dataReduction_folder}")
+        else:
+            if Path(self.dataReduction_folder).exists():
+                self.dataReduction_folder_exists = True
+            else:
+                self.dataReduction_folder_exists = False
         self.folder_button.config(text=self.dataReduction_folder[-self.path_disp_len :])
         if self.dataReduction_folder_exists:
             self.folder_button.config(bg="lightgreen")
@@ -613,11 +681,31 @@ class Exec:
     def update_key_label(self):
         self.key_label.config(text=self.key)
         self.key_exists_in_file = False
-        if Path(self.file_path).is_file():
-            for line in open(self.file_path, "r"):
-                if re.search(self.key, line):
-                    self.key_exists_in_file = True
-                    break
+        if platform.system() == "Windows":
+            import threading
+
+            def _read_file():
+                try:
+                    if Path(self.file_path).is_file():
+                        with open(self.file_path, "r") as f:
+                            for line in f:
+                                if re.search(self.key, line):
+                                    self.key_exists_in_file = True
+                                    break
+                except Exception as e:
+                    print(f"update_key_label: {e}")
+
+            t = threading.Thread(target=_read_file, daemon=True)
+            t.start()
+            t.join(timeout=0.5)
+            if t.is_alive():
+                print(f"update_key_label: timeout reading {self.file_path}")
+        else:
+            if Path(self.file_path).is_file():
+                for line in open(self.file_path, "r"):
+                    if re.search(self.key, line):
+                        self.key_exists_in_file = True
+                        break
         if self.key_exists_in_file:
             self.key_label.config(bg="lightgreen")
         else:

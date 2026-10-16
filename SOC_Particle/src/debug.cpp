@@ -253,7 +253,7 @@ void debug_check_99(BatteryMonitor* Mon, Sensors* Sen) {
   else {
     String txBuf =
         String::format("\n Tb   |") +
-        String::format("Tc   |") +
+        String::format("Tc    |") +
         String::format("Vb      Vbrms  SV,     *Dc|") +
         String::format("Vr    Vrrms|") +
         String::format(" Imh    Imhkf Imhrms  SA,    *DA|") +
