@@ -40,6 +40,7 @@ A Particle Photon 2 application that uses temperature, voltage, and bipolar curr
   * [References](#references)
   * [Appendix 1: Nomenclature](#appendix-1-nomenclature)
   * [Appendix 2: Links](#appendix-2-links)
+  * [Appendix 3: Gemini 3.8 (High) Evaluation of hist_20261009_soc4_p2.csv](#appendix-3-gemini-38-high-evaluation-of-hist_20261009_soc4_p2csv)
 <!-- TOC -->
 
 
@@ -841,14 +842,21 @@ With sensor drift eliminated and the steady-state hysteresis envelope known:
 
 ### 4. Photon 2 / P2 ADC Reference & $V_c$ Compensation
 
-> **Question:**
-> *Do you know if Particle Photon 2 (P2) compensates for $V_c$ variation in the ADC sensing and conversion?*
+> **Question & Reference:**
+> *Do you know if Particle Photon 2 (P2) compensates for $V_c$ variation in the ADC sensing and conversion? Are ADC voltages dependent upon variation of the 3V3 supply?*
+> *(See Google AI Mode analysis: [share.google/aimode/MKaS90F5ZkWHVW0vT](https://share.google/aimode/MKaS90F5ZkWHVW0vT))*
 
-**No, the Particle Photon 2 (P2) does NOT compensate for $V_c$ or 3.3V rail variation in its ADC sensing and conversion.**
+**No, on the Particle Photon 2 (P2), ADC voltages/readings are NOT inherently dependent on variations in the 3V3 supply, and the MCU does NOT automatically compensate for external $V_c$ or 3.3V rail variation in software.**
 
-#### Hardware Architecture
-1. **Fixed Internal Reference (`AdcReference::INTERNAL`):** On the Realtek RTL872x core of the Photon 2 / P2, Device OS locks the ADC conversion reference to an internal silicon bandgap reference. Calling `analogSetReference()` is unsupported and returns `SYSTEM_ERROR_NOT_SUPPORTED`. Furthermore, there is no external $V_{\text{REF}}$ pin exposed on the module.
-2. **The Ratiometric Mismatch:** In traditional MCUs where $V_{\text{REF}}$ is tied directly to the `3V3` supply, supply rail drift cancels out in divider circuits ($V_{\text{in}} / V_{\text{REF}} = \text{const}$). On the Photon 2, the ADC samples against the internal bandgap while external divider networks (such as the battery voltage divider and the amplifier centering bias $V_c$) are powered by the board's switching regulator. Changes in the 3.3V rail due to temperature, USB input variations, or Wi-Fi/BLE transmit bursts cause the external divider voltages to shift without changing the ADC full-scale reference.
+#### Hardware Architecture & Internal Reference
+1. **Fixed Internal Reference (`AdcReference::INTERNAL`):** Unlike older microcontrollers where the ADC reference is tied directly to the `3V3` power rail (`VCC`), the Realtek RTL8721DM MCU inside the Photon 2 / P2 uses a **fixed internal bandgap reference voltage** for analog-to-digital conversions.
+2. **Device OS Lockout:** Particle's Device OS hardcodes the ADC reference to internal on RTL872x devices. Calling `analogSetReference()` returns `SYSTEM_ERROR_NOT_SUPPORTED`. Furthermore, there is no external $V_{\text{REF}}$ pin exposed on the module.
+3. **Factory EFuse Calibration:** The Realtek chip uses factory-calibrated values stored in its non-volatile memory (EFuse) to convert raw 12-bit ADC counts ($0 - 4095$) into millivolts independently of minor fluctuations on the 3.3V supply rail. Consequently, an **absolute** voltage applied to an ADC pin does not scale with 3.3V rail wander.
+
+#### The Ratiometric Mismatch & Supply Variations
+While the ADC conversion itself is independent of the 3.3V rail, external circuits tied to 3.3V are **not**:
+- **Ratiometric Mismatch:** In traditional MCUs where $V_{\text{REF}} = V_{3\text{V}3}$, supply rail drift cancels out in divider networks ($V_{\text{in}} / V_{\text{REF}} = \text{const}$). On the Photon 2, the ADC measures against the fixed internal bandgap while external divider networks—such as the op-amp centering bias $V_c$ (which divides the 3.3V rail by 2) or resistive dividers referenced to 3.3V—are powered by the board's switching regulator. Changes in the 3.3V rail cause the external voltages to shift in millivolts, which the ADC reads as a real change in signal because the ADC reference did not move with the rail.
+- **RF and Load Ripple:** The Photon 2's onboard 3.3V regulator supplies both the MCU core and external peripherals (up to 500 mA load). Heavy switching loads and pulsed Wi-Fi/BLE RF transmit bursts induce transient ripple and small voltage droops on the 3.3V rail, manifesting as noise or baseline shifts on unbuffered analog measurements.
 
 #### Firmware Implementation
 In [`src/constants.h`](src/constants.h#L55-L450) and [`src/Sensors.cpp`](src/Sensors.cpp#L764):
@@ -863,10 +871,13 @@ Vb_hdwe_ = float(Vb_raw_) * VB_CONV_GAIN * ap.Vb_scale() + float(VB_A) + sp.Vb_b
 ```
 `VB_CONV_GAIN` assumes a static 3.3000 V at all times. A mere 2% drift in the 3.3V rail or internal reference shifts $V_b$ by $\sim 260\text{ mV}$ ($13\text{ V} \times 0.02$).
 
-#### Software Compensation Using $V_c$
-Since the hardware already samples the amplifier centering signal $V_c$ on pin `D14` (`Vc_read_` in [`src/Sensors.cpp`](src/Sensors.cpp#L186-L193)), this channel can be used to cancel out rail wander in software:
-$$\text{Gain}_{\text{corr}} = \frac{V_{c,\text{nominal}}}{V_{c,\text{measured}}(t)}$$
-$$V_{b,\text{comp}} = V_{b,\text{hdwe}} \times \left( \frac{V_{c,\text{nominal}}}{V_{c,\text{measured}}} \right)$$
+#### Mitigations & Software Compensation Using $V_c$
+To eliminate measurement wander induced by 3.3V variations and RF noise:
+1. **Software Oversampling / Averaging:** Averaging multiple consecutive ADC samples (e.g., 10 to 50 samples) smooths out high-frequency noise from RF activity and regulator switching ripple.
+2. **Software Compensation via $V_c$ (`D14`):** Because the hardware samples the amplifier virtual ground centering signal $V_c$ on pin `D14` (`Vc_read_` in [`src/Sensors.cpp`](src/Sensors.cpp#L186-L193)), this measurement can directly track 3.3V rail wander and correct $V_b$ in software:
+   $$\text{Gain}_{\text{corr}} = \frac{V_{c,\text{nominal}}}{V_{c,\text{measured}}(t)}$$
+   $$V_{b,\text{comp}} = V_{b,\text{hdwe}} \times \left( \frac{V_{c,\text{nominal}}}{V_{c,\text{measured}}} \right)$$
+3. **Hardware Considerations:** For high-precision applications requiring absolute immunity from 3.3V ripple, precision external reference ICs (such as an LM4040) or dedicated analog LDOs should be considered.
 
 ---
 
