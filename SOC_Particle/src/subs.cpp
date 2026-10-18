@@ -536,11 +536,11 @@ void serial_display(Sensors* Sen, BatteryMonitor* Mon) {
   sprintf(pr.buff, "%3.0f / %3.0f", pp.pubList.Tb, pp.pubList.Tc);
   disp_0 = pr.buff;  // Default
   if (Sen->Flt->Tb_fa() && (blink == 0 || blink == 1)) {
-    disp_0 = "***";
+    disp_0 = "***    ";
     dispAssign(true, flt_tb);
   }
   if (Sen->Flt->Tc_fa() && (blink == 1 || blink == 3)) {
-      disp_0 = "accy";
+      disp_0 = "accy    ";
       dispAssign(true, flt_tc);
   }
 
@@ -586,7 +586,7 @@ void serial_display(Sensors* Sen, BatteryMonitor* Mon) {
       dispAssign(true, conn);
     }
   }
-  String disp_Tbop = disp_0.substring(0, 4) + " " + disp_1.substring(0, 6) +
+  String disp_Top = disp_0.substring(0, 9) + " " + disp_1.substring(0, 6) +
                      " " + disp_2.substring(0, 7);
 
   // --------------------- Bottom line of Display ------------------------------
@@ -637,9 +637,8 @@ void serial_display(Sensors* Sen, BatteryMonitor* Mon) {
   {
     String txBuf;
     txBuf = String::format(
-        "%s Tb,C  VOC,V  Ib,A \n%s EKF,Ah chg,hrs CC, Ah\nPf; for fails.  %s %s"
-        " prints=%ld\n\n",
-        disp_Tbop.c_str(), dispBot.c_str(), HDWE_UNIT, version, cp.num_v_print);
+        "%s Tb/Tc,C  VOC,V  Ib,A \n%s EKF,Ah chg,hrs CC, Ah\nPf; for fails.  %s %s",
+        disp_Top.c_str(), dispBot.c_str(), HDWE_UNIT, version, cp.num_v_print);
     sendTxBuf(txBuf, true, true);
   } else if (1 <= sp.debug() &&
              sp.debug() <= 4)  // Normal BLE display as long as 'vv4' so can
@@ -647,9 +646,9 @@ void serial_display(Sensors* Sen, BatteryMonitor* Mon) {
   {
     String txBuf;
     txBuf = String::format(
-        "%s Tb,C  VOC,V  Ib,A \n%s EKF,Ah chg,hrs CC, Ah\nPf; for fails.  %s %s"
+        "%s Tb/Tc,C  VOC,V  Ib,A \n%s EKF,Ah chg,hrs CC, Ah\nPf; for fails.  %s %s",
         " prints=%ld\n\n",
-        disp_Tbop.c_str(), dispBot.c_str(), HDWE_UNIT, version, cp.num_v_print);
+        disp_Top.c_str(), dispBot.c_str(), HDWE_UNIT, version, cp.num_v_print);
     sendTxBuf(txBuf, false, true);
   }
 
@@ -665,9 +664,9 @@ void serial_display(Sensors* Sen, BatteryMonitor* Mon) {
         Sen->Flt->Tb_fa(), Sen->Flt->ib_amp_fa(), Sen->Flt->ib_noa_fa(),
         Sen->Flt->ib_diff_fa(), Sen->Flt->dscn_fa(), Sen->Flt->red_loss());
     Serial.printf(
-        "%s Tb,C  VOC,V  Ib,A \n%s EKF,Ah chg,hrs CC, Ah\nPf; for fails.  %s %s"
+        "%s Tb/Tc,C  VOC,V  Ib,A \n%s EKF,Ah chg,hrs CC, Ah\nPf; for fails.  %s %s"
         " prints=%lu\n\n",
-        disp_Tbop.c_str(), dispBot.c_str(), HDWE_UNIT, version, cp.num_v_print);
+        disp_Top.c_str(), dispBot.c_str(), HDWE_UNIT, version, cp.num_v_print);
   }
 #endif
 }
