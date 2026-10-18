@@ -16,3 +16,4 @@ SOC_Particle/src/SOC_Particle.cpp
 /SOC_Particle/pyStateOfCharge/build
 /SOC_Particle/pyStateOfCharge/dist
 *.odt#
+*.ods#
