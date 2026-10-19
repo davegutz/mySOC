@@ -178,7 +178,6 @@ const float IBATT_DISAGREE_SET = (WRAP_LO_SET - 1.);
 #define QUIET_SET 60.  // Quiet set persistence, sec (60.)
 const float QUIET_RES(QUIET_SET/10.);  // Quiet reset pers, sec ('up 1 down 10')
 #define NOMINAL_TB 15.  // Middle of the road Tb for good rev op, deg C (15.)
-#define NOMINAL_TC 25.  // Middle of the road Tc for good rev op, deg C (25.)
 #define NOMINAL_VB  (13.*NS)  // Middle of the road Vb for good rev op, V (13.)
 #define IMAX_NUM 100000.  // Simulation limit to prevent NaN, A (1e5)
 #if !defined(WRAP_SOC_HI_OFF)
@@ -460,6 +459,12 @@ const float QUIET_RES(QUIET_SET/10.);  // Quiet reset pers, sec ('up 1 down 10')
 #endif
 #if !defined(SAT_CUTBACK_GAIN)
 #define SAT_CUTBACK_GAIN 1000.  // Gain to retard ib when sat, dimensionless
+#endif
+#if !defined(VB_TC_SLR)
+#define VB_TC_SLR 0.  // Fractional temp scaling, V/deg C (0)
+#endif
+#if !defined(NOMINAL_TC)
+#define NOMINAL_TC 25.  // Middle of the road Tc for good rev op, deg C (25.)
 #endif
 
 // Conversion gains

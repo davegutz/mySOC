@@ -195,7 +195,6 @@ class Sensors {
   float Vb_hdwe_f() { return Vb_hdwe_f_; }
   void Vb_model(const float input) { Vb_model_ = input; }
   float Vb_model() { return Vb_model_; }
-  float Vb_volt() { return Vb_volt_; }
   void Vc(const float input) { Vc_ = input; }
   float Vc() { return Vc_; }
   void Vc_hdwe(const float input) { Vc_hdwe_ = input; }
@@ -467,7 +466,6 @@ class Sensors {
   float Vb_hdwe_;                 // Sensed battery bank voltage, V
   float Vb_hdwe_f_;               // Sensed, filtered battery bank voltage, V
   float Vb_model_;                // Modeled battery bank voltage, V
-  float Vb_volt_;                 // Sensed battery bank voltage at ADC, V
   float Vc_;                      // Selected common reference voltage, V
   float Vc_hdwe_;                 // Sensed common reference voltage, V
   float Vc_hdwe_sum_;             // Sensed common reference voltage sum, V

@@ -27,7 +27,7 @@
         // 20250608
 #define CURR_BIAS_NOA \
   0.15  // Calibration of non-amplified shunt sensor (* 'DB'), A
-#define VOLT_BIAS 0.02   // Bias on Vb sensor (* 'Dc'), V
+#define VOLT_BIAS 0.0   // Bias on Vb sensor (* 'Dc'), V
 #define TB_BIAS 0.0    // Bias on Tb sensor (* 'Dt'), deg C
 #define VTAB_BIAS 0.0    // Bias on voc_soc table (* 'Dw'), V  (0.0)
 
@@ -44,6 +44,9 @@
 // Vb hardware
 #define VB_SENSE_R_LO 4700   // Vb low sense resistor, ohm (4700)
 #define VB_SENSE_R_HI 22000  // Vb high sense resistor, ohm (22000)
+#define VB_TC_SLR 0.001783  // Fractional temp scaling, frac/deg C (0.001783)
+#define NOMINAL_TC -17.93  // Where dVb/Vb extrapolates to 0 V (-17.93)
+
 
 // Battery.  One 12 V 100 Ah battery bank would have NOM_UNIT_CAP 100, NS 1, and
 // NP 1 Two 12 V 100 Ah series battery bank would have NOM_UNIT_CAP 100, NS 2,
@@ -65,9 +68,8 @@
                 // and remember NOM_UNIT_CAP 
 
 // Faults
-#define FAKE_FAULTS \
-  false  // What to do with faults, T=detect and display them but don't change
-         // signals
+#define FAKE_FAULTS false  // What to do with faults, T=detect and display
+                           // them but don't change signals
 #define CC_DIFF_SOC_DIS_THRESH \
   0.5  // Signal selection threshold for Coulomb counter EKF disagree test (0.2,
        // 0.1 too small on truck)

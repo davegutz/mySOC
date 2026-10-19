@@ -212,7 +212,7 @@ Sensors::Sensors(double T, double T_temp, Pins* pins, Sync* ReadSensors,
       TbModelFilt(nullptr), VbFilt(nullptr), VbRMS(nullptr), VcRMS(nullptr),
       Tb_read_(nullptr), Vb_read_(nullptr), Tb_raw_(0), Tb_volt_(NOMINAL_TB),
       Vb_raw_(0), Vb_(NOMINAL_VB), Vb_f_(NOMINAL_VB), Vb_hdwe_(NOMINAL_VB),
-      Vb_hdwe_f_(NOMINAL_VB), Vb_model_(NOMINAL_VB), Vb_volt_(NOMINAL_VB),
+      Vb_hdwe_f_(NOMINAL_VB), Vb_model_(NOMINAL_VB),
       Vc_(0.), Vc_hdwe_(0.), Vc_hdwe_sum_(0.), Tb_(NOMINAL_TB),
       Tb_f_(NOMINAL_TB), Tb_f_rate_(0.), Tb_hdwe_(NOMINAL_TB),
       Tb_hdwe_f_(NOMINAL_TB), Tb_hdwe_f_dt_(0.), Tb_hdwe_f_rate_(0.),
@@ -409,7 +409,6 @@ void Sensors::pretty_print() {
   Serial.printf(" Vb_model%8.4f, V\n", Vb_model_);
   Serial.printf(" Vb_raw %d, cnt\n", Vb_raw_);
   Serial.printf(" Vb_rms%8.4f, V\n", Vb_rms_);
-  Serial.printf(" Vb_volt%8.4f, V\n", Vb_volt_);
   Serial.printf(" Vc%8.4f, V\n", Vc_);
   Serial.printf(" Vc_hdwe%8.4f, V\n", Vc_hdwe_);
   Serial.printf(" Vc_hdwe_sum%8.4f, V\n", Vc_hdwe_sum_);
@@ -897,12 +896,11 @@ void Sensors::vb_load(const uint16_t vb_pin, const bool reset) {
 #if !defined(HDWE_BARE)
     Vb_raw_ = Vb_read_->analogReadDebounced(VRAW_VB_BARE_DETECTED*ap.bare_slr(),
                                             reset, "Vb");
-    Vb_volt_ = Vb_raw_ * VB_RAW_CONV_GAIN;
-    Vb_hdwe_ = float(Vb_raw_) * VB_CONV_GAIN * ap.Vb_scale() + float(VB_A) +
-               sp.Vb_bias_hdwe();
+    Vb_hdwe_ = float(Vb_raw_) * VB_CONV_GAIN * ap.Vb_scale() *
+                               (1. + VB_TC_SLR * (Tc_f_-NOMINAL_TC)) +
+                               float(VB_A) + sp.Vb_bias_hdwe();
 #else
     Vb_raw_ = 0;
-    Vb_volt_ = 0.;
     Vb_hdwe_ = NOMINAL_VB + sp.Vb_bias_hdwe();
 #endif
     Vb_hdwe_f_ = VbFilt->calculate(Vb_hdwe_, reset, AMP_FILT_TAU, T_);
