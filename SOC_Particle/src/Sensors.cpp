@@ -211,22 +211,23 @@ Sensors::Sensors(double T, double T_temp, Pins* pins, Sync* ReadSensors,
       SelFiltCal(nullptr), TbHdweFilt(nullptr),
       TbModelFilt(nullptr), VbFilt(nullptr), VbRMS(nullptr), VcRMS(nullptr),
       Tb_read_(nullptr), Vb_read_(nullptr), Tb_raw_(0), Tb_volt_(NOMINAL_TB),
-      Vb_raw_(0), Vb_(NOMINAL_VB), Vb_f_(NOMINAL_VB), Vb_hdwe_(NOMINAL_VB),
-      Vb_hdwe_f_(NOMINAL_VB), Vb_model_(NOMINAL_VB),
-      Vc_(0.), Vc_hdwe_(0.), Vc_hdwe_sum_(0.), Tb_(NOMINAL_TB),
-      Tb_f_(NOMINAL_TB), Tb_f_rate_(0.), Tb_hdwe_(NOMINAL_TB),
-      Tb_hdwe_f_(NOMINAL_TB), Tb_hdwe_f_dt_(0.), Tb_hdwe_f_rate_(0.),
-      Tb_hdwe_f_rstate_(NOMINAL_TB), Tb_hdwe_f_lstate_(NOMINAL_TB),
-      Tb_hdwe_f_tau_(0.), Tb_model_(NOMINAL_TB), Tb_model_f_(NOMINAL_TB),
-      Tb_model_f_dt_(0.), Tb_model_f_rate_(0.), Tb_model_f_rstate_(NOMINAL_TB),
-      Tb_model_f_lstate_(NOMINAL_TB), Tb_model_f_tau_(0.), Ib_(0.), Ib_f_(0.),
-      Ib_amp_(0.), Ib_amp_hdwe_(0.), Ib_amp_hdwe_f_(0.), Ib_amp_hdwe_kf_(0.),
-      Ib_amp_model_(0.), Ib_amp_rms_(0.), Ib_hdwe_f_(0.), Ib_hdwe_kf_(0.),
-      Ib_hdwe_f_cal_(0.), Ib_noa_(0.), Ib_noa_hdwe_(0.), Ib_noa_hdwe_f_(0.),
-      Ib_noa_hdwe_kf_(0.), Ib_noa_rms_(0.), Ib_noa_model_(0.), Ib_hdwe_(0.),
+      Vb_raw_(0), Vb_raw_volt_(0), Vb_(NOMINAL_VB), Vb_f_(NOMINAL_VB),
+      Vb_hdwe_(NOMINAL_VB), Vb_hdwe_f_(NOMINAL_VB), Vb_model_(NOMINAL_VB),
+      Vb_Tc_sclr_(1.), Vb_adc_volt_(NOMINAL_VB), Vc_(0.), Vc_hdwe_(0.),
+      Vc_hdwe_sum_(0.), Tb_(NOMINAL_TB), Tb_f_(NOMINAL_TB), Tb_f_rate_(0.),
+      Tb_hdwe_(NOMINAL_TB), Tb_hdwe_f_(NOMINAL_TB), Tb_hdwe_f_dt_(0.),
+      Tb_hdwe_f_rate_(0.), Tb_hdwe_f_rstate_(NOMINAL_TB),
+      Tb_hdwe_f_lstate_(NOMINAL_TB), Tb_hdwe_f_tau_(0.), Tb_model_(NOMINAL_TB),
+      Tb_model_f_(NOMINAL_TB), Tb_model_f_dt_(0.), Tb_model_f_rate_(0.),
+      Tb_model_f_rstate_(NOMINAL_TB), Tb_model_f_lstate_(NOMINAL_TB),
+      Tb_model_f_tau_(0.), Ib_(0.), Ib_f_(0.), Ib_amp_(0.), Ib_amp_hdwe_(0.),
+      Ib_amp_hdwe_f_(0.), Ib_amp_hdwe_kf_(0.), Ib_amp_model_(0.),
+      Ib_amp_rms_(0.), Ib_hdwe_f_(0.), Ib_hdwe_kf_(0.), Ib_hdwe_f_cal_(0.),
+      Ib_noa_(0.), Ib_noa_hdwe_(0.), Ib_noa_hdwe_f_(0.), Ib_noa_hdwe_kf_(0.),
+      Ib_noa_rms_(0.), Ib_noa_model_(0.), Ib_hdwe_(0.),
       Ib_hdwe_model_(0.), Ib_model_(0.), Ib_model_in_(0.), Vb_rms_(0.),
-      Vc_rms_(0.), Wb_(0.), now_ms_(0ULL), now_temp_ms_(0ULL), c_time_(0.),
-      T_(0.), reset_(false),
+      Vc_rms_(0.), Wb_(0.), now_ms_(0ULL), now_temp_ms_(0ULL),
+      c_time_(0.), T_(0.), reset_(false),
       T_filt_(0.), T_temp_(0.), elapsed_inj_ms_(0ULL), start_inj_ms_(0ULL),
       stop_inj_ms_(0ULL), end_inj_ms_(0ULL), control_time_(0.), display_(true),
       bms_off_(false), sat_(false), saturated_(false), sample_time_ms_(0ULL),
@@ -402,6 +403,24 @@ void Sensors::pretty_print() {
   Serial.printf(" Tb_model_f_tau%9.5f, s\n", Tb_model_f_tau_);
   Serial.printf(" Tb_raw %d, cnt\n", Tb_raw_);
   Serial.printf(" Tb_volt%8.4f, V\n", Tb_volt_);
+  Serial.printf(" Tc_f%9.5f, C\n", Tc_f_);
+  Serial.printf(" Tc_f_rate%11.8f, C/s\n", Tc_f_rate_);
+  Serial.printf(" Tc_hdwe%9.5f, C\n", Tc_hdwe_);
+  Serial.printf(" Tc_hdwe_f%9.5f, C\n", Tc_hdwe_f_);
+  Serial.printf(" Tc_hdwe_f_dt%9.5f, s\n", Tc_hdwe_f_dt_);
+  Serial.printf(" Tc_hdwe_f_lstate%9.5f, C\n", Tc_hdwe_f_lstate_);
+  Serial.printf(" Tc_hdwe_f_rate%11.8f, C/s\n", Tc_hdwe_f_rate_);
+  Serial.printf(" Tc_hdwe_f_rstate%9.5f, C\n", Tc_hdwe_f_rstate_);
+  Serial.printf(" Tc_hdwe_f_tau%9.5f, s\n", Tc_hdwe_f_tau_);
+  Serial.printf(" Tc_model%9.5f, C\n", Tc_model_);
+  Serial.printf(" Tc_model_f%9.5f, C\n", Tc_model_f_);
+  Serial.printf(" Tc_model_f_dt%9.5f, s\n", Tc_model_f_dt_);
+  Serial.printf(" Tc_model_f_lstate%9.5f, C\n", Tc_model_f_lstate_);
+  Serial.printf(" Tc_model_f_rate%11.8f, C/s\n", Tc_model_f_rate_);
+  Serial.printf(" Tc_model_f_rstate%9.5f, C\n", Tc_model_f_rstate_);
+  Serial.printf(" Tc_model_f_tau%9.5f, s\n", Tc_model_f_tau_);
+  Serial.printf(" Tc_raw %d, cnt\n", Tc_raw_);
+  Serial.printf(" Tc_volt%8.4f, V\n", Tc_volt_);
   Serial.printf(" Vb%8.4f, V\n", Vb_);
   Serial.printf(" Vb_f%8.4f, V\n", Vb_f_);
   Serial.printf(" Vb_hdwe%8.4f, V\n", Vb_hdwe_);
@@ -896,16 +915,20 @@ void Sensors::vb_load(const uint16_t vb_pin, const bool reset) {
 #if !defined(HDWE_BARE)
     Vb_raw_ = Vb_read_->analogReadDebounced(VRAW_VB_BARE_DETECTED*ap.bare_slr(),
                                             reset, "Vb");
-    Vb_hdwe_ = float(Vb_raw_) * VB_CONV_GAIN * ap.Vb_scale() *
-                               (1. + VB_TC_SLR * (Tc_f_-NOMINAL_TC)) +
-                               float(VB_A) + sp.Vb_bias_hdwe();
+    Vb_adc_volt_ = float(Vb_raw_) * VB_ADC_CONV_GAIN;
+    Vb_raw_volt_ = Vb_adc_volt_ * VB_CONV_GAIN;
+    Vb_Tc_sclr_ = 1. + VB_TC_SLR * (Tc_f_-NOMINAL_TC);
+    Vb_hdwe_ = Vb_raw_volt_  *  Vb_Tc_sclr_ * ap.Vb_scale() + float(VB_A) +
+              sp.Vb_bias_hdwe();
 #else
     Vb_raw_ = 0;
+    Vb_adc_volt_ = 0.;
     Vb_hdwe_ = NOMINAL_VB + sp.Vb_bias_hdwe();
 #endif
     Vb_hdwe_f_ = VbFilt->calculate(Vb_hdwe_, reset, AMP_FILT_TAU, T_);
   } else {
     Vb_raw_ = 0;
+    Vb_adc_volt_ = 0.;
     Vb_hdwe_ = 0.;
   }
 }

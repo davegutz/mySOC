@@ -371,7 +371,7 @@ void loop() {
   {
     chatter();  // Prioritize commands to describe.  ctl_str and asap_str queues
                 // always run.  Others only with chitchat
-    describe(Mon, Sen);  // Run the commands
+    describe(Mon, Sen, &pp.pubList);  // Run the commands
   }
 
   // Summary management.   Every boot after a wait an initial summary is saved

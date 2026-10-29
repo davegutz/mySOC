@@ -185,6 +185,7 @@ class Sensors {
   void c_time(const double input) { c_time_ = input; }
   double c_time() { return c_time_; }
   int Vb_raw() { return Vb_raw_; }
+  float Vb_raw_volt() { return Vb_raw_volt_; }
   void Vb(const float input) { Vb_ = input; }
   float Vb() { return Vb_; }
   void Vb_f(const float input) { Vb_f_ = input; }
@@ -195,6 +196,8 @@ class Sensors {
   float Vb_hdwe_f() { return Vb_hdwe_f_; }
   void Vb_model(const float input) { Vb_model_ = input; }
   float Vb_model() { return Vb_model_; }
+  void Vb_adc_volt(const float input) { Vb_adc_volt_ = input; }
+  float Vb_adc_volt() { return Vb_adc_volt_; }
   void Vc(const float input) { Vc_ = input; }
   float Vc() { return Vc_; }
   void Vc_hdwe(const float input) { Vc_hdwe_ = input; }
@@ -424,6 +427,7 @@ class Sensors {
   // Battery select hardware unit voltage, V
   float vb_hdwe() { return Vb_hdwe_ / ap.nS(); };
   void vb_load(const uint16_t vb_pin, const bool reset);  // Analog read of Vb
+  float Vb_Tc_sclr() { return Vb_Tc_sclr_; };
   float Vb_add();
   float Vb_noise();
   void vb_print();  // Print Vb result
@@ -461,11 +465,14 @@ class Sensors {
   int Tc_raw_;                    // Raw analog read, integer
   float Tc_volt_;                 // Sensed common elect temperature at ADC, V
   int Vb_raw_;                    // Raw analog read, integer
+  float Vb_raw_volt_;             // Sensed battery bank voltage at ADC, V
   float Vb_;                      // Selected battery bank voltage, V
   float Vb_f_;                    // Selected filtered battery bank voltage, V
   float Vb_hdwe_;                 // Sensed battery bank voltage, V
   float Vb_hdwe_f_;               // Sensed, filtered battery bank voltage, V
   float Vb_model_;                // Modeled battery bank voltage, V
+  float Vb_Tc_sclr_;              // Battery bank voltage to common elect temp scalar
+  float Vb_adc_volt_;                 // Sensed battery bank voltage at ADC, V
   float Vc_;                      // Selected common reference voltage, V
   float Vc_hdwe_;                 // Sensed common reference voltage, V
   float Vc_hdwe_sum_;             // Sensed common reference voltage sum, V

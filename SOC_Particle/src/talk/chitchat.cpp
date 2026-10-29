@@ -39,6 +39,7 @@ extern SavedPars sp;     // Various parameters to be static at system level and
 extern VolatilePars ap;  // Various adjustment parameters shared at system level
 extern CommandPars cp;   // Various parameters shared at system level
 extern Flt_st mySum[NSUM];  // Summaries for saving charge history
+extern PublishPars pp;  // For publishing
 
 // Clear adjustments that should be benign if done instantly
 void benign_zero(BatteryMonitor* Mon, Sensors* Sen)  // BZ
@@ -202,7 +203,7 @@ bool chitter(const bool chitchat, BatteryMonitor* Mon, Sensors* Sen) {
 #ifdef SOFT_DEBUG_QUEUE
         debug_queue("chitter control:");
 #endif
-        describe(Mon, Sen);  // may set cp.freeze_queues
+        describe(Mon, Sen, &pp.pubList);  // may set cp.freeze_queues
 #ifdef SOFT_DEBUG_QUEUE
         debug_queue("chitter control response:");
 #endif
@@ -356,7 +357,7 @@ void cmd_echo(urgency request) {
 }
 
 // Run the commands
-void describe(BatteryMonitor* Mon, Sensors* Sen) {
+void describe(BatteryMonitor* Mon, Sensors* Sen, Publish* pubList) {
   int INT_in = -1;
   bool found = false;
   uint16_t modeling_past = sp.modeling();
@@ -452,7 +453,7 @@ void describe(BatteryMonitor* Mon, Sensors* Sen) {
         break;
 
       case ('P'):
-        found = recall_P(letter_1, Mon, Sen);
+        found = recall_P(letter_1, Mon, Sen, pubList);
         break;
 
       case ('Q'):  // Q:  quick critical

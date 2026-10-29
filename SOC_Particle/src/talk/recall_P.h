@@ -23,5 +23,9 @@
 
 #pragma once
 #include "../Battery.h"
+#include "../command.h"
+extern PublishPars pp;  // For publishing
 
-bool recall_P(const char letter_1, BatteryMonitor* Mon, Sensors* Sen);
+
+bool recall_P(const char letter_1, BatteryMonitor* Mon, Sensors* Sen, 
+    Publish* pp);

@@ -473,11 +473,12 @@ const double H_MAX = NS * H_CELL_MAX;
 const double H_ALPHA = 0.05;  // Ha
 // Voltage measurement gains
 #if !defined(HDWE_BARE)
-const float VB_CONV_GAIN =
-    float(PHOTON_ADC_VOLT) * float(VB_SENSE_R_HI + VB_SENSE_R_LO) /
-    float(VB_SENSE_R_LO) / float(PHOTON_ADC_COUNT) * float(VB_S);
-const float VB_RAW_CONV_GAIN =
-    float(PHOTON_ADC_VOLT) / float(PHOTON_ADC_COUNT) * float(VB_S);
+const float VB_ADC_CONV_GAIN = float(PHOTON_ADC_VOLT) / float(PHOTON_ADC_COUNT);
+const float VB_CONV_GAIN = float(VB_SENSE_R_HI + VB_SENSE_R_LO) /
+                                                   float(VB_SENSE_R_LO);
+#else
+  const float VB_ADC_CONV_GAIN = 1.;
+  const float VB_CONV_GAIN = 1.;
 #endif
 const float VC_CONV_GAIN =
     float(PHOTON_ADC_VOLT) / float(PHOTON_ADC_COUNT) * float(VC_S);

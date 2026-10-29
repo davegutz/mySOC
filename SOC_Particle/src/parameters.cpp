@@ -121,7 +121,7 @@ VolatilePars::VolatilePars() : Parameters() {
 VolatilePars::~VolatilePars() {}
 
 void VolatilePars::initialize() {
-#define NVOL 66
+#define NVOL 67
   V_ = new Variable*[NVOL];
   V_[n_++] = (bare_slr_p = new FloatV("  ", "SZ", NULL, "Slr debounce", "float", 0, 1000, &bare_slr_, 1));                          // SZ
   V_[n_++] = (cc_diff_slr_p = new FloatV("  ", "SC", NULL, "Slr cc_diff", "float", 0, 1000, &cc_diff_slr_, 1));                     // SC
@@ -216,7 +216,7 @@ void VolatilePars::pretty_print(const bool all) {
   }
   while (n_ != NVOL) {
     delay(5000);
-    sendTxBuf(String::format("set NVOL=%d and recompilel please\n", n_),
+    sendTxBuf(String::format("set NVOL=%d and recompile please\n", n_),
               true, true);
   }
 }

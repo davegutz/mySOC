@@ -30,6 +30,7 @@ typedef enum urgency urgency;
 
 class BatteryMonitor;
 class Sensors;
+struct Publish;
 
 void benign_zero(BatteryMonitor* Mon, Sensors* Sen);
 void chat();
@@ -40,4 +41,4 @@ String chit_nibble_ctl();
 String chit_nibble_inp();
 void cmd_echo(urgency request);
 urgency chit_classify_nibble(String* nibble);
-void describe(BatteryMonitor* Mon, Sensors* Sen);
+void describe(BatteryMonitor* Mon, Sensors* Sen, Publish* pubList);
