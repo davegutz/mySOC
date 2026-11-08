@@ -309,7 +309,7 @@ if __name__ == "__main__":
     """
     # Cx46000, new base 20251231
     data_file = (
-        "C:/Users/daveg/Documents/GitHub/mySolarStateOfCharge/SOC_Particle/"
+        "C:/Users/daveg/Documents/GitHub/mySOC/SOC_Particle/"
         "pyStateOfCharge/noise_study/sweepchirp4_soc2p2_hi_lo_chg.csv"
     )
     doing_doe = True  # Toggle this to see various kf implemented in python

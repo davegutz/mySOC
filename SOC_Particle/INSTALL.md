@@ -48,7 +48,7 @@ Same as Ubuntu above.
 In GitHub Desktop: **File → Clone repository → URL**
 
 ```
-https://github.com/davegutz/mySolarStateOfCharge
+https://github.com/davegutz/mySOC
 ```
 
 Clone into a location such as `Documents/GitHub/`.
@@ -56,7 +56,7 @@ Clone into a location such as `Documents/GitHub/`.
 To clone from the command line:
 
 ```bash
-git clone https://github.com/davegutz/mySolarStateOfCharge
+git clone https://github.com/davegutz/mySOC
 ```
 
 ---

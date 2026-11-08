@@ -72,7 +72,7 @@ const char unit[] = version_str "_" HDWE_UNIT;
 // for each unit of NSUM Baseline compile information 20251227
 //   text    data     bss     dec     hex filename
 // 292998  119852   10306  423168   67500
-// c:/Users/daveg/Documents/GitHub/mySolarStateOfCharge/SOC_Particle/target/
+// c:/Users/daveg/Documents/GitHub/mySOC/SOC_Particle/target/
 // 6.2.1/p2/SOC_Particle.elf
 
 #define NFLT 7  // Number of saved SRAM fault data slices 10 s intervals (7)

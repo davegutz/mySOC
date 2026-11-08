@@ -4,7 +4,7 @@
 
 from PlotKiller import show_killer
 
-#  #! /Users/daveg/Documents/GitHub/mySolarStateOfCharge/SOC_Particle/py/venv/bin/python
+#  #! /Users/daveg/Documents/GitHub/mySOC/SOC_Particle/py/venv/bin/python
 # The #! operates for macOS only. 'Python Launcher' (Python Script Preferences) option for 'Allow override with #! in
 # script' is checked.
 #  Graphical interface to Test State of Charge application

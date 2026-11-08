@@ -187,7 +187,7 @@ All modeling is performed on a 12 V battery "unit" with a chemistry-specific `vo
 
 ## Repository
 
-All source, datasheets, scripts, and documentation live in <https://github.com/davegutz/mySolarStateOfCharge> under MIT license.
+All source, datasheets, scripts, and documentation live in <https://github.com/davegutz/mySOC> under MIT license.
 
 Top-level layout, alphabetically:
 
@@ -707,7 +707,7 @@ See `State of Charge Monitor.odt` for the full set of requirements, testing note
 
 Two main repositories:
 - <https://github.com/davegutz/myStateOfCharge> — Mar 2023 → May 2025, branches `g20230308gamma`, `g20240109`, `g20240704`.
-- <https://github.com/davegutz/mySolarStateOfCharge> — Jun 2025 → present, branch `master-with-BLE-Serial`.
+- <https://github.com/davegutz/mySOC> — Jun 2025 → present, branch `master-with-BLE-Serial`.
 
 
 ## References

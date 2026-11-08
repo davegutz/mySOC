@@ -3,7 +3,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
 Install the latest PowerShell for new features and improvements! https://aka.ms/PSWindows
 
-(.venv) PS C:\Users\daveg\Documents\GitHub\mySolarStateOfCharge\SOC_Particle\pyStateOfCharge> claude
+(.venv) PS C:\Users\daveg\Documents\GitHub\mySOC\SOC_Particle\pyStateOfCharge> claude
 
 ╭─── Claude Code v2.1.47 ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 │                                                    │ Tips for getting started                                                                                                   │
@@ -19,7 +19,7 @@ Install the latest PowerShell for new features and improvements! https://aka.ms/
 │                        ▘▘ ▝▝                       │                                                                                                                            │
 │ Sonnet 4.6 · API Usage Billing · Dave‘s Individual │                                                                                                                            │
 │  Org                                               │                                                                                                                            │
-│ ~\Documents\GitHub\mySolarStateOfCharge\SOC_Parti… │                                                                                                                            │
+│ ~\Documents\GitHub\mySOC\SOC_Parti… │                                                                                                                            │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 
   ↑ Install the PyCharm plugin from the JetBrains Marketplace: https://docs.claude.com/s/claude-code-jetbrains

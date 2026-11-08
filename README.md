@@ -1,4 +1,4 @@
-# mySolarStateOfCharge
+# mySOC
 
 **A reliable, fault-tolerant State of Charge (SoC) monitor for LiFePO4 battery banks**, built around the Particle Photon2 microcontroller.  Combines Coulomb Counting with an Extended Kalman Filter (EKF) and dual current sensing to deliver accurate, self-calibrating energy monitoring even in the presence of sensor failures.
 
@@ -9,7 +9,7 @@ Originally designed for truck and RV camping with a CPAP machine — "I've never
 ## Quick Start
 
 ```
-git clone https://github.com/davegutz/mySolarStateOfCharge
+git clone https://github.com/davegutz/mySOC
 ```
 
 See the [Installation Guide](SOC_Particle/INSTALL.md) for VS Code + Particle Workbench, PyCharm, and puTTY setup on Linux and Windows.
@@ -109,5 +109,5 @@ Power supply: 12 V battery → LM7805CT → 5 V (VIN) → Photon2 internal → 3
 ## License
 
 [MIT License](SOC_Particle/src/SOC_Particle.ino) — Copyright © 2024 Dave Gutz
-Repository: [github.com/davegutz/mySolarStateOfCharge](https://github.com/davegutz/mySolarStateOfCharge)
+Repository: [github.com/davegutz/mySOC](https://github.com/davegutz/mySOC)
 Contact: davegutz@alum.mit.edu

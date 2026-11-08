@@ -100,7 +100,7 @@ do not log in to GitHub in the browser first; that triggers an authorization
 loop. Sign in when prompted, then **File → Clone repository → URL**:
 
 ```text
-https://github.com/davegutz/mySolarStateOfCharge
+https://github.com/davegutz/mySOC
 ```
 
 Clone into `~/Documents/GitHub/`.
@@ -137,7 +137,7 @@ the system Python.
 
 In PyCharm:
 
-1. **Open** → browse to `Documents/GitHub/mySolarStateOfCharge/SOC_Particle/pyStateOfCharge/`.
+1. **Open** → browse to `Documents/GitHub/mySOC/SOC_Particle/pyStateOfCharge/`.
 2. Settings → Project → Python Interpreter → Add → New Virtualenv (use the
    system `python3` as the base).
 3. Let PyCharm finish indexing.
@@ -198,7 +198,7 @@ Tested on the MINISFORUM Venus and HP Omen.
 - In GitHub Desktop: **File → Clone repository → URL**:
 
   ```
-  https://github.com/davegutz/mySolarStateOfCharge
+  https://github.com/davegutz/mySOC
   ```
 
   Clone into `Documents\GitHub\`.
@@ -233,7 +233,7 @@ Recommended (optional) extensions: **Python** (Microsoft), **Codeium AI**
 - After install, quit **JetBrains Toolbox** from the system tray and remove
   it from Startup (it is not needed).
 - Open PyCharm → Open → browse to
-  `Documents\GitHub\mySolarStateOfCharge\SOC_Particle\pyStateOfCharge\`.
+  `Documents\GitHub\mySOC\SOC_Particle\pyStateOfCharge\`.
 - Settings → Project → Python Interpreter → Add → New Virtualenv. Base
   interpreter: the Python 3.12 you just installed.
 - Let PyCharm index.
@@ -297,7 +297,7 @@ xcode-select --install
 - In GitHub Desktop: **File → Clone repository → URL**:
 
   ```
-  https://github.com/davegutz/mySolarStateOfCharge
+  https://github.com/davegutz/mySOC
   ```
 
   Clone into `~/Documents/GitHub/`.
@@ -327,7 +327,7 @@ Azure IoT toolkit when offered.
   or Intel build).
 - Drag PyCharm CE to `/Applications/`.
 - Open PyCharm → Open → browse to
-  `~/Documents/GitHub/mySolarStateOfCharge/SOC_Particle/pyStateOfCharge/`.
+  `~/Documents/GitHub/mySOC/SOC_Particle/pyStateOfCharge/`.
 - Settings → Project → Python Interpreter → Add → New Virtualenv. Base
   interpreter: the Homebrew Python 3.12.
 - Right-click `install.py` → Run.
