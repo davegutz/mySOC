@@ -453,7 +453,7 @@ void describe(BatteryMonitor* Mon, Sensors* Sen, Publish* pubList) {
         break;
 
       case ('P'):
-        found = recall_P(letter_1, Mon, Sen, pubList);
+        found = recall_P(letter_1, Mon, Sen, pubList, value);
         break;
 
       case ('Q'):  // Q:  quick critical

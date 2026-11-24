@@ -28,4 +28,4 @@ extern PublishPars pp;  // For publishing
 
 
 bool recall_P(const char letter_1, BatteryMonitor* Mon, Sensors* Sen, 
-    Publish* pp);
+    Publish* pp, const String& value = "");

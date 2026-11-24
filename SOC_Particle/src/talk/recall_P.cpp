@@ -39,36 +39,50 @@ extern CommandPars cp;   // Various parameters shared at system level
 extern Flt_st mySum[NSUM];  // Summaries for saving charge history
 
 bool recall_P(const char letter_1, BatteryMonitor* Mon, Sensors* Sen,
-  Publish* pubList) {
+  Publish* pubList, const String& value) {
   bool found = true;
-  String txBuf =
-      String::format("\ntimestamp,            Tb,    Tc,") +
-      String::format("Vb_raw, VB_ADC_CONV_GAIN, Vb_adc_volt,") +
-      String::format("VB_CONV_GAIN, Vb_raw_volt ,") +
-      String::format("Vb_Tc_sclr_ ,") +
-      String::format("SV,    Dc,     ") +
-      String::format("Vb_hdwe, Vb_hdwe_f,\n") +
-      String::format(
-          "%s, %6.2f, %6.3f,"
-          "%6d,  %9.7f, %9.7f,"
-          "%9.7f, %9.7f, %9.7f,"
-          "%6.4f, %7.4f,"
-          "%8.3f, %9.3f,"
-          "\n",
-          pubList->hm_string.c_str(), Sen->Tb_hdwe_f(), Sen->Tc_hdwe_f(),
-          Sen->Vb_raw(), float(VB_ADC_CONV_GAIN), Sen->Vb_adc_volt(),
-          float(VB_CONV_GAIN), Sen->Vb_raw_volt(),
-          Sen->Vb_Tc_sclr(),
-          ap.Vb_scale(), sp.Vb_bias_hdwe(),
-          Sen->Vb_hdwe(), Sen->Vb_hdwe_f());
+  String txBuf;
   switch (letter_1) {
     case ('a'):  // Pa:  Print all
       chit("Pm;PS;Ps;Pr;PM;PN;Hd;Pf;Q;", SOON);
       break;
 
-    case ('b'):  // Pb:  Print Vb measure
+    case ('b'): {  // Pb:  Print Vb measure
+      double arg = -999.;
+      String val_str = value.length() ? value : cp.cmd_str.substring(2);
+      val_str.trim();
+      if (val_str.startsWith("=")) {
+        val_str = val_str.substring(1);
+        val_str.trim();
+      }
+      if (val_str.length()) {
+        arg = val_str.toFloat();
+      }
+      txBuf =
+          String::format("\ntimestamp,            Tb,    Tc,") +
+          String::format("Vb_raw, VB_ADC_CONV_GAIN, Vb_adc_volt,") +
+          String::format("VB_CONV_GAIN, Vb_raw_volt ,") +
+          String::format("Vb_Tc_sclr_ ,") +
+          String::format("SV,    Dc,     ") +
+          String::format("Vb_hdwe, Vb_hdwe_f,    input,\n") +
+          String::format(
+              "%s, %6.2f, %6.3f,"
+              "%6d,  %9.7f, %9.7f,"
+              "%9.7f, %9.7f, %9.7f,"
+              "%6.4f, %7.4f,"
+              "%8.3f, %9.3f,"
+              " %8.3f,"
+              "\n",
+              pubList->hm_string.c_str(), Sen->Tb_hdwe_f(), Sen->Tc_hdwe_f(),
+              Sen->Vb_raw(), float(VB_ADC_CONV_GAIN), Sen->Vb_adc_volt(),
+              float(VB_CONV_GAIN), Sen->Vb_raw_volt(),
+              Sen->Vb_Tc_sclr(),
+              ap.Vb_scale(), sp.Vb_bias_hdwe(),
+              Sen->Vb_hdwe(), Sen->Vb_hdwe_f(),
+              arg);
       sendTxBuf(txBuf, true, true);
       break;
+    }
 
     case ('d'):  // Pd:  Print firmware version date
       print_firmware_version();
