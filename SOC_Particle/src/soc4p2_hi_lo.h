@@ -42,8 +42,8 @@
 #define HDWE_IB_HI_LO_NOA_HI  11. // Fully NOA bank charge transition, A (11)
 
 // Vb hardware
-#define VB_SENSE_R_LO 4700   // Vb low sense resistor, ohm (4700)
-#define VB_SENSE_R_HI 22000  // Vb high sense resistor, ohm (22000)
+#define VB_SENSE_R_LO 4750   // Vb low sense resistor, ohm (4750)
+#define VB_SENSE_R_HI 22100  // Vb high sense resistor, ohm (22100)
 #define VB_TC_SLR 0.001783  // Fractional temp scaling, frac/deg C (0.001783)
 #define NOMINAL_TC -17.93  // Where dVb/Vb extrapolates to 0 V (-17.93)
 
