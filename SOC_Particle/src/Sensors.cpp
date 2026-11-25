@@ -210,7 +210,8 @@ Sensors::Sensors(double T, double T_temp, Pins* pins, Sync* ReadSensors,
       Prbn_Ib_amp_(nullptr), Prbn_Ib_noa_(nullptr), reset_temp_(false),
       SelFiltCal(nullptr), TbHdweFilt(nullptr),
       TbModelFilt(nullptr), VbFilt(nullptr), VbRMS(nullptr), VcRMS(nullptr),
-      Tb_read_(nullptr), Vb_read_(nullptr), Tb_raw_(0), Tb_volt_(NOMINAL_TB),
+      Tb_read_(nullptr), Tc_read_(nullptr), Vb_read_(nullptr),
+      Tb_raw_(0), Tb_volt_(0.), Tc_raw_(0), Tc_volt_(0.),
       Vb_raw_(0), Vb_raw_volt_(0), Vb_(NOMINAL_VB), Vb_f_(NOMINAL_VB),
       Vb_hdwe_(NOMINAL_VB), Vb_hdwe_f_(NOMINAL_VB), Vb_model_(NOMINAL_VB),
       Vb_Tc_sclr_(1.), Vb_adc_volt_(NOMINAL_VB), Vc_(0.), Vc_hdwe_(0.),
@@ -745,14 +746,16 @@ void Sensors::Tb_load(const uint16_t tb_pin, const bool reset) {
     hdwe_add = 0.;
   }
 
-  float res = Tb_volt_ * float(HDWE_RS_2WIRE) / (V3V3 - Tb_volt_);
-  // Steinhart-Hart (see '2-wireRTD.ods')
-  float lnres = log(res);
+  float res = 0., lnres = 0.;
   if (!sp.mod_tb_dscn()) {
 #if !defined(HDWE_BARE)
     Tb_raw_ = Tb_read_->analogReadDebounced(
       VRAW_TB_BARE_DETECTED * ap.bare_slr(), reset, "Tb");
     Tb_volt_ = float(Tb_raw_) * VTB_CONV_GAIN;
+    float v_sense = fmin(fmax(Tb_volt_, 0.001f), V3V3 - 0.001f);
+    res = v_sense * float(HDWE_RS_2WIRE) / (V3V3 - v_sense);
+    // Steinhart-Hart (see '2-wireRTD.ods')
+    lnres = log(res);
     Tb_hdwe_ =
         (1. / max(HDWE_SHA_2WIRE +
                  (HDWE_SHB_2WIRE + HDWE_SHC_2WIRE * lnres * lnres) * lnres,
@@ -766,6 +769,7 @@ void Sensors::Tb_load(const uint16_t tb_pin, const bool reset) {
 #endif
   } else {
     Tb_raw_ = 0;
+    Tb_volt_ = 0.;
     Tb_hdwe_ = NOMINAL_TB;
   }
   Tb_model_ = NOMINAL_TB + mod_add;  // Noise and fault injection;
@@ -832,14 +836,16 @@ void Sensors::Tc_load(const uint16_t tc_pin, const bool reset) {
     hdwe_add = 0.;
   }
 
-  float res = Tc_volt_ * float(HDWE_RS_2WIRE) / (V3V3 - Tc_volt_);
-  // Steinhart-Hart (see '2-wireRTD.ods')
-  float lnres = log(res);
+  float res = 0., lnres = 0.;
   if (!sp.mod_tc_dscn()) {
 #if !defined(HDWE_BARE)
     Tc_raw_ = Tc_read_->analogReadDebounced(
       VRAW_TC_BARE_DETECTED * ap.bare_slr(), reset, "Tc");
     Tc_volt_ = float(Tc_raw_) * VTC_CONV_GAIN;
+    float v_sense = fmin(fmax(Tc_volt_, 0.001f), V3V3 - 0.001f);
+    res = v_sense * float(HDWE_RS_2WIRE) / (V3V3 - v_sense);
+    // Steinhart-Hart (see '2-wireRTD.ods')
+    lnres = log(res);
     Tc_hdwe_ =
         (1. / max(HDWE_SHA_2WIRE +
                  (HDWE_SHB_2WIRE + HDWE_SHC_2WIRE * lnres * lnres) * lnres,
@@ -853,6 +859,7 @@ void Sensors::Tc_load(const uint16_t tc_pin, const bool reset) {
 #endif
   } else {
     Tc_raw_ = 0;
+    Tc_volt_ = 0.;
     Tc_hdwe_ = NOMINAL_TC;
   }
   Tc_model_ = NOMINAL_TC + mod_add;  // Noise and fault injection;

@@ -111,7 +111,7 @@ DiscreteFilter::DiscreteFilter()
     : reset_(false), max_(1e32), min_(-1e32), rate_(0.0), T_(1.0), tau_(0.0) {}
 DiscreteFilter::DiscreteFilter(const double T, const double tau,
                                const double min, const double max)
-    : max_(max), min_(min), rate_(0.0), T_(T), tau_(tau) {}
+    : reset_(false), max_(max), min_(min), rate_(0.0), T_(T), tau_(tau) {}
 DiscreteFilter::~DiscreteFilter() {}
 // operators
 // functions
@@ -297,7 +297,12 @@ LagExp::LagExp()
     : DiscreteFilter(), a_(0.), b_(0.), c_(0.), lstate_(0.), rstate_(0.) {}
 LagExp::LagExp(const double T, const double tau, const double min,
                const double max)
-    : DiscreteFilter(T, tau, min, max) {
+    : DiscreteFilter(T, tau, min, max),
+      a_(0.),
+      b_(0.),
+      c_(0.),
+      lstate_(0.),
+      rstate_(0.) {
   LagExp::assignCoeff(tau, T);
 }
 LagExp::~LagExp() {}
