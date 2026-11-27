@@ -44,9 +44,8 @@
 // Vb hardware
 #define VB_SENSE_R_LO 4750   // Vb low sense resistor, ohm (4750)
 #define VB_SENSE_R_HI 22100  // Vb high sense resistor, ohm (22100)
-#define VB_TC_SLR 0.001783  // Fractional temp scaling, frac/deg C (0.001783)
-#define NOMINAL_TC -17.93  // Where dVb/Vb extrapolates to 0 V (-17.93)
-
+// #define VB_TC_SLR 0.001783  // Fractional temp scaling, frac/deg C (0)
+// #define VB_TC_SLR 1.0  // dVb/Vb at Tc=0 (1.0)  // intercept (1.0)
 
 // Battery.  One 12 V 100 Ah battery bank would have NOM_UNIT_CAP 100, NS 1, and
 // NP 1 Two 12 V 100 Ah series battery bank would have NOM_UNIT_CAP 100, NS 2,

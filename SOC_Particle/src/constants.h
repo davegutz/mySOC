@@ -463,6 +463,9 @@ const float QUIET_RES(QUIET_SET/10.);  // Quiet reset pers, sec ('up 1 down 10')
 #if !defined(VB_TC_SLR)
 #define VB_TC_SLR 0.  // Fractional temp scaling, V/deg C (0)
 #endif
+#if !defined(VB_TC_SLR_0)
+#define VB_TC_SLR_0 1.  // Zeroth-order temp scaling, V (1.)
+#endif
 #if !defined(NOMINAL_TC)
 #define NOMINAL_TC 25.  // Middle of the road Tc for good rev op, deg C (25.)
 #endif
