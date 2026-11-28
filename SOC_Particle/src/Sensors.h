@@ -427,7 +427,8 @@ class Sensors {
   // Battery select hardware unit voltage, V
   float vb_hdwe() { return Vb_hdwe_ / ap.nS(); };
   void vb_load(const uint16_t vb_pin, const bool reset);  // Analog read of Vb
-  float Vb_Tc_sclr() { return Vb_Tc_sclr_; };
+  float Vb_dV() const { return Vb_dV_; }
+  float Vb_dT() const { return Vb_dT_; }
   float Vb_add();
   float Vb_noise();
   void vb_print();  // Print Vb result
@@ -471,7 +472,8 @@ class Sensors {
   float Vb_hdwe_;                 // Sensed battery bank voltage, V
   float Vb_hdwe_f_;               // Sensed, filtered battery bank voltage, V
   float Vb_model_;                // Modeled battery bank voltage, V
-  float Vb_Tc_sclr_;              // Battery bank voltage to common elect temp scalar
+  float Vb_dV_;                   // Battery bank raw voltage offset (Vb_raw_volt - VB_REF_VOLT), V
+  float Vb_dT_;                   // Battery bank temperature offset (Tc_f - VB_TC_REF_TEMP), deg C
   float Vb_adc_volt_;                 // Sensed battery bank voltage at ADC, V
   float Vc_;                      // Selected common reference voltage, V
   float Vc_hdwe_;                 // Sensed common reference voltage, V

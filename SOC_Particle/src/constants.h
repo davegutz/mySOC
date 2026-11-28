@@ -467,11 +467,11 @@ const float QUIET_RES(QUIET_SET/10.);  // Quiet reset pers, sec ('up 1 down 10')
 #if !defined(VB_TC_REF_TEMP)
 #define VB_TC_REF_TEMP 0.  // Reference temp for Vb calibration, deg C (0.)
 #endif
-#if !defined(VB_TC_SLR)
-#define VB_TC_SLR 0.  // Fractional temp scaling, V/deg C (0)
+#if !defined(VB_TC_K_T)
+#define VB_TC_K_T 0.  // Fractional temp scaling, V/deg C (0)
 #endif
-#if !defined(VB_TC_SLR_0)
-#define VB_TC_SLR_0 1.  // Zeroth-order temp scaling, V (1.)
+#if !defined(VB_TC_K_V)
+#define VB_TC_K_V 1.  // Zeroth-order temp scaling, V (1.)
 #endif
 #if !defined(VB_TC_CROSS)
 #define VB_TC_CROSS 0.  // Vb raw voltage and temperature cross coupling, 1/deg C (0.)

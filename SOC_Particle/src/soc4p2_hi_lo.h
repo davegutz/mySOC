@@ -46,8 +46,8 @@
 #define VB_SENSE_R_HI 22100  // Vb high sense resistor, ohm (22100)
 #define VB_REF_VOLT 13.0     // V0: Centering reference voltage, V (13.0)
 #define VB_TC_REF_TEMP 0.0   // T0: Centering reference temp, deg C (0.0)
-#define VB_TC_SLR_0 1.693358 // Va: Voltage sensitivity Kv at T0, slr (1.0)
-#define VB_TC_SLR -0.030986  // Vs: Temperature slope Kt at V0, V/deg C (0.0)
+#define VB_TC_K_V 1.693358 // Va: Voltage sensitivity Kv at T0, slr (1.0)
+#define VB_TC_K_T -0.030986  // Vs: Temperature slope Kt at V0, V/deg C (0.0)
 #define VB_TC_CROSS -0.08279808 // Vx: Cross-coupling Kvt, 1/deg C (0.0)
 
 

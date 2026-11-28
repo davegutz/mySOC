@@ -214,7 +214,7 @@ Sensors::Sensors(double T, double T_temp, Pins* pins, Sync* ReadSensors,
       Tb_raw_(0), Tb_volt_(0.), Tc_raw_(0), Tc_volt_(0.),
       Vb_raw_(0), Vb_raw_volt_(0), Vb_(NOMINAL_VB), Vb_f_(NOMINAL_VB),
       Vb_hdwe_(NOMINAL_VB), Vb_hdwe_f_(NOMINAL_VB), Vb_model_(NOMINAL_VB),
-      Vb_Tc_sclr_(1.), Vb_adc_volt_(NOMINAL_VB), Vc_(0.), Vc_hdwe_(0.),
+      Vb_dV_(0.), Vb_dT_(0.), Vb_adc_volt_(NOMINAL_VB), Vc_(0.), Vc_hdwe_(0.),
       Vc_hdwe_sum_(0.), Tb_(NOMINAL_TB), Tb_f_(NOMINAL_TB), Tb_f_rate_(0.),
       Tb_hdwe_(NOMINAL_TB), Tb_hdwe_f_(NOMINAL_TB), Tb_hdwe_f_dt_(0.),
       Tb_hdwe_f_rate_(0.), Tb_hdwe_f_rstate_(NOMINAL_TB),
@@ -924,22 +924,25 @@ void Sensors::vb_load(const uint16_t vb_pin, const bool reset) {
                                             reset, "Vb");
     Vb_adc_volt_ = float(Vb_raw_) * VB_ADC_CONV_GAIN;
     Vb_raw_volt_ = Vb_adc_volt_ * VB_CONV_GAIN;
-    const float dV = Vb_raw_volt_ - float(VB_REF_VOLT);
-    const float dT = Tc_f_ - float(VB_TC_REF_TEMP);
-    Vb_Tc_sclr_ = float(VB_TC_SLR_0) + float(VB_TC_CROSS) * dT;
+    Vb_dV_ = Vb_raw_volt_ - float(VB_REF_VOLT);
+    Vb_dT_ = Tc_f_ - float(VB_TC_REF_TEMP);
     Vb_hdwe_ = (float(VB_REF_VOLT) + sp.Vb_bias_hdwe() +
-                float(VB_TC_SLR_0) * dV +
-                float(VB_TC_SLR) * dT +
-                float(VB_TC_CROSS) * dV * dT) * ap.Vb_scale() + float(VB_A);
+                float(VB_TC_K_V) * Vb_dV_ +
+                float(VB_TC_K_T) * Vb_dT_ +
+                float(VB_TC_CROSS) * Vb_dV_ * Vb_dT_) * ap.Vb_scale() + float(VB_A);
 #else
     Vb_raw_ = 0;
     Vb_adc_volt_ = 0.;
+    Vb_dV_ = 0.;
+    Vb_dT_ = 0.;
     Vb_hdwe_ = NOMINAL_VB + sp.Vb_bias_hdwe();
 #endif
     Vb_hdwe_f_ = VbFilt->calculate(Vb_hdwe_, reset, AMP_FILT_TAU, T_);
   } else {
     Vb_raw_ = 0;
     Vb_adc_volt_ = 0.;
+    Vb_dV_ = 0.;
+    Vb_dT_ = 0.;
     Vb_hdwe_ = 0.;
   }
 }

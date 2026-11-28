@@ -63,13 +63,18 @@ bool recall_P(const char letter_1, BatteryMonitor* Mon, Sensors* Sen,
           String::format("    Tb,    Tc,") +
           String::format("Vb_raw, VB_ADC_CONV_GAIN, Vb_adc_volt,") +
           String::format("VB_CONV_GAIN, Vb_raw_volt ,") +
-          String::format("Vb_Tc_sclr_ ,") +
+          String::format("      Vb_dV,       Vb_dT,") +
+          String::format("  VOLT_BIAS, VB_REF_VOLT, VB_TC_REF_TEMP,") +
+          String::format(" VB_TC_K_V,   VB_TC_K_T,  VB_TC_CROSS,") +
           String::format("SV,    Dc,     ") +
           String::format("Vb_hdwe, Vb_hdwe_f,    input,\n") +
           String::format(
               "%s, %15.3f, %6.2f, %6.3f,"
               "%6d,  %9.7f, %9.7f,"
-              "%9.7f, %9.7f, %9.7f,"
+              "%9.7f, %9.7f,"
+              "%11.7f, %12.7f,"
+              "%11.6f, %12.4f, %15.4f,"
+              "%12.6f, %12.6f, %13.8f,"
               "%6.4f, %7.4f,"
               "%8.3f, %9.3f,"
               " %8.3f,"
@@ -78,7 +83,9 @@ bool recall_P(const char letter_1, BatteryMonitor* Mon, Sensors* Sen,
               Sen->Tb_hdwe_f(), Sen->Tc_hdwe_f(),
               Sen->Vb_raw(), float(VB_ADC_CONV_GAIN), Sen->Vb_adc_volt(),
               float(VB_CONV_GAIN), Sen->Vb_raw_volt(),
-              Sen->Vb_Tc_sclr(),
+              Sen->Vb_dV(), Sen->Vb_dT(),
+              float(VOLT_BIAS), float(VB_REF_VOLT), float(VB_TC_REF_TEMP),
+              float(VB_TC_K_V), float(VB_TC_K_T), float(VB_TC_CROSS),
               ap.Vb_scale(), sp.Vb_bias_hdwe(),
               Sen->Vb_hdwe(), Sen->Vb_hdwe_f(),
               arg);
