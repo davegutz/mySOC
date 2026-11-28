@@ -78,6 +78,8 @@ void talkH(BatteryMonitor* Mon, Sensors* Sen) {
   sp.ib_bias_amp_p->print_help();   //* DA
   sp.ib_bias_noa_p->print_help();   //* DB
   sp.Vb_bias_hdwe_p->print_help();  //* Dc
+  sp.vb_tc_slr_0_p->print_help();   //* Vb
+  sp.vb_tc_slr_p->print_help();     //* Vm
   ap.sum_delay_p->print_help();     //  Dh
   sendTxBuf("    set 'Dh0;' for nominal\n", true, IN_SERVICE);
   sp.ib_bias_all_p->print_help();       //* DI

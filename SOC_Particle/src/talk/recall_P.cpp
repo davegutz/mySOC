@@ -59,21 +59,23 @@ bool recall_P(const char letter_1, BatteryMonitor* Mon, Sensors* Sen,
         arg = val_str.toFloat();
       }
       txBuf =
-          String::format("\ntimestamp,            Tb,    Tc,") +
+          String::format("\ntimestamp,            time_since_boot,") +
+          String::format("    Tb,    Tc,") +
           String::format("Vb_raw, VB_ADC_CONV_GAIN, Vb_adc_volt,") +
           String::format("VB_CONV_GAIN, Vb_raw_volt ,") +
           String::format("Vb_Tc_sclr_ ,") +
           String::format("SV,    Dc,     ") +
           String::format("Vb_hdwe, Vb_hdwe_f,    input,\n") +
           String::format(
-              "%s, %6.2f, %6.3f,"
+              "%s, %15.3f, %6.2f, %6.3f,"
               "%6d,  %9.7f, %9.7f,"
               "%9.7f, %9.7f, %9.7f,"
               "%6.4f, %7.4f,"
               "%8.3f, %9.3f,"
               " %8.3f,"
               "\n",
-              pubList->hm_string.c_str(), Sen->Tb_hdwe_f(), Sen->Tc_hdwe_f(),
+              pubList->hm_string.c_str(), double(millis()) / 1000.,
+              Sen->Tb_hdwe_f(), Sen->Tc_hdwe_f(),
               Sen->Vb_raw(), float(VB_ADC_CONV_GAIN), Sen->Vb_adc_volt(),
               float(VB_CONV_GAIN), Sen->Vb_raw_volt(),
               Sen->Vb_Tc_sclr(),

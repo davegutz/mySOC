@@ -400,8 +400,9 @@ class SavedPars : public Parameters {
   uint32_t Time_now() { return Time_now_; }
   uint8_t type() { return type_; }
   float Vb_bias_hdwe() { return Vb_bias_hdwe_; }
+  float Vb_tc_slr_0() { return vb_tc_slr_0_; }
+  float Vb_tc_slr() { return vb_tc_slr_; }
   float Vsat_add() { return vsat_add_; }
-
   // functions
   virtual void initialize();
   void large_reset() {
@@ -528,6 +529,8 @@ class SavedPars : public Parameters {
   ULongV* Time_now_p;
   Uint8tV* Type_p;
   FloatV* Vb_bias_hdwe_p;
+  FloatV* vb_tc_slr_0_p;
+  FloatV* vb_tc_slr_p;
   FloatV* vsat_add_p;
 
  protected:
@@ -563,5 +566,7 @@ class SavedPars : public Parameters {
   uint32_t Time_now_;
   uint8_t type_;
   float Vb_bias_hdwe_;
+  float vb_tc_slr_0_;
+  float vb_tc_slr_;
   float vsat_add_;  // Saturation voltage bias, V
 };

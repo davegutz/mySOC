@@ -924,7 +924,7 @@ void Sensors::vb_load(const uint16_t vb_pin, const bool reset) {
                                             reset, "Vb");
     Vb_adc_volt_ = float(Vb_raw_) * VB_ADC_CONV_GAIN;
     Vb_raw_volt_ = Vb_adc_volt_ * VB_CONV_GAIN;
-    Vb_Tc_sclr_ = float(VB_TC_SLR_0) + float(VB_TC_SLR) * Tc_f_;
+    Vb_Tc_sclr_ = sp.Vb_tc_slr_0() + sp.Vb_tc_slr() * Tc_f_;
     Vb_hdwe_ = Vb_raw_volt_  *  Vb_Tc_sclr_ * ap.Vb_scale() + float(VB_A) +
               sp.Vb_bias_hdwe();
 #else

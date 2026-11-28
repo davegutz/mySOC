@@ -76,11 +76,12 @@ const char unit[] = version_str "_" HDWE_UNIT;
 // 6.2.1/p2/SOC_Particle.elf
 
 #define NFLT 7  // Number of saved SRAM fault data slices 10 s intervals (7)
-#define NHIS 43  // Number of saved SRAM history data slices. If NFLT + NHIS
-      // too large will get compile error BACKUPSRAM, BACKUPSRAM_USER  (45)
+#define NHIS 42  // Number of saved SRAM history data slices. If NFLT + NHIS
+      // too large will get compile error BACKUPSRAM, BACKUPSRAM_USER  (43)
+      // competes with sp.  Add an sp parameter --> reduce NHIS
 #define NSUM 2000  // Number of saved summaries. If NFLT + NHIS + NSUM too
                   // large, will get compile error SRAM, or GUI FRAG msg (2845)
-                  // or SOS 4 Bus Fault (2500)
+                  // or SOS 4 Bus Fault (2000)
 #define HDB_VB 0.05        // Half deadband to filter Vb, V (0.05)
 #define T_SAT 24           // Saturation time, sec (>21 for no SAT with Dv0.82)
 const float T_DESAT = 20;  // De-saturation time, sec
