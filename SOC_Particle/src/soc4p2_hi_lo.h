@@ -27,7 +27,7 @@
         // 20250608
 #define CURR_BIAS_NOA \
   0.15  // Calibration of non-amplified shunt sensor (* 'DB'), A
-#define VOLT_BIAS 0.0   // Bias on Vb sensor (* 'Dc'), V
+#define VOLT_BIAS 0.720007   // Bias on Vb sensor (* 'Dc') Delta_V0 at V0, T0, V (0.0)
 #define TB_BIAS 0.0    // Bias on Tb sensor (* 'Dt'), deg C
 #define VTAB_BIAS 0.0    // Bias on voc_soc table (* 'Dw'), V  (0.0)
 
@@ -41,11 +41,14 @@
 #define HDWE_IB_HI_LO_AMP_HI  10. // Fully AMP bank charge transition, A (10)
 #define HDWE_IB_HI_LO_NOA_HI  11. // Fully NOA bank charge transition, A (11)
 
-// Vb hardware
+// Vb hardware - Method B Centered 2D Calibration
 #define VB_SENSE_R_LO 4750   // Vb low sense resistor, ohm (4750)
 #define VB_SENSE_R_HI 22100  // Vb high sense resistor, ohm (22100)
-#define VB_TC_SLR 0.000663  // Fractional temp scaling, frac/deg C (0)
-#define VB_TC_SLR_0 1.03193  // dVb/Vb at Tc=0 (1.0)  // intercept (1.0)
+#define VB_REF_VOLT 13.0     // V0: Centering reference voltage, V (13.0)
+#define VB_TC_REF_TEMP 0.0   // T0: Centering reference temp, deg C (0.0)
+#define VB_TC_SLR_0 1.693358 // Va: Voltage sensitivity Kv at T0, slr (1.0)
+#define VB_TC_SLR -0.030986  // Vs: Temperature slope Kt at V0, V/deg C (0.0)
+#define VB_TC_CROSS -0.08279808 // Vx: Cross-coupling Kvt, 1/deg C (0.0)
 
 
 

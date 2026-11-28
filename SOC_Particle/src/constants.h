@@ -76,7 +76,7 @@ const char unit[] = version_str "_" HDWE_UNIT;
 // 6.2.1/p2/SOC_Particle.elf
 
 #define NFLT 7  // Number of saved SRAM fault data slices 10 s intervals (7)
-#define NHIS 42  // Number of saved SRAM history data slices. If NFLT + NHIS
+#define NHIS 43  // Number of saved SRAM history data slices. If NFLT + NHIS
       // too large will get compile error BACKUPSRAM, BACKUPSRAM_USER  (43)
       // competes with sp.  Add an sp parameter --> reduce NHIS
 #define NSUM 2000  // Number of saved summaries. If NFLT + NHIS + NSUM too
@@ -461,11 +461,20 @@ const float QUIET_RES(QUIET_SET/10.);  // Quiet reset pers, sec ('up 1 down 10')
 #if !defined(SAT_CUTBACK_GAIN)
 #define SAT_CUTBACK_GAIN 1000.  // Gain to retard ib when sat, dimensionless
 #endif
+#if !defined(VB_REF_VOLT)
+#define VB_REF_VOLT NOMINAL_VB  // Middle of the road Vb for good rev op, V (13.)
+#endif
+#if !defined(VB_TC_REF_TEMP)
+#define VB_TC_REF_TEMP 0.  // Reference temp for Vb calibration, deg C (0.)
+#endif
 #if !defined(VB_TC_SLR)
 #define VB_TC_SLR 0.  // Fractional temp scaling, V/deg C (0)
 #endif
 #if !defined(VB_TC_SLR_0)
 #define VB_TC_SLR_0 1.  // Zeroth-order temp scaling, V (1.)
+#endif
+#if !defined(VB_TC_CROSS)
+#define VB_TC_CROSS 0.  // Vb raw voltage and temperature cross coupling, 1/deg C (0.)
 #endif
 #if !defined(NOMINAL_TC)
 #define NOMINAL_TC 25.  // Middle of the road Tc for good rev op, deg C (25.)
