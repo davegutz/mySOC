@@ -290,8 +290,8 @@ void SavedPars::initialize() {
   V_[n_++] = (Time_now_p = new ULongV("* ", "UT", rP_, "UNIX time epoch", "sec", 0UL, 2100000000UL, &Time_now_, 1669801880UL, false));  // UT
   V_[n_++] = (Type_p = new Uint8tV("* ", "Xt", rP_, "Inj type", "1sn 2sq 3tr 4 1C, 5 -1C, 8cs", 0, 10, &type_, 0));  // Xt
   V_[n_++] = (Vb_bias_hdwe_p = new FloatV("* ", "Dc", rP_, "Bias Vb sensor", "v", -10, 70, &Vb_bias_hdwe_, VOLT_BIAS));  // Dc
-  V_[n_++] = (vb_tc_slr_0_p = new FloatV("* ", "Vb", rP_, "Sense Vb slr int", "none", 0.5,1.5, &vb_tc_slr_0_, VB_TC_SLR_0));  // Vb
-  V_[n_++] = (vb_tc_slr_p = new FloatV("* ", "Vm", rP_, "Sense Vb slr slp", "none", -0.01,0.01, &vb_tc_slr_, VB_TC_SLR));  // Vm
+  V_[n_++] = (Vb_tc_slr_0_p = new FloatV("* ", "Va", rP_, "Sense Vb slr int", "none", 0.5,1.5, &Vb_tc_slr_0_, VB_TC_SLR_0));  // Va
+  V_[n_++] = (Vb_tc_slr_p = new FloatV("* ", "Vs", rP_, "Sense Vb slr slp", "none", -0.01,0.01, &Vb_tc_slr_, VB_TC_SLR));  // Vs
   V_[n_++] = (vsat_add_p = new FloatV("* ", "DS", rP_, "Bias on nominal vsat", "v", -2., 2., &vsat_add_, VSAT_ADD));  // DS
 }
 
